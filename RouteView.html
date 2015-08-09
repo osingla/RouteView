@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+  
+        <meta charset="utf-8">
+        <title>Street View Riding Simulation</title>
+
+        <style>
+
+            html, body, #map-canvas {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            
+        </style>
+
+        <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+        <script type="text/javascript" src="http://www.geocodezip.com/scripts/v3_epoly.js"></script>
+
+        <script>
+
+            var collapsed = false;
+            var map;
+            var panorama;
+            var polyline = [];
+            var location_from = [];
+            var location_to = [];
+            var poly2 = [];
+            var timers = [];
+            var eol = [];
+            var step = 250; // metres
+            var tick = 1000; // milliseconds
+
+            function initialize() {
+            
+                var home = new google.maps.LatLng( 35.733435, -78.907684 );
+                var mapOptions = {
+                   center: home,
+                    zoom: 14
+                };
+            
+                map = new google.maps.Map( document.getElementById('map-canvas'), mapOptions );
+                var panoramaOptions = {
+                    position: home,
+                    pov: {
+                        heading: 34,
+                        pitch: 10
+                    }
+                };
+
+                panorama = new google.maps.StreetViewPanorama( document.getElementById('pano'), panoramaOptions );
+                map.setStreetView( panorama );
+            }
+            
+            function cb_expand_collapse( ) {
+                if ( collapsed ) {
+                    document.getElementById('id_config').style.display = "";
+                    document.getElementById('id_btn_expand_collapse').innerHTML = "<<<";
+                    collapsed = false;
+                }
+                else {
+                    document.getElementById('id_config').style.display = "None";
+                    document.getElementById('id_btn_expand_collapse').innerHTML = ">>>";
+                    collapsed = true;
+                }
+            }
+            
+
+            function updatePoly( i, d ) {
+                var lastVertex = 1;
+                // Spawn a new polyline every 30 vertices, because updating a 100-vertex poly is too slow
+                if ( poly2[i].getPath().getLength() > 30 ) {
+                    poly2[i] = new google.maps.Polyline([polyline[i].getPath().getAt( lastVertex - 1 )]);
+                    // map.addOverlay( poly2 )
+                }
+
+                if ( polyline[i].GetIndexAtDistance(d) < lastVertex + 2 ) {
+                    if ( poly2[i].getPath().getLength() > 1 )
+                        poly2[i].getPath().removeAt(poly2[i].getPath().getLength()-1)
+                    poly2[i].getPath().insertAt( poly2[i].getPath().getLength(),polyline[i].GetPointAtDistance(d) );
+                } 
+                else {
+                    poly2[i].getPath().insertAt( poly2[i].getPath().getLength(),location_to[i].latlng );
+                }
+            }
+
+            function cb_animate( index, d ) {
+
+                if ( d > eol[index] ) {
+                    console.log( "Route " + index + " is done" );
+                    return;
+                }
+                
+                var p = polyline[index].GetPointAtDistance(d);
+                if ( !map.getBounds().contains( p ) )
+                    map.panTo(p);
+
+                var bearing = polyline[index].Bearing( polyline[index].GetIndexAtDistance(d) );
+                console.log( polyline[index].GetIndexAtDistance(d) + " / " + bearing);
+                panorama.setPosition( new google.maps.LatLng( p.G, p.K ) );
+                panorama.setPov({
+                    heading: bearing,
+                    pitch: 10
+                });
+
+                updatePoly( index, d );
+                timers[index] = setTimeout( "cb_animate("+index+","+(d+step)+")", tick );
+            }
+
+            function startAnimation( route_num ) {
+            
+                if ( timers[route_num] ) 
+                    clearTimeout(timers[route_num]);
+                    
+                eol[route_num] = polyline[route_num].Distance();
+                map.setCenter( polyline[route_num].getPath().getAt(0) );
+
+                poly2[route_num] = new google.maps.Polyline({path: [polyline[route_num].getPath().getAt(0)], strokeColor:"#FFFF00", strokeWeight:3});
+
+                timers[route_num] = setTimeout("cb_animate("+route_num+",50)",50);
+            }
+
+            function do_test( ) {
+            
+                console.log( 1 );
+
+                var directionsDisplay = new Array();
+
+                var startLoc = new Array();
+                startLoc[0] = document.getElementById('id_route1_from').value;
+                console.log( "from = " + startLoc[0] );
+
+                var way_points = [];
+                waypt = document.getElementById('id_route1_waypoint1').value;
+                if ( waypt != "" ) {
+                    console.log( "waypt = " + waypt );
+                    way_points.push({
+                          location:waypt,
+                          stopover:true
+                    });
+                }
+
+                var endLoc = new Array();
+                endLoc[0] = document.getElementById('id_route1_to').value;
+                console.log( "to   = " + endLoc[0] );
+
+                for ( var route_num = 0; route_num < startLoc.length; route_num++ ) {
+
+                    var rendererOptions = {
+                        map: map,
+                        suppressMarkers : true,
+                        preserveViewport: true
+                    }
+                    var directions_service = new google.maps.DirectionsService( );
+
+                    var travelMode = google.maps.DirectionsTravelMode.DRIVING;  
+                    
+                    var waypts = [];
+
+                    var request = {
+                        origin: startLoc[route_num],
+                        destination: endLoc[route_num],
+                        travelMode: travelMode,
+                        waypoints: way_points,
+                        optimizeWaypoints: true,
+                    };  
+
+                    directions_service.route( request,makeRouteCallback( route_num, directionsDisplay[route_num] ) );
+
+                }
+                
+                function makeRouteCallback( routeNum, disp ) {
+
+                    if ( polyline[routeNum] && (polyline[routeNum].getMap() != null)) {
+                        startAnimation( routeNum );
+                        return;
+                    }
+
+                    return function( response, status ) {
+
+                        if ( status == google.maps.DirectionsStatus.OK ) {
+
+                            var bounds = new google.maps.LatLngBounds();
+console.log( "function: routeNum=" + routeNum );
+                            var route = response.routes[0];
+                            location_from[routeNum] = new Object();
+                            location_to[routeNum] = new Object();
+
+
+                            polyline[routeNum] = new google.maps.Polyline({
+                                path: [],
+                                strokeColor: '#FFFF00',
+                                strokeWeight: 3
+                            });
+console.log( polyline[routeNum] );
+
+                            poly2[routeNum] = new google.maps.Polyline({
+                                path: [],
+                                strokeColor: '#FFFF00',
+                                strokeWeight: 3
+                            });     
+
+
+                            // For each route, display summary information.
+                            var path = response.routes[0].overview_path;
+                            var legs = response.routes[0].legs;
+
+
+                            disp = new google.maps.DirectionsRenderer( rendererOptions );     
+                            disp.setMap( map );
+                            disp.setDirections( response );
+
+                            // Markers               
+                            for ( i=0; i < legs.length; i++) {
+                                if ( i == 0 ) {
+                                    location_from[routeNum].latlng = legs[i].start_location;
+                                    location_from[routeNum].address = legs[i].start_address;
+                                }
+                                location_to[routeNum].latlng = legs[i].end_location;
+                                location_to[routeNum].address = legs[i].end_address;
+                                var steps = legs[i].steps;
+
+                                for (j=0; j < steps.length;j++) {
+                                    var nextSegment = steps[j].path;                
+                                    var nextSegment = steps[j].path;
+
+                                    for ( k=0;k < nextSegment.length;k++) {
+                                        polyline[routeNum].getPath().push(nextSegment[k]);
+                                        bounds.extend(nextSegment[k]);      // ??
+                                    }
+                                }
+                            }
+
+                        }
+
+                        polyline[routeNum].setMap( map );
+                        map.fitBounds( bounds );      // ??
+                        startAnimation( routeNum );  
+
+                    }
+
+                }
+
+            }
+
+            function cb_step_input( new_step ) {
+                document.getElementById("id_meters").innerHTML = new_step;
+            }
+
+            function cb_step_changed( new_step ) {
+                console.log( "new_step = " + new_step );
+                step = parseInt( new_step );
+            }
+
+            function cb_interval_input( new_interval ) {
+                document.getElementById("id_interval").innerHTML = new_interval;
+            }
+
+            function cb_interval_changed( new_interval ) {
+                console.log( "new_interval = " + new_interval );
+                tick = parseInt( new_interval );
+            }
+            
+            function cb_route1_from( from ) {
+                console.log( "from = " + from );
+            }
+
+            function cb_route1_waypoint1( from ) {
+                console.log( "waypoint1 = " + from );
+            }
+
+            function cb_route1_to( from ) {
+                console.log( "from = " + from );
+            }
+
+            google.maps.event.addDomListener( window, 'load', initialize );
+
+        </script>
+
+    </head>
+
+    <body>
+    
+        <table width="100%" height="100%" border="0" cellpadding="1" cellspacing="1">
+            <tr>
+                <td id='xx' nowrap="nowrap" valign="top" width="1px">
+                    <div align="center">
+                        <button id="id_btn_expand_collapse" type="button" onclick="cb_expand_collapse()"><<<</button>
+                    </div>
+                    <div id='id_config' align="left">
+                        <br>
+                        <table>
+                            <tr>
+                                <td colspan="2" valign="middle" align="center"><b>Route #1</b></td>
+                            </tr>
+                            <tr>
+                                <td valign="middle" align="right">From:</td>
+                                <td valign="middle" align="left"><input type="text" id="id_route1_from" onchange="cb_route1_from(this.value)"></td>
+                            </tr>
+                            <tr>
+                                <td valign="middle" align="right">Through:</td>
+                                <td valign="middle" align="left"><input type="text" id="id_route1_waypoint1" onchange="cb_route1_waypoint1(this.value)"></td>
+                            </tr>
+                            <tr>
+                                <td valign="middle" align="right">To:</td>
+                                <td valign="middle" align="left"><input type="text" id="id_route1_to" onchange="cb_route1_to(this.value)"></td>
+                            </tr>
+                        </table>
+                        <br>
+                        <br>
+                        <div style="width:100%" align="center">
+                            <span>Step : <b id="id_meters">250</b> meters</span><br>
+                            <input style="width:100%" type="range" min="50" max="1000" step="50" value="250"
+                             oninput="cb_step_input(this.value)"
+                             onchange="cb_step_changed(this.value)" >
+                            <p>
+                                <span>Interval : <b id="id_interval">750</b> milliseconds</span><br>
+                                <input style="width:100%" type="range" min="500" max="5000" step="250" value="750"
+                                 oninput="cb_interval_input(this.value)"
+                                 onchange="cb_interval_changed(this.value)" >
+                            </p>
+                        </div>
+                        <br>
+                        <div style="width:100%" align="center">
+                            <button type="button" onclick="do_test()">Start</button>
+                            <button type="button" onclick="do_test()" disabled>Stop</button>
+                        </div>
+                    </div>
+                </td>
+                <td nowrap="nowrap" valign="top" width="50%">
+                    <div id="map-canvas" style="width: 100%; float:left"></div>
+                </td>
+                <td nowrap="nowrap" valign="top" width="50%">
+                    <div id="pano" style="width: 100%; height: 100%;float:left"></div>
+                </td>
+            </tr>
+        </table>
+    
+    </body>
+
+</html>
+
