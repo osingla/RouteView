@@ -30,8 +30,8 @@
             var poly2 = [];
             var timers = [];
             var eol = [];
-            var step = 250; // metres
-            var tick = 1000; // milliseconds
+            var step;               // metres
+            var interval;           // milliseconds
 
             function initialize() {
             
@@ -86,45 +86,52 @@
                 }
             }
 
-            function cb_animate( index, d ) {
+            function cb_animate( num_route, d ) {
 
-                if ( d > eol[index] ) {
-                    console.log( "Route " + index + " is done" );
+                if ( d > eol[num_route] ) {
+                    console.log( "Route " + num_route + " is done" );
                     return;
                 }
                 
-                var p = polyline[index].GetPointAtDistance(d);
+                var p = polyline[num_route].GetPointAtDistance(d);
                 if ( !map.getBounds().contains( p ) )
                     map.panTo(p);
 
-                var bearing = polyline[index].Bearing( polyline[index].GetIndexAtDistance(d) );
-                console.log( polyline[index].GetIndexAtDistance(d) + " / " + bearing);
+                var bearing = polyline[num_route].Bearing( polyline[num_route].GetIndexAtDistance(d) );
+                console.log( "d=" + d + " - " + polyline[num_route].GetIndexAtDistance(d) + " / " + bearing);
                 panorama.setPosition( new google.maps.LatLng( p.G, p.K ) );
                 panorama.setPov({
                     heading: bearing,
                     pitch: 10
                 });
 
-                updatePoly( index, d );
-                timers[index] = setTimeout( "cb_animate("+index+","+(d+step)+")", tick );
+                updatePoly( num_route, d );
+                if ( step > 0 )
+                    timers[num_route] = setTimeout( "cb_animate("+num_route+","+(d+step)+")", interval );
             }
 
-            function startAnimation( route_num ) {
+            function start_driving( route_num ) {
             
                 if ( timers[route_num] ) 
-                    clearTimeout(timers[route_num]);
+                    clearTimeout( timers[route_num] );
                     
                 eol[route_num] = polyline[route_num].Distance();
                 map.setCenter( polyline[route_num].getPath().getAt(0) );
 
                 poly2[route_num] = new google.maps.Polyline({path: [polyline[route_num].getPath().getAt(0)], strokeColor:"#FFFF00", strokeWeight:3});
 
-                timers[route_num] = setTimeout("cb_animate("+route_num+",50)",50);
+                timers[route_num] = setTimeout("cb_animate("+route_num+",50)",250);
             }
 
-            function do_test( ) {
+            function do_start( ) {
             
-                console.log( 1 );
+                document.getElementById("id_btn_start").disabled = true;
+                document.getElementById("id_btn_pause").disabled = false;
+                document.getElementById("id_btn_stop").disabled = false;
+
+                step = parseInt( document.getElementById("id_input_meters").value );
+                interval = parseInt( document.getElementById("id_input_interval").value );
+                console.log( "step=" + step + " interval=" + interval );
 
                 var directionsDisplay = new Array();
 
@@ -174,7 +181,7 @@
                 function makeRouteCallback( routeNum, disp ) {
 
                     if ( polyline[routeNum] && (polyline[routeNum].getMap() != null)) {
-                        startAnimation( routeNum );
+                        start_driving( routeNum );
                         return;
                     }
 
@@ -183,7 +190,6 @@
                         if ( status == google.maps.DirectionsStatus.OK ) {
 
                             var bounds = new google.maps.LatLngBounds();
-console.log( "function: routeNum=" + routeNum );
                             var route = response.routes[0];
                             location_from[routeNum] = new Object();
                             location_to[routeNum] = new Object();
@@ -194,7 +200,6 @@ console.log( "function: routeNum=" + routeNum );
                                 strokeColor: '#FFFF00',
                                 strokeWeight: 3
                             });
-console.log( polyline[routeNum] );
 
                             poly2[routeNum] = new google.maps.Polyline({
                                 path: [],
@@ -228,7 +233,7 @@ console.log( polyline[routeNum] );
 
                                     for ( k=0;k < nextSegment.length;k++) {
                                         polyline[routeNum].getPath().push(nextSegment[k]);
-                                        bounds.extend(nextSegment[k]);      // ??
+                                        bounds.extend(nextSegment[k]);
                                     }
                                 }
                             }
@@ -236,12 +241,28 @@ console.log( polyline[routeNum] );
                         }
 
                         polyline[routeNum].setMap( map );
-                        map.fitBounds( bounds );      // ??
-                        startAnimation( routeNum );  
+                        map.fitBounds( bounds );
+                        start_driving( routeNum );  
 
                     }
 
                 }
+
+            }
+
+            function do_pause( ) {
+                if ( document.getElementById("id_btn_pause").innerHTML == "Pause" ) {
+                    if ( timers[0] ) 
+                        clearTimeout( timers[0] );
+//                    document.getElementById("id_btn_pause").innerHTML = "Continue";
+                }
+                else if ( document.getElementById("id_btn_pause").innerHTML == "Continue" ) {
+                    step = -step;
+                    document.getElementById("id_btn_pause").innerHTML = "Pause";
+                }
+            }
+
+            function do_stop( ) {
 
             }
 
@@ -260,7 +281,7 @@ console.log( polyline[routeNum] );
 
             function cb_interval_changed( new_interval ) {
                 console.log( "new_interval = " + new_interval );
-                tick = parseInt( new_interval );
+                interval = parseInt( new_interval );
             }
             
             function cb_route1_from( from ) {
@@ -297,7 +318,7 @@ console.log( polyline[routeNum] );
                             </tr>
                             <tr>
                                 <td valign="middle" align="right">From:</td>
-                                <td valign="middle" align="left"><input type="text" id="id_route1_from" onchange="cb_route1_from(this.value)"></td>
+                                <td valign="middle" align="left"><input type="text" id="id_route1_from" onchange="cb_route1_from(this.value)" value="Apex,NC"></td>
                             </tr>
                             <tr>
                                 <td valign="middle" align="right">Through:</td>
@@ -305,27 +326,28 @@ console.log( polyline[routeNum] );
                             </tr>
                             <tr>
                                 <td valign="middle" align="right">To:</td>
-                                <td valign="middle" align="left"><input type="text" id="id_route1_to" onchange="cb_route1_to(this.value)"></td>
+                                <td valign="middle" align="left"><input type="text" id="id_route1_to" onchange="cb_route1_to(this.value)" value="Troy,NC"></td>
                             </tr>
                         </table>
                         <br>
                         <br>
                         <div style="width:100%" align="center">
                             <span>Step : <b id="id_meters">250</b> meters</span><br>
-                            <input style="width:100%" type="range" min="50" max="1000" step="50" value="250"
+                            <input id="id_input_meters" style="width:100%" type="range" min="50" max="1000" step="50" value="250"
                              oninput="cb_step_input(this.value)"
                              onchange="cb_step_changed(this.value)" >
                             <p>
                                 <span>Interval : <b id="id_interval">750</b> milliseconds</span><br>
-                                <input style="width:100%" type="range" min="500" max="5000" step="250" value="750"
+                                <input id="id_input_interval" style="width:100%" type="range" min="500" max="5000" step="250" value="750"
                                  oninput="cb_interval_input(this.value)"
                                  onchange="cb_interval_changed(this.value)" >
                             </p>
                         </div>
                         <br>
                         <div style="width:100%" align="center">
-                            <button type="button" onclick="do_test()">Start</button>
-                            <button type="button" onclick="do_test()" disabled>Stop</button>
+                            <button type="button" id="id_btn_start" onclick="do_start()">Start</button>
+                            <button type="button" id="id_btn_pause" onclick="do_pause()" disabled>Pause</button>
+                            <button type="button" id="id_btn_stop"  onclick="do_stop()" disabled>Stop</button>
                         </div>
                     </div>
                 </td>
