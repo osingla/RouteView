@@ -128,13 +128,11 @@
 
             function initialize() {
             
-console.log( 1 );
                 var home = new google.maps.LatLng( 35.733435, -78.907684 );
                 var mapOptions = {
                    center: home,
                     zoom: 14
                 };
-console.log( 2 );
             
                 map = new google.maps.Map( document.getElementById('map-canvas'), mapOptions );
                 var panoramaOptions = {
@@ -142,13 +140,15 @@ console.log( 2 );
                     pov: {
                         heading: 34,
                         pitch: 10
-                    }
+                    },
+                    enableCloseButton: false,
+                    linksControl: false,
+                    panControl: false,
+                    zoomControl: false,
                 };
-console.log( 3 );
 
                 panorama = new google.maps.StreetViewPanorama( document.getElementById('pano'), panoramaOptions );
                 map.setStreetView( panorama );
-console.log( 4 );
             }
             
             function cb_expand_collapse( ) {
@@ -215,7 +215,9 @@ console.log( 4 );
                 eol[route_num] = polyline[route_num].Distance();
                 map.setCenter( polyline[route_num].getPath().getAt(0) );
 
-                poly2[route_num] = new google.maps.Polyline({path: [polyline[route_num].getPath().getAt(0)], strokeColor:"#FFFF00", strokeWeight:3});
+                poly2[route_num] = new google.maps.Polyline({
+                    path: [polyline[route_num].getPath().getAt(0)], strokeColor:"#FFFF00", strokeWeight:3
+                });
 
                 timers[route_num] = setTimeout("cb_animate("+route_num+",50)",250);
             }
@@ -225,12 +227,15 @@ console.log( 4 );
                 document.getElementById("id_btn_start").disabled = true;
                 document.getElementById("id_btn_pause").disabled = false;
                 document.getElementById("id_btn_stop").disabled = false;
+                
+                document.getElementById("id_route1_from").disabled = true;
+                document.getElementById("id_route1_waypoint1").disabled = true;
+                document.getElementById("id_route1_to").disabled = true;
+                
 
                 step = parseInt( document.getElementById("id_input_meters").value );
                 interval = parseInt( document.getElementById("id_input_interval").value );
                 console.log( "step=" + step + " interval=" + interval );
-
-                var directionsDisplay = new Array();
 
                 var startLoc = new Array();
                 startLoc[0] = document.getElementById('id_route1_from').value;
@@ -271,16 +276,11 @@ console.log( 4 );
                         optimizeWaypoints: true,
                     };  
 
-                    directions_service.route( request,makeRouteCallback( route_num, directionsDisplay[route_num] ) );
+                    directions_service.route( request, cb_make_route( route_num ) );
 
                 }
                 
-                function makeRouteCallback( routeNum, disp ) {
-
-                    if ( polyline[routeNum] && (polyline[routeNum].getMap() != null)) {
-                        start_driving( routeNum );
-                        return;
-                    }
+                function cb_make_route( routeNum ) {
 
                     return function( response, status ) {
 
@@ -310,7 +310,7 @@ console.log( 4 );
                             var legs = response.routes[0].legs;
 
 
-                            disp = new google.maps.DirectionsRenderer( rendererOptions );     
+                            var disp = new google.maps.DirectionsRenderer( rendererOptions );     
                             disp.setMap( map );
                             disp.setDirections( response );
 
@@ -361,6 +361,15 @@ console.log( 4 );
 
             function do_stop( ) {
 
+                clearTimeout( timers[0] );
+
+                document.getElementById("id_route1_from").disabled = false;
+                document.getElementById("id_route1_waypoint1").disabled = false;
+                document.getElementById("id_route1_to").disabled = false;
+
+                document.getElementById("id_btn_start").disabled = false;
+                document.getElementById("id_btn_pause").disabled = true;
+                document.getElementById("id_btn_stop").disabled = true;
             }
 
             function cb_step_input( new_step ) {
