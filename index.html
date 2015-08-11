@@ -1,3 +1,11 @@
+<!--                                                                           -->
+<!-- RouteView - Virtual drive/ride over a Google Maps route, using StreetView -->
+<!--                                                                           -->
+<!-- Olivier Singla                                                            -->
+<!--                                                                           -->
+<!-- Please see: https://github.com/osingla/RouteView                          -->
+<!--                                                                           -->
+
 <!DOCTYPE html>
 <html>
 
@@ -5,13 +13,14 @@
   
         <meta charset="utf-8">
         <title>RouteView - Riding Simulation</title>
+        <meta name="description"  content="Allows a virtual drive/ride over a Google Maps route using Street View. Step (in meters) and Refresh Rate are configurable.">
+        <meta name="revisit-after" content="4 hours">
         
         <script>
             (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
             (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
             m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
             })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
             ga('create', 'UA-66144602-1', 'auto');
             ga('send', 'pageview');
         </script>
@@ -20,17 +29,18 @@
 
     <body>
     
-        <h2>Route View - Driving or Riding Simulation</h2>
+        <h2>RouteView - Driving or Riding Simulation (Virtual drive/ride using StreetView)</h2>
 
-        I ride a Harley Road King, and to prepare my next Saturday ride, I often use GoogleMaps and StreetView to figure out how cool the road is.<br>
+        I ride a motorcycle, and to prepare my next Saturday ride, I often use GoogleMaps and StreetView to figure out how cool the road is.<br>
         Is it a two lanes or a four lanes road? Is it curvy? How nice is the scenery? etc.
         So basically, I create a route, and then move the StreeView icon along some random points on the route to look at the road.<br>
         I found this manual process kind of tedious. <br>
-        I thought that using StreeView to allow a kind of 'Virtual Drive' would be easier and more fun... <br>
-        So I use Google Maps v3 and some code floating around to do this: <br>
+        I thought that using StreetView to allow a kind of 'Virtual Drive' would be easier and more fun... <br>
+        So I use Google Maps v3, some existent code floating around to do this, and wrote the javascript code in an html page.<br>
+        I hope thia might be usefull to other people. <br>
         <br>
 
-        This allows you to create a route using Google Maps, and then do a 'virtual travel' through this route using Google Street View.
+        The web page allows you to create a route using Google Maps, and then do a 'virtual travel' through this route using Google Street View.
         <br>
         <ul>
         <li>Create an origin point (for instance: Raleigh, NC)</li>
@@ -46,7 +56,7 @@
         Code is created with Google Maps API v3, and use the <a href="http://econym.org.uk/gmap/epoly.htm">EPolys extension:</a><br>
         <br>
         
-        I choose to keep the code as simple as possible, and to use a single html file, so the interface is not sophisticated by design, 
+        I choose to keep the code as simple as possible, and also to use a single html file, so the interface is not sophisticated by design, 
         using only HTML5 controls (no jquery or dojo...).
 
         <br>
@@ -77,8 +87,8 @@
         <a href="https://github.com/osingla/RouteView">https://github.com/osingla/RouteView</a>
         <br>
         <br>
-       You can download the html file from <a href="https://raw.githubusercontent.com/osingla/RouteView/master/RouteView.html">here<a>,
-        save it on your computer, and then use file:// to access it from your browser. 
+       You can download the html file from <a href="https://raw.githubusercontent.com/osingla/RouteView/master/RouteView.html">here<a>,&nbsp;
+       save it on your computer, and then use file:// to access it from your browser. 
 
     </body>
 
