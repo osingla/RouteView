@@ -22,7 +22,14 @@
     
         <h2>Route View - Driving or Riding Simulation</h2>
 
-        This allows you to create a route using Google Maps, and then do a 'virtual travel' through this route using Google Stree View.
+        I ride a Harley RoadKing, and to prepare my next Saturady ride, I often use StreeView to figure out how cool the road is. <br>
+        So basically, I create a route, and then move the StreeView icon along some random points on the route to look at the road. <br>
+        I found this manual process kind of tedious. <br>
+        I thought that using StreeView to allow a kind of 'Virtual Drive' would be easier and more fun... <br>
+        So I use Google Maps v3 and some code floating around to do this: <br>
+        <br>
+
+        This allows you to create a route using Google Maps, and then do a 'virtual travel' through this route using Google Street View.
         <br>
         <ul>
         <li>Create an origin point (for instance: Raleigh, NC)</li>
@@ -32,10 +39,14 @@
         </ul>
       
         The default step is 250 meters, and the default interval beteen two stepa is 750 millisecons.<br>
-        These value can be changed interactively using a slider.<br>
+        These values can be changed interactively using a slider.<br>
         <br>
 
         Code is created with Google Maps API v3, and use the <a href="http://econym.org.uk/gmap/epoly.htm">EPolys extension:</a><br>
+        <br>
+        
+        I choose to keep the code as simple as possible, and to use a single html file, so the interface is not sophisticated by design, 
+        using only HTML5 controls (no jquery or dojo...).
 
         <br>
         <br>
@@ -43,13 +54,24 @@
 
         <br>
         <br>
-        <br>
         Notes:<br>
         <ul>
         <li>early prototype</li>
-        <li>tested only with Chrome at this point</li>
-        <li>start works only once for now, hit refresh for a new route</li>
+        <li>tested only with Chrome at this point, but this seems to work fine with Firefox</li>
+        <li>start/stop kind of works, but for now hit refresh if you change the route</li>
         </ul>
+
+        <br>
+        <hr>
+        <br>
+        <h2>Geek only section</h2>
+        
+        GitHub code is here:<br>
+        <a href="https://github.com/osingla/RouteView">https://github.com/osingla/RouteView</a>
+        <br>
+        <br>
+       You can download the html file from <a href="https://raw.githubusercontent.com/osingla/RouteView/master/RouteView.html">here<a>,
+        save it on your computer, and then use file:// to access it from your browser. 
 
     </body>
 
