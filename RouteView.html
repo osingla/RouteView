@@ -121,10 +121,11 @@
             var location_from = [];
             var location_to = [];
             var poly2 = [];
-            var timers = [];
+            var timer_animate = [];
             var eol = [];
             var step;               // metres
             var interval;           // milliseconds
+            var curr_dist;
 
             function initialize() {
             
@@ -185,6 +186,8 @@
 
             function cb_animate( num_route, d ) {
 
+                curr_dist = d;
+
                 if ( d > eol[num_route] ) {
                     console.log( "Route " + num_route + " is done" );
                     return;
@@ -204,13 +207,13 @@
 
                 updatePoly( num_route, d );
                 if ( step > 0 )
-                    timers[num_route] = setTimeout( "cb_animate("+num_route+","+(d+step)+")", interval );
+                    timer_animate[num_route] = setTimeout( "cb_animate("+num_route+","+(d+step)+")", interval );
             }
 
             function start_driving( route_num ) {
             
-                if ( timers[route_num] ) 
-                    clearTimeout( timers[route_num] );
+                if ( timer_animate[route_num] ) 
+                    clearTimeout( timer_animate[route_num] );
                     
                 eol[route_num] = polyline[route_num].Distance();
                 map.setCenter( polyline[route_num].getPath().getAt(0) );
@@ -219,7 +222,7 @@
                     path: [polyline[route_num].getPath().getAt(0)], strokeColor:"#FFFF00", strokeWeight:3
                 });
 
-                timers[route_num] = setTimeout("cb_animate("+route_num+",50)",250);
+                timer_animate[route_num] = setTimeout("cb_animate("+route_num+",50)",250);
             }
 
             function do_start( ) {
@@ -349,19 +352,20 @@
 
             function do_pause( ) {
                 if ( document.getElementById("id_btn_pause").innerHTML == "Pause" ) {
-                    if ( timers[0] ) 
-                        clearTimeout( timers[0] );
-//                    document.getElementById("id_btn_pause").innerHTML = "Continue";
+                    clearTimeout( timer_animate[0] );
+                    document.getElementById("id_btn_pause").innerHTML = "Continue";
+                    console.log( "curr_dist=" + curr_dist );
                 }
                 else if ( document.getElementById("id_btn_pause").innerHTML == "Continue" ) {
-                    step = -step;
                     document.getElementById("id_btn_pause").innerHTML = "Pause";
+                    var num_route = 0;
+                    timer_animate[num_route] = setTimeout( "cb_animate(" + num_route + "," + curr_dist + ")", interval );
                 }
             }
 
             function do_stop( ) {
 
-                clearTimeout( timers[0] );
+                clearTimeout( timer_animate[0] );
 
                 document.getElementById("id_route1_from").disabled = false;
                 document.getElementById("id_route1_waypoint1").disabled = false;
@@ -369,6 +373,7 @@
 
                 document.getElementById("id_btn_start").disabled = false;
                 document.getElementById("id_btn_pause").disabled = true;
+                document.getElementById("id_btn_pause").innerHTML = "Pause";
                 document.getElementById("id_btn_stop").disabled = true;
             }
 
