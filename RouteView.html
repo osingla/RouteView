@@ -277,6 +277,8 @@
                         travelMode: travelMode,
                         waypoints: way_points,
                         optimizeWaypoints: true,
+                        avoidHighways: true,
+                        avoidTolls: true
                     };  
 
                     directions_service.route( request, cb_make_route( route_num ) );
@@ -423,23 +425,24 @@
                     </div>
                     <div id='id_config' align="left">
                         <br>
-                        <table>
-                            <tr>
-                                <td colspan="2" valign="middle" align="center"><b>Route #1</b></td>
-                            </tr>
-                            <tr>
-                                <td valign="middle" align="right">From:</td>
-                                <td valign="middle" align="left"><input type="text" id="id_route1_from" onchange="cb_route1_from(this.value)" value="Apex,NC"></td>
-                            </tr>
-                            <tr>
-                                <td valign="middle" align="right">Through:</td>
-                                <td valign="middle" align="left"><input type="text" id="id_route1_waypoint1" onchange="cb_route1_waypoint1(this.value)"></td>
-                            </tr>
-                            <tr>
-                                <td valign="middle" align="right">To:</td>
-                                <td valign="middle" align="left"><input type="text" id="id_route1_to" onchange="cb_route1_to(this.value)" value="Troy,NC"></td>
-                            </tr>
-                        </table>
+                        
+                        <fieldset>
+                            <legend>Route #1</legend>
+                            <table>
+                                <tr>
+                                    <td valign="middle" align="right">From:</td>
+                                    <td valign="middle" align="left"><input type="text" id="id_route1_from" onchange="cb_route1_from(this.value)" value="Apex,NC"></td>
+                                </tr>
+                                <tr>
+                                    <td valign="middle" align="right">Through:</td>
+                                    <td valign="middle" align="left"><input type="text" id="id_route1_waypoint1" onchange="cb_route1_waypoint1(this.value)"></td>
+                                </tr>
+                                <tr>
+                                    <td valign="middle" align="right">To:</td>
+                                    <td valign="middle" align="left"><input type="text" id="id_route1_to" onchange="cb_route1_to(this.value)" value="Troy,NC"></td>
+                                </tr>
+                            </table>
+                        </fieldset>
                         <br>
                         <br>
                         <div style="width:100%" align="center">
