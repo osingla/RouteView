@@ -273,6 +273,9 @@
                 endLoc[0] = document.getElementById('id_route1_to').value;
                 console.log( "to   = " + endLoc[0] );
 
+                var no_hwy  = document.getElementById("id_check_no_hwy").checked
+                var no_toll = document.getElementById("id_check_no_toll").checked
+
                 for ( var route_num = 0; route_num < startLoc.length; route_num++ ) {
 
                     var rendererOptions = {
@@ -292,8 +295,8 @@
                         travelMode: travelMode,
                         waypoints: way_points,
                         optimizeWaypoints: true,
-                        avoidHighways: true,
-                        avoidTolls: true
+                        avoidHighways: no_hwy,
+                        avoidTolls: no_toll
                     };  
 
                     directions_service.route( request, cb_make_route( route_num ) );
@@ -439,6 +442,12 @@
                 }
                 google.maps.event.trigger( panorama, 'resize' );
             }
+            
+            function cb_click_no_hwy( cb ) {
+            }
+
+            function cb_click_no_toll( cb ) {
+            }
 
             google.maps.event.addDomListener( window, 'load', initialize );
 
@@ -455,7 +464,6 @@
                         <button id="id_btn_expand_collapse" type="button" onclick="cb_expand_collapse()"><<<</button>
                     </div>
                     <div id='id_config' align="left">
-                        <br>
                         
                         <fieldset>
                             <legend>Route #1</legend>
@@ -473,6 +481,14 @@
                                     <td valign="middle" align="left"><input type="text" id="id_route1_to" onchange="cb_route1_to(this.value)" value="Troy,NC"></td>
                                 </tr>
                             </table>
+                            <hr>
+                            <div align="center">
+                            <label>No Highway</label>
+                            <input type="checkbox" id="id_check_no_hwy" checked onclick="cb_click_no_hwy(this)">
+                            &nbsp; &nbsp; &nbsp;
+                            <label>No Toll</label>
+                            <input type="checkbox" id="id_check_no_toll" checked onclick="cb_click_no_toll(this)">
+                            </div>
                         </fieldset>
                         <br>
                         <br>
