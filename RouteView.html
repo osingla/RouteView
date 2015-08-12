@@ -303,7 +303,7 @@
 
                 }
                 
-                function cb_make_route( routeNum ) {
+                function cb_make_route( route_num ) {
 
                     return function( response, status ) {
 
@@ -311,58 +311,63 @@
 
                             var bounds = new google.maps.LatLngBounds();
                             var route = response.routes[0];
-                            location_from[routeNum] = new Object();
-                            location_to[routeNum] = new Object();
+                            location_from[route_num] = new Object();
+                            location_to[route_num] = new Object();
 
 
-                            polyline[routeNum] = new google.maps.Polyline({
+                            polyline[route_num] = new google.maps.Polyline({
                                 path: [],
                                 strokeColor: '#FFFF00',
                                 strokeWeight: 3
                             });
 
-                            poly2[routeNum] = new google.maps.Polyline({
+                            poly2[route_num] = new google.maps.Polyline({
                                 path: [],
                                 strokeColor: '#FFFF00',
                                 strokeWeight: 3
                             });     
 
-
                             // For each route, display summary information.
                             var path = response.routes[0].overview_path;
                             var legs = response.routes[0].legs;
-
 
                             var disp = new google.maps.DirectionsRenderer( rendererOptions );     
                             disp.setMap( map );
                             disp.setDirections( response );
 
-                            // Markers               
-                            for ( i=0; i < legs.length; i++) {
+                            // Markers
+                            var dist_meters = 0;
+                            var duration_secs = 0;
+                            for ( i = 0; i < legs.length; i++) {
+                                dist_meters += legs[i].distance.value;
+                                duration_secs += legs[i].duration.value;
+                                console.log( i + ": m=" + legs[i].distance.value + " secs=" + legs[i].duration.value );
                                 if ( i == 0 ) {
-                                    location_from[routeNum].latlng = legs[i].start_location;
-                                    location_from[routeNum].address = legs[i].start_address;
+                                    location_from[route_num].latlng  = legs[i].start_location;
+                                    location_from[route_num].address = legs[i].start_address;
                                 }
-                                location_to[routeNum].latlng = legs[i].end_location;
-                                location_to[routeNum].address = legs[i].end_address;
+                                location_to[route_num].latlng  = legs[i].end_location;
+                                location_to[route_num].address = legs[i].end_address;
                                 var steps = legs[i].steps;
 
-                                for (j=0; j < steps.length;j++) {
+                                for ( j = 0; j < steps.length; j++) {
                                     var nextSegment = steps[j].path;                
                                     var nextSegment = steps[j].path;
 
                                     for ( k=0;k < nextSegment.length;k++) {
-                                        polyline[routeNum].getPath().push(nextSegment[k]);
+                                        polyline[route_num].getPath().push(nextSegment[k]);
                                         bounds.extend(nextSegment[k]);
                                     }
                                 }
                             }
+                            
+                            show_route_distance_duration( route_num, dist_meters, duration_secs );
 
                         }
 
-                        polyline[routeNum].setMap( map );
+                        polyline[route_num].setMap( map );
                         map.fitBounds( bounds );
-                        start_driving( routeNum );  
+                        start_driving( route_num );  
 
                     }
 
@@ -449,6 +454,34 @@
             function cb_click_no_toll( cb ) {
             }
 
+            function show_route_distance_duration( route_num, dist_meters, duration_secs ) {
+
+                console.log( "dist_meters=" + dist_meters + " duration_secs=" + duration_secs );
+
+                document.getElementById("id_route1_dist").innerHTML = Math.round( dist_meters / 1000 );
+                
+                var nb_hours   = Math.floor( duration_secs / 3600 );
+                var nb_minutes = Math.floor( (duration_secs - (nb_hours * 3600)) / 60 );
+                var nb_seconds = Math.floor( duration_secs - (nb_hours * 3600) - (nb_minutes * 60) );
+                if ( nb_hours == 0 ) {
+                    if ( nb_minutes == 0 ) {
+                        document.getElementById("id_route1_duration").innerHTML = nb_seconds + '"';
+                    }
+                    else {
+                        if ( nb_seconds == 0 )
+                            document.getElementById("id_route1_duration").innerHTML = nb_minutes + "'";
+                        else
+                            document.getElementById("id_route1_duration").innerHTML = nb_minutes + "'" + nb_seconds + '"';
+                    }
+                }
+                else {
+                    document.getElementById("id_route1_duration").innerHTML = nb_hours + "h" + nb_minutes + "'" + nb_seconds + '"';
+                }
+                
+                document.getElementById("id_route1_distance_duration").style.display = "";
+                
+            }
+            
             google.maps.event.addDomListener( window, 'load', initialize );
 
         </script>
@@ -483,11 +516,23 @@
                             </table>
                             <hr>
                             <div align="center">
-                            <label>No Highway</label>
-                            <input type="checkbox" id="id_check_no_hwy" checked onclick="cb_click_no_hwy(this)">
-                            &nbsp; &nbsp; &nbsp;
-                            <label>No Toll</label>
-                            <input type="checkbox" id="id_check_no_toll" checked onclick="cb_click_no_toll(this)">
+                                <label>No Highway</label>
+                                <input type="checkbox" id="id_check_no_hwy" checked onclick="cb_click_no_hwy(this)">
+                                &nbsp; &nbsp; &nbsp;
+                                <label>No Toll</label>
+                                <input type="checkbox" id="id_check_no_toll" checked onclick="cb_click_no_toll(this)">
+                            </div>
+                            <div id="id_route1_distance_duration" style="width:100%; display:None" align="center" >
+                                <table style="width:100%">
+                                    <tr>
+                                        <td align="left" valign="middle">
+                                            <b id="id_route1_dist"></b>&nbsp;kms
+                                        </td>
+                                        <td align="right" valign="middle">
+                                            <b id="id_route1_duration">XX</b>
+                                        </td>
+                                    </tr>
+                                </table>
                             </div>
                         </fieldset>
                         <br>
