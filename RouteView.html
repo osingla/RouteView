@@ -218,7 +218,7 @@
                 panorama.setPosition( new google.maps.LatLng( p.G, p.K ) );
                 panorama.setPov({
                     heading: bearing,
-                    pitch: 10
+                    pitch: (panorama_full_screen) ? 2 : 10
                 });
 
                 updatePoly( num_route, d );
