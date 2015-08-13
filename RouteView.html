@@ -135,6 +135,7 @@
             var eol = [];
             var step;               // metres
             var interval;           // milliseconds
+			var is_force_panto = true;
             var curr_dist;
 			var cb_move_to_dist = undefined;
 
@@ -211,7 +212,8 @@
                 
                 var p = polyline[num_route].GetPointAtDistance( d );
                 if ( !map.getBounds().contains( p ) )
-                    map.panTo(p);
+					if ( is_force_panto )
+                    	map.panTo( p );
 
                 var bearing = polyline[num_route].Bearing( polyline[num_route].GetIndexAtDistance(d) );
                 console.log( "d=" + d + " - " + polyline[num_route].GetIndexAtDistance(d) + " / " + bearing);
@@ -526,6 +528,11 @@
 				cb_move_to_dist = setTimeout( "move_to_dist(" + new_pos + ")", 25 );
             }
 
+			function cb_click_force_panto( cb ) {
+				console.log( "--> " + cb.checked );
+				is_force_panto = cb.checked;
+			}
+
             google.maps.event.addDomListener( window, 'load', initialize );
 
         </script>
@@ -559,13 +566,6 @@
                                 </tr>
                             </table>
                             <hr>
-                            <div align="center">
-                                <label>No Highway</label>
-                                <input type="checkbox" id="id_check_no_hwy" checked onclick="cb_click_no_hwy(this)">
-                                &nbsp; &nbsp; &nbsp;
-                                <label>No Toll</label>
-                                <input type="checkbox" id="id_check_no_toll" checked onclick="cb_click_no_toll(this)">
-                            </div>
                             <div id="id_route1_distance_duration" style="width:100%; display:None" align="center" >
                                 <table style="width:100%">
                                     <tr>
@@ -578,27 +578,44 @@
                                     </tr>
                                 </table>
                             </div>
+                            <div align="center">
+                                <label>No Highway</label>
+                                <input type="checkbox" id="id_check_no_hwy" checked onclick="cb_click_no_hwy(this)">
+                                &nbsp; &nbsp; &nbsp;
+                                <label>No Toll</label>
+                                <input type="checkbox" id="id_check_no_toll" checked onclick="cb_click_no_toll(this)">
+                            </div>
                         </fieldset>
                         <br>
                         <br>
-                        <div style="width:100%" align="center">
-                            <span>Step : <b id="id_meters">250</b> meters</span><br>
-                            <input id="id_input_meters" style="width:100%" type="range" min="50" max="1000" step="50" value="250"
-                             oninput="cb_step_input( this.value )"
-                             onchange="cb_step_changed( this.value )" >
-                            <p>
-                                <span>Interval : <b id="id_interval">750</b> milliseconds</span><br>
-                                <input id="id_input_interval" style="width:100%" type="range" min="500" max="5000" step="250" value="750"
-                                 oninput="cb_interval_input( this.value )"
-                                 onchange="cb_interval_changed( this.value )" >
-                            </p>
-                        </div>
+
+                        <fieldset>
+                            <legend>Configuration</legend>
+                            <div style="width:100%" align="center">
+                                <span>Step : <b id="id_meters">250</b> meters</span><br>
+                                <input id="id_input_meters" style="width:100%" type="range" min="50" max="1000" step="50" value="250"
+                                 oninput="cb_step_input( this.value )"
+                                 onchange="cb_step_changed( this.value )" >
+                                <p>
+                                    <span>Interval : <b id="id_interval">750</b> milliseconds</span><br>
+                                    <input id="id_input_interval" style="width:100%" type="range" min="500" max="5000" step="250" value="750"
+                                     oninput="cb_interval_input( this.value )"
+                                     onchange="cb_interval_changed( this.value )" >
+                                </p>
+                            </div>
+                        	<div style="width:100%" align="center">
+                                <label>Force Pan To</label>
+                                <input type="checkbox" id="id_check_force_panto" checked onclick="cb_click_force_panto(this)">
+                        	</div>
+                        </fieldset>
                         <br>
+
                         <div style="width:100%" align="center">
                             <button type="button" id="id_btn_start" onclick="do_start()">Start</button>
                             <button type="button" id="id_btn_pause" onclick="do_pause()" disabled>Pause</button>
                             <button type="button" id="id_btn_stop"  onclick="do_stop()" disabled>Stop</button>
                         </div>
+
                     </div>
                 </td>
                 <td id="td-map-canvas" nowrap="nowrap" valign="top" width="50%">
