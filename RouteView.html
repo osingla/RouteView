@@ -136,6 +136,7 @@
             var step;               // metres
             var interval;           // milliseconds
             var curr_dist;
+			var cb_move_to_dist = undefined;
 
             function initialize() {
             
@@ -208,7 +209,7 @@
                     return;
                 }
                 
-                var p = polyline[num_route].GetPointAtDistance(d);
+                var p = polyline[num_route].GetPointAtDistance( d );
                 if ( !map.getBounds().contains( p ) )
                     map.panTo(p);
 
@@ -223,6 +224,9 @@
                 updatePoly( num_route, d );
                 if ( step > 0 )
                     timer_animate[num_route] = setTimeout( "cb_animate("+num_route+","+(d+step)+")", interval );
+
+                // Update route slider
+                document.getElementById("id_input_route").value = d;
             }
 
             function start_driving( route_num ) {
@@ -250,7 +254,6 @@
                 document.getElementById("id_route1_waypoint1").disabled = true;
                 document.getElementById("id_route1_to").disabled = true;
                 
-
                 step = parseInt( document.getElementById("id_input_meters").value );
                 interval = parseInt( document.getElementById("id_input_interval").value );
                 console.log( "step=" + step + " interval=" + interval );
@@ -373,9 +376,13 @@
 
                 }
 
+                document.getElementById("id_input_route").style.display = "";
+                document.getElementById("id_input_route").disabled = true;
+
             }
 
             function do_pause( ) {
+
                 if ( document.getElementById("id_btn_pause").innerHTML == "Pause" ) {
                     clearTimeout( timer_animate[0] );
                     document.getElementById("id_btn_pause").innerHTML = "Continue";
@@ -386,6 +393,9 @@
                     var num_route = 0;
                     timer_animate[num_route] = setTimeout( "cb_animate(" + num_route + "," + curr_dist + ")", interval );
                 }
+
+                document.getElementById("id_input_route").disabled = false;
+
             }
 
             function do_stop( ) {
@@ -400,6 +410,8 @@
                 document.getElementById("id_btn_pause").disabled = true;
                 document.getElementById("id_btn_pause").innerHTML = "Pause";
                 document.getElementById("id_btn_stop").disabled = true;
+
+                document.getElementById("id_input_route").disabled = true;
             }
 
             function cb_step_input( new_step ) {
@@ -480,8 +492,40 @@
                 
                 document.getElementById("id_route1_distance_duration").style.display = "";
                 
+                // Update route slider
+                document.getElementById("id_input_route").max = dist_meters
+                document.getElementById("id_input_route").value = 0;
+                
             }
             
+			function move_to_dist( new_pos ) {
+
+				var num_route = 0;
+
+                var p = polyline[num_route].GetPointAtDistance( new_pos );
+                if ( !map.getBounds().contains( p ) )
+                    map.panTo( p );
+
+                var bearing = polyline[num_route].Bearing( polyline[num_route].GetIndexAtDistance( new_pos ) );
+                panorama.setPosition( new google.maps.LatLng( p.G, p.K ) );
+                panorama.setPov({
+                    heading: bearing,
+                    pitch: 10
+                });
+
+                updatePoly( num_route, new_pos );
+
+				cb_move_to_dist = undefined;
+
+				curr_dist = new_pos;
+			}
+
+            function cb_route_input( new_pos ) {
+				if ( cb_move_to_dist != undefined )
+					clearTimeout( cb_move_to_dist );
+				cb_move_to_dist = setTimeout( "move_to_dist(" + new_pos + ")", 25 );
+            }
+
             google.maps.event.addDomListener( window, 'load', initialize );
 
         </script>
@@ -540,13 +584,13 @@
                         <div style="width:100%" align="center">
                             <span>Step : <b id="id_meters">250</b> meters</span><br>
                             <input id="id_input_meters" style="width:100%" type="range" min="50" max="1000" step="50" value="250"
-                             oninput="cb_step_input(this.value)"
-                             onchange="cb_step_changed(this.value)" >
+                             oninput="cb_step_input( this.value )"
+                             onchange="cb_step_changed( this.value )" >
                             <p>
                                 <span>Interval : <b id="id_interval">750</b> milliseconds</span><br>
                                 <input id="id_input_interval" style="width:100%" type="range" min="500" max="5000" step="250" value="750"
-                                 oninput="cb_interval_input(this.value)"
-                                 onchange="cb_interval_changed(this.value)" >
+                                 oninput="cb_interval_input( this.value )"
+                                 onchange="cb_interval_changed( this.value )" >
                             </p>
                         </div>
                         <br>
@@ -560,10 +604,16 @@
                 <td id="td-map-canvas" nowrap="nowrap" valign="top" width="50%">
                     <div id="map-canvas" style="width: 100%; float:left"></div>
                 </td>
-                <td id="id_td_pano" nowrap="nowrap" valign="top" width="50%">
+                <td id="id_td_pano" nowrap="nowrap" valign="top" width="50%" height="100%">
                     <div id="pano" style="width: 100%; height: 100%;float:left" onclick="cb_pano_click()"></div>
                 </td>
             </tr>
+        	<tr>
+        		<td colspan="3" width="100%" align="center" >
+					<input id="id_input_route" style="width:100%; display:None" type="range" min="0" max="0" step="1" value="0"
+						oninput="cb_route_input( this.value )" >
+       			</td>
+        	</tr>
         </table>
     
     </body>
