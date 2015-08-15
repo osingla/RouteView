@@ -147,9 +147,10 @@ define( function( m ) {
         endLoc[0] = dijit.byId('id_route1_to').get( 'value' );
         console.log( "to   = " + endLoc[0] );
 
-        var no_hwy  = document.getElementById("id_check_no_hwy").checked
-        var no_toll = document.getElementById("id_check_no_toll").checked
-
+        var no_hwy  = dijit.byId('id_check_no_hwy').get( 'checked' );
+        var no_toll = dijit.byId('id_check_no_toll').get( 'checked' );
+        console.log( "no_hwy=" + no_hwy + " no_toll=" + no_toll );
+        
         for ( var route_num = 0; route_num < startLoc.length; route_num++ ) {
 
             var rendererOptions = {
@@ -357,6 +358,12 @@ define( function( m ) {
 		cb_move_to_dist = setTimeout( 'require(["RouteView.js"], function( s ) { s.move_to_dist('+new_pos+'); })', 25 );
     }
 
+    function cb_click_no_hwy( cb ) {
+    }
+
+    function cb_click_no_toll( cb ) {
+    }
+
 	
 	// ---------
 	// Externals
@@ -375,6 +382,9 @@ define( function( m ) {
 		move_to_dist: function( new_pos ) { move_to_dist( new_pos ); },
 
 		cb_route_input: function( ) { cb_route_input( ); },
+
+		cb_click_no_hwy:  function( ) { cb_click_no_hwy(); },
+		cb_click_no_toll: function( ) { cb_click_no_toll(); },
 		
     };
  

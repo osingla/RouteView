@@ -77,11 +77,19 @@
                         </table>
                     </div>
                     <div align="center">
-                        <label>No Highway</label>
-                        <input type="checkbox" id="id_check_no_hwy" checked onclick="cb_click_no_hwy(this)">
-                        &nbsp; &nbsp; &nbsp;
-                        <label>No Toll</label>
-                        <input type="checkbox" id="id_check_no_toll" checked onclick="cb_click_no_toll(this)">
+                        
+                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" 
+		                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_hwy(); })'
+                         id="id_check_no_hwy" >
+                         No Highway
+                         </button>
+
+                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" 
+		                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_toll(); })'
+                         id="id_check_no_toll" >
+                         No Toll
+                         </button>
+
                     </div>
                 </fieldset>
                 <br>
