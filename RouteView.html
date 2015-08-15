@@ -36,7 +36,7 @@
             <!-- Left Layout -->            
 	        <div id="id_left_layout" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'left', splitter: true">
 
-                <fieldset>
+                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:false">
                     <legend>Route #1</legend>
                     <table>
                         <tr>
@@ -95,19 +95,38 @@
                 <br>
                 <br>
 
-                <fieldset>
+                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:false">
                     <legend>Configuration</legend>
                     <div style="width:100%" align="center">
+                    
                         <span>Step : <b id="id_meters">250</b> meters</span><br>
-                        <input id="id_input_meters" style="width:100%" type="range" min="50" max="1000" step="50" value="250"
-                         oninput="cb_step_input( this.value )"
-                         onchange="cb_step_changed( this.value )" >
-                        <p>
-                            <span>Interval : <b id="id_interval">800</b> milliseconds</span><br>
-                            <input id="id_input_interval" style="width:100%" type="range" min="500" max="5000" step="50" value="800"
-                             oninput="cb_interval_input( this.value )"
-                             onchange="cb_interval_changed( this.value )" >
-                        </p>
+                        <div id="id_input_meters"
+                            style="width:200px;"
+                            name="horizontalSlider"
+                            data-dojo-type="dijit/form/HorizontalSlider"
+                            data-dojo-props="value:250,
+                            minimum: 50,
+                            maximum:1000,
+                            discreteValues:20,
+                            intermediateChanges:true,
+                            showButtons:true"
+	                        onChange='require(["RouteView.js"], function( s ) { s.cb_step_changed(); })'>
+                        </div>					
+
+                        <span>Interval : <b id="id_interval">800</b> milliseconds</span><br>
+                        <div id="id_input_interval"
+                            style="width:200px;"
+                            name="horizontalSlider"
+                            data-dojo-type="dijit/form/HorizontalSlider"
+                            data-dojo-props="value:800,
+                            minimum: 500,
+                            maximum:5000,
+                            discreteValues:46,
+                            intermediateChanges:true,
+                            showButtons:true"
+	                        onChange='require(["RouteView.js"], function( s ) { s.cb_interval_changed(); })'>
+                        </div>					
+
                     </div>
                     <div style="width:100%" align="center">
                         <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" 
@@ -136,7 +155,6 @@
             </div>
             
             <div id="id_bottom_layout" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="splitter: false, region: 'bottom'">
-
                 <div id="id_input_route"
                     style="width:100%;"
                     name="horizontalSlider"
@@ -165,7 +183,6 @@
                     <div data-dojo-type="dijit/form/HorizontalRule" container="bottomDecoration"
                         count=11 style="height:5px;"></div>
                 </div>					
-					
             </div>
 
         </div>

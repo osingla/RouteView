@@ -287,6 +287,19 @@ define( function( m ) {
 		dijit.byId('id_input_route').set( 'disabled', false );
     }
 
+    function resize_sliders( ) {
+    	
+    	require(["dojo/dom-geometry", "dojo/dom", "dojo/dom-style"], function( domGeom, dom, domStyle) {
+		    var node = dom.byId("id_left_layout");
+		    var computedStyle = domStyle.getComputedStyle( node );
+		    var output = domGeom.getContentBox( node, computedStyle );
+    		domStyle.set( "id_input_meters", "width", (output.w - 20)+ "px" );
+    		domStyle.set( "id_input_interval", "width", (output.w - 20)+ "px" );
+		    console.log( output );
+   		});
+    	
+    }
+    
     function initialize( ) {
 
         var home = new google.maps.LatLng( 35.733435, -78.907684 );
@@ -323,8 +336,16 @@ define( function( m ) {
                     map.setCenter( panorama.location.latLng );
                     google.maps.event.trigger( panorama, 'resize' );
                 });
+
+                aspect.after(registry.byId("id_left_layout"), "resize", function(changeSize) {
+                	console.log( changeSize );
+                	resize_sliders( );                	
+                }, true);                
+                
             });
         });
+        
+        resize_sliders( );
         
     }
     
@@ -358,6 +379,17 @@ define( function( m ) {
 		cb_move_to_dist = setTimeout( 'require(["RouteView.js"], function( s ) { s.move_to_dist('+new_pos+'); })', 25 );
     }
 
+    function cb_step_changed( ) {
+    	step = dijit.byId('id_input_meters').get( 'value' );
+        document.getElementById("id_meters").innerHTML = step;
+    }
+
+    function cb_interval_changed( new_interval ) {
+    	interval = dijit.byId('id_input_interval').get( 'value' );
+        document.getElementById("id_interval").innerHTML = interval;
+    }
+    
+
     function cb_click_no_hwy( ) {
     }
 
@@ -388,6 +420,9 @@ define( function( m ) {
 
 		cb_route_input: function( ) { cb_route_input( ); },
 
+		cb_step_changed:     function( ) { cb_step_changed(); },
+		cb_interval_changed: function( ) { cb_interval_changed(); },
+		
 		cb_click_no_hwy:  function( ) { cb_click_no_hwy(); },
 		cb_click_no_toll: function( ) { cb_click_no_toll(); },
 
