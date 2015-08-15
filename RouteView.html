@@ -1,639 +1,172 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
     <head>
-  
-        <meta charset="utf-8">
-        <title>Street View Riding Simulation</title>
-
-        <script>
-          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-          ga('create', 'UA-66144602-1', 'auto');
-          ga('send', 'pageview');
-        </script>
-
-        <style>
-
-            html, body, #map-canvas, #td-map-canvas {
-                height: 100%;
-                margin: 0;
-                padding: 0;
-            }
-            
-            /* http://brennaobrien.com/blog/2014/05/style-input-type-range-in-every-browser.html */
-            
-            input[type=range] {
-                /*removes default webkit styles*/
-                -webkit-appearance: none;
-
-                /*fix for FF unable to apply focus style bug */
-                border: 1px solid white;
-
-                /*required for proper track sizing in FF*/
-                width: 300px;
-            }
-            input[type=range]::-webkit-slider-runnable-track {
-                width: 300px;
-                height: 5px;
-                background: #ddd;
-                border: none;
-                border-radius: 3px;
-            }
-            input[type=range]::-webkit-slider-thumb {
-                -webkit-appearance: none;
-                border: none;
-                height: 16px;
-                width: 16px;
-                border-radius: 50%;
-                background: goldenrod;
-                margin-top: -4px;
-            }
-            input[type=range]:focus {
-                outline: none;
-            }
-            input[type=range]:focus::-webkit-slider-runnable-track {
-                background: #ccc;
-            }
-
-            input[type=range]::-moz-range-track {
-                width: 300px;
-                height: 5px;
-                background: #ddd;
-                border: none;
-                border-radius: 3px;
-            }
-            input[type=range]::-moz-range-thumb {
-                border: none;
-                height: 16px;
-                width: 16px;
-                border-radius: 50%;
-                background: goldenrod;
-            }
-
-            /*hide the outline behind the border*/
-            input[type=range]:-moz-focusring{
-                outline: 1px solid white;
-                outline-offset: -1px;
-            }
-
-            input[type=range]::-ms-track {
-                width: 300px;
-                height: 5px;
-
-                /*remove bg colour from the track, we'll use ms-fill-lower and ms-fill-upper instead */
-                background: transparent;
-
-                /*leave room for the larger thumb to overflow with a transparent border */
-                border-color: transparent;
-                border-width: 6px 0;
-
-                /*remove default tick marks*/
-                color: transparent;
-            }
-            input[type=range]::-ms-fill-lower {
-                background: #777;
-                border-radius: 10px;
-            }
-            input[type=range]::-ms-fill-upper {
-                background: #ddd;
-                border-radius: 10px;
-            }
-            input[type=range]::-ms-thumb {
-                border: none;
-                height: 16px;
-                width: 16px;
-                border-radius: 50%;
-                background: goldenrod;
-            }
-            input[type=range]:focus::-ms-fill-lower {
-                background: #888;
-            }
-            input[type=range]:focus::-ms-fill-upper {
-                background: #ccc;
-            }
-            
-        </style>
+	    <meta charset="utf-8">
+	    <title>Demo: Nested BorderContainer</title>
 
         <script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false"></script>
         <script type="text/javascript" src="https://gisgraphy.googlecode.com/svn-history/r67/trunk/gisgraphy/src/main/webapp/scripts/v3_epoly.js"></script>
-<!--    <script type="text/javascript" src="http://www.geocodezip.com/scripts/v3_epoly.js"></script> -->
 
+ 		<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.10.4/dijit/themes/claro/claro.css" media="screen" >
+		<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.10.4/dojo/dojo.js"
+            data-dojo-config="isDebug: true, async: false, parseOnLoad: false"></script>
         <script>
 
-            var collapsed = false;
-            var map;
-            var panorama;
-            var panorama_full_screen;
-            var polyline = [];
-            var location_from = [];
-            var location_to = [];
-            var poly2 = [];
-            var timer_animate = [];
-            var eol = [];
-            var step;               // metres
-            var interval;           // milliseconds
-			var is_force_panto = true;
-            var curr_dist;
-			var cb_move_to_dist = undefined;
-
-            function initialize() {
+        require(["dojo/parser", "dijit/layout/BorderContainer", "dijit/layout/TabContainer", "dijit/layout/ContentPane", 
+        		 "dijit/form/TextBox", "dojo/domReady!"], 
+        	function(parser){
+            	parser.parse();
+        	}
+        );
+            </script>
             
-                var home = new google.maps.LatLng( 35.733435, -78.907684 );
-                var mapOptions = {
-                   center: home,
-                    zoom: 14
-                };
-            
-                map = new google.maps.Map( document.getElementById('map-canvas'), mapOptions );
-                var panoramaOptions = {
-                    position: home,
-                    pov: {
-                        heading: 34,
-                        pitch: 10
-                    },
-                    enableCloseButton: false,
-                    linksControl: false,
-                    panControl: false,
-                    zoomControl: false,
-                    clickToGo: false,
-                    disableDoubleClickZoom: true,
-                };
-
-                panorama = new google.maps.StreetViewPanorama( document.getElementById('pano'), panoramaOptions );
-                map.setStreetView( panorama );
-
-                panorama_full_screen = false;
-                
-            }
-            
-            function cb_expand_collapse( ) {
-                if ( collapsed ) {
-                    document.getElementById('id_config').style.display = "";
-                    document.getElementById('id_btn_expand_collapse').innerHTML = "<<<";
-                    collapsed = false;
-                }
-                else {
-                    document.getElementById('id_config').style.display = "None";
-                    document.getElementById('id_btn_expand_collapse').innerHTML = ">>>";
-                    collapsed = true;
-                }
-            }
-            
-
-            function updatePoly( i, d ) {
-                var lastVertex = 1;
-                // Spawn a new polyline every 30 vertices, because updating a 100-vertex poly is too slow
-                if ( poly2[i].getPath().getLength() > 30 ) {
-                    poly2[i] = new google.maps.Polyline([polyline[i].getPath().getAt( lastVertex - 1 )]);
-                    // map.addOverlay( poly2 )
-                }
-
-                if ( polyline[i].GetIndexAtDistance(d) < lastVertex + 2 ) {
-                    if ( poly2[i].getPath().getLength() > 1 )
-                        poly2[i].getPath().removeAt(poly2[i].getPath().getLength()-1)
-                    poly2[i].getPath().insertAt( poly2[i].getPath().getLength(),polyline[i].GetPointAtDistance(d) );
-                } 
-                else {
-                    poly2[i].getPath().insertAt( poly2[i].getPath().getLength(),location_to[i].latlng );
-                }
-            }
-
-            function cb_animate( num_route, d ) {
-
-                curr_dist = d;
-
-                if ( d > eol[num_route] ) {
-                    console.log( "Route " + num_route + " is done" );
-                    return;
-                }
-                
-                var p = polyline[num_route].GetPointAtDistance( d );
-                if ( !map.getBounds().contains( p ) )
-					if ( is_force_panto )
-                    	map.panTo( p );
-
-                var bearing = polyline[num_route].Bearing( polyline[num_route].GetIndexAtDistance(d) );
-                console.log( "d=" + d + " - " + polyline[num_route].GetIndexAtDistance(d) + " / " + bearing);
-                panorama.setPosition( new google.maps.LatLng( p.G, p.K ) );
-                panorama.setPov({
-                    heading: bearing,
-                    pitch: (panorama_full_screen) ? 2 : 10
-                });
-
-                updatePoly( num_route, d );
-                if ( step > 0 )
-                    timer_animate[num_route] = setTimeout( "cb_animate("+num_route+","+(d+step)+")", interval );
-
-                // Update route slider
-                document.getElementById("id_input_route").value = d;
-            }
-
-            function start_driving( route_num ) {
-            
-                if ( timer_animate[route_num] ) 
-                    clearTimeout( timer_animate[route_num] );
-                    
-                eol[route_num] = polyline[route_num].Distance();
-                map.setCenter( polyline[route_num].getPath().getAt(0) );
-
-                poly2[route_num] = new google.maps.Polyline({
-                    path: [polyline[route_num].getPath().getAt(0)], strokeColor:"#FFFF00", strokeWeight:3
-                });
-
-                timer_animate[route_num] = setTimeout("cb_animate("+route_num+",50)",250);
-            }
-
-            function do_start( ) {
-            
-                document.getElementById("id_btn_start").disabled = true;
-                document.getElementById("id_btn_pause").disabled = false;
-                document.getElementById("id_btn_stop").disabled = false;
-                
-                document.getElementById("id_route1_from").disabled = true;
-                document.getElementById("id_route1_waypoint1").disabled = true;
-                document.getElementById("id_route1_to").disabled = true;
-                
-                step = parseInt( document.getElementById("id_input_meters").value );
-                interval = parseInt( document.getElementById("id_input_interval").value );
-                console.log( "step=" + step + " interval=" + interval );
-
-                var startLoc = new Array();
-                startLoc[0] = document.getElementById('id_route1_from').value;
-                console.log( "from = " + startLoc[0] );
-
-                var way_points = [];
-                waypt = document.getElementById('id_route1_waypoint1').value;
-                if ( waypt != "" ) {
-                    console.log( "waypt = " + waypt );
-                    way_points.push({
-                          location:waypt,
-                          stopover:true
-                    });
-                }
-
-                var endLoc = new Array();
-                endLoc[0] = document.getElementById('id_route1_to').value;
-                console.log( "to   = " + endLoc[0] );
-
-                var no_hwy  = document.getElementById("id_check_no_hwy").checked
-                var no_toll = document.getElementById("id_check_no_toll").checked
-
-                for ( var route_num = 0; route_num < startLoc.length; route_num++ ) {
-
-                    var rendererOptions = {
-                        map: map,
-                        suppressMarkers : true,
-                        preserveViewport: true
-                    }
-                    var directions_service = new google.maps.DirectionsService( );
-
-                    var travelMode = google.maps.DirectionsTravelMode.DRIVING;  
-                    
-                    var waypts = [];
-
-                    var request = {
-                        origin: startLoc[route_num],
-                        destination: endLoc[route_num],
-                        travelMode: travelMode,
-                        waypoints: way_points,
-                        optimizeWaypoints: true,
-                        avoidHighways: no_hwy,
-                        avoidTolls: no_toll
-                    };  
-
-                    directions_service.route( request, cb_make_route( route_num ) );
-
-                }
-                
-                function cb_make_route( route_num ) {
-
-                    return function( response, status ) {
-
-                        if ( status == google.maps.DirectionsStatus.OK ) {
-
-                            var bounds = new google.maps.LatLngBounds();
-                            var route = response.routes[0];
-                            location_from[route_num] = new Object();
-                            location_to[route_num] = new Object();
-
-
-                            polyline[route_num] = new google.maps.Polyline({
-                                path: [],
-                                strokeColor: '#FFFF00',
-                                strokeWeight: 3
-                            });
-
-                            poly2[route_num] = new google.maps.Polyline({
-                                path: [],
-                                strokeColor: '#FFFF00',
-                                strokeWeight: 3
-                            });     
-
-                            // For each route, display summary information.
-                            var path = response.routes[0].overview_path;
-                            var legs = response.routes[0].legs;
-
-                            var disp = new google.maps.DirectionsRenderer( rendererOptions );     
-                            disp.setMap( map );
-                            disp.setDirections( response );
-
-                            // Markers
-                            var dist_meters = 0;
-                            var duration_secs = 0;
-                            for ( i = 0; i < legs.length; i++) {
-                                dist_meters += legs[i].distance.value;
-                                duration_secs += legs[i].duration.value;
-                                console.log( i + ": m=" + legs[i].distance.value + " secs=" + legs[i].duration.value );
-                                if ( i == 0 ) {
-                                    location_from[route_num].latlng  = legs[i].start_location;
-                                    location_from[route_num].address = legs[i].start_address;
-                                }
-                                location_to[route_num].latlng  = legs[i].end_location;
-                                location_to[route_num].address = legs[i].end_address;
-                                var steps = legs[i].steps;
-
-                                for ( j = 0; j < steps.length; j++) {
-                                    var nextSegment = steps[j].path;                
-                                    var nextSegment = steps[j].path;
-
-                                    for ( k=0;k < nextSegment.length;k++) {
-                                        polyline[route_num].getPath().push(nextSegment[k]);
-                                        bounds.extend(nextSegment[k]);
-                                    }
-                                }
-                            }
-                            
-                            show_route_distance_duration( route_num, dist_meters, duration_secs );
-
-                        }
-
-                        polyline[route_num].setMap( map );
-                        map.fitBounds( bounds );
-                        start_driving( route_num );  
-
-                    }
-
-                }
-
-                document.getElementById("id_input_route").style.display = "";
-                document.getElementById("id_input_route").disabled = true;
-
-            }
-
-            function do_pause( ) {
-
-                if ( document.getElementById("id_btn_pause").innerHTML == "Pause" ) {
-                    clearTimeout( timer_animate[0] );
-                    document.getElementById("id_btn_pause").innerHTML = "Continue";
-                    console.log( "curr_dist=" + curr_dist );
-                }
-                else if ( document.getElementById("id_btn_pause").innerHTML == "Continue" ) {
-                    document.getElementById("id_btn_pause").innerHTML = "Pause";
-                    var num_route = 0;
-                    timer_animate[num_route] = setTimeout( "cb_animate(" + num_route + "," + curr_dist + ")", interval );
-                }
-
-                document.getElementById("id_input_route").disabled = false;
-
-            }
-
-            function do_stop( ) {
-
-                clearTimeout( timer_animate[0] );
-
-                document.getElementById("id_route1_from").disabled = false;
-                document.getElementById("id_route1_waypoint1").disabled = false;
-                document.getElementById("id_route1_to").disabled = false;
-
-                document.getElementById("id_btn_start").disabled = false;
-                document.getElementById("id_btn_pause").disabled = true;
-                document.getElementById("id_btn_pause").innerHTML = "Pause";
-                document.getElementById("id_btn_stop").disabled = true;
-
-                document.getElementById("id_input_route").disabled = true;
-            }
-
-            function cb_step_input( new_step ) {
-                document.getElementById("id_meters").innerHTML = new_step;
-            }
-
-            function cb_step_changed( new_step ) {
-                console.log( "new_step = " + new_step );
-                step = parseInt( new_step );
-            }
-
-            function cb_interval_input( new_interval ) {
-                document.getElementById("id_interval").innerHTML = new_interval;
-            }
-
-            function cb_interval_changed( new_interval ) {
-                console.log( "new_interval = " + new_interval );
-                interval = parseInt( new_interval );
-            }
-            
-            function cb_route1_from( from ) {
-                console.log( "from = " + from );
-            }
-
-            function cb_route1_waypoint1( from ) {
-                console.log( "waypoint1 = " + from );
-            }
-
-            function cb_route1_to( from ) {
-                console.log( "from = " + from );
-            }
-            
-            function cb_pano_dblclick( ) {
-                if ( !panorama_full_screen ) {
-                    panorama_full_screen = true;
-                    console.log( "Panorama switching to full screen" );
-                    document.getElementById("td-map-canvas").style.display = "None";
-                    document.getElementById("td_config").style.display = "None";
-                }
-                else {
-                    panorama_full_screen = false;
-                    console.log( "Panorama switching to half screen" );
-                    document.getElementById("td-map-canvas").style.display = "";
-                    document.getElementById("td_config").style.display = "";
-                }
-                google.maps.event.trigger( panorama, 'resize' );
-            }
-            
-            function cb_click_no_hwy( cb ) {
-            }
-
-            function cb_click_no_toll( cb ) {
-            }
-
-            function show_route_distance_duration( route_num, dist_meters, duration_secs ) {
-
-                console.log( "dist_meters=" + dist_meters + " duration_secs=" + duration_secs );
-
-                document.getElementById("id_route1_dist").innerHTML = Math.round( dist_meters / 1000 );
-                
-                var nb_hours   = Math.floor( duration_secs / 3600 );
-                var nb_minutes = Math.floor( (duration_secs - (nb_hours * 3600)) / 60 );
-                var nb_seconds = Math.floor( duration_secs - (nb_hours * 3600) - (nb_minutes * 60) );
-                if ( nb_hours == 0 ) {
-                    if ( nb_minutes == 0 ) {
-                        document.getElementById("id_route1_duration").innerHTML = nb_seconds + '"';
-                    }
-                    else {
-                        if ( nb_seconds == 0 )
-                            document.getElementById("id_route1_duration").innerHTML = nb_minutes + "'";
-                        else
-                            document.getElementById("id_route1_duration").innerHTML = nb_minutes + "'" + nb_seconds + '"';
-                    }
-                }
-                else {
-                    document.getElementById("id_route1_duration").innerHTML = nb_hours + "h" + nb_minutes + "'" + nb_seconds + '"';
-                }
-                
-                document.getElementById("id_route1_distance_duration").style.display = "";
-                
-                // Update route slider
-                document.getElementById("id_input_route").max = dist_meters
-                document.getElementById("id_input_route").value = 0;
-                
-            }
-            
-			function move_to_dist( new_pos ) {
-
-				var num_route = 0;
-
-                var p = polyline[num_route].GetPointAtDistance( new_pos );
-                if ( !map.getBounds().contains( p ) )
-                    map.panTo( p );
-
-                var bearing = polyline[num_route].Bearing( polyline[num_route].GetIndexAtDistance( new_pos ) );
-                panorama.setPosition( new google.maps.LatLng( p.G, p.K ) );
-                panorama.setPov({
-                    heading: bearing,
-                    pitch: 10
-                });
-
-                updatePoly( num_route, new_pos );
-
-				cb_move_to_dist = undefined;
-
-				curr_dist = new_pos;
-			}
-
-            function cb_route_input( new_pos ) {
-				if ( cb_move_to_dist != undefined )
-					clearTimeout( cb_move_to_dist );
-				cb_move_to_dist = setTimeout( "move_to_dist(" + new_pos + ")", 25 );
-            }
-
-			function cb_click_force_panto( cb ) {
-				console.log( "--> " + cb.checked );
-				is_force_panto = cb.checked;
-			}
-
-            google.maps.event.addDomListener( window, 'load', initialize );
-
-        </script>
+        <link rel="stylesheet" href="RouteView.css" media="screen" type="text/css" />
 
     </head>
 
-    <body bgcolor="#E6E6FA">
+    <body class="claro">
 
-         <table width="100%" height="100%" border="0" cellpadding="1" cellspacing="1">
-            <tr>
-                <td id='td_config' nowrap="nowrap" valign="top" width="1px">
+        <div id="app_layout" class="demoLayout" data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="design: 'headline'">
+        
+	        <div id="id_top_layout" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'top'">
+                RouteView - Google StreetView Player
+            </div>
+
+            <!-- Left Layout -->            
+	        <div id="id_left_layout" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'left', splitter: true">
+
+                <fieldset>
+                    <legend>Route #1</legend>
+                    <table>
+                        <tr>
+                            <td valign="middle" align="right">From:</td>
+                            <td valign="middle" align="left">
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" data-dojo-props="trim:true, propercase:true"  
+                            	id="id_route1_from" 
+                            	 onchange="cb_route1_from(this.value)" value="Apex,NC">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td valign="middle" align="right">Through:</td>
+                            <td valign="middle" align="left">
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" data-dojo-props="trim:true, propercase:true"
+                            	id="id_route1_waypoint1" 
+                            	onchange="cb_route1_waypoint1(this.value)">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td valign="middle" align="right">To:</td>
+                            <td valign="middle" align="left">
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" data-dojo-props="trim:true, propercase:true"
+                            	id="id_route1_to" onchange="cb_route1_to(this.value)" value="Troy,NC">
+                            </td>
+                        </tr>
+                    </table>
+                    <hr>
+                    <div id="id_route1_distance_duration" style="width:100%; display:None" align="center" >
+                        <table style="width:100%">
+                            <tr>
+                                <td align="left" valign="middle">
+                                    <b id="id_route1_dist"></b>&nbsp;kms
+                                </td>
+                                <td align="right" valign="middle">
+                                    <b id="id_route1_duration">XX</b>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
                     <div align="center">
-                        <button id="id_btn_expand_collapse" type="button" onclick="cb_expand_collapse()"><<<</button>
+                        <label>No Highway</label>
+                        <input type="checkbox" id="id_check_no_hwy" checked onclick="cb_click_no_hwy(this)">
+                        &nbsp; &nbsp; &nbsp;
+                        <label>No Toll</label>
+                        <input type="checkbox" id="id_check_no_toll" checked onclick="cb_click_no_toll(this)">
                     </div>
-                    <div id='id_config' align="left">
-                        
-                        <fieldset>
-                            <legend>Route #1</legend>
-                            <table>
-                                <tr>
-                                    <td valign="middle" align="right">From:</td>
-                                    <td valign="middle" align="left"><input type="text" id="id_route1_from" onchange="cb_route1_from(this.value)" value="Apex,NC"></td>
-                                </tr>
-                                <tr>
-                                    <td valign="middle" align="right">Through:</td>
-                                    <td valign="middle" align="left"><input type="text" id="id_route1_waypoint1" onchange="cb_route1_waypoint1(this.value)"></td>
-                                </tr>
-                                <tr>
-                                    <td valign="middle" align="right">To:</td>
-                                    <td valign="middle" align="left"><input type="text" id="id_route1_to" onchange="cb_route1_to(this.value)" value="Troy,NC"></td>
-                                </tr>
-                            </table>
-                            <hr>
-                            <div id="id_route1_distance_duration" style="width:100%; display:None" align="center" >
-                                <table style="width:100%">
-                                    <tr>
-                                        <td align="left" valign="middle">
-                                            <b id="id_route1_dist"></b>&nbsp;kms
-                                        </td>
-                                        <td align="right" valign="middle">
-                                            <b id="id_route1_duration">XX</b>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-                            <div align="center">
-                                <label>No Highway</label>
-                                <input type="checkbox" id="id_check_no_hwy" checked onclick="cb_click_no_hwy(this)">
-                                &nbsp; &nbsp; &nbsp;
-                                <label>No Toll</label>
-                                <input type="checkbox" id="id_check_no_toll" checked onclick="cb_click_no_toll(this)">
-                            </div>
-                        </fieldset>
-                        <br>
-                        <br>
+                </fieldset>
+                <br>
+                <br>
 
-                        <fieldset>
-                            <legend>Configuration</legend>
-                            <div style="width:100%" align="center">
-                                <span>Step : <b id="id_meters">250</b> meters</span><br>
-                                <input id="id_input_meters" style="width:100%" type="range" min="50" max="1000" step="50" value="250"
-                                 oninput="cb_step_input( this.value )"
-                                 onchange="cb_step_changed( this.value )" >
-                                <p>
-                                    <span>Interval : <b id="id_interval">800</b> milliseconds</span><br>
-                                    <input id="id_input_interval" style="width:100%" type="range" min="500" max="5000" step="50" value="800"
-                                     oninput="cb_interval_input( this.value )"
-                                     onchange="cb_interval_changed( this.value )" >
-                                </p>
-                            </div>
-                        	<div style="width:100%" align="center">
-                                <label>Force Pan To</label>
-                                <input type="checkbox" id="id_check_force_panto" checked onclick="cb_click_force_panto(this)">
-                        	</div>
-                        </fieldset>
-                        <br>
-
-                        <div style="width:100%" align="center">
-                            <button type="button" id="id_btn_start" onclick="do_start()">Start</button>
-                            <button type="button" id="id_btn_pause" onclick="do_pause()" disabled>Pause</button>
-                            <button type="button" id="id_btn_stop"  onclick="do_stop()" disabled>Stop</button>
-                        </div>
-
+                <fieldset>
+                    <legend>Configuration</legend>
+                    <div style="width:100%" align="center">
+                        <span>Step : <b id="id_meters">250</b> meters</span><br>
+                        <input id="id_input_meters" style="width:100%" type="range" min="50" max="1000" step="50" value="250"
+                         oninput="cb_step_input( this.value )"
+                         onchange="cb_step_changed( this.value )" >
+                        <p>
+                            <span>Interval : <b id="id_interval">800</b> milliseconds</span><br>
+                            <input id="id_input_interval" style="width:100%" type="range" min="500" max="5000" step="50" value="800"
+                             oninput="cb_interval_input( this.value )"
+                             onchange="cb_interval_changed( this.value )" >
+                        </p>
                     </div>
-                </td>
-                <td id="td-map-canvas" nowrap="nowrap" valign="top" width="50%">
-                    <div id="map-canvas" style="width: 100%; float:left"></div>
-                </td>
-                <td id="id_td_pano" nowrap="nowrap" valign="top" width="50%" height="100%">
-                    <div id="pano" style="width: 100%; height: 100%;float:left" ondblclick="cb_pano_dblclick()"></div>
-                </td>
-            </tr>
-        	<tr>
-        		<td colspan="3" width="100%" align="center" height="16px" >
-					<input id="id_input_route" style="width:100%; display:None" type="range" min="0" max="0" step="1" value="0"
-						oninput="cb_route_input( this.value )" >
-       			</td>
-        	</tr>
-        </table>
-    
+                    <div style="width:100%" align="center">
+                        <label>Force Pan To</label>
+                        <input type="checkbox" id="id_check_force_panto" checked onclick="cb_click_force_panto(this)">
+                    </div>
+                </fieldset>
+                <br>
+
+                <div style="width:100%" align="center">
+                    <button dojoType="dijit/form/Button" type="button" id="id_btn_start" onclick='require(["RouteView.js"], function( s ) { s.do_start(); })'>Start</button>
+                    <button dojoType="dijit/form/Button" type="button" id="id_btn_pause" onclick='require(["RouteView.js"], function( s ) { s.do_pause(); })' disabled>Pause</button>
+                    <button dojoType="dijit/form/Button" type="button" id="id_btn_stop"  onclick='require(["RouteView.js"], function( s ) { s.do_stop(); })' disabled>Stop</button>
+                </div>
+
+            </div>
+            
+	        <div id="id_middle_layout" class="centerPanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'center', tabPosition: 'bottom'">
+                <div id="map-canvas" style="width: 100%; float:left"></div>
+	        </div>
+            
+	        <div id="id_right_layout" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'right', splitter: true">
+                <div id="pano" style="width: 100%; height: 100%;float:left" ondblclick="cb_pano_dblclick()"></div>
+            </div>
+            
+            <div id="id_bottom_layout" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="splitter: false, region: 'bottom'">
+
+                <div id="id_input_route"
+                    style="width:100%;"
+                    name="horizontalSlider"
+                    data-dojo-type="dijit/form/HorizontalSlider"
+                    data-dojo-props="value:0,
+                    minimum: 0,
+                    maximum:0,
+                    discreteValues:0,
+                    intermediateChanges:true,
+                    showButtons:true"
+	                onChange='require(["RouteView.js"], function( s ) { s.cb_route_input(); })'>
+                    <ol data-dojo-type="dijit/form/HorizontalRuleLabels" container="topDecoration"
+                        style="height:1.5em;font-size:75%;color:gray;">
+                        <li> </li>
+                        <li>10%</li>
+                        <li>20%</li>
+                        <li>30%</li>
+                        <li>40%</li>
+                        <li>50%</li>
+                        <li>60%</li>
+                        <li>70%</li>
+                        <li>80%</li>
+                        <li>90%</li>
+                        <li> </li>
+                    </ol>
+                    <div data-dojo-type="dijit/form/HorizontalRule" container="bottomDecoration"
+                        count=11 style="height:5px;"></div>
+                </div>					
+					
+            </div>
+
+        </div>
+
+        <script>
+		    require(["RouteView.js", "dojo/ready"], function( s, ready ) {
+				ready( function() {
+		    		s.initialize( );
+			    });
+		    });
+        </script>
+
     </body>
 
 </html>
-
