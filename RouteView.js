@@ -358,10 +358,15 @@ define( function( m ) {
 		cb_move_to_dist = setTimeout( 'require(["RouteView.js"], function( s ) { s.move_to_dist('+new_pos+'); })', 25 );
     }
 
-    function cb_click_no_hwy( cb ) {
+    function cb_click_no_hwy( ) {
     }
 
-    function cb_click_no_toll( cb ) {
+    function cb_click_no_toll( ) {
+    }
+
+    function cb_click_force_panto( ) {
+		is_force_panto = dijit.byId('id_check_force_panto').get( 'checked' );
+		console.log( "is_force_panto=" + is_force_panto );
     }
 
 	
@@ -385,6 +390,8 @@ define( function( m ) {
 
 		cb_click_no_hwy:  function( ) { cb_click_no_hwy(); },
 		cb_click_no_toll: function( ) { cb_click_no_toll(); },
+
+		cb_click_force_panto:  function( ) { cb_click_force_panto(); },
 		
     };
  

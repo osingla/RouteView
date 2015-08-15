@@ -82,7 +82,7 @@
 		                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_hwy(); })'
                          id="id_check_no_hwy" >
                          No Highway
-                         </button>
+                        </button>
 
                         <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" 
 		                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_toll(); })'
@@ -110,8 +110,11 @@
                         </p>
                     </div>
                     <div style="width:100%" align="center">
-                        <label>Force Pan To</label>
-                        <input type="checkbox" id="id_check_force_panto" checked onclick="cb_click_force_panto(this)">
+                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" 
+		                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_force_panto(); })'
+                         id="id_check_force_panto" >
+                         Force Pan To
+                        </button>
                     </div>
                 </fieldset>
                 <br>
