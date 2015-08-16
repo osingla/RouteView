@@ -116,9 +116,9 @@ define( function( m ) {
         timer_animate[route_num] = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, 50); })', 250 );
     }
 
-    function do_start( ) {
+    function do_play( ) {
     
-		dijit.byId('id_btn_start').set( 'disabled', true );
+		dijit.byId('id_btn_play').set( 'disabled', true );
 		dijit.byId('id_btn_pause').set( 'disabled', false );
 		dijit.byId('id_btn_stop').set( 'disabled', false );
 
@@ -286,7 +286,7 @@ define( function( m ) {
 		dijit.byId('id_route1_waypoint1').set( 'disabled', false );
 		dijit.byId('id_route1_to').set( 'disabled', false );
 
-		dijit.byId('id_btn_start').set( 'disabled', false );
+		dijit.byId('id_btn_play').set( 'disabled', false );
 		dijit.byId('id_btn_pause').set( 'disabled', true );
     	dijit.byId('id_btn_pause').set( 'label', "Pause" );
 		dijit.byId('id_btn_stop').set( 'disabled', true );
@@ -414,6 +414,19 @@ define( function( m ) {
 		console.log( "is_force_panto=" + is_force_panto );
     }
 
+    function download_file( text, name, type ) {
+        var a = document.createElement("a");
+        var file = new Blob([text], {type: type});
+        a.href = URL.createObjectURL(file);
+        a.download = name;
+        a.click();
+    }
+    
+    function do_save_gpx( ) {
+    	
+    	download_file( "Hello", "test.gpx", "application/gpx+xml" );
+
+    }
 	
 	// ---------
 	// Externals
@@ -423,10 +436,12 @@ define( function( m ) {
 
         initialize: function( ) { initialize( ); },
 		
-		do_start: function( ) { do_start(); },
+		do_play: function( ) { do_play(); },
 		do_pause: function( ) { do_pause(); },
 		do_stop:  function( ) { do_stop(); },
 
+		do_save_gpx: function( ) { do_save_gpx(); },
+		
 		cb_animate: function( num_route, d ) { cb_animate( num_route, d ); },
 
 		move_to_dist: function( new_pos ) { move_to_dist( new_pos ); },
