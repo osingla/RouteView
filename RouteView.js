@@ -1,6 +1,5 @@
 define( function( m ) {
 
-    var collapsed = false;
     var map;
     var panorama;
     var panorama_full_screen;
@@ -125,8 +124,8 @@ define( function( m ) {
 		dijit.byId('id_route1_waypoint1').set( 'disabled', true );
 		dijit.byId('id_route1_to').set( 'disabled', true );
 
-        step = parseInt( document.getElementById("id_input_meters").value );
-        interval = parseInt( document.getElementById("id_input_interval").value );
+    	step = dijit.byId('id_input_meters').get( 'value' );
+    	interval = dijit.byId('id_input_interval').get( 'value' );
         console.log( "step=" + step + " interval=" + interval );
 
         var startLoc = new Array();
@@ -159,6 +158,12 @@ define( function( m ) {
                 preserveViewport: true
             }
             var directions_service = new google.maps.DirectionsService( );
+            
+            var directionsDisplay = new google.maps.DirectionsRenderer({
+                draggable: true,
+                map: map,
+                panel: document.getElementById('directionsPanel')
+              });
 
             var travelMode = google.maps.DirectionsTravelMode.DRIVING;  
             
@@ -184,6 +189,8 @@ define( function( m ) {
 
                 if ( status == google.maps.DirectionsStatus.OK ) {
 
+//                	display.setDirections( response );
+                	
                     var bounds = new google.maps.LatLngBounds();
                     var route = response.routes[0];
                     location_from[route_num] = new Object();
@@ -293,7 +300,7 @@ define( function( m ) {
 		    var node = dom.byId("id_left_layout");
 		    var computedStyle = domStyle.getComputedStyle( node );
 		    var output = domGeom.getContentBox( node, computedStyle );
-    		domStyle.set( "id_input_meters", "width", (output.w - 20)+ "px" );
+    		domStyle.set( "id_input_meters",   "width", (output.w - 20)+ "px" );
     		domStyle.set( "id_input_interval", "width", (output.w - 20)+ "px" );
 		    console.log( output );
    		});
