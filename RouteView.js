@@ -14,6 +14,8 @@ define( function( m ) {
 	var is_force_panto = true;
     var curr_dist;
 	var cb_move_to_dist = undefined;
+	var directions_service = [];
+	var directions_display = [];
 
     function show_route_distance_duration( route_num, dist_meters, duration_secs ) {
 
@@ -152,18 +154,19 @@ define( function( m ) {
         
         for ( var route_num = 0; route_num < startLoc.length; route_num++ ) {
 
-            var rendererOptions = {
-                map: map,
-                suppressMarkers : true,
-                preserveViewport: true
-            }
-            var directions_service = new google.maps.DirectionsService( );
+            directions_service[route_num] = new google.maps.DirectionsService( );
             
-            var directionsDisplay = new google.maps.DirectionsRenderer({
-                draggable: true,
+            directions_display[route_num] = new google.maps.DirectionsRenderer({
+                draggable: false,
                 map: map,
-                panel: document.getElementById('directionsPanel')
-              });
+                hideRouteList: false,
+                preserveViewport: true,
+                suppressMarkers : false,
+             });
+            
+            directions_display[route_num].addListener('directions_changed', function() {
+                console.log( directions_display[0].getDirections() );
+            });
 
             var travelMode = google.maps.DirectionsTravelMode.DRIVING;  
             
@@ -179,7 +182,7 @@ define( function( m ) {
                 avoidTolls: no_toll
             };  
 
-            directions_service.route( request, cb_make_route( route_num ) );
+            directions_service[route_num].route( request, cb_make_route( route_num ) );
 
         }
         
@@ -189,7 +192,8 @@ define( function( m ) {
 
                 if ( status == google.maps.DirectionsStatus.OK ) {
 
-//                	display.setDirections( response );
+                	directions_display[route_num].setMap( map );
+                	directions_display[route_num].setDirections( response );
                 	
                     var bounds = new google.maps.LatLngBounds();
                     var route = response.routes[0];
@@ -212,10 +216,6 @@ define( function( m ) {
                     // For each route, display summary information.
                     var path = response.routes[0].overview_path;
                     var legs = response.routes[0].legs;
-
-                    var disp = new google.maps.DirectionsRenderer( rendererOptions );     
-                    disp.setMap( map );
-                    disp.setDirections( response );
 
                     // Markers
                     var dist_meters = 0;
@@ -271,7 +271,7 @@ define( function( m ) {
         	dijit.byId('id_btn_pause').set( 'label', "Pause" );
             var num_route = 0;
             timer_animate[num_route] = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, '+(curr_dist)+'); })', interval );
-//            timer_animate[num_route] = setTimeout( "cb_animate(" + num_route + "," + curr_dist + ")", interval );
+//          timer_animate[num_route] = setTimeout( "cb_animate(" + num_route + "," + curr_dist + ")", interval );
         }
 
 		dijit.byId('id_input_route').set( 'disabled', false );
@@ -292,6 +292,12 @@ define( function( m ) {
 		dijit.byId('id_btn_stop').set( 'disabled', true );
 		
 		dijit.byId('id_input_route').set( 'disabled', false );
+		
+        var renderer_options = {
+            draggable: true,
+        };
+		directions_display[0].setOptions( renderer_options );
+		
     }
 
     function resize_sliders( ) {
@@ -300,9 +306,9 @@ define( function( m ) {
 		    var node = dom.byId("id_left_layout");
 		    var computedStyle = domStyle.getComputedStyle( node );
 		    var output = domGeom.getContentBox( node, computedStyle );
-    		domStyle.set( "id_input_meters",   "width", (output.w - 20)+ "px" );
-    		domStyle.set( "id_input_interval", "width", (output.w - 20)+ "px" );
-		    console.log( output );
+    		domStyle.set( "id_input_meters",   "width", (output.w - 22)+ "px" );
+    		domStyle.set( "id_input_interval", "width", (output.w - 22)+ "px" );
+//		    console.log( output );
    		});
     	
     }
@@ -332,12 +338,12 @@ define( function( m ) {
 
         panorama = new google.maps.StreetViewPanorama( document.getElementById('pano'), panoramaOptions );
         map.setStreetView( panorama );
-        console.log( panorama );
+//      console.log( panorama );
 
         panorama_full_screen = false;
         
         require(["dojo/ready", "dojo/aspect", "dijit/registry"], function(ready, aspect, registry) {
-            ready(function() {
+            ready( function() {
                 aspect.after(registry.byId("id_middle_layout"), "resize", function() {
                     google.maps.event.trigger( map, 'resize' );
                     map.setCenter( panorama.location.latLng );
