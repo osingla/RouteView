@@ -16,6 +16,7 @@ define( function( m ) {
 	var cb_move_to_dist = undefined;
 	var directions_service = [];
 	var directions_display = [];
+	var route_directions_first = [];
 
     function show_route_distance_duration( route_num, dist_meters, duration_secs ) {
 
@@ -116,15 +117,18 @@ define( function( m ) {
         timer_animate[route_num] = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, 50); })', 250 );
     }
 
-    function do_play( ) {
-    
-		dijit.byId('id_btn_play').set( 'disabled', true );
-		dijit.byId('id_btn_pause').set( 'disabled', false );
-		dijit.byId('id_btn_stop').set( 'disabled', false );
+    function do_route( ) {
 
-		dijit.byId('id_route1_from').set( 'disabled', true );
-		dijit.byId('id_route1_waypoint1').set( 'disabled', true );
-		dijit.byId('id_route1_to').set( 'disabled', true );
+    	if ( directions_display[0] != undefined ) {
+    		console.log( "Delete current route" )
+    		var route_num = 0;
+    		directions_display[route_num].setMap( null );
+        	directions_display[route_num] = undefined;
+        	if ( polyline[route_num] != undefined ) {
+        		polyline[route_num].setMap( null );
+        		polyline[route_num] = undefined;
+        	}
+    	}
 
     	step = dijit.byId('id_input_meters').get( 'value' );
     	interval = dijit.byId('id_input_interval').get( 'value' );
@@ -157,25 +161,29 @@ define( function( m ) {
             directions_service[route_num] = new google.maps.DirectionsService( );
             
             directions_display[route_num] = new google.maps.DirectionsRenderer({
-                draggable: false,
+                draggable: true,
                 map: map,
                 hideRouteList: false,
                 preserveViewport: true,
                 suppressMarkers : false,
              });
-            
-            directions_display[route_num].addListener('directions_changed', function() {
-                console.log( directions_display[0].getDirections() );
-            });
 
-            var travelMode = google.maps.DirectionsTravelMode.DRIVING;  
-            
-            var waypts = [];
+        	route_directions_first[route_num] = true;
+            directions_display[route_num].addListener('directions_changed', function() {
+            	var route_num = 0;
+                console.log( directions_display[route_num].getDirections() );
+                if ( route_directions_first[route_num] ) {
+                	route_directions_first[route_num] = false;
+                }
+                else {
+                	show_error( "Sorry, this feature is not yet implemented!<br><br>Hopefuly I'll have time next week-end to work on it..." );
+                }
+            });
 
             var request = {
                 origin: startLoc[route_num],
                 destination: endLoc[route_num],
-                travelMode: travelMode,
+                travelMode: google.maps.DirectionsTravelMode.DRIVING,
                 waypoints: way_points,
                 optimizeWaypoints: true,
                 avoidHighways: no_hwy,
@@ -194,12 +202,11 @@ define( function( m ) {
 
                 	directions_display[route_num].setMap( map );
                 	directions_display[route_num].setDirections( response );
-                	
+
                     var bounds = new google.maps.LatLngBounds();
                     var route = response.routes[0];
                     location_from[route_num] = new Object();
                     location_to[route_num] = new Object();
-
 
                     polyline[route_num] = new google.maps.Polyline({
                         path: [],
@@ -245,19 +252,88 @@ define( function( m ) {
                     
                     show_route_distance_duration( route_num, dist_meters, duration_secs );
 
-                }
+                    polyline[route_num].setMap( map );
+                    map.fitBounds( bounds );
+//                  start_driving( route_num );  
 
-                polyline[route_num].setMap( map );
-                map.fitBounds( bounds );
-                start_driving( route_num );  
+                    document.getElementById("id_input_route").style.display = "";
+            		dijit.byId('id_input_route').set( 'disabled', true );
+            		
+            		dijit.byId('id_btn_route').set( 'disabled', true );
+            		dijit.byId('id_btn_play').set( 'disabled', false );
+            		dijit.byId('id_btn_pause').set( 'disabled', true );
+            		dijit.byId('id_btn_stop').set( 'disabled', true );
+
+                }
+                else {
+                	
+                	var message = "?";
+                    if ( status == google.maps.DirectionsStatus.UNKNOWN_ERROR )
+                    	message = "A directions request could not be processed due to a server error. The request may succeed if you try again.";
+                    else if ( status == google.maps.DirectionsStatus.OVER_QUERY_LIMIT )
+                    	message = "The webpage has gone over the requests limit in too short a period of time.";
+                    else if ( status == google.maps.DirectionsStatus.NOT_FOUND )
+                    	message = "At least one of the origin, destination, or waypoints could not be geocoded.";
+                    else if ( status == google.maps.DirectionsStatus.REQUEST_DENIED )
+                    	message = "The webpage is not allowed to use the directions service.";
+                    else if ( status == google.maps.DirectionsStatus.ZERO_RESULTS )
+                    	message = "No route could be found between the origin and destination.";
+                    else if ( status == google.maps.DirectionsStatus.INVALID_REQUEST )
+                    	message = "The DirectionsRequest provided was invalid.";
+                    show_error( message );
+
+                }
 
             }
 
         }
 
-        document.getElementById("id_input_route").style.display = "";
-		dijit.byId('id_input_route').set( 'disabled', true );
+    }
+    
+    function do_play( ) {
 
+    	console.log( "Play!" );
+    	var route_num = 0;
+        start_driving( route_num );  
+
+		dijit.byId('id_btn_route').set( 'disabled', true );
+		dijit.byId('id_btn_play').set( 'disabled', true );
+		dijit.byId('id_btn_pause').set( 'disabled', false );
+		dijit.byId('id_btn_stop').set( 'disabled', false );
+
+		dijit.byId('id_route1_from').set( 'disabled', true );
+		dijit.byId('id_route1_waypoint1').set( 'disabled', true );
+		dijit.byId('id_route1_to').set( 'disabled', true );
+
+		dijit.byId('id_check_no_hwy').set( 'disabled', true );
+		dijit.byId('id_check_no_toll').set( 'disabled', true );
+
+        var renderer_options = {
+            draggable: true,
+        };
+    	directions_display[0].setOptions( renderer_options );
+    		
+    }
+    
+    function show_error( message ) {
+    	
+    	require(["dijit/Dialog", "dojo/domReady!"], function(Dialog){
+
+    		message += "<hr>" +
+    			"<div align='right'>" +
+    			"<button dojoType='dijit/form/Button' type='button' onclick='dlg_error.hide()'>Ok</button>" +
+    			"</div>";
+    		
+    		dlg_error = new Dialog({
+    	        title: "Error",
+    	        closable: false,
+    	        duration:1500,
+    	        content: message,
+    	        style: "min-width: 250px"
+    	    });
+    		
+    		dlg_error.show();
+    	});
     }
     
     function do_pause( ) {
@@ -286,17 +362,16 @@ define( function( m ) {
 		dijit.byId('id_route1_waypoint1').set( 'disabled', false );
 		dijit.byId('id_route1_to').set( 'disabled', false );
 
-		dijit.byId('id_btn_play').set( 'disabled', false );
+		dijit.byId('id_check_no_hwy').set( 'disabled', false );
+		dijit.byId('id_check_no_toll').set( 'disabled', false );
+
+		dijit.byId('id_btn_route').set( 'disabled', true );
+		dijit.byId('id_btn_play').set( 'disabled', true );
 		dijit.byId('id_btn_pause').set( 'disabled', true );
     	dijit.byId('id_btn_pause').set( 'label', "Pause" );
 		dijit.byId('id_btn_stop').set( 'disabled', true );
 		
-		dijit.byId('id_input_route').set( 'disabled', false );
-		
-        var renderer_options = {
-            draggable: true,
-        };
-		directions_display[0].setOptions( renderer_options );
+		dijit.byId('id_input_route').set( 'disabled', true );
 		
     }
 
@@ -312,7 +387,7 @@ define( function( m ) {
    		});
     	
     }
-    
+
     function initialize( ) {
 
         var home = new google.maps.LatLng( 35.733435, -78.907684 );
@@ -338,7 +413,6 @@ define( function( m ) {
 
         panorama = new google.maps.StreetViewPanorama( document.getElementById('pano'), panoramaOptions );
         map.setStreetView( panorama );
-//      console.log( panorama );
 
         panorama_full_screen = false;
         
@@ -427,6 +501,28 @@ define( function( m ) {
     	download_file( "Hello", "test.gpx", "application/gpx+xml" );
 
     }
+    
+    function cb_route1_changed( ) {
+    	
+    	console.log( "route 1 has changed ");
+
+		var origin = dijit.byId('id_route1_from').get( 'value' );
+		var destination = dijit.byId('id_route1_to').get( 'value' );
+		var waypoint1 = dijit.byId('id_route1_waypoint1').get( 'value' );
+		console.log( "origin= [" + origin + "]" );
+		console.log( "destination= [" + destination + "]" );
+		console.log( "waypoint1= [" + waypoint1 + "]" );
+
+        var directions = new google.maps.DirectionsService( );
+
+		dijit.byId('id_btn_route').set( 'disabled', false );
+		dijit.byId('id_btn_play').set( 'disabled', true );
+        
+    }
+    
+    function cb_route1_from_blur( ) {
+    	console.log("blur!");
+    }
 	
 	// ---------
 	// Externals
@@ -436,7 +532,8 @@ define( function( m ) {
 
         initialize: function( ) { initialize( ); },
 		
-		do_play: function( ) { do_play(); },
+        do_route: function( ) { do_route(); },
+        do_play:  function( ) { do_play(); },
 		do_pause: function( ) { do_pause(); },
 		do_stop:  function( ) { do_stop(); },
 
@@ -455,7 +552,10 @@ define( function( m ) {
 		cb_click_no_toll: function( ) { cb_click_no_toll(); },
 
 		cb_click_force_panto:  function( ) { cb_click_force_panto(); },
-		
+
+		cb_route1_changed:  function( ) { cb_route1_changed(); },
+		cb_route1_from_blur:  function( ) { cb_route1_from_blur(); },
+
     };
  
 });

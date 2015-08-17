@@ -59,13 +59,13 @@
                 	</tr>
                 </table>
                 
-                <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_beta',position:['below-centered']">
+                <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_beta',position:['below-centered'],showDelay:750,hideDelay:0">
 					This software is in Beta.<br><br>
 					A lot of features are still missing, or not fully functional.<br><br>
 					I am actively working on it on my spare time, so please stay tuned ;-) 
                 </div>
 
-                <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_link_to_github_project',position:['below-centered']">
+                <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_link_to_github_project',position:['below-centered'],showDelay:750,hideDelay:0">
 					This software open-source and hosted on <a href="https://github.com/" target="_blank">Github</a><br><br>
 					Click <a href="https://github.com/osingla/RouteView" target="_blank">here</a> if you want to see the source.
                 </div>
@@ -83,24 +83,32 @@
                         <tr>
                             <td valign="middle" align="right">From:</td>
                             <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit/form/TextBox" data-dojo-props="trim:true, propercase:true"  
-                            	id="id_route1_from" 
-                            	 onchange="cb_route1_from(this.value)" value="Apex,NC">
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" 
+                            	 data-dojo-props="trim:true, propercase:true, intermediateChanges:true"  
+				                 onChange='require(["RouteView.js"], function( s ) { s.cb_route1_changed(); })' 
+				                 onBlur='require(["RouteView.js"], function( s ) { s.cb_route1_from_blur(); })' 
+				                 id="id_route1_from"
+                            	 value="Apex,NC">
                             </td>
                         </tr>
                         <tr>
                             <td valign="middle" align="right">Through:</td>
                             <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit/form/TextBox" data-dojo-props="trim:true, propercase:true"
-                            	id="id_route1_waypoint1" 
-                            	onchange="cb_route1_waypoint1(this.value)">
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" 
+                            	 data-dojo-props="trim:true, propercase:true, intermediateChanges:true"  
+				                 onChange='require(["RouteView.js"], function( s ) { s.cb_route1_changed(); })' 
+				                 id="id_route1_waypoint1"
+				                 value="Asheboro, NC">
                             </td>
                         </tr>
                         <tr>
                             <td valign="middle" align="right">To:</td>
                             <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit/form/TextBox" data-dojo-props="trim:true, propercase:true"
-                            	id="id_route1_to" onchange="cb_route1_to(this.value)" value="Troy,NC">
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" 
+                            	 data-dojo-props="trim:true, propercase:true, intermediateChanges:true"  
+				                 onChange='require(["RouteView.js"], function( s ) { s.cb_route1_changed(); })' 
+				                 id="id_route1_to"
+				                 value="Troy, NC">
                             </td>
                         </tr>
                     </table>
@@ -129,12 +137,12 @@
                          No Toll
                          </button>
 
-	                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_hwy',position:['below-centered']">
+	                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_hwy',position:['below-centered'],showDelay:750,hideDelay:0">
 							When selected, this asks Google Maps service to create a route not using Highways.<br>
 							Using this button will recreate the route, and incidentally will 'rewind' the route at the beginning.
 	                    </div>
 
-	                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_toll',position:['below-centered']">
+	                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_toll',position:['below-centered'],showDelay:750,hideDelay:0">
 							When selected, this asks Google Maps service to create a route not using Toll routes.<br>
 							Using this button will recreate the route, and incidentally will 'rewind' the route at the beginning.
 	                    </div>
@@ -176,12 +184,12 @@
 	                        onChange='require(["RouteView.js"], function( s ) { s.cb_interval_changed(); })'>
                         </div>					
 
-                		<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_input_meters',position:['after-centered']">
+                		<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_input_meters',position:['after-centered'],showDelay:750,hideDelay:0">
 							This slider lets you define the step in the route.<br><br>
 							Default is 250 meters, meaning that each Street View image are 250 meters apart. 
                 		</div>
 
-                		<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_input_interval',position:['after-centered']">
+                		<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_input_interval',position:['after-centered'],showDelay:750,hideDelay:0">
 							This slider lets you define the time interval between each Street View image.<br><br>
 							Default is 800 milliseconds, meaning that each Street View image is displayed for 800 milliseconds. 
                 		</div>
@@ -195,7 +203,7 @@
                         </button>
                     </div>
 
-                	<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_force_panto',position:['below-centered']">
+                	<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_force_panto',position:['below-centered'],showDelay:750,hideDelay:0">
 						When this option is selected, if the current location of the route is not shown onto the map,<br>
 						the map is scrolled so the current location becomes the center of the map.
                 	</div>
@@ -205,33 +213,38 @@
 
                 <div style="width:100%" align="center">
 
-                    <button dojoType="dijit/form/Button" type="button" id="id_btn_play"  onclick='require(["RouteView.js"], function( s ) { s.do_play(); })'>Play</button>
+                    <button dojoType="dijit/form/Button" type="button" id="id_btn_route" onclick='require(["RouteView.js"], function( s ) { s.do_route(); })'>Route</button>
+                    <button dojoType="dijit/form/Button" type="button" id="id_btn_play"  onclick='require(["RouteView.js"], function( s ) { s.do_play(); })' disabled>Play</button>
                     <button dojoType="dijit/form/Button" type="button" id="id_btn_pause" onclick='require(["RouteView.js"], function( s ) { s.do_pause(); })' disabled>Pause</button>
                     <button dojoType="dijit/form/Button" type="button" id="id_btn_stop"  onclick='require(["RouteView.js"], function( s ) { s.do_stop(); })' disabled>Stop</button>
                     <br>
                     <button dojoType="dijit/form/Button" type="button" id="id_btn_save_gpx" onclick='require(["RouteView.js"], function( s ) { s.do_save_gpx(); })' disabled>Save GPX file</button>
 
-                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_play',position:['below-centered']">
+                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_route',position:['below-centered'],showDelay:750,hideDelay:0">
+                        This will ask Google Maps service to create the Route.
+                    </div>
+
+                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_play',position:['below-centered'],showDelay:750,hideDelay:0">
                         Once a route has been defined,<br>
                         this allows you to play the route using Street View.
                         <br><br>
                         Basically, a Virtual Drive or Virtual Ride!
                     </div>
 
-                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_pause',position:['below-centered']">
+                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_pause',position:['below-centered'],showDelay:750,hideDelay:0">
                         Once a route has been defined and you are playing this route through Google Street View,<br>
                         this allows you to pause / continue the playing of the route.
                         <br><br>
                         Note that you can still use the slider at the bottom of the screen to move to any location within the route.
                     </div>
 
-                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_stop',position:['below-centered']">
+                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_stop',position:['below-centered'],showDelay:750,hideDelay:0">
                         Once a route has been defined and you are playing this route through Google Street View,<br>
                         this allows you to stop the playing of the route. Once stopped, a route can be restart (from the beginning)>br>
                         or cleared.
                     </div>
 
-                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_save_gpx',position:['below-centered']">
+                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_save_gpx',position:['below-centered'],showDelay:750,hideDelay:0">
                         Once a route has been defined, this option allows you to create a GPX file (GPS exchange format).<br>
                         This file can then be uploaded to a GPS device (for instance a Garmin).
                     </div>
@@ -284,13 +297,12 @@
                         count=11 style="height:4px;"></div>
                 </div>					
 
-            	<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_input_route',position:['above-centered']">
+            	<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_input_route',position:['above-centered'],showDelay:750,hideDelay:0">
                 	Once a route has been defined, this slider can be used to move along any point of the route.<br>
                 	This slider can be used either in Play mode, or when the route is Paused.
             	</div>
 
             </div>
-
 
         </div>
 
