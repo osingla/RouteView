@@ -76,7 +76,7 @@
             <!-- ----------- -->            
             <!-- LEFT Layout -->
             <!-- ----------- -->            
-	        <div id="id_left_layout" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'left', splitter: true">
+	        <div id="id_left_layout" style="display:" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'left', splitter: false">
 
                 <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:false">
                     <legend>Route #1</legend>
@@ -85,7 +85,7 @@
                             <td valign="middle" align="right">From:</td>
                             <td valign="middle" align="left">
                             	<input type="text" data-dojo-type="dijit/form/TextBox" 
-                            	 data-dojo-props="trim:true, propercase:true, intermediateChanges:true"  
+                            	 data-dojo-props="trim:true, intermediateChanges:true"  
 				                 onChange='require(["RouteView.js"], function( s ) { s.cb_route1_changed(); })' 
 				                 onBlur='require(["RouteView.js"], function( s ) { s.cb_route1_from_blur(); })' 
 				                 id="id_route1_from"
@@ -96,7 +96,7 @@
                             <td valign="middle" align="right">Through:</td>
                             <td valign="middle" align="left">
                             	<input type="text" data-dojo-type="dijit/form/TextBox" 
-                            	 data-dojo-props="trim:true, propercase:true, intermediateChanges:true"  
+                            	 data-dojo-props="trim:true, intermediateChanges:true"  
 				                 onChange='require(["RouteView.js"], function( s ) { s.cb_route1_changed(); })' 
 				                 id="id_route1_waypoint1"
 				                 value="Asheboro, NC">
@@ -106,7 +106,7 @@
                             <td valign="middle" align="right">To:</td>
                             <td valign="middle" align="left">
                             	<input type="text" data-dojo-type="dijit/form/TextBox" 
-                            	 data-dojo-props="trim:true, propercase:true, intermediateChanges:true"  
+                            	 data-dojo-props="trim:true, intermediateChanges:true"  
 				                 onChange='require(["RouteView.js"], function( s ) { s.cb_route1_changed(); })' 
 				                 id="id_route1_to"
 				                 value="Troy, NC">
@@ -159,7 +159,7 @@
                     
                         <span>Step : <b id="id_meters">250</b> meters</span><br>
                         <div id="id_input_meters"
-                            style="width:200px;"
+                            style="width:280px;"
                             name="horizontalSlider"
                             data-dojo-type="dijit/form/HorizontalSlider"
                             data-dojo-props="value:250,
@@ -173,7 +173,7 @@
 
                         <span>Interval : <b id="id_interval">800</b> milliseconds</span><br>
                         <div id="id_input_interval"
-                            style="width:200px;"
+                            style="width:280px;"
                             name="horizontalSlider"
                             data-dojo-type="dijit/form/HorizontalSlider"
                             data-dojo-props="value:800,
@@ -255,13 +255,14 @@
             </div>
             
             <!-- MIDDLE panel -->
-	        <div id="id_middle_layout" class="centerPanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'center', tabPosition: 'bottom'">
+	        <div id="id_middle_layout" class="centerPanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'center'">
                 <div id="map-canvas" style="width: 100%; float:left"></div>
 	        </div>
             
             <!-- RIGHT panel -->
 	        <div id="id_right_layout" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'right', splitter: true">
-                <div id="pano" style="width: 100%; height: 100%;float:left" ondblclick="cb_pano_dblclick()"></div>
+                <div id="id_panorama" style="width: 100%; height: 100%;float:left"> 
+                </div>
             </div>
             
             <!-- ------------ -->

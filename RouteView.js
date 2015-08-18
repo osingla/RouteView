@@ -411,28 +411,40 @@ define( function( m ) {
             disableDoubleClickZoom: true,
         };
 
-        panorama = new google.maps.StreetViewPanorama( document.getElementById('pano'), panoramaOptions );
+        panorama = new google.maps.StreetViewPanorama( document.getElementById('id_panorama'), panoramaOptions );
         map.setStreetView( panorama );
 
         panorama_full_screen = false;
         
-        require(["dojo/ready", "dojo/aspect", "dijit/registry"], function(ready, aspect, registry) {
+        require(["dojo/dom", "dojo/on"], function(dom, on) {
+    		var id_panorama = dom.byId('id_panorama');
+    		on( id_panorama, "click", function(evt){
+   				if ( evt.handled != true )
+   					cb_panorama_click( );
+   			});
+        });
+
+        require(["dojo/ready", "dojo/aspect", "dijit/registry", "dojo/dom-style"], function(ready, aspect, registry, domStyle) {
             ready( function() {
-                aspect.after(registry.byId("id_middle_layout"), "resize", function() {
+
+//        		domStyle.set( "id_left_layout", "display", "None" );
+            	
+            	aspect.after(registry.byId("id_middle_layout"), "resize", function() {
                     google.maps.event.trigger( map, 'resize' );
                     map.setCenter( panorama.location.latLng );
                     google.maps.event.trigger( panorama, 'resize' );
                 });
-
+/*
                 aspect.after(registry.byId("id_left_layout"), "resize", function(changeSize) {
                 	console.log( changeSize );
                 	resize_sliders( );                	
                 }, true);                
-                
+*/
+
             });
         });
         
-        resize_sliders( );
+//		resize_sliders( );
         
     }
     
@@ -524,6 +536,30 @@ define( function( m ) {
     	console.log("blur!");
     }
 	
+    function cb_panorama_click( ) {
+    	
+        require(["dojo/ready", "dojo/dom-style"], function( ready, domStyle ) {
+            ready( function() {
+
+                if ( !panorama_full_screen ) {
+                    panorama_full_screen = true;
+                    console.log( "Panorama switching to full screen" );
+            		domStyle.set( "id_right_layout", "width", "100%" );
+                }
+                else {
+                    panorama_full_screen = false;
+            		domStyle.set( "id_left_layout", "display", "" );
+            		domStyle.set( "id_right_layout", "width", "50%" );
+                }
+        		var main_layout = dijit.byId('app_layout');
+        		main_layout.resize();
+        		
+            });
+        });
+            	
+        google.maps.event.trigger( panorama, 'resize' );
+    }
+    
 	// ---------
 	// Externals
 	// ---------
@@ -555,7 +591,7 @@ define( function( m ) {
 
 		cb_route1_changed:  function( ) { cb_route1_changed(); },
 		cb_route1_from_blur:  function( ) { cb_route1_from_blur(); },
-
+		
     };
  
 });

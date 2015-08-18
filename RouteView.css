@@ -53,19 +53,19 @@ html, body {
 }
 
 #id_left_layout {
-//    width: 26%;
     margin: 0;
     padding: 0;
 }
 
 #id_middle_layout {
     width: 50%;
+    min-width: 200px;
     margin: 0;
     padding: 0;
 }
 
 #id_right_layout {
-    width: 25%;
+    width: 50%;
     margin: 0;
     padding: 0;
 }
