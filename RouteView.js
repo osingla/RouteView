@@ -2,6 +2,7 @@ define( function( m ) {
 
     var map;
     var panorama;
+    var map_full_screen;
     var panorama_full_screen;
     var polyline = [];
     var location_from = [];
@@ -396,7 +397,7 @@ define( function( m ) {
            zoom: 14
         };
 
-        map = new google.maps.Map( document.getElementById('map-canvas'), mapOptions );
+        map = new google.maps.Map( document.getElementById('id_map_canvas'), mapOptions );
         var panoramaOptions = {
             position: home,
             pov: {
@@ -414,14 +415,23 @@ define( function( m ) {
         panorama = new google.maps.StreetViewPanorama( document.getElementById('id_panorama'), panoramaOptions );
         map.setStreetView( panorama );
 
+        map_full_screen = false;
         panorama_full_screen = false;
         
-        require(["dojo/dom", "dojo/on"], function(dom, on) {
-    		var id_panorama = dom.byId('id_panorama');
-    		on( id_panorama, "click", function(evt){
+        require(["dojo/dom", "dojo/on"], function( dom, on ) {
+
+        	var id_map_canvas = dom.byId('id_map_canvas');
+    		on( id_map_canvas, "click", function( evt ) {
+   				if ( evt.handled != true )
+   					cb_map_click( );
+   			});
+    		
+        	var id_panorama = dom.byId('id_panorama');
+    		on( id_panorama, "click", function( evt ) {
    				if ( evt.handled != true )
    					cb_panorama_click( );
    			});
+    		
         });
 
         require(["dojo/ready", "dojo/aspect", "dijit/registry", "dojo/dom-style"], function(ready, aspect, registry, domStyle) {
@@ -536,6 +546,29 @@ define( function( m ) {
     	console.log("blur!");
     }
 	
+    function cb_map_click( ) {
+    	
+        require(["dojo/ready", "dojo/dom-style"], function( ready, domStyle ) {
+            ready( function() {
+
+                if ( !map_full_screen ) {
+                	map_full_screen = true;
+                    console.log( "Map switching to full screen" );
+            		domStyle.set( "id_right_layout", "display", "None" );
+                }
+                else {
+                	map_full_screen = false;
+                    console.log( "Map leaving full screen" );
+            		domStyle.set( "id_right_layout", "display", "" );
+                }
+        		var main_layout = dijit.byId('app_layout');
+        		main_layout.resize();
+        		
+            });
+        });
+            	
+    }
+    
     function cb_panorama_click( ) {
     	
         require(["dojo/ready", "dojo/dom-style"], function( ready, domStyle ) {
@@ -548,7 +581,7 @@ define( function( m ) {
                 }
                 else {
                     panorama_full_screen = false;
-            		domStyle.set( "id_left_layout", "display", "" );
+                    console.log( "Panorama leaving full screen" );
             		domStyle.set( "id_right_layout", "width", "50%" );
                 }
         		var main_layout = dijit.byId('app_layout');
