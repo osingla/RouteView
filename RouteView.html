@@ -17,7 +17,7 @@
             ga('send', 'pageview');
         </script>
 
-        <script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false"></script>
+        <script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false&libraries=places"></script>
         <script type="text/javascript" src="https://gisgraphy.googlecode.com/svn-history/r67/trunk/gisgraphy/src/main/webapp/scripts/v3_epoly.js"></script>
 
  		<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/dojo/1.10.4/dijit/themes/claro/claro.css" media="screen" >
@@ -82,33 +82,33 @@
                     <legend>Route #1</legend>
                     <table>
                         <tr>
-                            <td valign="middle" align="right">From:</td>
+                            <td valign="middle" align="right">From</td>
                             <td valign="middle" align="left">
                             	<input type="text" data-dojo-type="dijit/form/TextBox" 
                             	 data-dojo-props="trim:true, intermediateChanges:true"  
 				                 onChange='require(["RouteView.js"], function( s ) { s.cb_route1_changed(); })' 
 				                 onBlur='require(["RouteView.js"], function( s ) { s.cb_route1_from_blur(); })' 
-				                 id="id_route1_from"
+				                 id="id_route1_wp0"
                             	 value="Apex,NC">
                             </td>
                         </tr>
                         <tr>
-                            <td valign="middle" align="right">Through:</td>
+                            <td valign="middle" align="right">Through</td>
                             <td valign="middle" align="left">
                             	<input type="text" data-dojo-type="dijit/form/TextBox" 
                             	 data-dojo-props="trim:true, intermediateChanges:true"  
 				                 onChange='require(["RouteView.js"], function( s ) { s.cb_route1_changed(); })' 
-				                 id="id_route1_waypoint1"
+				                 id="id_route1_wp1"
 				                 value="Asheboro, NC">
                             </td>
                         </tr>
                         <tr>
-                            <td valign="middle" align="right">To:</td>
+                            <td valign="middle" align="right">To</td>
                             <td valign="middle" align="left">
                             	<input type="text" data-dojo-type="dijit/form/TextBox" 
                             	 data-dojo-props="trim:true, intermediateChanges:true"  
 				                 onChange='require(["RouteView.js"], function( s ) { s.cb_route1_changed(); })' 
-				                 id="id_route1_to"
+				                 id="id_route1_wp2"
 				                 value="Troy, NC">
                             </td>
                         </tr>

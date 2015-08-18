@@ -1,6 +1,7 @@
 define( function( m ) {
 
     var map;
+    var service;
     var panorama;
     var map_full_screen;
     var panorama_full_screen;
@@ -17,7 +18,6 @@ define( function( m ) {
 	var cb_move_to_dist = undefined;
 	var directions_service = [];
 	var directions_display = [];
-	var route_directions_first = [];
 
     function show_route_distance_duration( route_num, dist_meters, duration_secs ) {
 
@@ -136,11 +136,11 @@ define( function( m ) {
         console.log( "step=" + step + " interval=" + interval );
 
         var startLoc = new Array();
-        startLoc[0] = dijit.byId('id_route1_from').get( 'value' );
+        startLoc[0] = dijit.byId('id_route1_wp0').get( 'value' );
         console.log( "from = " + startLoc[0] );
 
         var way_points = [];
-        waypt = dijit.byId('id_route1_waypoint1').get( 'value' );
+        waypt = dijit.byId('id_route1_wp1').get( 'value' );
         if ( waypt != "" ) {
             console.log( "waypt = " + waypt );
             way_points.push({
@@ -150,7 +150,7 @@ define( function( m ) {
         }
 
         var endLoc = new Array();
-        endLoc[0] = dijit.byId('id_route1_to').get( 'value' );
+        endLoc[0] = dijit.byId('id_route1_wp2').get( 'value' );
         console.log( "to   = " + endLoc[0] );
 
         var no_hwy  = dijit.byId('id_check_no_hwy').get( 'checked' );
@@ -169,16 +169,32 @@ define( function( m ) {
                 suppressMarkers : false,
              });
 
-        	route_directions_first[route_num] = true;
             directions_display[route_num].addListener('directions_changed', function() {
             	var route_num = 0;
-                console.log( directions_display[route_num].getDirections() );
-                if ( route_directions_first[route_num] ) {
-                	route_directions_first[route_num] = false;
+            	var new_dir = directions_display[route_num].getDirections();
+                console.log( new_dir );
+                var index_waypoint = new_dir.request.j;
+                if ( index_waypoint != undefined ) {
+                	
+                    console.log( index_waypoint );
+                    var place_id = new_dir.geocoded_waypoints[index_waypoint].place_id ;
+                    console.log( place_id );
+
+                	service.getDetails({
+                	    placeId: place_id
+                	  }, function ( place, status ) {
+                	    if ( status === google.maps.places.PlacesServiceStatus.OK ) {
+                	    	console.log( place );
+                	    	console.log( place.name );
+                	    	console.log( place.formatted_address );
+//                	        position: place.geometry.location
+                	    	change_waypoint( index_waypoint, place.formatted_address );
+                	    }
+                	  });
+                	
+//                 	show_error( "Sorry, this feature is not yet implemented!<br><br>Hopefuly I'll have time next week-end to work on it..." );
                 }
-                else {
-                	show_error( "Sorry, this feature is not yet implemented!<br><br>Hopefuly I'll have time next week-end to work on it..." );
-                }
+
             });
 
             var request = {
@@ -302,17 +318,15 @@ define( function( m ) {
 		dijit.byId('id_btn_pause').set( 'disabled', false );
 		dijit.byId('id_btn_stop').set( 'disabled', false );
 
-		dijit.byId('id_route1_from').set( 'disabled', true );
-		dijit.byId('id_route1_waypoint1').set( 'disabled', true );
-		dijit.byId('id_route1_to').set( 'disabled', true );
+		dijit.byId('id_route1_wp0').set( 'disabled', true );
+		dijit.byId('id_route1_wp1').set( 'disabled', true );
+		dijit.byId('id_route1_wp2').set( 'disabled', true );
 
 		dijit.byId('id_check_no_hwy').set( 'disabled', true );
 		dijit.byId('id_check_no_toll').set( 'disabled', true );
 
-        var renderer_options = {
-            draggable: true,
-        };
-    	directions_display[0].setOptions( renderer_options );
+        var renderer_options = { draggable: true };
+       	directions_display[0].setOptions( renderer_options );
     		
     }
     
@@ -353,15 +367,17 @@ define( function( m ) {
 
 		dijit.byId('id_input_route').set( 'disabled', false );
 
+        var renderer_options = { draggable: false };
+       	directions_display[0].setOptions( renderer_options );
     }
 
     function do_stop( ) {
 
         clearTimeout( timer_animate[0] );
 
-		dijit.byId('id_route1_from').set( 'disabled', false );
-		dijit.byId('id_route1_waypoint1').set( 'disabled', false );
-		dijit.byId('id_route1_to').set( 'disabled', false );
+		dijit.byId('id_route1_wp0').set( 'disabled', false );
+		dijit.byId('id_route1_wp1').set( 'disabled', false );
+		dijit.byId('id_route1_wp2').set( 'disabled', false );
 
 		dijit.byId('id_check_no_hwy').set( 'disabled', false );
 		dijit.byId('id_check_no_toll').set( 'disabled', false );
@@ -374,6 +390,8 @@ define( function( m ) {
 		
 		dijit.byId('id_input_route').set( 'disabled', true );
 		
+        var renderer_options = { draggable: false };
+       	directions_display[0].setOptions( renderer_options );
     }
 
     function resize_sliders( ) {
@@ -411,6 +429,8 @@ define( function( m ) {
             clickToGo: false,
             disableDoubleClickZoom: true,
         };
+
+    	service = new google.maps.places.PlacesService( map );
 
         panorama = new google.maps.StreetViewPanorama( document.getElementById('id_panorama'), panoramaOptions );
         map.setStreetView( panorama );
@@ -528,9 +548,9 @@ define( function( m ) {
     	
     	console.log( "route 1 has changed ");
 
-		var origin = dijit.byId('id_route1_from').get( 'value' );
-		var destination = dijit.byId('id_route1_to').get( 'value' );
-		var waypoint1 = dijit.byId('id_route1_waypoint1').get( 'value' );
+		var origin = dijit.byId('id_route1_wp0').get( 'value' );
+		var waypoint1 = dijit.byId('id_route1_wp1').get( 'value' );
+		var destination = dijit.byId('id_route1_wp2').get( 'value' );
 		console.log( "origin= [" + origin + "]" );
 		console.log( "destination= [" + destination + "]" );
 		console.log( "waypoint1= [" + waypoint1 + "]" );
@@ -591,6 +611,14 @@ define( function( m ) {
         });
             	
         google.maps.event.trigger( panorama, 'resize' );
+    }
+
+    function change_waypoint( index_wp, place_name ) {
+    	
+    	var id_label_wp = "id_route1_wp" + index_wp;
+		dijit.byId(id_label_wp).set( 'value', place_name );
+
+		do_route( );
     }
     
 	// ---------
