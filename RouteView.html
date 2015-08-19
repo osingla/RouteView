@@ -1,3 +1,11 @@
+<!-- ------------------------------------------------------------------------------------------- -->
+<!-- ---                                                                                     --- -->
+<!-- --- RouteView - Olivier Singla                                                          --- -->
+<!-- ---                                                                                     --- -->
+<!-- --- StreeView Player - Virtual Drive or Virtual Ride, using Google Maps and Street View ------>
+<!-- ---                                                                                     --- -->
+<!-- ------------------------------------------------------------------------------------------- -->
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -49,7 +57,7 @@
             	<table style="width:100%">
                 	<tr>
                         <td valign="middle" align="left" id="id_beta">
-                			Beta
+                			<font color="red">BETA</font>
                 		</td>
                         <td valign="middle" align="center" style="width:100%"" >
 			                <b>RouteView - Google StreetView Player - Virtual Drive / Virtual Ride using Google Street View</b>
@@ -76,40 +84,90 @@
             <!-- ----------- -->            
             <!-- LEFT Layout -->
             <!-- ----------- -->            
-	        <div id="id_left_layout" style="display:" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'left', splitter: false">
+	        <div id="id_left_layout" style="display:" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" 
+	         data-dojo-props="region: 'left', splitter: false">
 
                 <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:false">
                     <legend>Route #1</legend>
                     <table>
-                        <tr>
-                            <td valign="middle" align="right">From</td>
+                        <tr id="id_route1_tr0">
+                            <td id="id_route1_label0" valign="middle" align="right">From</td>
                             <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit/form/TextBox" 
-                            	 data-dojo-props="trim:true, intermediateChanges:true"  
-				                 onChange='require(["RouteView.js"], function( s ) { s.cb_route1_changed(); })' 
-				                 onBlur='require(["RouteView.js"], function( s ) { s.cb_route1_from_blur(); })' 
-				                 id="id_route1_wp0"
-                            	 value="Apex,NC">
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:24em" 
+                            	 data-dojo-props="trim:true, intermediateChanges:false"
+				                 id="id_route1_wp0" value="Apex,NC">
                             </td>
                         </tr>
-                        <tr>
-                            <td valign="middle" align="right">Through</td>
+                        <tr id="id_route1_tr1">
+                            <td id="id_route1_label1" valign="middle" align="right">Through</td>
                             <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit/form/TextBox" 
-                            	 data-dojo-props="trim:true, intermediateChanges:true"  
-				                 onChange='require(["RouteView.js"], function( s ) { s.cb_route1_changed(); })' 
-				                 id="id_route1_wp1"
-				                 value="Asheboro, NC">
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:24em" 
+                            	 data-dojo-props="trim:true, intermediateChanges:false"  
+				                 id="id_route1_wp1" value="Asheboro, NC">
                             </td>
                         </tr>
-                        <tr>
-                            <td valign="middle" align="right">To</td>
+                        <tr id="id_route1_tr2">
+                            <td id="id_route1_label2" valign="middle" align="right">To</td>
                             <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit/form/TextBox" 
-                            	 data-dojo-props="trim:true, intermediateChanges:true"  
-				                 onChange='require(["RouteView.js"], function( s ) { s.cb_route1_changed(); })' 
-				                 id="id_route1_wp2"
-				                 value="Troy, NC">
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:24em" 
+                            	 data-dojo-props="trim:true, intermediateChanges:false"  
+				                 id="id_route1_wp2" value="Troy, NC">
+                            </td>
+                        </tr>
+                        <tr id="id_route1_tr3" style="display:None">
+                            <td id="id_route1_label3" valign="middle" align="right">Through</td>
+                            <td valign="middle" align="left">
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:24em" 
+                            	 data-dojo-props="trim:true, intermediateChanges:false"  
+				                 id="id_route1_wp3" value="">
+                            </td>
+                        </tr>
+                        <tr id="id_route1_tr4" style="display:None">
+                            <td id="id_route1_label4" valign="middle" align="right">Through</td>
+                            <td valign="middle" align="left">
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:24em" 
+                            	 data-dojo-props="trim:true, intermediateChanges:false"  
+				                 id="id_route1_wp4" value="">
+                            </td>
+                        </tr>
+                        <tr id="id_route1_tr5" style="display:None">
+                            <td id="id_route1_label5" valign="middle" align="right">Through</td>
+                            <td valign="middle" align="left">
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:24em" 
+                            	 data-dojo-props="trim:true, intermediateChanges:false"  
+				                 id="id_route1_wp5" value="">
+                            </td>
+                        </tr>
+                        <tr id="id_route1_tr6" style="display:None">
+                            <td id="id_route1_label6" valign="middle" align="right">Through</td>
+                            <td valign="middle" align="left">
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:24em" 
+                            	 data-dojo-props="trim:true, intermediateChanges:false"  
+				                 id="id_route1_wp6" value="">
+                            </td>
+                        </tr>
+                        <tr id="id_route1_tr7" style="display:None">
+                            <td id="id_route1_label7" valign="middle" align="right">Through</td>
+                            <td valign="middle" align="left">
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:24em" 
+                            	 data-dojo-props="trim:true, intermediateChanges:false"  
+				                 id="id_route1_wp7" value="">
+                            </td>
+                        </tr>
+                        <tr id="id_route1_tr8" style="display:None">
+                            <td id="id_route1_label8" valign="middle" align="right">Through</td>
+                            <td valign="middle" align="left">
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:24em" 
+                            	 data-dojo-props="trim:true, intermediateChanges:false"  
+				                 id="id_route1_wp8" value="">
+                            </td>
+                        </tr>
+                        <tr id="id_route1_tr9" style="display:None">
+                            <td id="id_route1_label9" valign="middle" align="right">Through</td>
+                            <td valign="middle" align="left">
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:24em" 
+                            	 data-dojo-props="trim:true, intermediateChanges:false"  
+				                 id="id_route1_wp9" value="">
                             </td>
                         </tr>
                     </table>

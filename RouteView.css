@@ -58,14 +58,14 @@ html, body {
 }
 
 #id_middle_layout {
-    width: 50%;
+    width: 60%;
     min-width: 200px;
     margin: 0;
     padding: 0;
 }
 
 #id_right_layout {
-    width: 50%;
+    width: 40%;
     margin: 0;
     padding: 0;
 }
