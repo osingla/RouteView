@@ -32,7 +32,9 @@ The code is using Dojo.
 
 The latest version of this web application is hosted on github:
 https://rawgit.com/osingla/RouteView/master/RouteView.html
+
 or also:
+
 https://osingla.github.io/RouteView/
 
 Feedback and comments are welcome - olivier dot singla at gmail dot com
