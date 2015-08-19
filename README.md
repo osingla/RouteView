@@ -1,4 +1,8 @@
+#
 # RouteView
+# (C) Olivier Singla 2015
+#
+
 Use GoogleMaps / StreetView to simulate a route
 
 I ride a motorcycle, and to prepare my next Saturday ride, I often use GoogleMaps and StreetView to figure out how cool the road is.
@@ -19,10 +23,16 @@ The web page allows you to create a route using Google Maps, and then do a 'virt
  - Create optionally a waypoint (for instance: Asheboro, NC)
  - Then click the Start button to see all Street View image along the route!
  
-The default step is 250 meters, and the default interval beteen two stepa is 750 millisecons.
+The default step is 250 meters, and the default interval beteen two stepa is 800 millisecons.
 These values can be changed interactively using a slider.
 
 Code is created with Google Maps API v3, and use the EPolys extension:
 
-I choose to keep the code as simple as possible, and also to use a single html file, so the interface is not sophisticated by design, 
-using only HTML5 controls (no jquery or dojo...). 
+The code is using Dojo.
+
+The latest version of this web application is hosted on github:
+https://rawgit.com/osingla/RouteView/master/RouteView.html
+or also:
+https://osingla.github.io/RouteView/
+
+Feedback and comments are welcome - olivier dot singla at gmail dot com
