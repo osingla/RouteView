@@ -112,7 +112,7 @@ define( function( m ) {
             timer_animate[num_route] = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, '+(d+step)+',50); })', interval );
 
         // Update route slider
-        document.getElementById("id_input_route").value = d;
+		dijit.byId('id_input_route').set( 'value', d );
     }
 
     function start_driving( route_num ) {
@@ -309,7 +309,6 @@ define( function( m ) {
                     map.fitBounds( bounds );
 //                  start_driving( route_num );  
 
-                    document.getElementById("id_input_route").style.display = "";
             		dijit.byId('id_input_route').set( 'disabled', true );
             		
             		dijit.byId('id_btn_route').set( 'disabled', true );
@@ -581,7 +580,6 @@ define( function( m ) {
 		if ( cb_move_to_dist != undefined )
 			clearTimeout( cb_move_to_dist );
 		var new_pos = dijit.byId('id_input_route').get( 'value' );
-		console.log( new_pos );
 		cb_move_to_dist = setTimeout( 'require(["RouteView.js"], function( s ) { s.move_to_dist('+new_pos+'); })', 25 );
     }
 
