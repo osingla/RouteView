@@ -2,7 +2,7 @@
 <!-- ---                                                                                     --- -->
 <!-- --- RouteView - Olivier Singla                                                          --- -->
 <!-- ---                                                                                     --- -->
-<!-- --- StreeView Player - Virtual Drive or Virtual Ride, using Google Maps and Street View ------>
+<!-- --- StreeView Player - Virtual Drive or Virtual Ride, using Google Maps and Street View --- -->
 <!-- ---                                                                                     --- -->
 <!-- ------------------------------------------------------------------------------------------- -->
 
@@ -29,12 +29,14 @@
         <script type="text/javascript" src="https://gisgraphy.googlecode.com/svn-history/r67/trunk/gisgraphy/src/main/webapp/scripts/v3_epoly.js"></script>
 
  		<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/dojo/1.10.4/dijit/themes/claro/claro.css" media="screen" >
+ 		<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/dojo/1.10.4/dojox/layout/resources/ExpandoPane.css" media="screen" >
+
 		<script src="https://ajax.googleapis.com/ajax/libs/dojo/1.10.4/dojo/dojo.js"
             data-dojo-config="isDebug: true, async: false, parseOnLoad: false"></script>
         <script>
 
 	        require(["dojo/parser", "dijit/layout/BorderContainer", "dijit/layout/TabContainer", "dijit/layout/ContentPane", 
-        		 "dijit/form/TextBox", "dojo/domReady!"], 
+        		 "dijit/form/TextBox", "dojox/layout/ExpandoPane", "dojo/domReady!"], 
     	    	function(parser){
             		parser.parse();
 	        	}
@@ -47,7 +49,7 @@
 
     <body class="claro">
 
-        <div id="app_layout" class="demoLayout" data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="design: 'headline'">
+        <div id="app_layout" class="demoLayout" data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="design: 'headline', gutters:true, liveSplitters:true">
         
             <!-- ---------- -->
             <!-- TOP layout -->            
@@ -84,8 +86,8 @@
             <!-- ----------- -->            
             <!-- LEFT Layout -->
             <!-- ----------- -->            
-	        <div id="id_left_layout" style="display:" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" 
-	         data-dojo-props="region: 'left', splitter: false">
+	        <div id="id_left_layout" style="display:" class="edgePanel" data-dojo-type="dojox/layout/ExpandoPane" 
+	         data-dojo-props="region:'left', splitter:false, title:'Configuration'">
 
                 <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:false">
                     <legend>Route #1</legend>
@@ -434,15 +436,20 @@
 
             </div>
             
+            <!-- ------------ -->
             <!-- MIDDLE panel -->
-	        <div id="id_middle_layout" class="centerPanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'center'">
+            <!-- ------------ -->
+	        <div id="id_middle_layout" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" 
+             data-dojo-props="region:'center', splitter:true, title:'Map'">
                 <div id="id_map_canvas" style="width: 100%; float:left"></div>
 	        </div>
             
-            <!-- RIGHT panel -->
-	        <div id="id_right_layout" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'right', splitter: true">
-                <div id="id_panorama" style="width: 100%; height: 100%;float:left"> 
-                </div>
+             <!-- ------------ -->
+             <!-- RIGHT panel  -->
+             <!-- ------------ -->
+	        <div id="id_right_layout" class="edgePanel" data-dojo-type="dojox/layout/ExpandoPane" 
+             data-dojo-props="region:'right', splitter:true, title:'View'">
+                <div id="id_panorama" style="width: 100%; height: 100%;float:left"> </div>
             </div>
             
             <!-- ------------ -->
