@@ -637,9 +637,11 @@ define( function( m ) {
 		console.log( "destination= [" + destination + "]" );
 		console.log( "waypoint1= [" + waypoint1 + "]" );
 
-		dijit.byId('id_btn_route').set( 'disabled', false );
-		dijit.byId('id_btn_play').set( 'disabled', true );
+//		dijit.byId('id_btn_route').set( 'disabled', false );
+//		dijit.byId('id_btn_play').set( 'disabled', true );
         
+    	if ( !dijit.byId( "id_btn_play" ).get( "disabled" ) )
+    		do_route();
     }
     
     function cb_map_click( ) {
