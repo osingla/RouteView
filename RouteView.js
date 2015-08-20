@@ -598,9 +598,15 @@ define( function( m ) {
     
 
     function cb_click_no_hwy( ) {
+    	
+    	if ( !dijit.byId( "id_btn_play" ).get( "disabled" ) )
+    		do_route();
     }
 
     function cb_click_no_toll( ) {
+    	
+    	if ( !dijit.byId( "id_btn_play" ).get( "disabled" ) )
+    		do_route();
     }
 
     function cb_click_force_panto( ) {
