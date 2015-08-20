@@ -34,7 +34,8 @@ define( function( m ) {
 
         console.log( "dist_meters=" + dist_meters + " duration_secs=" + duration_secs );
 
-        document.getElementById("id_route1_dist").innerHTML = Math.round( dist_meters / 1000 );
+        document.getElementById("id_route1_dist_kms").innerHTML = Math.round( dist_meters / 1000 );
+        document.getElementById("id_route1_dist_miles").innerHTML = Math.round( dist_meters * 0.000621371 );
         
         var nb_hours   = Math.floor( duration_secs / 3600 );
         var nb_minutes = Math.floor( (duration_secs - (nb_hours * 3600)) / 60 );
@@ -367,6 +368,7 @@ define( function( m ) {
         var renderer_options = { draggable: true };
        	directions_display[0].setOptions( renderer_options );
     		
+    	update_btns_remove_up_down( false );
         map.setOptions({draggableCursor: 'hand'});
         
     }
@@ -586,6 +588,7 @@ define( function( m ) {
     function cb_step_changed( ) {
     	step = dijit.byId('id_input_meters').get( 'value' );
         document.getElementById("id_meters").innerHTML = step;
+        document.getElementById("id_feet").innerHTML = Math.floor(step * 3.2808);
     }
 
     function cb_interval_changed( new_interval ) {
