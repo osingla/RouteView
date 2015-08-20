@@ -80,3 +80,63 @@ html, body {
     padding: 0;
 }
 
+.dijitButtonDisabled .icon_btn_remove {
+  background-image: url('icons/btn-remove-disabled.png');
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+}
+
+.icon_btn_remove {
+  background-image: url('icons/btn-remove.png');
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  border: none; 
+  outline:none;
+}
+
+.dijitButtonDisabled .icon_btn_up {
+  background-image: url('icons/btn-up-disabled.png');
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+}
+
+.icon_btn_up {
+  background-image: url('icons/btn-up.png');
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  border: none; 
+  outline:none;
+}
+
+.dijitButtonDisabled .icon_btn_down {
+  background-image: url('icons/btn-down-disabled.png');
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+}
+
+.icon_btn_down {
+  background-image: url('icons/btn-down.png');
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  border: none; 
+  outline:none;
+}
+
