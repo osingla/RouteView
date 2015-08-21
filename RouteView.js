@@ -29,6 +29,7 @@ define( function( m ) {
 	var cb_move_to_dist = undefined;
 	var directions_service = [];
 	var directions_display = [];
+	var route = [];
 
     function show_route_distance_duration( route_num, dist_meters, duration_secs ) {
 
@@ -173,9 +174,9 @@ define( function( m ) {
         var first_hidden = find_first_hidden( num_route);
     	console.log( "first_hidden=" + first_hidden );
         
-        var startLoc = new Array();
-        startLoc[num_route] = dijit.byId('id_route'+(num_route+1)+'_wp0').get( 'value' );
-        console.log( "from = " + startLoc[num_route] );
+        var start_location = new Array();
+        start_location[num_route] = dijit.byId('id_route'+(num_route+1)+'_wp0').get( 'value' );
+        console.log( "from = " + start_location[num_route] );
 
         var way_points = [];
         for ( var n = 1; n < first_hidden-1; n++ ) {
@@ -190,11 +191,11 @@ define( function( m ) {
             }
         }
 
-        var endLoc = new Array();
-        endLoc[num_route] = dijit.byId('id_route'+(num_route+1)+'_wp'+(first_hidden-1)).get( 'value' );
-        console.log( "to   = " + endLoc[num_route] );
+        var end_location = new Array();
+        end_location[num_route] = dijit.byId('id_route'+(num_route+1)+'_wp'+(first_hidden-1)).get( 'value' );
+        console.log( "to   = " + end_location[num_route] );
 
-        for ( var route_num = 0; route_num < startLoc.length; route_num++ ) {
+        for ( var route_num = 0; route_num < start_location.length; route_num++ ) {
 
             directions_service[route_num] = new google.maps.DirectionsService( );
             
@@ -234,8 +235,8 @@ define( function( m ) {
             });
 
             var request = {
-                origin: startLoc[route_num],
-                destination: endLoc[route_num],
+                origin: start_location[route_num],
+                destination: end_location[route_num],
                 travelMode: google.maps.DirectionsTravelMode.DRIVING,
                 waypoints: way_points,
                 optimizeWaypoints: false,
@@ -257,7 +258,7 @@ define( function( m ) {
                 	directions_display[route_num].setDirections( response );
 
                     var bounds = new google.maps.LatLngBounds();
-                    var route = response.routes[0];
+                    route[route_num] = response.routes[0];
                     location_from[route_num] = new Object();
                     location_to[route_num] = new Object();
 
@@ -274,8 +275,8 @@ define( function( m ) {
                     });     
 
                     // For each route, display summary information.
-                    var path = response.routes[0].overview_path;
-                    var legs = response.routes[0].legs;
+                    var path = route[route_num].overview_path;
+                    var legs = route[route_num].legs;
 
                     // Markers
                     var dist_meters = 0;
@@ -307,7 +308,6 @@ define( function( m ) {
 
                     polyline[route_num].setMap( map );
                     map.fitBounds( bounds );
-//                  start_driving( route_num );  
 
             		dijit.byId('id_input_route').set( 'disabled', true );
             		
@@ -344,6 +344,8 @@ define( function( m ) {
         set_labels_from_wp_to( 0 );
     
         map.setOptions({draggableCursor: 'crosshair'});
+
+		dijit.byId('id_btn_save_gpx').set( 'disabled', false );
         
     } // do_route
     
@@ -358,6 +360,8 @@ define( function( m ) {
 		dijit.byId('id_btn_pause').set( 'disabled', false );
 		dijit.byId('id_btn_stop').set( 'disabled', false );
 
+		dijit.byId('id_btn_save_gpx').set( 'disabled', true );
+        
 		for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) 
 			dijit.byId('id_route1_wp'+n).set( 'disabled', true );
 
@@ -622,7 +626,43 @@ define( function( m ) {
     
     function do_save_gpx( ) {
     	
-    	download_file( "Hello", "test.gpx", "application/gpx+xml" );
+    	var route_num = 0;
+    	
+    	console.log( "XXXXXXXXXXXXXXXXXXXXXXXX" );
+    	console.log( route[route_num].summary );
+    	console.log( route[route_num] );
+/*
+    	var legs = route[route_num].legs;
+        for ( n = 0; n < legs.length; n++) {
+            console.log( i + ": G=" + legs[n].start_location.G + " K=" + legs[n].start_location.K );
+        }
+*/
+    	var crlf = String.fromCharCode(13) + String.fromCharCode(10);
+    	
+        var gpx = '';
+        
+        gpx += '<?xml version="1.0" encoding="UTF-8"?>' + crlf +
+        	'<gpx version="1.0" creator="" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/0" xsi:schemaLocation="http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd">' + crlf + 
+        	'<time>2015-06-12T21:36:34Z</time>' +crlf;
+        
+    	var op = route[route_num].overview_path;
+        for ( n = 0; n < op.length; n++ ) {
+        	gpx += '<wpt lat="'+op[n].G+'" lon="'+op[n].K+'">' + ' </wpt>' + crlf;
+        }
+        
+        gpx += '<rte>' + crlf;
+        gpx += '<name>' + route[route_num].summary + '</name>' + crlf;
+//        for ( n = 0; n < op.length; n++ ) {
+//        	gpx += '<rtept lat="'+op[n].G+'" lon="'+op[n].K+'">' + ' </rtept>' + crlf;
+//        }
+    	var legs = route[route_num].legs;
+        for ( n = 0; n < legs.length; n++)
+        	gpx += '<rtept lat="'+legs[n].start_location.G+'" lon="'+legs[n].start_location.K+'">' + ' </rtept>' + crlf;
+    	gpx += '<rtept lat="'+legs[legs.length-1].end_location.G+'" lon="'+legs[legs.length-1].end_location.K+'">' + ' </rtept>' + crlf;
+        gpx += '</rte>' + crlf;
+        gpx += '</gpx>' + crlf;
+        	
+    	download_file( gpx, "test.gpx", "application/gpx+xml" );
 
     }
     
@@ -685,7 +725,7 @@ define( function( m ) {
             	}
             	else {
                 	var id_label = 'id_route' + (num_route+1) + '_label' + n;
-                    document.getElementById(id_label).innerHTML = "Throught&nbsp;";
+                    document.getElementById(id_label).innerHTML = "Through&nbsp;";
             	}
             }
  		});
