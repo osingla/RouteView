@@ -626,17 +626,14 @@ define( function( m ) {
     
     function do_save_gpx( ) {
     	
+    	// xmllint --noout --schema http://www.topografix.com/GPX/1/0/gpx.xsd testfile.gpx
+    	
     	var route_num = 0;
     	
     	console.log( "XXXXXXXXXXXXXXXXXXXXXXXX" );
     	console.log( route[route_num].summary );
     	console.log( route[route_num] );
-/*
-    	var legs = route[route_num].legs;
-        for ( n = 0; n < legs.length; n++) {
-            console.log( i + ": G=" + legs[n].start_location.G + " K=" + legs[n].start_location.K );
-        }
-*/
+
     	var crlf = String.fromCharCode(13) + String.fromCharCode(10);
     	
         var gpx = '';
@@ -714,6 +711,8 @@ define( function( m ) {
     
     function set_labels_from_wp_to( num_route ) {
 
+    	return;
+    	
     	require(["dojo/dom-style"], function( domStyle) {
             for ( var n = 1; n < MAX_NB_WAYPOINTS+2; n++ ) {
             	var id = 'id_route' + (num_route+1) + '_tr' + n;
