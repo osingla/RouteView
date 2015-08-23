@@ -438,7 +438,7 @@
                 } // cb_make_route
 
                 document.getElementById("id_input_route").style.display = "";
-                document.getElementById("id_input_route").disabled = true;
+                document.getElementById("id_input_route").disabled = false;
 
             } // do_start
 
@@ -446,6 +446,7 @@
 
                 if ( document.getElementById("id_label_pause").innerHTML == "Pause" ) {
                     clearTimeout( timer_animate );
+                    timer_animate = undefined;
                     document.getElementById("id_label_pause").innerHTML = "Continue";
                     console.log( "curr_dist=" + curr_dist );
                 }
@@ -461,6 +462,7 @@
             function do_stop( ) {
 
                 clearTimeout( timer_animate );
+                timer_animate = undefined;
 
                 document.getElementById("id_route1_from").disabled = false;
                 document.getElementById("id_route1_to").disabled = false;
@@ -583,6 +585,11 @@
             
 			function move_to_dist( new_pos ) {
 
+				if ( timer_animate != undefined ) { 
+                    clearTimeout( timer_animate );
+                	timer_animate = setTimeout( "cb_animate(" + new_pos + ")", interval );
+				}
+				
                 var p = polyline.GetPointAtDistance( new_pos );
                 if ( !map.getBounds().contains( p ) )
                     map.panTo( p );
@@ -623,7 +630,7 @@
          <table id="id_main_table" width="100%" height="100%" border="0" cellpadding="1" cellspacing="1">
             <tr id='tr_config'>
                 <td id='td_config' nowrap="nowrap" valign="top" width="0%">
-                    <div align="center">
+                    <div align="center" style="display:none">
                         <button id="id_btn_expand_collapse" type="button" onclick="cb_expand_collapse()">&laquo;</button>
                     </div>
                     <div id='id_config' align="left">
@@ -632,12 +639,12 @@
 	                    <div align="center">
                             <table style="font-size:175%">
                                 <tr>
-                                    <td valign="middle" align="right" style="font-size:150%">From</td>
+                                    <td valign="middle" align="right" style="font-size:125%">From</td>
                                     <td valign="middle" align="left"><input type="text" id="id_route1_from" style="width:24em; font-size:150%"
                                      onchange="cb_route1_from(this.value)" value="Apex,NC"></td>
                                 </tr>
                                 <tr>
-                                    <td valign="middle" align="right" style="font-size:150%">To</td>
+                                    <td valign="middle" align="right" style="font-size:125%">To</td>
                                     <td valign="middle" align="left"><input type="text" id="id_route1_to" style="width:24em; font-size:150%"
                                      onchange="cb_route1_to(this.value)" value="Troy,NC"></td>
                                 </tr>
