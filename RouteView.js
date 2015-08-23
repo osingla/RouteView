@@ -138,7 +138,7 @@ define( function( m ) {
             for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
             	var id = 'id_route' + (num_route+1) + '_tr' + n;
         		var display = domStyle.get( id, "display" );
-            	console.log( id + " --> " + display );
+//            	console.log( id + " --> " + display );
             	if ( display == "none" ) {
             		first_hidden = n;
             		break;
@@ -341,7 +341,7 @@ define( function( m ) {
         } // cb_make_route
 
         update_btns_remove_up_down( );
-        set_labels_from_wp_to( 0 );
+//      set_labels_from_wp_to( 0 );
     
         map.setOptions({draggableCursor: 'crosshair'});
 
@@ -546,15 +546,21 @@ define( function( m ) {
 //		resize_sliders( );
         
 /*
-        require(["dojo/dnd/Moveable", "dojo/dom", "dojo/on", "dojo/domReady!"],
-        		function(Moveable, dom, on){
-        		       var dnd = new Moveable( dom.byId("id_route1_tr0") );
-        		});
+        require(["dojo/dnd/Moveable", "dojo/dom", "dojo/on", "dojo/domReady!"], function(Moveable, dom, on){
+        	var dnd = new Moveable( dom.byId("id_route1_mark1") );
+        	on( dnd, "MoveStart", function (e) {
+                console.log( "Move started" );
+        		console.log(e);
+            });
+        	on( dnd, "FirstMove", function (e) {
+                console.log( "First Move" );
+        		console.log(e);
+            });
+   		});
 */
-        
 
 //      update_btns_remove_up_down( );
-        set_labels_from_wp_to( 0 );
+//      set_labels_from_wp_to( 0 );
    
     } // initialize
     
@@ -641,7 +647,7 @@ define( function( m ) {
         gpx += '<?xml version="1.0" encoding="UTF-8"?>' + crlf +
         	'<gpx version="1.0" creator="" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/0" xsi:schemaLocation="http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd">' + crlf + 
         	'<time>2015-06-12T21:36:34Z</time>' +crlf;
-        
+
     	var op = route[route_num].overview_path;
         for ( n = 0; n < op.length; n++ ) {
         	gpx += '<wpt lat="'+op[n].G+'" lon="'+op[n].K+'">' + ' </wpt>' + crlf;
@@ -671,6 +677,15 @@ define( function( m ) {
 		console.log( "origin= [" + origin + "]" );
 		console.log( "destination= [" + destination + "]" );
 		console.log( "waypoint1= [" + waypoint1 + "]" );
+
+    	if ( dijit.byId( "id_btn_route" ).get( "disabled" ) && dijit.byId( "id_btn_play" ).get( "disabled" ) ) {
+    		console.log( evt );
+    		console.log( evt.srcElement );
+			var wp = dijit.byId(evt.target.id).get( 'value' );
+			console.log ( wp );
+			if ( wp != '' )
+				dijit.byId('id_btn_route').set( 'disabled', false );
+    	}
 
 //		dijit.byId('id_btn_route').set( 'disabled', false );
 //		dijit.byId('id_btn_play').set( 'disabled', true );
@@ -711,8 +726,6 @@ define( function( m ) {
     
     function set_labels_from_wp_to( num_route ) {
 
-    	return;
-    	
     	require(["dojo/dom-style"], function( domStyle) {
             for ( var n = 1; n < MAX_NB_WAYPOINTS+2; n++ ) {
             	var id = 'id_route' + (num_route+1) + '_tr' + n;
@@ -799,14 +812,41 @@ define( function( m ) {
     	
     }
 
-	function cb_click_btn_remove( num_route, index ) {
+	function cb_click_btn_add( num_route, index ) {
 		
-		console.log( "Remove: num_route=" + num_route + " index=" + index );
+		console.log( "*** Add: num_route=" + num_route + " index=" + index );
 
         var first_hidden = find_first_hidden( num_route);
     	console.log( "first_hidden=" + first_hidden );
 
-		for ( var n = 1; n < first_hidden - 1; n++ ) {
+    	for ( var n = first_hidden - 1; n >= index; n-- ) {
+			var wp = dijit.byId('id_route'+(num_route+1)+'_wp'+(n)).get( 'value' );
+			console.log( n + " -> " + wp );
+			dijit.byId('id_route'+(num_route+1)+'_wp'+(n+1)).set( 'value', wp );
+    	}
+		dijit.byId('id_route'+(num_route+1)+'_wp'+(index)).set( 'value', "" );
+
+    	require(["dojo/dom-style"], function( domStyle) {
+    		domStyle.set( 'id_route'+(num_route+1)+'_tr'+(first_hidden), "display", "" );
+    	});
+    	
+		dijit.byId('id_btn_play').set( 'disabled', true );
+		
+		require([ "dijit/focus", "dojo/dom", "dojo/domReady!" ], function(focusUtil, dom){
+			focusUtil.focus(dom.byId('id_route'+(num_route+1)+'_wp'+(index)));
+		});
+		
+		update_btns_remove_up_down( );		
+	}
+		
+	function cb_click_btn_remove( num_route, index ) {
+		
+		console.log( "*** Remove: num_route=" + num_route + " index=" + index );
+
+        var first_hidden = find_first_hidden( num_route);
+    	console.log( "first_hidden=" + first_hidden );
+
+		for ( var n = index; n < first_hidden - 1; n++ ) {
 			var wp = dijit.byId('id_route'+(num_route+1)+'_wp'+(n+1)).get( 'value' );
 			dijit.byId('id_route'+(num_route+1)+'_wp'+(n)).set( 'value', wp );
 		}
@@ -849,6 +889,7 @@ define( function( m ) {
 		if ( all == false ) {
 			var num_route = 0;
             for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
+           		dijit.byId('id_btn_add_'+(num_route+1)+'_'+n).set( 'disabled', true ); 
 		   		dijit.byId('id_btn_remove_'+(num_route+1)+'_'+n).set( 'disabled', true ); 
 		   		dijit.byId('id_btn_up_'+(num_route+1)+'_'+n).set( 'disabled', true ); 
 		   		dijit.byId('id_btn_down_'+(num_route+1)+'_'+n).set( 'disabled', true ); 
@@ -862,16 +903,19 @@ define( function( m ) {
     	console.log( "first_hidden=" + first_hidden );
 
 		var origin = dijit.byId('id_route'+(num_route+1)+'_wp0').get( 'value' );
+   		dijit.byId('id_btn_add_'+(num_route+1)+'_0').set( 'disabled', (first_hidden > 2) ? false : true );
    		dijit.byId('id_btn_remove_'+(num_route+1)+'_0').set( 'disabled', (first_hidden > 2) ? false : true );
    		dijit.byId('id_btn_down_'+(num_route+1)+'_0').set( 'disabled', (origin == '') ? true : false ); 
     	
 		for ( var n = 1; n < first_hidden - 1; n++ ) {
 			var waypoint = dijit.byId('id_route'+(num_route+1)+'_wp'+n).get( 'value' );
+	   		dijit.byId('id_btn_add_'+(num_route+1)+'_'+n).set( 'disabled', false ); 
 	   		dijit.byId('id_btn_remove_'+(num_route+1)+'_'+n).set( 'disabled', false ); 
 	   		dijit.byId('id_btn_up_'+(num_route+1)+'_'+n).set( 'disabled', (waypoint == '') ? true : false ); 
 	   		dijit.byId('id_btn_down_'+(num_route+1)+'_'+n).set( 'disabled', (waypoint == '') ? true : false ); 
 		}
 		
+   		dijit.byId('id_btn_add_'+(num_route+1)+'_'+(first_hidden-1)).set( 'disabled', (first_hidden > 2) ? false : true );
    		dijit.byId('id_btn_remove_'+(num_route+1)+'_'+(first_hidden-1)).set( 'disabled', (first_hidden > 2) ? false : true );
 		var destination = dijit.byId('id_route'+(num_route+1)+'_wp'+(first_hidden-1)).get( 'value' );
    		dijit.byId('id_btn_up_'+(num_route+1)+'_'+(first_hidden-1)).set( 'disabled', (destination == '') ? true : false );
@@ -909,6 +953,7 @@ define( function( m ) {
 
 		cb_click_force_panto:  function( ) { cb_click_force_panto(); },
 
+		cb_click_btn_add:    function( num_route, index ) { cb_click_btn_add( num_route, index ); },
 		cb_click_btn_remove: function( num_route, index ) { cb_click_btn_remove( num_route, index ); },
 		cb_click_btn_up:     function( num_route, index ) { cb_click_btn_up( num_route, index ); },
 		cb_click_btn_down:   function( num_route, index ) { cb_click_btn_down( num_route, index ); },

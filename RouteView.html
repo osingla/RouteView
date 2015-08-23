@@ -65,7 +65,7 @@
 			                <b>RouteView - Google StreetView Player - Virtual Drive / Virtual Ride using Google Street View</b>
                 		</td>
                         <td valign="middle" align="right" id='id_link_to_github_project'>
-                        	<a href="https://github.com/osingla/RouteView" target="_blank">Github&nbsp;project</a>
+                        	<a href="https://github.com/osingla/RouteView" target="_blank">Github&nbsp;Project</a>
                 		</td>
                 	</tr>
                 </table>
@@ -89,18 +89,20 @@
 	        <div id="id_left_layout" style="display:" class="edgePanel" data-dojo-type="dojox/layout/ExpandoPane" 
 	         data-dojo-props="region:'left', splitter:false, title:'Configuration'">
 
-                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:false">
+                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:true">
                     <legend>Route #1</legend>
                     <table cellspacing="0" cellpadding="0">
                         <tr id="id_route1_tr0">
-                            <td valign="middle" align="right"><img src="icons/arrow-down.png"></td>
-                            <td valign="middle" align="right">A</td>
+                            <td valign="middle" align="right">A&nbsp;</td>
 <!--                        <td id="id_route1_label0" valign="middle" align="right">From&nbsp;</td> -->
                             <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:24em" 
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:22em" 
                             	 data-dojo-props="trim:true, intermediateChanges:false"
 				                 id="id_route1_wp0" value="Apex,NC">
                             </td>
+                            <td valign="middle" align="right">
+                            	<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_add', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_add(0,1); })' id="id_btn_add_1_0" disabled />
+							</td>
                             <td>
                             	<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_remove', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_remove(0,0); })' id="id_btn_remove_1_0" disabled />
 							</td>
@@ -112,14 +114,16 @@
 							</td>
                         </tr>
                         <tr id="id_route1_tr1">
-                            <td valign="middle" align="right"><img src="icons/arrow-down.png"></td>
-                            <td valign="middle" align="right">B</td>
+                            <td valign="middle" align="right" id='id_route1_mark1'>B&nbsp;</td>
 <!--                        <td id="id_route1_label1" valign="middle" align="right">Through</td> -->
                             <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:24em" 
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:22em" 
                             	 data-dojo-props="trim:true, intermediateChanges:false"  
 				                 id="id_route1_wp1" value="Graham, NC">
                             </td>
+                            <td valign="middle" align="right">
+                            	<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_add', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_add(0,1); })' id="id_btn_add_1_1" disabled />
+							</td>
                             <td>
                             	<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_remove', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_remove(0,1); })' id="id_btn_remove_1_1" disabled />
 							</td>
@@ -131,14 +135,16 @@
 							</td>
                         </tr>
                         <tr id="id_route1_tr2">
-                            <td valign="middle" align="right"><img src="icons/arrow-down.png"></td>
-                            <td valign="middle" align="right">C</td>
+                            <td valign="middle" align="right">C&nbsp;</td>
 <!--                        <td id="id_route1_label2" valign="middle" align="right">To</td> -->
                             <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:24em" 
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:22em" 
                             	 data-dojo-props="trim:true, intermediateChanges:false"  
 				                 id="id_route1_wp2" value="Asheboro, NC">
                             </td>
+                            <td valign="middle" align="right">
+                            	<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_add', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_add(0,2); })' id="id_btn_add_1_2" disabled />
+							</td>
                             <td>
                             	<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_remove', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_remove(0,2); })' id="id_btn_remove_1_2" disabled />
 							</td>
@@ -150,14 +156,16 @@
 							</td>
                         </tr>
                         <tr id="id_route1_tr3" style="display:">
-                            <td valign="middle" align="right"><img src="icons/arrow-down.png"></td>
-                            <td valign="middle" align="right">D</td>
+                            <td valign="middle" align="right">D&nbsp;</td>
 <!--                        <td id="id_route1_label3" valign="middle" align="right">Through</td> -->
                             <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:24em" 
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:22em" 
                             	 data-dojo-props="trim:true, intermediateChanges:false"  
 				                 id="id_route1_wp3" value="Troy, NC">
                             </td>
+                            <td valign="middle" align="right">
+                            	<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_add', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_add(0,3); })' id="id_btn_add_1_3" disabled />
+							</td>
                             <td>
                             	<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_remove', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_remove(0,3); })' id="id_btn_remove_1_3" disabled />
 							</td>
@@ -169,14 +177,16 @@
 							</td>
                         </tr>
                         <tr id="id_route1_tr4" style="display:None">
-                            <td valign="middle" align="right"><img src="icons/arrow-down.png"></td>
-                            <td valign="middle" align="right">E</td>
+                            <td valign="middle" align="right">E&nbsp;</td>
 <!--                        <td id="id_route1_label4" valign="middle" align="right">Through</td> -->
                             <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:24em" 
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:22em" 
                             	 data-dojo-props="trim:true, intermediateChanges:false"  
 				                 id="id_route1_wp4" value="">
                             </td>
+                            <td valign="middle" align="right">
+                            	<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_add', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_add(0,4); })' id="id_btn_add_1_4" disabled />
+							</td>
                             <td>
                             	<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_remove', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_remove(0,4); })' id="id_btn_remove_1_4" disabled />
 							</td>
@@ -188,14 +198,16 @@
 							</td>
                         </tr>
                         <tr id="id_route1_tr5" style="display:None">
-                            <td valign="middle" align="right"><img src="icons/arrow-down.png"></td>
-                            <td valign="middle" align="right">F</td>
+                            <td valign="middle" align="right">F&nbsp;</td>
 <!--                        <td id="id_route1_label5" valign="middle" align="right">Through</td> -->
                             <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:24em" 
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:22em" 
                             	 data-dojo-props="trim:true, intermediateChanges:false"  
 				                 id="id_route1_wp5" value="">
                             </td>
+                            <td valign="middle" align="right">
+                            	<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_add', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_add(0,5); })' id="id_btn_add_1_5" disabled />
+							</td>
                             <td>
                             	<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_remove', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_remove(0,5); })' id="id_btn_remove_1_5" disabled />
 							</td>
@@ -207,14 +219,16 @@
 							</td>
                         </tr>
                         <tr id="id_route1_tr6" style="display:None">
-                            <td valign="middle" align="right"><img src="icons/arrow-down.png"></td>
-                            <td valign="middle" align="right">G</td>
+                            <td valign="middle" align="right">G&nbsp;</td>
 <!--                        <td id="id_route1_label6" valign="middle" align="right">Through</td> -->
                             <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:24em" 
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:22em" 
                             	 data-dojo-props="trim:true, intermediateChanges:false"  
 				                 id="id_route1_wp6" value="">
                             </td>
+                            <td valign="middle" align="right">
+                            	<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_add', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_add(0,6); })' id="id_btn_add_1_6" disabled />
+							</td>
                             <td>
                             	<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_remove', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_remove(0,6); })' id="id_btn_remove_1_6" disabled />
 							</td>
@@ -226,14 +240,16 @@
 							</td>
                         </tr>
                         <tr id="id_route1_tr7" style="display:None">
-                            <td valign="middle" align="right"><img src="icons/arrow-down.png"></td>
-                            <td valign="middle" align="right">H</td>
+                            <td valign="middle" align="right">H&nbsp;</td>
 <!--                        <td id="id_route1_label7" valign="middle" align="right">Through</td> -->
                             <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:24em" 
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:22em" 
                             	 data-dojo-props="trim:true, intermediateChanges:false"  
 				                 id="id_route1_wp7" value="">
                             </td>
+                            <td valign="middle" align="right">
+                            	<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_add', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_add(0,7); })' id="id_btn_add_1_7" disabled />
+							</td>
                             <td>
                             	<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_remove', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_remove(0,7); })' id="id_btn_remove_1_7" disabled />
 							</td>
@@ -245,14 +261,16 @@
 							</td>
                         </tr>
                         <tr id="id_route1_tr8" style="display:None">
-                            <td valign="middle" align="right"><img src="icons/arrow-down.png"></td>
-                            <td valign="middle" align="right">I</td>
+                            <td valign="middle" align="right">I&nbsp;</td>
 <!--                        <td id="id_route1_label8" valign="middle" align="right">Through</td> -->
                             <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:24em" 
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:22em" 
                             	 data-dojo-props="trim:true, intermediateChanges:false"  
 				                 id="id_route1_wp8" value="">
                             </td>
+                            <td valign="middle" align="right">
+                            	<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_add', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_add(0,8); })' id="id_btn_add_1_8" disabled />
+							</td>
                             <td>
                             	<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_remove', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_remove(0,8); })' id="id_btn_remove_1_8" disabled />
 							</td>
@@ -264,14 +282,16 @@
 							</td>
                         </tr>
                         <tr id="id_route1_tr9" style="display:None">
-                            <td valign="middle" align="right"><img src="icons/arrow-down.png"></td>
-                            <td valign="middle" align="right">J</td>
+                            <td valign="middle" align="right">J&nbsp;</td>
 <!--                        <td id="id_route1_label9" valign="middle" align="right">Through</td> -->
                             <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:24em" 
+                            	<input type="text" data-dojo-type="dijit/form/TextBox" style="width:22em" 
                             	 data-dojo-props="trim:true, intermediateChanges:false"  
 				                 id="id_route1_wp9" value="">
                             </td>
+                            <td valign="middle" align="right">
+                            	<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_add', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_add(0,9); })' id="id_btn_add_9_1" disabled />
+							</td>
                             <td>
                             	<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_remove', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_remove(0,9); })' id="id_btn_remove_1_9" disabled />
 							</td>
@@ -325,7 +345,7 @@
                 <br>
                 <br>
 
-                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:false">
+                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:true">
                     <legend>Configuration</legend>
                     <div style="width:100%" align="center">
                     
