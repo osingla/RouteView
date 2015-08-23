@@ -306,6 +306,18 @@
                 	}
             	}
 
+            	// go full-screen
+            	var i = document.getElementById("id_main_table");
+            	if (i.requestFullscreen) {
+            		i.requestFullscreen();
+            	} else if (i.webkitRequestFullscreen) {
+            		i.webkitRequestFullscreen();
+            	} else if (i.mozRequestFullScreen) {
+            		i.mozRequestFullScreen();
+            	} else if (i.msRequestFullscreen) {
+            		i.msRequestFullscreen();
+            	}
+            	
             	map_is_shown = false;
                 setTimeout( 'alt_map_panorama_full_screen_init1()', 250 );
             	
@@ -608,7 +620,7 @@
 
     <body bgcolor="#E6E6FA">
 
-         <table width="100%" height="100%" border="0" cellpadding="1" cellspacing="1">
+         <table id="id_main_table" width="100%" height="100%" border="0" cellpadding="1" cellspacing="1">
             <tr id='tr_config'>
                 <td id='td_config' nowrap="nowrap" valign="top" width="0%">
                     <div align="center">
