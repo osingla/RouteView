@@ -473,7 +473,7 @@ define( function( m ) {
         };
 
         map = new google.maps.Map( document.getElementById('id_map_canvas'), map_options );
-        var panoramaOptions = {
+        var panorama_options = {
             position: home,
             pov: {
                 heading: 34,
@@ -491,7 +491,7 @@ define( function( m ) {
         
         service = new google.maps.places.PlacesService( map );
 
-        panorama = new google.maps.StreetViewPanorama( document.getElementById('id_panorama'), panoramaOptions );
+        panorama = new google.maps.StreetViewPanorama( document.getElementById('id_panorama'), panorama_options );
         map.setStreetView( panorama );
 
         map_full_screen = false;

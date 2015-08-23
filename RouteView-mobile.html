@@ -17,7 +17,7 @@
 
         <style>
 
-            html, body, #map-canvas, #td-map-canvas {
+            html, body, #map-canvas, #td_map_canvas {
                 height: 100%;
                 margin: 0;
                 padding: 0;
@@ -126,8 +126,8 @@
             var collapsed = false;
             var map;
             var panorama;
-            var panorama_full_screen;
-            var polyline;
+            var map_is_shown;
+            var polyline = undefined;
             var location_from;
             var location_to;
             var poly2;
@@ -138,6 +138,7 @@
 			var is_force_panto = true;
             var curr_dist;
 			var cb_move_to_dist = undefined;
+			var directions_display = undefined;
 
             function initialize() {
             
@@ -148,7 +149,7 @@
                 };
             
                 map = new google.maps.Map( document.getElementById('map-canvas'), mapOptions );
-                var panoramaOptions = {
+                var panorama_options = {
                     position: home,
                     pov: {
                         heading: 34,
@@ -162,10 +163,15 @@
                     disableDoubleClickZoom: true,
                 };
 
-                panorama = new google.maps.StreetViewPanorama( document.getElementById('pano'), panoramaOptions );
+                panorama = new google.maps.StreetViewPanorama( document.getElementById('pano'), panorama_options );
                 map.setStreetView( panorama );
 
-                panorama_full_screen = false;
+        		google.maps.event.addListener( map, "click", function( evt ) { 
+        			cb_map_click( evt ); 
+        		});
+        		document.getElementById('pano').onclick = cb_panorama_click;
+        		
+                map_is_shown = false;
 
                 var previous_orientation = window.orientation;
                 var check_orientation = function() {
@@ -191,6 +197,7 @@
                 window.addEventListener("resize", check_orientation, false);
                 window.addEventListener("orientationchange", check_orientation, false);
                 
+//                document.getElementById("td_map_canvas").style.width = "100%";
             }
             
             function cb_expand_collapse( ) {
@@ -244,7 +251,7 @@
                 panorama.setPosition( new google.maps.LatLng( p.G, p.K ) );
                 panorama.setPov({
                     heading: bearing,
-                    pitch: (panorama_full_screen) ? 1 : 10
+                    pitch: 1
                 });
 
                 update_poly( d );
@@ -272,6 +279,16 @@
 
             function do_start( ) {
             
+            	if ( directions_display != undefined ) {
+            		console.log( "Delete current route" )
+            		directions_display.setMap( null );
+                	directions_display = undefined;
+                	if ( polyline != undefined ) {
+                		polyline.setMap( null );
+                		polyline = undefined;
+                	}
+            	}
+
                 document.getElementById('id_btn_start').style.display = "None";
                 document.getElementById("id_btn_start").disabled = true;
                 
@@ -345,9 +362,9 @@
                             var path = response.routes[0].overview_path;
                             var legs = response.routes[0].legs;
 
-                            var disp = new google.maps.DirectionsRenderer( rendererOptions );     
-                            disp.setMap( map );
-                            disp.setDirections( response );
+                            directions_display = new google.maps.DirectionsRenderer( rendererOptions );     
+                            directions_display.setMap( map );
+                            directions_display.setDirections( response );
 
                             // Markers
                             var dist_meters = 0;
@@ -390,7 +407,6 @@
                 document.getElementById("id_input_route").style.display = "";
                 document.getElementById("id_input_route").disabled = true;
 
-                cb_panorama_dblclick( );            
             } // do_start
 
             function do_pause( ) {
@@ -419,16 +435,17 @@
                 document.getElementById('id_btn_start').style.display = "";
                 document.getElementById("id_btn_start").disabled = false;
                 
-                document.getElementById('id_btn_pause').style.display = "";
                 document.getElementById("id_btn_pause").disabled = true;
+                document.getElementById('id_btn_pause').style.display = "None";
                 document.getElementById("id_label_pause").innerHTML = "Pause";
                 
                 document.getElementById("id_btn_stop").disabled = true;
-                document.getElementById('id_btn_stop').style.display = "";
+                document.getElementById('id_btn_stop').style.display = "None";
 
                 document.getElementById("id_input_route").disabled = true;
 
-                cb_panorama_dblclick( );
+                document.getElementById("td_map_canvas").style.display = "";
+                document.getElementById("td_config").style.display = "";
             }
 
             function cb_step_input( new_step ) {
@@ -461,20 +478,34 @@
                 console.log( "from = " + from );
             }
             
-            function cb_panorama_dblclick( ) {
-                if ( !panorama_full_screen ) {
-                    panorama_full_screen = true;
-                    console.log( "Panorama switching to full screen" );
-                    document.getElementById("td-map-canvas").style.display = "None";
-                    document.getElementById("td_config").style.display = "None";
+            function alt_map_panorama_full_screen( ) {
+                document.getElementById("td_config").style.display = "None";
+            	if ( map_is_shown ) {
+                	map_is_shown = false;
+                    document.getElementById("td_map_canvas").style.display = "None";
+                    document.getElementById("id_td_panorama").style.display = "";
+                    document.getElementById("id_td_panorama").style.width = "100%";
                 }
-                else {
-                    panorama_full_screen = false;
-                    console.log( "Panorama switching to half screen" );
-                    document.getElementById("td-map-canvas").style.display = "";
-                    document.getElementById("td_config").style.display = "";
-                }
+            	else {
+                	map_is_shown = true;
+                    document.getElementById("td_map_canvas").style.display = "";
+                    document.getElementById("td_map_canvas").style.width = "100%";
+                    document.getElementById("id_td_panorama").style.display = "None";
+            	}
+                google.maps.event.trigger( map, 'resize' );
                 google.maps.event.trigger( panorama, 'resize' );
+            }
+            
+            function cb_panorama_click( evt ) {
+   				if ( evt.handled != true ) {
+            		console.log( "cb_panorama_click" );
+            		alt_map_panorama_full_screen( );
+   				}
+            }
+            
+            function cb_map_click( evt ) {
+            	console.log( "cb_map_click" );
+        		alt_map_panorama_full_screen( );
             }
             
             function cb_click_no_hwy( cb ) {
@@ -556,7 +587,7 @@
 
          <table width="100%" height="100%" border="0" cellpadding="1" cellspacing="1">
             <tr>
-                <td id='td_config' nowrap="nowrap" valign="top" width="1px">
+                <td id='td_config' nowrap="nowrap" valign="top" width="0%">
                     <div align="center">
                         <button id="id_btn_expand_collapse" type="button" onclick="cb_expand_collapse()">&laquo;</button>
                     </div>
@@ -616,11 +647,11 @@
 
                     </div>
                 </td>
-                <td id="td-map-canvas" nowrap="nowrap" valign="top" width="50%">
-                    <div id="map-canvas" style="width: 100%; float:left"></div>
+                <td id="td_map_canvas" nowrap="nowrap" valign="top" style="width:50%">
+                    <div id="map-canvas" style="width: 100%; float:left" ></div>
                 </td>
-                <td id="id_td_pano" nowrap="nowrap" valign="top" width="50%" height="100%">
-                    <div id="pano" style="width: 100%; height: 100%;float:left" ondblclick="cb_panorama_dblclick()"></div>
+                <td id="id_td_panorama" nowrap="nowrap" valign="top" style="width:50%; height:100%">
+                    <div id="pano" style="width: 100%; height: 100%; float:left"></div>
                 </td>
             </tr>
         	<tr>
@@ -649,4 +680,3 @@
     </body>
 
 </html>
-
