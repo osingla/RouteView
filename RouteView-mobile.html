@@ -117,7 +117,7 @@
             
         </style>
 
-        <script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false"></script>
+        <script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false&libraries=places"></script>
         <script type="text/javascript" src="https://gisgraphy.googlecode.com/svn-history/r67/trunk/gisgraphy/src/main/webapp/scripts/v3_epoly.js"></script>
 <!--    <script type="text/javascript" src="http://www.geocodezip.com/scripts/v3_epoly.js"></script> -->
 
@@ -135,7 +135,7 @@
             var dist_route;
             var step;               // metres
             var interval;           // milliseconds
-			var is_force_panto = true;
+			var is_force_panto = false;
             var curr_dist;
 			var cb_move_to_dist = undefined;
 			var directions_display = undefined;
@@ -145,7 +145,7 @@
                 var home = new google.maps.LatLng( 35.733435, -78.907684 );
                 var mapOptions = {
                    center: home,
-                    zoom: 14
+                   zoom: 14
                 };
             
                 map = new google.maps.Map( document.getElementById('map-canvas'), mapOptions );
@@ -166,7 +166,15 @@
                 panorama = new google.maps.StreetViewPanorama( document.getElementById('pano'), panorama_options );
                 map.setStreetView( panorama );
 
-        		google.maps.event.addListener( map, "click", function( evt ) { 
+                var input_from = document.getElementById("id_route1_from");
+                var autocomplete_from = new google.maps.places.Autocomplete(input_from);
+                autocomplete_from.bindTo('bounds', map);
+
+                var input_to = document.getElementById("id_route1_to");
+                var autocomplete_to = new google.maps.places.Autocomplete(input_to);
+                autocomplete_to.bindTo('bounds', map);
+
+       			google.maps.event.addListener( map, "click", function( evt ) { 
         			cb_map_click( evt ); 
         		});
         		document.getElementById('pano').onclick = cb_panorama_click;
@@ -641,7 +649,7 @@
                         </div>
                         <div style="width:100%" align="center">
                             <label>Force Pan To</label>
-                            <input type="checkbox" id="id_check_force_panto" checked onclick="cb_click_force_panto(this)">
+                            <input type="checkbox" id="id_check_force_panto" unchecked onclick="cb_click_force_panto(this)">
                         </div>
                         <br>
 
