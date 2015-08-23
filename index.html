@@ -1,9 +1,34 @@
 <html>
-  <head>
-    <title>RouteView</title>
-    <META http-equiv="refresh" content="0;URL=https://rawgit.com/osingla/RouteView/master/RouteView.html">
-  </head>
-  <body>
-  </body>
+    <head>
+        <title>RouteView</title>
+        <XMETA http-equiv="refresh" content="0;URL=https://rawgit.com/osingla/RouteView/master/RouteView.html">
+    </head>
+    <script>
+        var isMobile = {
+            Android: function() {
+                return navigator.userAgent.match(/Android/i);
+            },
+            BlackBerry: function() {
+                return navigator.userAgent.match(/BlackBerry/i);
+            },
+            iOS: function() {
+                return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+            },
+            Opera: function() {
+                return navigator.userAgent.match(/Opera Mini/i);
+            },
+            Windows: function() {
+                return navigator.userAgent.match(/IEMobile/i);
+            },
+            any: function() {
+                return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows());
+            }
+        };
+        if ( isMobile.any() )
+            window.location.href = "https://rawgit.com/osingla/RouteView/master/RouteView-mobile.html";
+        else
+            window.location.href = "https://rawgit.com/osingla/RouteView/master/RouteView.html";
+    </script>
+    <body>
+    </body>
 </html>
-
