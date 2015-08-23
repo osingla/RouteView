@@ -127,12 +127,12 @@
             var map;
             var panorama;
             var panorama_full_screen;
-            var polyline = [];
-            var location_from = [];
-            var location_to = [];
-            var poly2 = [];
-            var timer_animate = [];
-            var eol = [];
+            var polyline;
+            var location_from;
+            var location_to;
+            var poly2;
+            var timer_animate;
+            var dist_route;
             var step;               // metres
             var interval;           // milliseconds
 			var is_force_panto = true;
@@ -207,73 +207,78 @@
             }
             
 
-            function updatePoly( i, d ) {
+            function update_poly( d ) {
                 var lastVertex = 1;
-                // Spawn a new polyline every 30 vertices, because updating a 100-vertex poly is too slow
-                if ( poly2[i].getPath().getLength() > 30 ) {
-                    poly2[i] = new google.maps.Polyline([polyline[i].getPath().getAt( lastVertex - 1 )]);
+                // Spawn a new polyline every 20 vertices, because updating a 100-vertex poly is too slow
+                if ( poly2.getPath().getLength() > 20 ) {
+                    poly2 = new google.maps.Polyline([polyline.getPath().getAt( lastVertex - 1 )]);
                     // map.addOverlay( poly2 )
                 }
 
-                if ( polyline[i].GetIndexAtDistance(d) < lastVertex + 2 ) {
-                    if ( poly2[i].getPath().getLength() > 1 )
-                        poly2[i].getPath().removeAt(poly2[i].getPath().getLength()-1)
-                    poly2[i].getPath().insertAt( poly2[i].getPath().getLength(),polyline[i].GetPointAtDistance(d) );
+                if ( polyline.GetIndexAtDistance(d) < lastVertex + 2 ) {
+                    if ( poly2.getPath().getLength() > 1 )
+                        poly2.getPath().removeAt(poly2.getPath().getLength()-1)
+                    poly2.getPath().insertAt( poly2.getPath().getLength(),polyline.GetPointAtDistance(d) );
                 } 
                 else {
-                    poly2[i].getPath().insertAt( poly2[i].getPath().getLength(),location_to[i].latlng );
+                    poly2.getPath().insertAt( poly2.getPath().getLength(),location_to.latlng );
                 }
             }
 
-            function cb_animate( num_route, d ) {
+            function cb_animate( d ) {
 
                 curr_dist = d;
 
-                if ( d > eol[num_route] ) {
-                    console.log( "Route " + num_route + " is done" );
+                if ( d > dist_route ) {
+                    console.log( "Route is done" );
                     return;
                 }
                 
-                var p = polyline[num_route].GetPointAtDistance( d );
+                var p = polyline.GetPointAtDistance( d );
                 if ( !map.getBounds().contains( p ) )
 					if ( is_force_panto )
                     	map.panTo( p );
 
-                var bearing = polyline[num_route].Bearing( polyline[num_route].GetIndexAtDistance(d) );
-                console.log( "d=" + d + " - " + polyline[num_route].GetIndexAtDistance(d) + " / " + bearing);
+                var bearing = polyline.Bearing( polyline.GetIndexAtDistance(d) );
+                console.log( "d=" + d + " - " + polyline.GetIndexAtDistance(d) + " / " + bearing);
                 panorama.setPosition( new google.maps.LatLng( p.G, p.K ) );
                 panorama.setPov({
                     heading: bearing,
                     pitch: (panorama_full_screen) ? 1 : 10
                 });
 
-                updatePoly( num_route, d );
+                update_poly( d );
                 if ( step > 0 )
-                    timer_animate[num_route] = setTimeout( "cb_animate("+num_route+","+(d+step)+")", interval );
+                    timer_animate = setTimeout( "cb_animate("+(d+step)+")", interval );
 
                 // Update route slider
                 document.getElementById("id_input_route").value = d;
             }
 
-            function start_driving( route_num ) {
+            function start_driving( ) {
             
-                if ( timer_animate[route_num] ) 
-                    clearTimeout( timer_animate[route_num] );
+                if ( timer_animate ) 
+                    clearTimeout( timer_animate );
                     
-                eol[route_num] = polyline[route_num].Distance();
-                map.setCenter( polyline[route_num].getPath().getAt(0) );
+                dist_route = polyline.Distance();
+                map.setCenter( polyline.getPath().getAt(0) );
 
-                poly2[route_num] = new google.maps.Polyline({
-                    path: [polyline[route_num].getPath().getAt(0)], strokeColor:"#FFFF00", strokeWeight:3
+                poly2 = new google.maps.Polyline({
+                    path: [polyline.getPath().getAt(0)], strokeColor:"#FFFF00", strokeWeight:3
                 });
 
-                timer_animate[route_num] = setTimeout("cb_animate("+route_num+",50)",250);
+                timer_animate = setTimeout("cb_animate(50)",250);
             }
 
             function do_start( ) {
             
+                document.getElementById('id_btn_start').style.display = "None";
                 document.getElementById("id_btn_start").disabled = true;
+                
+                document.getElementById('id_btn_pause').style.display = "";
                 document.getElementById("id_btn_pause").disabled = false;
+                
+                document.getElementById('id_btn_stop').style.display = "";
                 document.getElementById("id_btn_stop").disabled = false;
                 
                 document.getElementById("id_route1_from").disabled = true;
@@ -283,44 +288,36 @@
                 interval = parseInt( document.getElementById("id_input_interval").value );
                 console.log( "step=" + step + " interval=" + interval );
 
-                var startLoc = new Array();
-                startLoc[0] = document.getElementById('id_route1_from').value;
-                console.log( "from = " + startLoc[0] );
+                start_location = document.getElementById('id_route1_from').value;
+                console.log( "from = " + start_location );
 
-                var endLoc = new Array();
-                endLoc[0] = document.getElementById('id_route1_to').value;
-                console.log( "to   = " + endLoc[0] );
+                end_location = document.getElementById('id_route1_to').value;
+                console.log( "to   = " + end_location );
 
                 var no_hwy  = document.getElementById("id_check_no_hwy").checked
                 var no_toll = document.getElementById("id_check_no_toll").checked
 
-                for ( var route_num = 0; route_num < startLoc.length; route_num++ ) {
-
-                    var rendererOptions = {
-                        map: map,
-                        suppressMarkers : true,
-                        preserveViewport: true
-                    }
-                    var directions_service = new google.maps.DirectionsService( );
-
-                    var travelMode = google.maps.DirectionsTravelMode.DRIVING;  
-                    
-                    var waypts = [];
-
-                    var request = {
-                        origin: startLoc[route_num],
-                        destination: endLoc[route_num],
-                        travelMode: travelMode,
-                        optimizeWaypoints: true,
-                        avoidHighways: no_hwy,
-                        avoidTolls: no_toll
-                    };  
-
-                    directions_service.route( request, cb_make_route( route_num ) );
-
+                var rendererOptions = {
+                    map: map,
+                    suppressMarkers : true,
+                    preserveViewport: true
                 }
+                var directions_service = new google.maps.DirectionsService( );
+
+                var travelMode = google.maps.DirectionsTravelMode.DRIVING;  
                 
-                function cb_make_route( route_num ) {
+                var request = {
+                    origin: start_location,
+                    destination: end_location,
+                    travelMode: travelMode,
+                    optimizeWaypoints: true,
+                    avoidHighways: no_hwy,
+                    avoidTolls: no_toll
+                };  
+
+                directions_service.route( request, cb_make_route( ) );
+                
+                function cb_make_route( ) {
 
                     return function( response, status ) {
 
@@ -328,17 +325,17 @@
 
                             var bounds = new google.maps.LatLngBounds();
                             var route = response.routes[0];
-                            location_from[route_num] = new Object();
-                            location_to[route_num] = new Object();
+                            location_from = new Object();
+                            location_to = new Object();
 
 
-                            polyline[route_num] = new google.maps.Polyline({
+                            polyline = new google.maps.Polyline({
                                 path: [],
                                 strokeColor: '#FFFF00',
                                 strokeWeight: 3
                             });
 
-                            poly2[route_num] = new google.maps.Polyline({
+                            poly2 = new google.maps.Polyline({
                                 path: [],
                                 strokeColor: '#FFFF00',
                                 strokeWeight: 3
@@ -360,11 +357,11 @@
                                 duration_secs += legs[i].duration.value;
                                 console.log( i + ": m=" + legs[i].distance.value + " secs=" + legs[i].duration.value );
                                 if ( i == 0 ) {
-                                    location_from[route_num].latlng  = legs[i].start_location;
-                                    location_from[route_num].address = legs[i].start_address;
+                                    location_from.latlng  = legs[i].start_location;
+                                    location_from.address = legs[i].start_address;
                                 }
-                                location_to[route_num].latlng  = legs[i].end_location;
-                                location_to[route_num].address = legs[i].end_address;
+                                location_to.latlng  = legs[i].end_location;
+                                location_to.address = legs[i].end_address;
                                 var steps = legs[i].steps;
 
                                 for ( j = 0; j < steps.length; j++) {
@@ -372,40 +369,40 @@
                                     var nextSegment = steps[j].path;
 
                                     for ( k=0;k < nextSegment.length;k++) {
-                                        polyline[route_num].getPath().push(nextSegment[k]);
+                                        polyline.getPath().push(nextSegment[k]);
                                         bounds.extend(nextSegment[k]);
                                     }
                                 }
                             }
                             
-                            show_route_distance_duration( route_num, dist_meters, duration_secs );
+                            show_route_distance_duration( dist_meters, duration_secs );
 
                         }
 
-                        polyline[route_num].setMap( map );
+                        polyline.setMap( map );
                         map.fitBounds( bounds );
-                        start_driving( route_num );  
+                        start_driving( );  
 
                     }
 
-                }
+                } // cb_make_route
 
                 document.getElementById("id_input_route").style.display = "";
                 document.getElementById("id_input_route").disabled = true;
 
-            }
+                cb_panorama_dblclick( );            
+            } // do_start
 
             function do_pause( ) {
 
                 if ( document.getElementById("id_label_pause").innerHTML == "Pause" ) {
-                    clearTimeout( timer_animate[0] );
+                    clearTimeout( timer_animate );
                     document.getElementById("id_label_pause").innerHTML = "Continue";
                     console.log( "curr_dist=" + curr_dist );
                 }
                 else if ( document.getElementById("id_label_pause").innerHTML == "Continue" ) {
                     document.getElementById("id_label_pause").innerHTML = "Pause";
-                    var num_route = 0;
-                    timer_animate[num_route] = setTimeout( "cb_animate(" + num_route + "," + curr_dist + ")", interval );
+                    timer_animate = setTimeout( "cb_animate(" + curr_dist + ")", interval );
                 }
 
                 document.getElementById("id_input_route").disabled = false;
@@ -414,17 +411,24 @@
 
             function do_stop( ) {
 
-                clearTimeout( timer_animate[0] );
+                clearTimeout( timer_animate );
 
                 document.getElementById("id_route1_from").disabled = false;
                 document.getElementById("id_route1_to").disabled = false;
 
+                document.getElementById('id_btn_start').style.display = "";
                 document.getElementById("id_btn_start").disabled = false;
+                
+                document.getElementById('id_btn_pause').style.display = "";
                 document.getElementById("id_btn_pause").disabled = true;
-                document.getElementById("id_btn_pause").innerHTML = "Pause";
+                document.getElementById("id_label_pause").innerHTML = "Pause";
+                
                 document.getElementById("id_btn_stop").disabled = true;
+                document.getElementById('id_btn_stop').style.display = "";
 
                 document.getElementById("id_input_route").disabled = true;
+
+                cb_panorama_dblclick( );
             }
 
             function cb_step_input( new_step ) {
@@ -457,7 +461,7 @@
                 console.log( "from = " + from );
             }
             
-            function cb_pano_dblclick( ) {
+            function cb_panorama_dblclick( ) {
                 if ( !panorama_full_screen ) {
                     panorama_full_screen = true;
                     console.log( "Panorama switching to full screen" );
@@ -479,7 +483,7 @@
             function cb_click_no_toll( cb ) {
             }
 
-            function show_route_distance_duration( route_num, dist_meters, duration_secs ) {
+            function show_route_distance_duration( dist_meters, duration_secs ) {
 
                 console.log( "dist_meters=" + dist_meters + " duration_secs=" + duration_secs );
 
@@ -513,20 +517,18 @@
             
 			function move_to_dist( new_pos ) {
 
-				var num_route = 0;
-
-                var p = polyline[num_route].GetPointAtDistance( new_pos );
+                var p = polyline.GetPointAtDistance( new_pos );
                 if ( !map.getBounds().contains( p ) )
                     map.panTo( p );
 
-                var bearing = polyline[num_route].Bearing( polyline[num_route].GetIndexAtDistance( new_pos ) );
+                var bearing = polyline.Bearing( polyline.GetIndexAtDistance( new_pos ) );
                 panorama.setPosition( new google.maps.LatLng( p.G, p.K ) );
                 panorama.setPov({
                     heading: bearing,
                     pitch: 10
                 });
 
-                updatePoly( num_route, new_pos );
+                update_poly( new_pos );
 
 				cb_move_to_dist = undefined;
 
@@ -556,60 +558,60 @@
             <tr>
                 <td id='td_config' nowrap="nowrap" valign="top" width="1px">
                     <div align="center">
-                        <button id="id_btn_expand_collapse" type="button" onclick="cb_expand_collapse()"><<<</button>
+                        <button id="id_btn_expand_collapse" type="button" onclick="cb_expand_collapse()">&laquo;</button>
                     </div>
                     <div id='id_config' align="left">
                         
-                        	<br>
-                            <table>
+                        <br>
+                        <table>
+                            <tr>
+                                <td valign="middle" align="right">From</td>
+                                <td valign="middle" align="left"><input type="text" id="id_route1_from" onchange="cb_route1_from(this.value)" value="Apex,NC"></td>
+                            </tr>
+                            <tr>
+                                <td valign="middle" align="right">To</td>
+                                <td valign="middle" align="left"><input type="text" id="id_route1_to" onchange="cb_route1_to(this.value)" value="Troy,NC"></td>
+                            </tr>
+                        </table>
+                        <hr>
+                        <div id="id_route1_distance_duration" style="width:100%; display:None" align="center" >
+                            <table style="width:100%">
                                 <tr>
-                                    <td valign="middle" align="right">From</td>
-                                    <td valign="middle" align="left"><input type="text" id="id_route1_from" onchange="cb_route1_from(this.value)" value="Apex,NC"></td>
-                                </tr>
-                                <tr>
-                                    <td valign="middle" align="right">To</td>
-                                    <td valign="middle" align="left"><input type="text" id="id_route1_to" onchange="cb_route1_to(this.value)" value="Troy,NC"></td>
+                                    <td align="left" valign="middle">
+                                        <b id="id_route1_dist"></b>&nbsp;kms
+                                    </td>
+                                    <td align="right" valign="middle">
+                                        <b id="id_route1_duration">XX</b>
+                                    </td>
                                 </tr>
                             </table>
-                            <hr>
-                            <div id="id_route1_distance_duration" style="width:100%; display:None" align="center" >
-                                <table style="width:100%">
-                                    <tr>
-                                        <td align="left" valign="middle">
-                                            <b id="id_route1_dist"></b>&nbsp;kms
-                                        </td>
-                                        <td align="right" valign="middle">
-                                            <b id="id_route1_duration">XX</b>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-                            <div align="center">
-                                <label>No Highway</label>
-                                <input type="checkbox" id="id_check_no_hwy" checked onclick="cb_click_no_hwy(this)">
-                                &nbsp; &nbsp; &nbsp;
-                                <label>No Toll</label>
-                                <input type="checkbox" id="id_check_no_toll" checked onclick="cb_click_no_toll(this)">
-                            </div>
+                        </div>
+                        <div align="center">
+                            <label>No Highway</label>
+                            <input type="checkbox" id="id_check_no_hwy" checked onclick="cb_click_no_hwy(this)">
+                            &nbsp; &nbsp; &nbsp;
+                            <label>No Toll</label>
+                            <input type="checkbox" id="id_check_no_toll" checked onclick="cb_click_no_toll(this)">
+                        </div>
                         <br>
                         <br>
 
-                            <div style="width:100%" align="center">
-                                <span>Step : <b id="id_meters">250</b> meters</span><br>
-                                <input id="id_input_meters" style="width:100%" type="range" min="50" max="1000" step="50" value="250"
-                                 oninput="cb_step_input( this.value )"
-                                 onchange="cb_step_changed( this.value )" >
-                                <p>
-                                    <span>Interval : <b id="id_interval">1000</b> milliseconds</span><br>
-                                    <input id="id_input_interval" style="width:100%" type="range" min="500" max="5000" step="50" value="1000"
-                                     oninput="cb_interval_input( this.value )"
-                                     onchange="cb_interval_changed( this.value )" >
-                                </p>
-                            </div>
-                        	<div style="width:100%" align="center">
-                                <label>Force Pan To</label>
-                                <input type="checkbox" id="id_check_force_panto" checked onclick="cb_click_force_panto(this)">
-                        	</div>
+                        <div style="width:100%" align="center">
+                            <span>Step : <b id="id_meters">250</b> meters</span><br>
+                            <input id="id_input_meters" style="width:100%" type="range" min="50" max="1000" step="50" value="250"
+                             oninput="cb_step_input( this.value )"
+                             onchange="cb_step_changed( this.value )" >
+                            <p>
+                                <span>Interval : <b id="id_interval">1000</b> milliseconds</span><br>
+                                <input id="id_input_interval" style="width:100%" type="range" min="500" max="5000" step="50" value="1000"
+                                 oninput="cb_interval_input( this.value )"
+                                 onchange="cb_interval_changed( this.value )" >
+                            </p>
+                        </div>
+                        <div style="width:100%" align="center">
+                            <label>Force Pan To</label>
+                            <input type="checkbox" id="id_check_force_panto" checked onclick="cb_click_force_panto(this)">
+                        </div>
                         <br>
 
                     </div>
@@ -618,7 +620,7 @@
                     <div id="map-canvas" style="width: 100%; float:left"></div>
                 </td>
                 <td id="id_td_pano" nowrap="nowrap" valign="top" width="50%" height="100%">
-                    <div id="pano" style="width: 100%; height: 100%;float:left" ondblclick="cb_pano_dblclick()"></div>
+                    <div id="pano" style="width: 100%; height: 100%;float:left" ondblclick="cb_panorama_dblclick()"></div>
                 </td>
             </tr>
         	<tr>
@@ -629,10 +631,10 @@
                                 <button type="button" id="id_btn_start" onclick="do_start()" style="min-width:60px;height:80px"><b style="font-size:175%">Start</b></button>
                             </td>
                             <td width="1%" align="center" height="24px">
-                                <button type="button" id="id_btn_pause" onclick="do_pause()" style="min-width:60px;height:80px"disabled><b ><span style="font-size:175%" id="id_label_pause">Pause</span></b></button>
+                                <button type="button" id="id_btn_pause" onclick="do_pause()" style="min-width:60px;height:80px;display:None"disabled><b ><span style="font-size:175%" id="id_label_pause">Pause</span></b></button>
                             </td>
                             <td width="1%" align="center" height="24px">
-                                <button type="button" id="id_btn_stop"  onclick="do_stop()" style="min-width:60px;height:80px" disabled><b style="font-size:175%">Stop</b></button>
+                                <button type="button" id="id_btn_stop"  onclick="do_stop()" style="min-width:60px;height:80px;display:None" disabled><b style="font-size:175%">Stop</b></button>
                             </td>
                             <td width="100%" align="center" height="16px" >
                                 <input id="id_input_route" style="width:100%; display:None" type="range" min="0" max="0" step="1" value="0"
