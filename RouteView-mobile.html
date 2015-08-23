@@ -60,14 +60,14 @@
 
             input[type=range]::-moz-range-track {
                 width: 300px;
-                height: 14px;
+                height: 24px;
                 background: #ddd;
                 border: none;
                 border-radius: 1px;
             }
             input[type=range]::-moz-range-thumb {
                 border: none;
-                height: 16px;
+                height: 26px;
                 width: 16px;
                 border-radius: 50%;
                 background: goldenrod;
@@ -166,6 +166,30 @@
                 map.setStreetView( panorama );
 
                 panorama_full_screen = false;
+
+                var previous_orientation = window.orientation;
+                var check_orientation = function() {
+                	console.log( "Checking orientation" );
+//                	alert( window.orientation );
+                    if (window.orientation !== previous_orientation ) {
+                    	previous_orientation = window.orientation;
+                        console.log( "Orientation changed" );
+                        var height_btn = "32px";
+                    	if ( (window.orientation == -90) || (window.orientation == 90) ) {
+                    		height_btn = "32px";
+                    	}
+                    	else if ( window.orientation == 0 ) {
+                    		height_btn = "80px";
+                    	}
+                		document.getElementById("id_btn_start").style.height = height_btn;
+                		document.getElementById("id_btn_stop").style.height  = height_btn;
+                		document.getElementById("id_btn_pause").style.height = height_btn;
+                        google.maps.event.trigger( panorama, 'resize' );
+                    }
+                };
+
+                window.addEventListener("resize", check_orientation, false);
+                window.addEventListener("orientationchange", check_orientation, false);
                 
             }
             
@@ -602,13 +626,13 @@
                     <table width="100%" height="100%" border="0" cellpadding="1" cellspacing="1">
                         <tr>
                             <td width="1%" align="center" height="24px">
-                                <button type="button" id="id_btn_start" onclick="do_start()" style="min-width:60px;height:32px"><b>Start</b></button>
+                                <button type="button" id="id_btn_start" onclick="do_start()" style="min-width:60px;height:80px"><b style="font-size:175%">Start</b></button>
                             </td>
                             <td width="1%" align="center" height="24px">
-                                <button type="button" id="id_btn_pause" onclick="do_pause()" style="min-width:60px;height:32px"disabled><b><span id="id_label_pause">Pause</span></b></button>
+                                <button type="button" id="id_btn_pause" onclick="do_pause()" style="min-width:60px;height:80px"disabled><b ><span style="font-size:175%" id="id_label_pause">Pause</span></b></button>
                             </td>
                             <td width="1%" align="center" height="24px">
-                                <button type="button" id="id_btn_stop"  onclick="do_stop()" style="min-width:60px;height:32px" disabled><b>Stop</b></button>
+                                <button type="button" id="id_btn_stop"  onclick="do_stop()" style="min-width:60px;height:80px" disabled><b style="font-size:175%">Stop</b></button>
                             </td>
                             <td width="100%" align="center" height="16px" >
                                 <input id="id_input_route" style="width:100%; display:None" type="range" min="0" max="0" step="1" value="0"
