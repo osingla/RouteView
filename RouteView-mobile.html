@@ -178,6 +178,9 @@
                 var input_to = document.getElementById("id_route1_to");
                 var autocomplete_to = new google.maps.places.Autocomplete(input_to);
                 autocomplete_to.bindTo('bounds', map);
+                
+        		document.getElementById('id_route1_from').onchange = cb_route_from_or_to_changed;
+        		document.getElementById('id_route1_to').onchange = cb_route_from_or_to_changed;
 
        			google.maps.event.addListener( map, "click", function( evt ) { 
         			cb_map_click( evt ); 
@@ -198,7 +201,7 @@
                     		height_btn = "32px";
                     	}
                     	else if ( window.orientation == 0 ) {
-                    		height_btn = "80px";
+                    		height_btn = "92px";
                     	}
                 		document.getElementById("id_btn_start").style.height = height_btn;
                 		document.getElementById("id_btn_stop").style.height  = height_btn;
@@ -338,6 +341,9 @@
                 
                 document.getElementById('id_btn_stop').style.display = "";
                 document.getElementById("id_btn_stop").disabled = false;
+
+                document.getElementById("tr_btn_start").style.display = 'None';
+                document.getElementById("tr_btns_pause_stop").style.display = '';
                 
                 step = parseInt( document.getElementById("id_input_meters").value );
                 interval = parseInt( document.getElementById("id_input_interval").value );
@@ -495,6 +501,9 @@
 
                 document.getElementById("id_input_route").disabled = true;
 
+                document.getElementById("tr_btn_start").style.display = '';
+                document.getElementById("tr_btns_pause_stop").style.display = 'None';
+                
                 document.getElementById("td_map_canvas").style.display = "";
                 document.getElementById("tr_config").style.display = "";
             }
@@ -635,6 +644,20 @@
 				is_force_panto = cb.checked;
 			}
 
+			function cb_route_from_or_to_changed( evt ) {
+			
+				console.log( "cb_route_from_or_to_changed" );
+
+                start_location = document.getElementById('id_route1_from').value;
+                end_location = document.getElementById('id_route1_to').value;
+                console.log( "from = " + start_location );
+                console.log( "to   = " + end_location );
+
+                var start_disabled = (start_location == "") || (end_location == "");
+                document.getElementById("id_btn_start").disabled = start_disabled;
+
+			}
+			
             google.maps.event.addDomListener( window, 'load', initialize );
 
         </script>
@@ -689,14 +712,14 @@
                         <br>
                         <br>
 
-                        <div style="width:100%" align="center">
+                        <div style="width:100%;" align="center">
                             <span>Step : <b id="id_meters">250</b> meters</span><br>
-                            <input id="id_input_meters" style="width:100%" type="range" min="50" max="1000" step="50" value="250"
+                            <input id="id_input_meters" style="width:100%;  max-width: 320px" type="range" min="50" max="1000" step="50" value="250"
                              oninput="cb_step_input( this.value )"
                              onchange="cb_step_changed( this.value )" >
                             <p>
                                 <span>Interval : <b id="id_interval">1200</b> milliseconds</span><br>
-                                <input id="id_input_interval" style="width:100%" type="range" min="500" max="5000" step="50" value="1200"
+                                <input id="id_input_interval" style="width:100%; max-width: 320px" type="range" min="500" max="5000" step="50" value="1200"
                                  oninput="cb_interval_input( this.value )"
                                  onchange="cb_interval_changed( this.value )" >
                             </p>
@@ -723,17 +746,17 @@
         	<tr>
         		<td colspan="3" width="100%" align="center" height="16px" >
                     <table width="100%" border="0" cellpadding="1" cellspacing="1">
-                        <tr>
-                           	<td colspan="2" width="100%" align="center" height="24px" style="width:100%">
-                               	<button type="button" id="id_btn_start" onclick="do_start()" style="min-width:120px;height:80px"><b style="font-size:275%">Start</b></button>
+                        <tr id='tr_btn_start'>
+                           	<td colspan="2" width="100%" align="center" style="width:100%">
+                               	<button type="button" id="id_btn_start" onclick="do_start()" style="min-width:120px;height:92px" disabled><b style="font-size:325%">Start</b></button>
 	                    	</td>
                         </tr>
-                        <tr>
+                        <tr id='tr_btns_pause_stop' style="display:None">
                             <td width="1%" align="center" height="24px">
-                                <button type="button" id="id_btn_pause" onclick="do_pause()" style="min-width:60px;height:80px;display:None"disabled><b ><span style="font-size:175%" id="id_label_pause">Pause</span></b></button>
+                                <button type="button" id="id_btn_pause" onclick="do_pause()" style="min-width:60px;height:92px;display:None"disabled><b ><span style="font-size:175%" id="id_label_pause">Pause</span></b></button>
                             </td>
                             <td width="1%" align="center" height="24px">
-                                <button type="button" id="id_btn_stop"  onclick="do_stop()" style="min-width:60px;height:80px;display:None" disabled><b style="font-size:175%">Stop</b></button>
+                                <button type="button" id="id_btn_stop"  onclick="do_stop()" style="min-width:60px;height:92px;display:None" disabled><b style="font-size:175%">Stop</b></button>
                             </td>
                             <td width="100%" align="center" height="16px" >
                                 <input id="id_input_route" style="width:100%; display:None" type="range" min="0" max="0" step="1" value="0"
