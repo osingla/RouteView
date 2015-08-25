@@ -22,6 +22,12 @@
                 margin: 0;
                 padding: 0;
             }
+
+			body {
+				-moz-transform: scale(1.0, 1.0);
+				zoom: 1.0;
+				zoom: 100%;
+			}
             
             /* http://brennaobrien.com/blog/2014/05/style-input-type-range-in-every-browser.html */
             
@@ -285,7 +291,7 @@
             }
             
             function do_start( ) {
-            
+
             	if ( directions_display != undefined ) {
             		console.log( "Delete current route" )
             		directions_display.setMap( null );
@@ -459,6 +465,10 @@
             	} else if (document.msExitFullscreen) {
             		document.msExitFullscreen();
             	}
+
+            	document.getElementById('id_body').style.MozTransform = "scale(1.0, 1.0)";
+            	document.getElementById('id_body').style.zoom = "100%";
+        		document.getElementById('id_body').style.zoom = "1.0";
             	
             	clearTimeout( timer_animate );
                 timer_animate = undefined;
@@ -638,7 +648,7 @@
 
     </head>
 
-    <body bgcolor="#E6E6FA">
+    <body bgcolor="#E6E6FA" id="id_body">
 
          <table id="id_main_table" width="100%" height="100%" border="0" cellpadding="1" cellspacing="1">
             <tr id='tr_config'>
@@ -717,7 +727,7 @@
                     <table width="100%" border="0" cellpadding="1" cellspacing="1">
                         <tr id='tr_btn_start'>
                            	<td colspan="2" width="100%" align="center" style="width:100%">
-                               	<button type="button" id="id_btn_start" onclick="do_start()" style="min-width:120px;height:92px" disabled><b style="font-size:325%">Start</b></button>
+                               	<button type="button" id="id_btn_start" onclick="do_start()" style="min-width:120px;height:92px" xdisabled><b style="font-size:325%">Start</b></button>
 	                    	</td>
                         </tr>
                         <tr id='tr_btns_pause_stop' style="display:None">
