@@ -213,7 +213,7 @@
                 window.addEventListener("resize", check_orientation, false);
                 window.addEventListener("orientationchange", check_orientation, false);
                 
-            }
+            } // initialize
             
             function cb_expand_collapse( ) {
                 if ( collapsed ) {
@@ -258,8 +258,10 @@
                 
                 var p = polyline.GetPointAtDistance( d );
                 if ( !map.getBounds().contains( p ) )
-					if ( is_force_panto )
-                    	map.panTo( p );
+					if ( !map_is_shown ) {
+						console.log( "XXXX -> " + d );
+//                    	map.panTo( p );
+					}
 
                 var bearing = polyline.Bearing( polyline.GetIndexAtDistance(d) );
                 console.log( "d=" + d + " - " + polyline.GetIndexAtDistance(d) + " / " + bearing);
@@ -293,6 +295,7 @@
             }
 
             function alt_map_panorama_full_screen_init1( ) {
+            	is_force_panto = true;
                 map.setOptions({ draggableCursor:'crosshair', zoom:14 });
                 alt_map_panorama_full_screen();
                 setTimeout( 'alt_map_panorama_full_screen_init2()', 250 );
@@ -300,6 +303,7 @@
             
             function alt_map_panorama_full_screen_init2( ) {
                 alt_map_panorama_full_screen();
+            	is_force_panto = false;
             }
             
             function do_start( ) {
@@ -506,6 +510,8 @@
                 
                 document.getElementById("td_map_canvas").style.display = "";
                 document.getElementById("tr_config").style.display = "";
+
+//              map.setOptions({draggableCursor: 'hand'});
             }
 
             function cb_step_input( new_step ) {
@@ -561,13 +567,15 @@
             function cb_panorama_click( evt ) {
    				if ( evt.handled != true ) {
             		console.log( "cb_panorama_click" );
-            		alt_map_panorama_full_screen( );
+                	if ( document.getElementById("id_btn_start").disabled )
+	            		alt_map_panorama_full_screen( );
    				}
             }
             
             function cb_map_click( evt ) {
             	console.log( "cb_map_click" );
-        		alt_map_panorama_full_screen( );
+            	if ( document.getElementById("id_btn_start").disabled )
+	        		alt_map_panorama_full_screen( );
             }
             
             function cb_click_no_hwy( cb ) {
