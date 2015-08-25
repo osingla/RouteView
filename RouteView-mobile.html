@@ -135,12 +135,10 @@
             var polyline = undefined;
             var location_from;
             var location_to;
-            var poly2;
             var timer_animate;
             var dist_route;
             var step;               // metres
             var interval;           // milliseconds
-			var is_force_panto = true;
             var curr_dist;
 			var cb_move_to_dist = undefined;
 			var directions_display = undefined;
@@ -229,24 +227,6 @@
             }
             
 
-            function update_poly( d ) {
-                var lastVertex = 1;
-                // Spawn a new polyline every 20 vertices, because updating a 100-vertex poly is too slow
-                if ( poly2.getPath().getLength() > 20 ) {
-                    poly2 = new google.maps.Polyline([polyline.getPath().getAt( lastVertex - 1 )]);
-                    // map.addOverlay( poly2 )
-                }
-
-                if ( polyline.GetIndexAtDistance(d) < lastVertex + 2 ) {
-                    if ( poly2.getPath().getLength() > 1 )
-                        poly2.getPath().removeAt(poly2.getPath().getLength()-1)
-                    poly2.getPath().insertAt( poly2.getPath().getLength(),polyline.GetPointAtDistance(d) );
-                } 
-                else {
-                    poly2.getPath().insertAt( poly2.getPath().getLength(),location_to.latlng );
-                }
-            }
-
             function cb_animate( d ) {
 
                 curr_dist = d;
@@ -258,10 +238,7 @@
                 
                 var p = polyline.GetPointAtDistance( d );
                 if ( !map.getBounds().contains( p ) )
-					if ( !map_is_shown ) {
-						console.log( "XXXX -> " + d );
-//                    	map.panTo( p );
-					}
+                   	map.panTo( p );
 
                 var bearing = polyline.Bearing( polyline.GetIndexAtDistance(d) );
                 console.log( "d=" + d + " - " + polyline.GetIndexAtDistance(d) + " / " + bearing);
@@ -271,7 +248,6 @@
                     pitch: 1
                 });
 
-                update_poly( d );
                 if ( step > 0 )
                     timer_animate = setTimeout( "cb_animate("+(d+step)+")", interval );
 
@@ -286,16 +262,14 @@
                     
                 dist_route = polyline.Distance();
                 map.setCenter( polyline.getPath().getAt(0) );
-
-                poly2 = new google.maps.Polyline({
-                    path: [polyline.getPath().getAt(0)], strokeColor:"#FFFF00", strokeWeight:3
-                });
+                var p = polyline.GetPointAtDistance( 50 );
+                if ( !map.getBounds().contains( p ) )
+                   	map.panTo( p );
 
                 timer_animate = setTimeout("cb_animate(50)",250);
             }
 
             function alt_map_panorama_full_screen_init1( ) {
-            	is_force_panto = true;
                 map.setOptions({ draggableCursor:'crosshair', zoom:14 });
                 alt_map_panorama_full_screen();
                 setTimeout( 'alt_map_panorama_full_screen_init2()', 250 );
@@ -303,7 +277,6 @@
             
             function alt_map_panorama_full_screen_init2( ) {
                 alt_map_panorama_full_screen();
-            	is_force_panto = false;
             }
             
             function do_start( ) {
@@ -333,7 +306,6 @@
             	map_is_shown = false;
                 setTimeout( 'alt_map_panorama_full_screen_init1()', 250 );
             	
-//            	document.getElementById('tr_config').style.display = "None";
                 document.getElementById("id_route1_from").disabled = true;
                 document.getElementById("id_route1_to").disabled = true;
 
@@ -399,12 +371,6 @@
                                 strokeColor: '#FFFF00',
                                 strokeWeight: 3
                             });
-
-                            poly2 = new google.maps.Polyline({
-                                path: [],
-                                strokeColor: '#FFFF00',
-                                strokeWeight: 3
-                            });     
 
                             // For each route, display summary information.
                             var path = response.routes[0].overview_path;
@@ -552,6 +518,7 @@
                     document.getElementById("id_td_panorama").style.display = "";
                     document.getElementById("id_td_panorama").style.height = "100%";
                     document.getElementById("id_td_panorama").style.width  = "100%";
+                    google.maps.event.trigger( panorama, 'resize' );
                 }
             	else {
                 	map_is_shown = true;
@@ -559,9 +526,8 @@
                     document.getElementById("td_map_canvas").style.width  = "100%";
                     document.getElementById("td_map_canvas").style.height = "100%";
                     document.getElementById("id_td_panorama").style.display = "None";
+                    google.maps.event.trigger( map, 'resize' );
             	}
-                google.maps.event.trigger( panorama, 'resize' );
-                google.maps.event.trigger( map, 'resize' );
             }
             
             function cb_panorama_click( evt ) {
@@ -634,8 +600,6 @@
                     pitch: 10
                 });
 
-                update_poly( new_pos );
-
 				cb_move_to_dist = undefined;
 
 				curr_dist = new_pos;
@@ -646,11 +610,6 @@
 					clearTimeout( cb_move_to_dist );
 				cb_move_to_dist = setTimeout( "move_to_dist(" + new_pos + ")", 25 );
             }
-
-			function cb_click_force_panto( cb ) {
-				console.log( "--> " + cb.checked );
-				is_force_panto = cb.checked;
-			}
 
 			function cb_route_from_or_to_changed( evt ) {
 			
@@ -731,10 +690,6 @@
                                  oninput="cb_interval_input( this.value )"
                                  onchange="cb_interval_changed( this.value )" >
                             </p>
-                        </div>
-                        <div style="width:100%" align="center">
-                            <label>Force Pan To</label>
-                            <input type="checkbox" id="id_check_force_panto" checked onclick="cb_click_force_panto(this)">
                         </div>
                         <br>
 
