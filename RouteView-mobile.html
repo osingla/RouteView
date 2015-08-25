@@ -115,10 +115,10 @@
                 background: #ccc;
             }
             
-			.pac-item-query { font-size: 28px; }
-			.pac-item { font-size: 28px; }
-			.pac-item-container { font-size: 28px; }
-			.pac-item-matched { font-size: 28px; }
+			.pac-item-query { font-size: 28px; ; line-height: 200%; }
+			.pac-item { font-size: 28px; ; line-height: 200%; }
+			.pac-item-container { font-size: 28px; line-height: 200%; }
+			.pac-item-matched { font-size: 28px; ; line-height: 200%; }
 
         </style>
 
@@ -146,12 +146,7 @@
             function initialize() {
             
                 var home = new google.maps.LatLng( 35.733435, -78.907684 );
-                var mapOptions = {
-                   center: home,
-                   zoom: 14
-                };
-            
-                map = new google.maps.Map( document.getElementById('map-canvas'), mapOptions );
+
                 var panorama_options = {
                     position: home,
                     pov: {
@@ -164,9 +159,19 @@
                     zoomControl: false,
                     clickToGo: false,
                     disableDoubleClickZoom: true,
+                    imageDateControl: false
                 };
-
                 panorama = new google.maps.StreetViewPanorama( document.getElementById('pano'), panorama_options );
+
+                var map_options = {
+                   center: home,
+                   zoom: 14,
+                   overviewMapControl: false,
+//                 streetViewControl: false,
+                   streetView: panorama
+                };
+                map = new google.maps.Map( document.getElementById('map-canvas'), map_options );
+
                 map.setStreetView( panorama );
 
                 var input_from = document.getElementById("id_route1_from");
@@ -693,7 +698,6 @@
                                  onchange="cb_interval_changed( this.value )" >
                             </p>
                         </div>
-                        <br>
 
                     </div>
                 </td>
