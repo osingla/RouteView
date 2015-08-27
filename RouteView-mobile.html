@@ -153,7 +153,6 @@
         <script>
 
         	var startup_done = false;
-            var collapsed = false;
             var map;
             var panorama;
             var map_is_shown;
@@ -167,6 +166,7 @@
             var curr_dist;
 			var cb_move_to_dist = undefined;
 			var directions_display = undefined;
+			var curr_layout;
 
             function initialize() {
             
@@ -234,9 +234,10 @@
                     	else if ( window.orientation == 0 ) {
                     		height_btn = "92px";
                     	}
-                		document.getElementById("id_btn_start").style.height = height_btn;
-                		document.getElementById("id_btn_stop").style.height  = height_btn;
-                		document.getElementById("id_btn_pause").style.height = height_btn;
+                		document.getElementById("id_btn_start").style.height  = height_btn;
+                		document.getElementById("id_btn_layout").style.height = height_btn;
+                		document.getElementById("id_btn_pause").style.height  = height_btn;
+                		document.getElementById("id_btn_stop").style.height   = height_btn;
                         google.maps.event.trigger( panorama, 'resize' );
                     }
                 };
@@ -338,14 +339,6 @@
 
             	map_is_shown = false;
             	
-                document.getElementById('id_btn_pause').style.display = "";
-                document.getElementById("id_btn_pause").disabled = false;
-                
-                document.getElementById('id_btn_stop').style.display = "";
-                document.getElementById("id_btn_stop").disabled = false;
-
-                document.getElementById("tr_btns_pause_stop").style.display = '';
-                
                 step = parseInt( document.getElementById("id_input_meters").value );
                 interval = parseInt( document.getElementById("id_input_interval").value );
                 console.log( "step=" + step + " interval=" + interval );
@@ -444,13 +437,51 @@
                 } // cb_make_route
 
         		document.getElementById("tr_config").style.display = "None";
-        		document.getElementById("tr_map_canvas").style.display = "";
+        		document.getElementById("td_map_canvas").style.display = "";
         		document.getElementById("tr_controls").style.display = "";
-              
+  
+                document.getElementById("id_btn_layout").disabled = false;
+                document.getElementById("id_btn_pause").disabled = false;
+                document.getElementById("id_btn_stop").disabled = false;
+                
+                curr_layout = 1;
+        		
 //				alt_map_panorama_full_screen();
 
             } // do_start
 
+            function do_layout( ) {
+
+            	if ( curr_layout == 1 ) {
+
+                    document.getElementById("td_map_canvas").style.display = "";
+                    document.getElementById("td_panorama").style.display = "";
+                    document.getElementById("td_map_canvas").style.width = "50%";
+                    document.getElementById("td_panorama").style.width  = "50%";
+                    google.maps.event.trigger( map, 'resize' );
+                    google.maps.event.trigger( panorama, 'resize' );
+
+	                curr_layout = 2;
+                
+            	}
+            	else if ( curr_layout == 2 ) {
+
+                    document.getElementById("td_map_canvas").style.display = "";
+                    document.getElementById("td_panorama").style.display = "None";
+                    document.getElementById("td_map_canvas").style.width = "100%";
+                    document.getElementById("td_panorama").style.width  = "100%";
+                    google.maps.event.trigger( map, 'resize' );
+                    google.maps.event.trigger( panorama, 'resize' );
+
+	                curr_layout = 1;
+
+            	}
+
+                google.maps.event.trigger( panorama, 'resize' );
+                google.maps.event.trigger( map, 'resize' );
+                
+            }
+            
             function do_pause( ) {
 
                 if ( document.getElementById("id_label_pause").innerHTML == "Pause" ) {
@@ -481,9 +512,9 @@
                 
                 document.getElementById("id_label_pause").innerHTML = "Pause";
                 
-                document.getElementById("tr_map_canvas").style.display = "None";
-                document.getElementById("tr_panorama").style.display = "None";
-        		document.getElementById("tr_controls").style.display = "None";
+                document.getElementById("td_map_canvas").style.display = "None";
+                document.getElementById("td_panorama").style.display = "None";
+        		document.getElementById("tr_controls").style.display = "";
         		document.getElementById("tr_config").style.display = "";
 
 //              map.setOptions({draggableCursor: 'hand'});
@@ -541,21 +572,17 @@
             
             function cb_map_click( evt ) {
             	console.log( "cb_map_click" );
-                document.getElementById("tr_map_canvas").style.display = "None";
-                document.getElementById("tr_panorama").style.display = "";
-//                document.getElementById("div_panorama").style.height = "100%";
-//                document.getElementById("div_panorama").style.width  = "100%";
-//                google.maps.event.trigger( panorama, 'resize' );
+                document.getElementById("td_map_canvas").style.display = "None";
+                document.getElementById("td_panorama").style.display = "";
+                google.maps.event.trigger( panorama, 'resize' );
             }
             
             function cb_panorama_click( evt ) {
    				if ( evt.handled != true ) {
             		console.log( "cb_panorama_click" );
-                    document.getElementById("tr_map_canvas").style.display = "";
-                    document.getElementById("tr_panorama").style.display = "None";
-//                    document.getElementById("div_map_canvas").style.width  = "100%";
-//                    document.getElementById("div_map_canvas").style.height = "100%";
-//                    google.maps.event.trigger( map, 'resize' );
+                    document.getElementById("td_map_canvas").style.display = "";
+                    document.getElementById("td_panorama").style.display = "None";
+                    google.maps.event.trigger( map, 'resize' );
    				}
             }
             
@@ -711,14 +738,11 @@
 			
 			</tr>
 			
-			<tr id="tr_map_canvas" style="display:None">
-				<td>
+			<tr >
+				<td id="td_map_canvas" style="display:None">
         			<div id="div_map_canvas"></div> 
 				</td>
-			</tr>
-
-			<tr id="tr_panorama" style="display:None">
-				<td>
+				<td id="td_panorama" style="display:None">
         			<div id="div_panorama"></div> 
 				</td>
 			</tr>
@@ -726,7 +750,10 @@
 			<tr id="tr_controls" style="height:1%; display:None">
 				<td>
                     <table width="100%" border="0" cellpadding="1" cellspacing="1">
-                        <tr id='tr_btns_pause_stop' style="display:">
+                        <tr>
+                            <td width="1%" align="center" height="24px">
+                                <button type="button" id="id_btn_layout" onclick="do_layout()" style="min-width:60px;height:92px;display:"disabled><b ><span style="font-size:175%">Layout</span></b></button>
+                            </td>
                             <td width="1%" align="center" height="24px">
                                 <button type="button" id="id_btn_pause" onclick="do_pause()" style="min-width:60px;height:92px;display:"disabled><b ><span style="font-size:175%" id="id_label_pause">Pause</span></b></button>
                             </td>
