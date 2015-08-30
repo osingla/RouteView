@@ -19,7 +19,6 @@ define( function( m ) {
     var polyline = [];
     var location_from = [];
     var location_to = [];
-    var poly2 = [];
     var timer_animate = [];
     var eol = [];
     var step;               			// meters
@@ -65,24 +64,6 @@ define( function( m ) {
         
     }
     
-    function updatePoly( i, d ) {
-        var lastVertex = 1;
-        // Spawn a new polyline every 30 vertices, because updating a 100-vertex poly is too slow
-        if ( poly2[i].getPath().getLength() > 30 ) {
-            poly2[i] = new google.maps.Polyline([polyline[i].getPath().getAt( lastVertex - 1 )]);
-            // map.addOverlay( poly2 )
-        }
-
-        if ( polyline[i].GetIndexAtDistance(d) < lastVertex + 2 ) {
-            if ( poly2[i].getPath().getLength() > 1 )
-                poly2[i].getPath().removeAt(poly2[i].getPath().getLength()-1)
-            poly2[i].getPath().insertAt( poly2[i].getPath().getLength(),polyline[i].GetPointAtDistance(d) );
-        } 
-        else {
-            poly2[i].getPath().insertAt( poly2[i].getPath().getLength(),location_to[i].latlng );
-        }
-    }
-
     function cb_animate( num_route, d ) {
 
 //    	alert( 'num_route=' + num_route );
@@ -108,7 +89,6 @@ define( function( m ) {
             pitch: (panorama_full_screen) ? 2 : 10
         });
 
-        updatePoly( num_route, d );
         if ( step > 0 )
             timer_animate[num_route] = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, '+(d+step)+',50); })', interval );
 
@@ -123,10 +103,6 @@ define( function( m ) {
             
         eol[route_num] = polyline[route_num].Distance();
         map.setCenter( polyline[route_num].getPath().getAt(0) );
-
-        poly2[route_num] = new google.maps.Polyline({
-            path: [polyline[route_num].getPath().getAt(0)], strokeColor:"#FFFF00", strokeWeight:3
-        });
 
         timer_animate[route_num] = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, 50); })', 250 );
     }
@@ -267,12 +243,6 @@ define( function( m ) {
                         strokeColor: '#FFFF00',
                         strokeWeight: 3
                     });
-
-                    poly2[route_num] = new google.maps.Polyline({
-                        path: [],
-                        strokeColor: '#FFFF00',
-                        strokeWeight: 3
-                    });     
 
                     // For each route, display summary information.
                     var path = route[route_num].overview_path;
@@ -584,8 +554,6 @@ define( function( m ) {
             heading: bearing,
             pitch: 10
         });
-
-        updatePoly( num_route, new_pos );
 
 		cb_move_to_dist = undefined;
 

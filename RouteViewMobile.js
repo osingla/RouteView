@@ -376,27 +376,48 @@ define( function( m ) {
             		dijit.byId('id_input_route').set( 'max', dist_meters, false );
             		dijit.byId('id_input_route').set( 'value', 0, false );
 
-                }
+                    polyline.setMap( map );
+                    map.fitBounds( bounds );
+                    start_driving( );  
+                    show_route_distance_duration( dist_route, duration_secs );
 
-                polyline.setMap( map );
-                map.fitBounds( bounds );
-                start_driving( );  
-                show_route_distance_duration( dist_route, duration_secs );
+            		document.getElementById("div_map_canvas").style.display = "";
+
+            		switch_to_panorama = false;
+
+            		dijit.byId('id_btn_split').set( 'disabled', false );
+            		dijit.byId('id_btn_pause').set( 'disabled', false );
+            		dijit.byId('id_btn_stop').set( 'disabled',  false );
+            		
+                    curr_layout = 1;
+                    
+                    do_split( );
+            		
+                }
+                else {
+                	
+                	exit_full_screen( );
+                	var message = "?";
+                    if ( status == google.maps.DirectionsStatus.UNKNOWN_ERROR )
+                    	message = "A directions request could not be processed due to a server error. The request may succeed if you try again.";
+                    else if ( status == google.maps.DirectionsStatus.OVER_QUERY_LIMIT )
+                    	message = "The webpage has gone over the requests limit in too short a period of time.";
+                    else if ( status == google.maps.DirectionsStatus.NOT_FOUND )
+                    	message = "At least one of the origin, destination, or waypoints could not be geocoded.";
+                    else if ( status == google.maps.DirectionsStatus.REQUEST_DENIED )
+                    	message = "The webpage is not allowed to use the directions service.";
+                    else if ( status == google.maps.DirectionsStatus.ZERO_RESULTS )
+                    	message = "No route could be found between the origin and destination.";
+                    else if ( status == google.maps.DirectionsStatus.INVALID_REQUEST )
+                    	message = "The DirectionsRequest provided was invalid.";
+                    console.log( message );
+
+                }
 
             }
 
         } // cb_make_route
 
-		document.getElementById("div_map_canvas").style.display = "";
-
-		switch_to_panorama = true;
-
-		dijit.byId('id_btn_split').set( 'disabled', false );
-		dijit.byId('id_btn_pause').set( 'disabled', false );
-		dijit.byId('id_btn_stop').set( 'disabled',  false );
-		
-        curr_layout = 1;
-		
     } // do_start
 	
     function do_split( ) {
