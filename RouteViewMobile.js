@@ -103,14 +103,21 @@ define( function( m ) {
 	
     function cb_map_click( evt ) {
     	console.log( "cb_map_click" );
+    	if ( curr_layout == 2 )
+    		do_split( );
         document.getElementById("div_map_canvas").style.display = "None";
+        document.getElementById("div_panorama").style.width = (w_body)+"px";
         document.getElementById("div_panorama").style.display = "";
+        google.maps.event.trigger( map, 'resize' );
         google.maps.event.trigger( panorama, 'resize' );
     }
     
     function cb_panorama_click( evt ) {
 		if ( evt.handled != true ) {
 			console.log( "cb_panorama_click" );
+	    	if ( curr_layout == 2 )
+	    		do_split( );
+            document.getElementById("div_map_canvas").style.width = (w_body)+"px";
             document.getElementById("div_map_canvas").style.display = "";
             document.getElementById("div_panorama").style.display = "None";
             google.maps.event.trigger( map, 'resize' );
@@ -394,9 +401,14 @@ define( function( m ) {
 	
     function do_split( ) {
 
+    	var saved_zoom = map.getZoom( );
     	if ( curr_layout == 1 ) {
 
-            document.getElementById("div_map_canvas").style.width = (w_body/2)+"px";
+    		dijit.byId('id_btn_split').set( 'label', "Unsplit" );
+
+    		map.setOptions({zoom: 15});
+
+    		document.getElementById("div_map_canvas").style.width = (w_body/2)+"px";
             document.getElementById("div_panorama").style.width  = (w_body/2)+"px";
             document.getElementById("div_panorama").style.left  = (w_body/2)+"px";
             document.getElementById("div_map_canvas").style.display = "";
@@ -407,9 +419,14 @@ define( function( m ) {
     	}
     	else if ( curr_layout == 2 ) {
 
+    		dijit.byId('id_btn_split').set( 'label', "Split" );
+
+    		map.setOptions({zoom: saved_zoom});
+
             document.getElementById("div_map_canvas").style.width = (w_body)+"px";
             document.getElementById("div_map_canvas").style.display = "";
             document.getElementById("div_panorama").style.display = "None";
+            document.getElementById("div_panorama").style.left  = "0px";
 
             curr_layout = 1;
 
