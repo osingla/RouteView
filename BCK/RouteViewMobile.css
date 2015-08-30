@@ -1,0 +1,87 @@
+
+.bold {
+	font-weight: bold;
+}
+
+.windows_theme .mblSlider {
+	margin: 0 15px;
+	width: 150px !important;
+}
+
+.mblTextArea, .mblTextBox {
+	font-size: 13px;
+}
+
+.mblSimpleDialogInput {
+	margin: 7px 0 14px;
+	width: 260px;
+}
+.mblSimpleDialogButton {
+	margin: 7px 0 0;
+	width: 262px;
+	font-size: 17px;
+	font-weight: bold;
+	opacity: 0.95;
+}
+.mblSimpleDialogButton2l {
+	float: left;
+	width: 127px;
+	margin: 7px 0 0;
+	font-size: 17px;
+	font-weight: bold;
+	opacity: 0.95;
+}
+.mblSimpleDialogButton2r {
+	float: right;
+	width: 127px;
+	margin: 7px 0 0;
+	font-size: 17px;
+	font-weight: bold;
+	opacity: 0.95;
+}
+.mblSimpleDialog .mblProgressIndicator {
+	position: relative;
+	margin: 14px 0 7px;
+	top: 0;
+}
+
+.mblSimpleDialog .mblListItem {
+	text-align: left;
+}
+
+.windows_theme .mblDomButtonSilverCircleGrayButton > div,
+.windows_theme .mblDomButtonSilverCircleGreenButton > div {
+	background-color: transparent !important;
+	background-image: none !important;
+	border: 2px solid white;
+	border-radius: 25px;
+}
+.windows_theme .mblDomButtonSilverCircleGrayButton > div > div {
+	background-color: transparent !important;
+	background-image: none !important;
+	border: none !important;
+}
+.windows_theme .mblDomButtonSilverCircleGreenButton > div > div {
+	background-color: white !important;
+}
+
+html, body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+#view_config {
+	height: 100%;
+}
+
+#div_map_canvas {
+    width: 100%;
+    height: 100%;
+}
+
+#div_panorama {
+    width: 100%;
+    height: 100%;
+}
