@@ -17,12 +17,14 @@ define( function( m ) {
     var location_to;
     var timer_animate;
     var dist_route;
+    var duration_secs;
     var step;               // metres
     var interval;           // milliseconds
     var curr_dist;
 	var cb_move_to_dist = undefined;
 	var directions_display = undefined;
-	var curr_layout;
+	var curr_layout;		// 1:split 2:unsplit
+	var show_duration;		// 1:time 2:km 3:miles
     
     function enter_full_screen( ) {
 
@@ -93,6 +95,12 @@ define( function( m ) {
 		
 	}
 
+	function click_duration_distance( ) {
+		if ( ++show_duration == 4 )
+			show_duration = 1;
+        show_route_distance_duration( dist_route, duration_secs );
+	}
+	
     function cb_map_click( evt ) {
     	console.log( "cb_map_click" );
         document.getElementById("div_map_canvas").style.display = "None";
@@ -200,30 +208,35 @@ define( function( m ) {
 
         console.log( "dist_meters=" + dist_meters + " duration_secs=" + duration_secs );
 
-/*
-        document.getElementById("id_route1_dist").innerHTML = Math.round( dist_meters / 1000 );
-*/
-        
     	require(["dojo/dom"], function( dom ) {
 
-    	    var nb_hours   = Math.floor( duration_secs / 3600 );
-            var nb_minutes = Math.floor( (duration_secs - (nb_hours * 3600)) / 60 );
-            var nb_seconds = Math.floor( duration_secs - (nb_hours * 3600) - (nb_minutes * 60) );
-            if ( nb_hours == 0 ) {
-                if ( nb_minutes == 0 ) {
-            	    dom.byId("td_controls_duration").innerHTML = nb_seconds + '"';
+    		if ( show_duration  == 1 ) {
+        	    var nb_hours   = Math.floor( duration_secs / 3600 );
+                var nb_minutes = Math.floor( (duration_secs - (nb_hours * 3600)) / 60 );
+                var nb_seconds = Math.floor( duration_secs - (nb_hours * 3600) - (nb_minutes * 60) );
+                if ( nb_hours == 0 ) {
+                    if ( nb_minutes == 0 ) {
+                	    dom.byId("td_controls_duration").innerHTML = nb_seconds + '"';
+                    }
+                    else {
+                        if ( nb_seconds == 0 )
+                    	    dom.byId("td_controls_duration").innerHTML = nb_minutes + "'";
+                        else
+                    	    dom.byId("td_controls_duration").innerHTML = nb_minutes + "'" + nb_seconds + '"';
+                    }
                 }
                 else {
-                    if ( nb_seconds == 0 )
-                	    dom.byId("td_controls_duration").innerHTML = nb_minutes + "'";
-                    else
-                	    dom.byId("td_controls_duration").innerHTML = nb_minutes + "'" + nb_seconds + '"';
+            	    dom.byId("td_controls_duration").innerHTML = nb_hours + "h" + nb_minutes + "'";
                 }
-            }
-            else {
-        	    dom.byId("td_controls_duration").innerHTML = nb_hours + "h" + nb_minutes + "'" + nb_seconds + '"';
-            }
-        });
+    		}
+    		else if ( show_duration  == 2 ) {
+    			dom.byId("td_controls_duration").innerHTML = Math.round( dist_meters / 1000 ) + "km";
+    		}
+    		else if ( show_duration  == 3 ) {
+    			dom.byId("td_controls_duration").innerHTML = Math.round( dist_meters * 0.000621371 ) + "m";
+    		}
+
+    	});
 
     }
     
@@ -329,7 +342,7 @@ define( function( m ) {
 
                     // Markers
                     var dist_meters = 0;
-                    var duration_secs = 0;
+                    duration_secs = 0;
                     for ( i = 0; i < legs.length; i++) {
                         dist_meters += legs[i].distance.value;
                         duration_secs += legs[i].duration.value;
@@ -352,8 +365,7 @@ define( function( m ) {
                             }
                         }
                     }
-                    
-                    show_route_distance_duration( dist_meters, duration_secs );
+
             		dijit.byId('id_input_route').set( 'max', dist_meters, false );
             		dijit.byId('id_input_route').set( 'value', 0, false );
 
@@ -362,6 +374,7 @@ define( function( m ) {
                 polyline.setMap( map );
                 map.fitBounds( bounds );
                 start_driving( );  
+                show_route_distance_duration( dist_route, duration_secs );
 
             }
 
@@ -554,7 +567,7 @@ define( function( m ) {
        	                console.log( "Orientation changed" );
        	            	if ( (window.orientation == -90) || (window.orientation == 90) || (window.orientation == 270) ) {
        	            		console.log( "Window orientation=" + window.orientation );
-       	            		if ( curr_layout != 1 )
+       	            		if ( curr_layout == 2 )
        	            			do_split( );
        	            	}
        	            	else if ( (window.orientation == 0) || (window.orientation == 180) ) {
@@ -563,6 +576,8 @@ define( function( m ) {
        	                google.maps.event.trigger( panorama, 'resize' );
        	            }
         		}, false);
+        		
+        		show_duration = true;
         		
             });
 
@@ -599,9 +614,9 @@ define( function( m ) {
 		cb_step_changed:     function( ) { cb_step_changed(); },
 		cb_interval_changed: function( ) { cb_interval_changed(); },
 		
-		cb_click_force_panto:  function( ) { cb_click_force_panto(); },
-
 		cb_route_from_or_to_changed: function( ) { cb_route_from_or_to_changed(); },
+
+		click_duration_distance:   function( ) { click_duration_distance(); },
 		
     };
  
