@@ -46,7 +46,8 @@
 		        "dojox/mobile/Slider",
 		        "dojox/mobile/TextBox",
 		        "dojox/mobile/ToggleButton",
-		        "dojox/mobile/SimpleDialog"
+		        "dojox/mobile/SimpleDialog",
+		        "dojox/mobile/Icon"
 	        ]);
         </script>
 
@@ -58,7 +59,22 @@
 
 	    <div data-dojo-type="dojox.mobile.View" data-dojo-props='selected:true' id="view_config">
 
-		    <h1 data-dojo-type="dojox.mobile.Heading">Route View</h1>
+		    <h1 data-dojo-type="dojox.mobile.Heading">
+		    	<table style="width:100%">
+		    		<tr>
+					    <td style="width:99%; text-align:center; vertical-align:middle">
+					    	Route View
+		    			</td>
+					    <td style="width:1%; text-align:right; vertical-align:middle">
+					    	<div data-dojo-type="dojox.mobile.Icon"
+								 data-dojo-props='icon:"icons/icon-about.png"'
+		         	    		 onclick='require(["RouteViewMobile.js"], function( s ) { s.show_dialog("dlg_about"); })'>
+							</div>
+		    			</td>
+		    		</tr>
+		    	</table>
+		    	
+		    </h1>
 
 		    <div data-dojo-type="dojox.mobile.RoundRect" data-dojo-props='shadow:true' align="center">
 
@@ -81,7 +97,7 @@
 
 		    <div data-dojo-type="dojox.mobile.RoundRect" data-dojo-props='shadow:true' align="center">
 			    <button data-dojo-type="dojox.mobile.Button" 
-			    		onclick='require(["RouteViewMobile.js"], function( s ) { s.show_dialog("dlg_login"); })'>
+			    		onclick='require(["RouteViewMobile.js"], function( s ) { s.show_dialog("dlg_settings"); })'>
 			    	Settings
 			    </button>
 		    </div>
@@ -95,7 +111,31 @@
 		        </button>
 		    </div>
 
-	        <div id="dlg_login" data-dojo-type="dojox.mobile.SimpleDialog">
+			<!-- ABOUT DIALOG -->
+	        <div id="dlg_about" data-dojo-type="dojox.mobile.SimpleDialog">
+		        <div class="mblSimpleDialogTitle">About RouteView</div>
+
+				<span>
+					This application let you create a route with Google Maps, and then navigate virtually through this route using Google Street View. 
+					<br><br>
+					(C) Olivier Singla 2015
+					<br>
+					Feedback welcome...
+					<br>
+					<b>olivier</b>&nbsp;<i>dot</i>&nbsp;<b>singla</b>&nbsp;<i>at</i>&nbsp;<b>gmail</b>&nbsp;<i>dot</i>&nbsp;<b>com</b>
+					<br>
+					
+				</span>
+
+		        <button data-dojo-type="dojox.mobile.Button" class="mblSimpleDialogButton2r mblBlueButton" 
+		         	    onclick='require(["RouteViewMobile.js"], function( s ) { s.hide_dialog("dlg_about"); })'>
+			        Close
+		        </button>
+
+	        </div>
+
+			<!-- SETTINGS DIALOG -->
+	        <div id="dlg_settings" data-dojo-type="dojox.mobile.SimpleDialog">
 		        <div class="mblSimpleDialogTitle">Settings</div>
 		        <table style="width:100%">
 			        <tr style="text-align:center">
@@ -135,10 +175,23 @@
 			        </tr>
 		        </table>
 
-		        <button data-dojo-type="dojox.mobile.Button" class="mblSimpleDialogButton2r mblBlueButton" style="font-size:75%;" 
-		         	    onclick='require(["RouteViewMobile.js"], function( s ) { s.hide_dialog("dlg_login"); })'>
-			        OK
+				<table>
+					<tr>
+						<td>
+		        <button data-dojo-type="dojox.mobile.Button" class="mblSimpleDialogButton2l mblBlueButton" disabled
+		         	    onclick='require(["RouteViewMobile.js"], function( s ) { s.hide_dialog("dlg_settings"); })'>
+			        Advanced
 		        </button>
+						</td>
+						<td>
+		        <button data-dojo-type="dojox.mobile.Button" class="mblSimpleDialogButton2r mblBlueButton" 
+		         	    onclick='require(["RouteViewMobile.js"], function( s ) { s.hide_dialog("dlg_settings"); })'>
+			        Close
+		        </button>
+						</td>
+					</tr>
+				</table>
+
 	        </div>
 
 	    </div>

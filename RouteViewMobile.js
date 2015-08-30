@@ -132,7 +132,7 @@ define( function( m ) {
             position: home,
             pov: {
                 heading: 34,
-                pitch: 10
+                pitch: 1
             },
             enableCloseButton: false,
             linksControl: false,
@@ -178,16 +178,12 @@ define( function( m ) {
 
         var bearing = polyline.Bearing( polyline.GetIndexAtDistance(d) );
         console.log( "d=" + d + " - " + polyline.GetIndexAtDistance(d) + " / " + bearing);
-        panorama.setPosition( new google.maps.LatLng( p.G, p.K ) );
-        panorama.setPov({
-            heading: bearing,
-            pitch: 1
-        });
+        panorama.setOptions( { pov: {heading: bearing, pitch: 1}, position: new google.maps.LatLng( p.G, p.K )} );
 
         if ( step > 0 )
             timer_animate = setTimeout( 'require(["RouteViewMobile.js"], function( s ) { s.cb_animate('+(d+step)+',50); })', interval );
 
-        dijit.byId('id_input_route').set( 'value', d );
+        dijit.byId('id_input_route').set( 'value', d, false );
 
         if ( switch_to_panorama ) {
         	document.getElementById("div_map_canvas").style.display = "None"; 
@@ -542,6 +538,8 @@ define( function( m ) {
     
 	function move_to_dist( new_pos ) {
 
+		console.log( "move_to_dist: " + new_pos );
+		
 		if ( timer_animate != undefined ) { 
             clearTimeout( timer_animate );
             timer_animate = setTimeout( 'require(["RouteViewMobile.js"], function( s ) { s.cb_animate(' + (new_pos) + '); })', interval );
@@ -552,11 +550,7 @@ define( function( m ) {
             map.panTo( p );
 
         var bearing = polyline.Bearing( polyline.GetIndexAtDistance( new_pos ) );
-        panorama.setPosition( new google.maps.LatLng( p.G, p.K ) );
-        panorama.setPov({
-            heading: bearing,
-            pitch: 10
-        });
+        panorama.setOptions( { pov: {heading: bearing, pitch: 1}, position: new google.maps.LatLng( p.G, p.K )} );
 
 		cb_move_to_dist = undefined;
 
@@ -580,13 +574,16 @@ define( function( m ) {
             ready( function() {
             	
             	var input_from = dom.byId('id_route1_from');
-            	var autocomplete_from = new google.maps.places.Autocomplete(input_from);
+            	var autocomplete_options = {
+            		types: ['geocode'] //this should work !
+            	};
+            	var autocomplete_from = new google.maps.places.Autocomplete(input_from, autocomplete_options);
         		on( input_from, "change", function( evt ) {
         			cb_route_from_or_to_changed( evt );
        			});
 
             	var input_to = dom.byId('id_route1_to');
-    	        var autocomplete_to = new google.maps.places.Autocomplete(input_to);
+    	        var autocomplete_to = new google.maps.places.Autocomplete(input_to, autocomplete_options);
         		on( input_to, "change", function( evt ) {
         			cb_route_from_or_to_changed( evt );
        			});
@@ -632,6 +629,8 @@ define( function( m ) {
 
         initialize: function( ) { initialize( ); },
 
+        show_about: function( dlg ) { show_about( dlg ); },
+        
         show_dialog: function( dlg ) { show_dialog( dlg ); },
         hide_dialog: function( dlg ) { hide_dialog( dlg ); },
 
