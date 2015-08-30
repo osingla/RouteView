@@ -239,7 +239,9 @@ define( function( m ) {
     	});
     	
     	enter_full_screen( );
-    	screen.orientation.lock('landscape');
+    	screen.orientation.lock('landscape').catch( function() {
+    		console.log( "Orientation is not supported on this device." );
+    	});
 
 /*
     	require(["dojo/on"], function( on ) {
@@ -525,7 +527,7 @@ define( function( m ) {
     	require(["dojo/dom", "dojo/on", "dojo/dom-style", "dojo/dom-geometry", "dojo/ready"], function( dom, on, style, domGeom, ready ) {
     		
             ready( function() {
-
+            	
             	var input_from = dom.byId('id_route1_from');
             	var autocomplete_from = new google.maps.places.Autocomplete(input_from);
         		on( input_from, "change", function( evt ) {
@@ -550,12 +552,12 @@ define( function( m ) {
        	            if (window.orientation !== previous_orientation ) {
        	            	previous_orientation = window.orientation;
        	                console.log( "Orientation changed" );
-       	            	if ( (window.orientation == -90) || (window.orientation == 90) ) {
+       	            	if ( (window.orientation == -90) || (window.orientation == 90) || (window.orientation == 270) ) {
        	            		console.log( "Window orientation=" + window.orientation );
        	            		if ( curr_layout != 1 )
        	            			do_split( );
        	            	}
-       	            	else if ( window.orientation == 0 ) {
+       	            	else if ( (window.orientation == 0) || (window.orientation == 180) ) {
        	            		console.log( "Window orientation=" + window.orientation );
        	            	}
        	                google.maps.event.trigger( panorama, 'resize' );
