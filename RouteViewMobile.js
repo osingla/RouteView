@@ -225,7 +225,7 @@ define( function( m ) {
     	});
     	
     	enter_full_screen( );
-//    	screen.orientation.lock('landscape');
+    	screen.orientation.lock('landscape');
 
 /*
     	require(["dojo/on"], function( on ) {
@@ -410,6 +410,8 @@ define( function( m ) {
 
     	exit_full_screen( );
     	
+    	screen.orientation.unlock();
+
     	document.getElementById('id_body').style.MozTransform = "scale(1.0, 1.0)";
     	document.getElementById('id_body').style.zoom = "100%";
 		document.getElementById('id_body').style.zoom = "1.0";
