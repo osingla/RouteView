@@ -465,7 +465,13 @@ define( function( m ) {
 //    	if ( navigator.geolocation ) 
 //    		navigator.geolocation.getCurrentPosition( function( pos ) { home = pos.coords; console.log( home ); } );
     	
-        var map_options = {
+    	require(["dojo/dom"], function( dom ) {
+    		for ( num_route = 0; num_route < 1; num_route++ )
+    			for ( var n = 0; n < MAX_NB_WAYPOINTS+2 - 1; n++ ) 
+    				new google.maps.places.Autocomplete( dom.byId('id_route'+(num_route+1)+'_wp'+n) );
+    	});
+
+    	var map_options = {
            center: home,
            zoom: 14,
 //         draggableCursor: 'crosshair',            
@@ -690,6 +696,8 @@ define( function( m ) {
 //		dijit.byId('id_btn_route').set( 'disabled', false );
 //		dijit.byId('id_btn_play').set( 'disabled', true );
         
+    	update_btns_remove_up_down( );
+    	
     	if ( !dijit.byId( "id_btn_play" ).get( "disabled" ) )
     		do_route();
     }
@@ -902,8 +910,9 @@ define( function( m ) {
         var first_hidden = find_first_hidden( num_route);
     	console.log( "first_hidden=" + first_hidden );
 
+		dijit.byId('id_route'+(num_route+1)+'_wp0').set( 'placeHolder', "Enter an origin" );
 		var origin = dijit.byId('id_route'+(num_route+1)+'_wp0').get( 'value' );
-   		dijit.byId('id_btn_add_'+(num_route+1)+'_0').set( 'disabled', (first_hidden > 2) ? false : true );
+   		dijit.byId('id_btn_add_'+(num_route+1)+'_0').set( 'disabled', (first_hidden < (MAX_NB_WAYPOINTS+2)) ? false : true );
    		dijit.byId('id_btn_remove_'+(num_route+1)+'_0').set( 'disabled', (first_hidden > 2) ? false : true );
    		dijit.byId('id_btn_down_'+(num_route+1)+'_0').set( 'disabled', (origin == '') ? true : false ); 
     	
@@ -915,13 +924,14 @@ define( function( m ) {
 	   		dijit.byId('id_btn_down_'+(num_route+1)+'_'+n).set( 'disabled', (waypoint == '') ? true : false ); 
 		}
 		
-   		dijit.byId('id_btn_add_'+(num_route+1)+'_'+(first_hidden-1)).set( 'disabled', (first_hidden > 2) ? false : true );
+		dijit.byId('id_route'+(num_route+1)+'_wp'+(first_hidden-1)).set( 'placeHolder', "Enter a destination" );
+   		dijit.byId('id_btn_add_'+(num_route+1)+'_'+(first_hidden-1)).set( 'disabled', (first_hidden < (MAX_NB_WAYPOINTS+2)) ? false : true );
    		dijit.byId('id_btn_remove_'+(num_route+1)+'_'+(first_hidden-1)).set( 'disabled', (first_hidden > 2) ? false : true );
 		var destination = dijit.byId('id_route'+(num_route+1)+'_wp'+(first_hidden-1)).get( 'value' );
    		dijit.byId('id_btn_up_'+(num_route+1)+'_'+(first_hidden-1)).set( 'disabled', (destination == '') ? true : false );
    		dijit.byId('id_btn_down_'+(num_route+1)+'_'+(first_hidden-1)).set( 'disabled', true );
     	
-	}
+	} // update_btns_remove_up_down
 
     
 	// ---------
