@@ -471,7 +471,7 @@ define( function( m ) {
      		domStyle.set( "div_map_canvas", "width", w_body+"px" );
      		domStyle.set( "div_map_canvas", "height", (h_body-h_controls)+"px" );
 //     		domGeom.setContentSize( dom.byId("div_map_canvas"), {w:w_body, h:h_body-h_controls} );
-
+     		
      		domStyle.set( "div_panorama", "width", w_body+"px" );
      		domStyle.set( "div_panorama", "height", (h_body-h_controls)+"px" );
 //     		domGeom.setContentSize( dom.byId("div_panorama"), {w:w_body, h:h_body-h_controls} );
@@ -479,8 +479,10 @@ define( function( m ) {
        		domStyle.set( "div_controls", "top", (h_body-h_controls)+"px" );
        		domGeom.setContentSize( dom.byId("div_controls"), {w:w_body-10}, computedStyle );
 
-            google.maps.event.trigger( map, 'resize' );
-            google.maps.event.trigger( panorama, 'resize' );
+			if ( map != undefined )
+				google.maps.event.trigger( map, 'resize' );
+			if ( panorama != undefined )
+				google.maps.event.trigger( panorama, 'resize' );
     	});
 		
     }
