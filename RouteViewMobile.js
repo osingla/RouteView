@@ -64,6 +64,20 @@ define( function( m ) {
         	registry.byId(dlg).hide();
         });
 	}
+
+	function cb_meters_changed( ) { 
+        var new_step = dijit.byId('id_input_meters').get( 'value' );
+    	require(["dojo/dom"], function( dom ) {
+    		dom.byId("id_meters").innerHTML = new_step;
+    	});
+	}
+	
+	function cb_interval_changed( ) {
+        var new_interval = dijit.byId('id_input_interval').get( 'value' );
+    	require(["dojo/dom"], function( dom ) {
+    		dom.byId("id_interval").innerHTML = new_interval;
+    	});
+	}
 	
 	function cb_route_from_or_to_changed( evt ) {
 		
@@ -564,6 +578,9 @@ define( function( m ) {
         show_dialog: function( dlg ) { show_dialog( dlg ); },
         hide_dialog: function( dlg ) { hide_dialog( dlg ); },
 
+        cb_meters_changed:   function( ) { cb_meters_changed( ); },
+        cb_interval_changed: function( ) { cb_interval_changed( ); },
+        
         do_start:  function( ) { do_start(); },
         do_split:  function( ) { do_split(); },
 		do_pause:  function( ) { do_pause(); },
