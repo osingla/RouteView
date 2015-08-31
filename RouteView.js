@@ -83,17 +83,20 @@ define( function( m ) {
 
         var bearing = polyline[num_route].Bearing( polyline[num_route].GetIndexAtDistance(d) );
         console.log( "d=" + d + " - " + polyline[num_route].GetIndexAtDistance(d) + " / " + bearing);
+        panorama.setOptions( { pov: {heading: bearing, pitch: 1}, position: new google.maps.LatLng( p.G, p.K )} );
+/*
         panorama.setPosition( new google.maps.LatLng( p.G, p.K ) );
         panorama.setPov({
             heading: bearing,
             pitch: (panorama_full_screen) ? 2 : 10
         });
+*/
 
         if ( step > 0 )
             timer_animate[num_route] = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, '+(d+step)+',50); })', interval );
 
         // Update route slider
-		dijit.byId('id_input_route').set( 'value', d );
+		dijit.byId('id_input_route').set( 'value', d, false );
     }
 
     function start_driving( route_num ) {
@@ -382,6 +385,7 @@ define( function( m ) {
         }
 
 		dijit.byId('id_input_route').set( 'disabled', false );
+		dijit.byId('id_input_route').set( 'intermediateChanges', true );
 
         var renderer_options = { draggable: false };
        	directions_display[0].setOptions( renderer_options );
@@ -407,6 +411,7 @@ define( function( m ) {
 		dijit.byId('id_btn_stop').set( 'disabled', true );
 		
 		dijit.byId('id_input_route').set( 'disabled', true );
+		dijit.byId('id_input_route').set( 'intermediateChanges', false );
 		
         var renderer_options = { draggable: false };
        	directions_display[0].setOptions( renderer_options );
