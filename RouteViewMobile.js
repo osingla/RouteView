@@ -558,7 +558,6 @@ define( function( m ) {
 	}
 
     function cb_route_input( ) {
-		
         var new_pos = dijit.byId('id_input_route').get( 'value' );
 		if ( cb_move_to_dist != undefined )
 			clearTimeout( cb_move_to_dist );

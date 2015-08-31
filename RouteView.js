@@ -30,7 +30,7 @@ define( function( m ) {
 	var directions_display = [];
 	var route = [];
 
-    function show_route_distance_duration( route_num, dist_meters, duration_secs ) {
+    function show_route_distance_duration( num_route, dist_meters, duration_secs ) {
 
         console.log( "dist_meters=" + dist_meters + " duration_secs=" + duration_secs );
 
@@ -66,11 +66,8 @@ define( function( m ) {
     
     function cb_animate( num_route, d ) {
 
-//    	alert( 'num_route=' + num_route );
-//    	alert( 'd=' + d );
-    	
         curr_dist = d;
-
+        
         if ( d > eol[num_route] ) {
             console.log( "Route " + num_route + " is done" );
             return;
@@ -84,13 +81,6 @@ define( function( m ) {
         var bearing = polyline[num_route].Bearing( polyline[num_route].GetIndexAtDistance(d) );
         console.log( "d=" + d + " - " + polyline[num_route].GetIndexAtDistance(d) + " / " + bearing);
         panorama.setOptions( { pov: {heading: bearing, pitch: 1}, position: new google.maps.LatLng( p.G, p.K )} );
-/*
-        panorama.setPosition( new google.maps.LatLng( p.G, p.K ) );
-        panorama.setPov({
-            heading: bearing,
-            pitch: (panorama_full_screen) ? 2 : 10
-        });
-*/
 
         if ( step > 0 )
             timer_animate[num_route] = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, '+(d+step)+',50); })', interval );
@@ -99,15 +89,15 @@ define( function( m ) {
 		dijit.byId('id_input_route').set( 'value', d, false );
     }
 
-    function start_driving( route_num ) {
+    function start_driving( num_route ) {
         
-        if ( timer_animate[route_num] ) 
-            clearTimeout( timer_animate[route_num] );
+        if ( timer_animate[num_route] ) 
+            clearTimeout( timer_animate[num_route] );
             
-        eol[route_num] = polyline[route_num].Distance();
-        map.setCenter( polyline[route_num].getPath().getAt(0) );
+        eol[num_route] = polyline[num_route].Distance();
+        map.setCenter( polyline[num_route].getPath().getAt(0) );
 
-        timer_animate[route_num] = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, 50); })', 250 );
+        timer_animate[num_route] = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, 50); })', 250 );
     }
 
     function find_first_hidden( num_route ) {
@@ -132,12 +122,12 @@ define( function( m ) {
 
     	if ( directions_display[0] != undefined ) {
     		console.log( "Delete current route" )
-    		var route_num = 0;
-    		directions_display[route_num].setMap( null );
-        	directions_display[route_num] = undefined;
-        	if ( polyline[route_num] != undefined ) {
-        		polyline[route_num].setMap( null );
-        		polyline[route_num] = undefined;
+    		var num_route = 0;
+    		directions_display[num_route].setMap( null );
+        	directions_display[num_route] = undefined;
+        	if ( polyline[num_route] != undefined ) {
+        		polyline[num_route].setMap( null );
+        		polyline[num_route] = undefined;
         	}
     	}
 
@@ -174,11 +164,11 @@ define( function( m ) {
         end_location[num_route] = dijit.byId('id_route'+(num_route+1)+'_wp'+(first_hidden-1)).get( 'value' );
         console.log( "to   = " + end_location[num_route] );
 
-        for ( var route_num = 0; route_num < start_location.length; route_num++ ) {
+        for ( var num_route = 0; num_route < start_location.length; num_route++ ) {
 
-            directions_service[route_num] = new google.maps.DirectionsService( );
+            directions_service[num_route] = new google.maps.DirectionsService( );
             
-            directions_display[route_num] = new google.maps.DirectionsRenderer({
+            directions_display[num_route] = new google.maps.DirectionsRenderer({
                 draggable: true,
                 map: map,
                 hideRouteList: false,
@@ -186,9 +176,9 @@ define( function( m ) {
                 suppressMarkers : false,
              });
 
-            directions_display[route_num].addListener('directions_changed', function() {
-            	var route_num = 0;
-            	var new_dir = directions_display[route_num].getDirections();
+            directions_display[num_route].addListener('directions_changed', function() {
+            	var num_route = 0;
+            	var new_dir = directions_display[num_route].getDirections();
                 console.log( new_dir );
                 var index_waypoint = new_dir.request.j;
                 if ( index_waypoint != undefined ) {
@@ -214,8 +204,8 @@ define( function( m ) {
             });
 
             var request = {
-                origin: start_location[route_num],
-                destination: end_location[route_num],
+                origin: start_location[num_route],
+                destination: end_location[num_route],
                 travelMode: google.maps.DirectionsTravelMode.DRIVING,
                 waypoints: way_points,
                 optimizeWaypoints: false,
@@ -223,33 +213,33 @@ define( function( m ) {
                 avoidTolls: no_toll
             };  
 
-            directions_service[route_num].route( request, cb_make_route( route_num ) );
+            directions_service[num_route].route( request, cb_make_route( num_route ) );
 
         }
         
-        function cb_make_route( route_num ) {
+        function cb_make_route( num_route ) {
 
             return function( response, status ) {
 
                 if ( status == google.maps.DirectionsStatus.OK ) {
 
-                	directions_display[route_num].setMap( map );
-                	directions_display[route_num].setDirections( response );
+                	directions_display[num_route].setMap( map );
+                	directions_display[num_route].setDirections( response );
 
                     var bounds = new google.maps.LatLngBounds();
-                    route[route_num] = response.routes[0];
-                    location_from[route_num] = new Object();
-                    location_to[route_num] = new Object();
+                    route[num_route] = response.routes[0];
+                    location_from[num_route] = new Object();
+                    location_to[num_route] = new Object();
 
-                    polyline[route_num] = new google.maps.Polyline({
+                    polyline[num_route] = new google.maps.Polyline({
                         path: [],
                         strokeColor: '#FFFF00',
                         strokeWeight: 3
                     });
 
                     // For each route, display summary information.
-                    var path = route[route_num].overview_path;
-                    var legs = route[route_num].legs;
+                    var path = route[num_route].overview_path;
+                    var legs = route[num_route].legs;
 
                     // Markers
                     var dist_meters = 0;
@@ -259,11 +249,11 @@ define( function( m ) {
                         duration_secs += legs[i].duration.value;
                         console.log( i + ": m=" + legs[i].distance.value + " secs=" + legs[i].duration.value );
                         if ( i == 0 ) {
-                            location_from[route_num].latlng  = legs[i].start_location;
-                            location_from[route_num].address = legs[i].start_address;
+                            location_from[num_route].latlng  = legs[i].start_location;
+                            location_from[num_route].address = legs[i].start_address;
                         }
-                        location_to[route_num].latlng  = legs[i].end_location;
-                        location_to[route_num].address = legs[i].end_address;
+                        location_to[num_route].latlng  = legs[i].end_location;
+                        location_to[num_route].address = legs[i].end_address;
                         var steps = legs[i].steps;
 
                         for ( j = 0; j < steps.length; j++) {
@@ -271,15 +261,15 @@ define( function( m ) {
                             var nextSegment = steps[j].path;
 
                             for ( k=0;k < nextSegment.length;k++) {
-                                polyline[route_num].getPath().push(nextSegment[k]);
+                                polyline[num_route].getPath().push(nextSegment[k]);
                                 bounds.extend(nextSegment[k]);
                             }
                         }
                     }
                     
-                    show_route_distance_duration( route_num, dist_meters, duration_secs );
+                    show_route_distance_duration( num_route, dist_meters, duration_secs );
 
-                    polyline[route_num].setMap( map );
+                    polyline[num_route].setMap( map );
                     map.fitBounds( bounds );
 
             		dijit.byId('id_input_route').set( 'disabled', true );
@@ -325,8 +315,8 @@ define( function( m ) {
     function do_play( ) {
 
     	console.log( "Play!" );
-    	var route_num = 0;
-        start_driving( route_num );  
+    	var num_route = 0;
+        start_driving( num_route );  
 
 		dijit.byId('id_btn_route').set( 'disabled', true );
 		dijit.byId('id_btn_play').set( 'disabled', true );
@@ -380,8 +370,7 @@ define( function( m ) {
         else if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" ) {
         	dijit.byId('id_btn_pause').set( 'label', "Pause" );
             var num_route = 0;
-            timer_animate[num_route] = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, '+(curr_dist)+'); })', interval );
-//          timer_animate[num_route] = setTimeout( "cb_animate(" + num_route + "," + curr_dist + ")", interval );
+            timer_animate[num_route] = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, '+(curr_dist)+'); })', 250 );
         }
 
 		dijit.byId('id_input_route').set( 'disabled', false );
@@ -545,20 +534,22 @@ define( function( m ) {
    
     } // initialize
     
-	function move_to_dist( new_pos ) {
+	function move_to_dist( new_pos, go_timer ) {
 
 		var num_route = 0;
 
+		if ( go_timer) {
+			if ( timer_animate[num_route] != undefined ) 
+				clearTimeout( timer_animate[num_route] );
+			timer_animate[num_route] = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, ' + (new_pos) + '); })', interval );
+		}
+		
         var p = polyline[num_route].GetPointAtDistance( new_pos );
         if ( !map.getBounds().contains( p ) )
             map.panTo( p );
 
         var bearing = polyline[num_route].Bearing( polyline[num_route].GetIndexAtDistance( new_pos ) );
-        panorama.setPosition( new google.maps.LatLng( p.G, p.K ) );
-        panorama.setPov({
-            heading: bearing,
-            pitch: 10
-        });
+        panorama.setOptions( { pov: {heading: bearing, pitch: 1}, position: new google.maps.LatLng( p.G, p.K )} );
 
 		cb_move_to_dist = undefined;
 
@@ -566,10 +557,13 @@ define( function( m ) {
 	}
 
     function cb_route_input( ) {
+		var new_pos = dijit.byId('id_input_route').get( 'value' );
+		new_pos = Math.round( new_pos );
 		if ( cb_move_to_dist != undefined )
 			clearTimeout( cb_move_to_dist );
-		var new_pos = dijit.byId('id_input_route').get( 'value' );
-		cb_move_to_dist = setTimeout( 'require(["RouteView.js"], function( s ) { s.move_to_dist('+new_pos+'); })', 25 );
+		if ( new_pos == 0 )
+			new_pos = 50;
+		cb_move_to_dist = setTimeout( 'require(["RouteView.js"], function( s ) { s.move_to_dist('+new_pos+', false); })', 25 );
     }
 
     function cb_step_changed( ) {
@@ -613,11 +607,11 @@ define( function( m ) {
     	
     	// xmllint --noout --schema http://www.topografix.com/GPX/1/0/gpx.xsd testfile.gpx
     	
-    	var route_num = 0;
+    	var num_route = 0;
     	
     	console.log( "XXXXXXXXXXXXXXXXXXXXXXXX" );
-    	console.log( route[route_num].summary );
-    	console.log( route[route_num] );
+    	console.log( route[num_route].summary );
+    	console.log( route[num_route] );
 
     	var crlf = String.fromCharCode(13) + String.fromCharCode(10);
     	
@@ -627,17 +621,17 @@ define( function( m ) {
         	'<gpx version="1.0" creator="" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/0" xsi:schemaLocation="http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd">' + crlf + 
         	'<time>2015-06-12T21:36:34Z</time>' +crlf;
 
-    	var op = route[route_num].overview_path;
+    	var op = route[num_route].overview_path;
         for ( n = 0; n < op.length; n++ ) {
         	gpx += '<wpt lat="'+op[n].G+'" lon="'+op[n].K+'">' + ' </wpt>' + crlf;
         }
         
         gpx += '<rte>' + crlf;
-        gpx += '<name>' + route[route_num].summary + '</name>' + crlf;
+        gpx += '<name>' + route[num_route].summary + '</name>' + crlf;
 //        for ( n = 0; n < op.length; n++ ) {
 //        	gpx += '<rtept lat="'+op[n].G+'" lon="'+op[n].K+'">' + ' </rtept>' + crlf;
 //        }
-    	var legs = route[route_num].legs;
+    	var legs = route[num_route].legs;
         for ( n = 0; n < legs.length; n++)
         	gpx += '<rtept lat="'+legs[n].start_location.G+'" lon="'+legs[n].start_location.K+'">' + ' </rtept>' + crlf;
     	gpx += '<rtept lat="'+legs[legs.length-1].end_location.G+'" lon="'+legs[legs.length-1].end_location.K+'">' + ' </rtept>' + crlf;
