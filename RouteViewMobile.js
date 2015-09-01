@@ -177,7 +177,7 @@ define( function( m ) {
            	map.panTo( p );
 
         var bearing = polyline.Bearing( polyline.GetIndexAtDistance(d) );
-        console.log( "d=" + d + " - " + polyline.GetIndexAtDistance(d) + " / " + bearing);
+//      console.log( "d=" + d + " - " + polyline.GetIndexAtDistance(d) + " / " + bearing);
         panorama.setOptions( { pov: {heading: bearing, pitch: 1}, position: new google.maps.LatLng( p.G, p.K )} );
 
         if ( step > 0 )
@@ -255,9 +255,14 @@ define( function( m ) {
     	});
     	
     	enter_full_screen( );
-    	screen.orientation.lock('landscape').catch( function() {
-    		console.log( "Orientation is not supported on this device." );
-    	});
+    	try {
+    		screen.orientation.lock('landscape').catch( function() {
+    			console.log( "Orientation is not supported on this device." );
+    		});
+    	}
+    	catch( e ) {
+    		console.log( e );
+    	}
 
 /*
     	require(["dojo/on"], function( on ) {
@@ -473,7 +478,12 @@ define( function( m ) {
 
     	exit_full_screen( );
     	
-    	screen.orientation.unlock();
+    	try {
+    		screen.orientation.unlock();
+    	}
+    	catch( e ) {
+    		console.log( e );
+    	}
 
     	document.getElementById('id_body').style.MozTransform = "scale(1.0, 1.0)";
     	document.getElementById('id_body').style.zoom = "100%";
