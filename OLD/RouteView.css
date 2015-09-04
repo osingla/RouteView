@@ -1,0 +1,162 @@
+* {
+	outline: none !important;
+}
+
+body {
+	margin: 0;
+	padding: 2em;
+	font-family: Lucida Sans,Lucida Grande,Arial !important;
+	font-size: 13px !important;
+	background: white;
+	color: #333;
+}
+
+button {
+	-webkit-transition: background-color 0.2s linear;
+	border-radius:4px;
+	-moz-border-radius: 4px 4px 4px 4px;
+	-moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
+	background-color: #E4F2FF;
+	background-image: url("https://ajax.googleapis.com/ajax/libs/dojo/1.7.4/dijit/themes/claro/form/images/button.png");
+	background-position: center top;
+	background-repeat: repeat-x;
+	border: 1px solid #769DC0;
+	padding: 2px 8px 4px;
+	font-size:1em;
+}
+
+button:hover {
+	background-color: #AFD9FF;
+	color: #000000;
+}
+
+h1 {
+	font-size:1.5em;
+}
+
+.break
+{
+	float:none;
+	clear:both;
+}
+
+/* Any demo specific styling needed for this tutorial only */
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
+}
+
+#app_layout {
+    height: 100%;
+}
+
+#id_left_layout {
+    margin: 0;
+    padding: 0;
+}
+
+#id_middle_layout {
+    width: 60%;
+    min-width: 200px;
+    margin: 0;
+    padding: 0;
+}
+
+#id_right_layout {
+    width: 40%;
+    margin: 0;
+    padding: 0;
+}
+
+.claro .demoLayout .edgePanel {
+    background-color: #d0e9fc;
+}
+
+#id_map_canvas {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.dijitButtonDisabled .icon_btn_add {
+  background-image: url('icons/btn-plus-disabled.png');
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+}
+
+.icon_btn_add {
+  background-image: url('icons/btn-plus.png');
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  border: none; 
+  outline:none;
+}
+
+.dijitButtonDisabled .icon_btn_remove {
+  background-image: url('icons/btn-remove-disabled.png');
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+}
+
+.icon_btn_remove {
+  background-image: url('icons/btn-remove.png');
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  border: none; 
+  outline:none;
+}
+
+.dijitButtonDisabled .icon_btn_up {
+  background-image: url('icons/btn-up-disabled.png');
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+}
+
+.icon_btn_up {
+  background-image: url('icons/btn-up.png');
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  border: none; 
+  outline:none;
+}
+
+.dijitButtonDisabled .icon_btn_down {
+  background-image: url('icons/btn-down-disabled.png');
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+}
+
+.icon_btn_down {
+  background-image: url('icons/btn-down.png');
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  border: none; 
+  outline:none;
+}
+

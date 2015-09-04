@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+  
+        <meta charset="utf-8">
+        <title>Street View Riding Simulation</title>
+
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+          ga('create', 'UA-66144602-1', 'auto');
+          ga('send', 'pageview');
+        </script>
+
+        <style>
+
+            html, body {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+			body {
+				-moz-transform: scale(1.0, 1.0);
+				zoom: 1.0;
+				zoom: 100%;
+			}
+            
+           #div_config {
+                position: relative;
+                width: 100%;
+                height: 100%;
+            }
+
+           #div_map_canvas {
+                position: relative;
+                width: 100%;
+                height: 100%;
+            }
+
+           #div_panorama {
+                position: relative;
+                width: 100%;
+                height: 100%;
+            }
+
+            /* http://brennaobrien.com/blog/2014/05/style-input-type-range-in-every-browser.html */
+            
+            input[type=range] {
+                /*removes default webkit styles*/
+                -webkit-appearance: none;
+
+                /*fix for FF unable to apply focus style bug */
+                border: 1px solid white;
+
+                /*required for proper track sizing in FF*/
+                width: 300px;
+            }
+            input[type=range]::-webkit-slider-runnable-track {
+                width: 300px;
+                height: 14px;
+                background: #ddd;
+                border: none;
+                border-radius: 3px;
+            }
+            input[type=range]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                border: none;
+                height: 24px;
+                width: 24px;
+                border-radius: 25%;
+                background: goldenrod;
+                margin-top: -4px;
+            }
+            input[type=range]:focus {
+                outline: none;
+            }
+            input[type=range]:focus::-webkit-slider-runnable-track {
+                background: #ccc;
+            }
+
+            input[type=range]::-moz-range-track {
+                width: 300px;
+                height: 24px;
+                background: #ddd;
+                border: none;
+                border-radius: 1px;
+            }
+            input[type=range]::-moz-range-thumb {
+                border: none;
+                height: 26px;
+                width: 16px;
+                border-radius: 50%;
+                background: goldenrod;
+            }
+
+            /*hide the outline behind the border*/
+            input[type=range]:-moz-focusring{
+                outline: 1px solid white;
+                outline-offset: -1px;
+            }
+
+            input[type=range]::-ms-track {
+                width: 300px;
+                height: 14px;
+
+                /*remove bg colour from the track, we'll use ms-fill-lower and ms-fill-upper instead */
+                background: transparent;
+
+                /*leave room for the larger thumb to overflow with a transparent border */
+                border-color: transparent;
+                border-width: 6px 0;
+
+                /*remove default tick marks*/
+                color: transparent;
+            }
+            input[type=range]::-ms-fill-lower {
+                background: #777;
+                border-radius: 10px;
+            }
+            input[type=range]::-ms-fill-upper {
+                background: #ddd;
+                border-radius: 10px;
+            }
+            input[type=range]::-ms-thumb {
+                border: none;
+                height: 16px;
+                width: 16px;
+                border-radius: 50%;
+                background: goldenrod;
+            }
+            input[type=range]:focus::-ms-fill-lower {
+                background: #888;
+            }
+            input[type=range]:focus::-ms-fill-upper {
+                background: #ccc;
+            }
+            
+			.pac-item-query { font-size: 28px; ; line-height: 200%; }
+			.pac-item { font-size: 28px; ; line-height: 200%; }
+			.pac-item-container { font-size: 28px; line-height: 200%; }
+			.pac-item-matched { font-size: 28px; ; line-height: 200%; }
+
+        </style>
+
+        <script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false&libraries=places"></script>
+        <script type="text/javascript" src="https://gisgraphy.googlecode.com/svn-history/r67/trunk/gisgraphy/src/main/webapp/scripts/v3_epoly.js"></script>
+<!--    <script type="text/javascript" src="http://www.geocodezip.com/scripts/v3_epoly.js"></script> -->
+
+        <script>
+
+        	var startup_done = false;
+            var map;
+            var panorama;
+            var map_is_shown;
+            var polyline = undefined;
+            var location_from;
+            var location_to;
+            var timer_animate;
+            var dist_route;
+            var step;               // metres
+            var interval;           // milliseconds
+            var curr_dist;
+			var cb_move_to_dist = undefined;
+			var directions_display = undefined;
+			var curr_layout;
+
+            function initialize() {
+            
+                var input_from = document.getElementById("id_route1_from");
+                var autocomplete_from = new google.maps.places.Autocomplete(input_from);
+//              autocomplete_from.bindTo('bounds', map);
+
+                var input_to = document.getElementById("id_route1_to");
+                var autocomplete_to = new google.maps.places.Autocomplete(input_to);
+//              autocomplete_to.bindTo('bounds', map);
+                
+        		document.getElementById('id_route1_from').onchange = cb_route_from_or_to_changed;
+        		document.getElementById('id_route1_to').onchange = cb_route_from_or_to_changed;
+
+            } // initialize
+            
+            function startup( ) {
+
+            	var home = new google.maps.LatLng( 35.733435, -78.907684 );
+
+                var panorama_options = {
+                    position: home,
+                    pov: {
+                        heading: 34,
+                        pitch: 10
+                    },
+                    enableCloseButton: false,
+                    linksControl: false,
+                    panControl: false,
+                    zoomControl: false,
+                    clickToGo: false,
+                    disableDoubleClickZoom: true,
+                    imageDateControl: false
+                };
+                panorama = new google.maps.StreetViewPanorama( document.getElementById('div_panorama'), panorama_options );
+
+                var map_options = {
+                   center: home,
+                   zoom: 14,
+                   overviewMapControl: false,
+                   streetView: panorama
+                };
+                map = new google.maps.Map( document.getElementById('div_map_canvas'), map_options );
+
+                map.setStreetView( panorama );
+
+       			google.maps.event.addListener( map, "click", function( evt ) { 
+        			cb_map_click( evt ); 
+        		});
+        		document.getElementById('div_panorama').onclick = cb_panorama_click;
+        		
+                map_is_shown = false;
+
+                var previous_orientation = window.orientation;
+                var check_orientation = function() {
+                	console.log( "Checking orientation" );
+//                	alert( window.orientation );
+                    if (window.orientation !== previous_orientation ) {
+                    	previous_orientation = window.orientation;
+                        console.log( "Orientation changed" );
+                        var height_btn = "32px";
+                    	if ( (window.orientation == -90) || (window.orientation == 90) ) {
+                    		height_btn = "32px";
+                    	}
+                    	else if ( window.orientation == 0 ) {
+                    		height_btn = "92px";
+                    	}
+                		document.getElementById("id_btn_start").style.height  = height_btn;
+                		document.getElementById("id_btn_layout").style.height = height_btn;
+                		document.getElementById("id_btn_pause").style.height  = height_btn;
+                		document.getElementById("id_btn_stop").style.height   = height_btn;
+                        google.maps.event.trigger( panorama, 'resize' );
+                    }
+                };
+
+                window.addEventListener("resize", check_orientation, false);
+                window.addEventListener("orientationchange", check_orientation, false);
+
+            }
+            
+            function cb_animate( d ) {
+
+                curr_dist = d;
+
+                if ( d > dist_route ) {
+                    console.log( "Route is done" );
+                    return;
+                }
+                
+                var p = polyline.GetPointAtDistance( d );
+                if ( !map.getBounds().contains( p ) )
+                   	map.panTo( p );
+
+                var bearing = polyline.Bearing( polyline.GetIndexAtDistance(d) );
+                console.log( "d=" + d + " - " + polyline.GetIndexAtDistance(d) + " / " + bearing);
+                panorama.setPosition( new google.maps.LatLng( p.G, p.K ) );
+                panorama.setPov({
+                    heading: bearing,
+                    pitch: 1
+                });
+
+                if ( step > 0 )
+                    timer_animate = setTimeout( "cb_animate("+(d+step)+")", interval );
+
+                // Update route slider
+                document.getElementById("id_input_route").value = d;
+            }
+
+            function start_driving( ) {
+            
+                if ( timer_animate ) 
+                    clearTimeout( timer_animate );
+                    
+                dist_route = polyline.Distance();
+                map.setCenter( polyline.getPath().getAt(0) );
+                var p = polyline.GetPointAtDistance( 50 );
+                if ( !map.getBounds().contains( p ) )
+                   	map.panTo( p );
+
+                timer_animate = setTimeout("cb_animate(50)",250);
+            }
+
+            function enter_full_screen( ) {
+
+            	var d = document.getElementById("id_body");
+            	if (d.requestFullscreen) {
+            		d.requestFullscreen();
+            	} else if (d.webkitRequestFullscreen) {
+            		d.webkitRequestFullscreen();
+            	} else if (d.mozRequestFullScreen) {
+            		d.mozRequestFullScreen();
+            	} else if (d.msRequestFullscreen) {
+            		d.msRequestFullscreen();
+            	}
+            	
+            }
+
+            function exit_full_screen( ) {
+
+            	if (document.exitFullscreen) {
+            		document.exitFullscreen();
+            	} else if (document.webkitExitFullscreen) {
+            		document.webkitExitFullscreen();
+            	} else if (document.mozCancelFullScreen) {
+            		document.mozCancelFullScreen();
+            	} else if (document.msExitFullscreen) {
+            		document.msExitFullscreen();
+            	}
+
+            }
+            
+            function do_start( ) {
+
+            	enter_full_screen( );
+
+            	if ( !startup_done ) {
+            		startup_done = true;
+            		startup( );
+            	}
+            	
+            	if ( directions_display != undefined ) {
+            		console.log( "Delete current route" )
+            		directions_display.setMap( null );
+                	directions_display = undefined;
+                	if ( polyline != undefined ) {
+                		polyline.setMap( null );
+                		polyline = undefined;
+                	}
+            	}
+
+            	map_is_shown = false;
+            	
+                step = parseInt( document.getElementById("id_input_meters").value );
+                interval = parseInt( document.getElementById("id_input_interval").value );
+                console.log( "step=" + step + " interval=" + interval );
+
+                start_location = document.getElementById('id_route1_from').value;
+                console.log( "from = " + start_location );
+
+                end_location = document.getElementById('id_route1_to').value;
+                console.log( "to   = " + end_location );
+
+                var no_hwy  = document.getElementById("id_check_no_hwy").checked
+                var no_toll = document.getElementById("id_check_no_toll").checked
+
+                var rendererOptions = {
+                    map: map,
+                    suppressMarkers : true,
+                    preserveViewport: true
+                }
+                var directions_service = new google.maps.DirectionsService( );
+
+                var travelMode = google.maps.DirectionsTravelMode.DRIVING;  
+                
+                var request = {
+                    origin: start_location,
+                    destination: end_location,
+                    travelMode: travelMode,
+                    optimizeWaypoints: true,
+                    avoidHighways: no_hwy,
+                    avoidTolls: no_toll
+                };  
+
+                directions_service.route( request, cb_make_route( ) );
+                
+                function cb_make_route( ) {
+
+                    return function( response, status ) {
+
+                        if ( status == google.maps.DirectionsStatus.OK ) {
+
+                            var bounds = new google.maps.LatLngBounds();
+                            var route = response.routes[0];
+                            location_from = new Object();
+                            location_to = new Object();
+
+
+                            polyline = new google.maps.Polyline({
+                                path: [],
+                                strokeColor: '#FFFF00',
+                                strokeWeight: 3
+                            });
+
+                            // For each route, display summary information.
+                            var path = response.routes[0].overview_path;
+                            var legs = response.routes[0].legs;
+
+                            directions_display = new google.maps.DirectionsRenderer( rendererOptions );     
+                            directions_display.setMap( map );
+                            directions_display.setDirections( response );
+
+                            // Markers
+                            var dist_meters = 0;
+                            var duration_secs = 0;
+                            for ( i = 0; i < legs.length; i++) {
+                                dist_meters += legs[i].distance.value;
+                                duration_secs += legs[i].duration.value;
+                                console.log( i + ": m=" + legs[i].distance.value + " secs=" + legs[i].duration.value );
+                                if ( i == 0 ) {
+                                    location_from.latlng  = legs[i].start_location;
+                                    location_from.address = legs[i].start_address;
+                                }
+                                location_to.latlng  = legs[i].end_location;
+                                location_to.address = legs[i].end_address;
+                                var steps = legs[i].steps;
+
+                                for ( j = 0; j < steps.length; j++) {
+                                    var nextSegment = steps[j].path;                
+                                    var nextSegment = steps[j].path;
+
+                                    for ( k=0;k < nextSegment.length;k++) {
+                                        polyline.getPath().push(nextSegment[k]);
+                                        bounds.extend(nextSegment[k]);
+                                    }
+                                }
+                            }
+                            
+                            show_route_distance_duration( dist_meters, duration_secs );
+
+                        }
+
+                        polyline.setMap( map );
+                        map.fitBounds( bounds );
+                        start_driving( );  
+
+                    }
+
+                } // cb_make_route
+
+        		document.getElementById("tr_config").style.display = "None";
+        		document.getElementById("td_map_canvas").style.display = "";
+        		document.getElementById("tr_controls").style.display = "";
+  
+                document.getElementById("id_btn_layout").disabled = false;
+                document.getElementById("id_btn_pause").disabled = false;
+                document.getElementById("id_btn_stop").disabled = false;
+                
+                curr_layout = 1;
+        		
+//				alt_map_panorama_full_screen();
+
+            } // do_start
+
+            function do_layout( ) {
+
+            	if ( curr_layout == 1 ) {
+
+                    document.getElementById("td_map_canvas").style.display = "";
+                    document.getElementById("td_panorama").style.display = "";
+                    document.getElementById("td_map_canvas").style.width = "50%";
+                    document.getElementById("td_panorama").style.width  = "50%";
+                    google.maps.event.trigger( map, 'resize' );
+                    google.maps.event.trigger( panorama, 'resize' );
+
+	                curr_layout = 2;
+                
+            	}
+            	else if ( curr_layout == 2 ) {
+
+                    document.getElementById("td_map_canvas").style.display = "";
+                    document.getElementById("td_panorama").style.display = "None";
+                    document.getElementById("td_map_canvas").style.width = "100%";
+                    document.getElementById("td_panorama").style.width  = "100%";
+                    google.maps.event.trigger( map, 'resize' );
+                    google.maps.event.trigger( panorama, 'resize' );
+
+	                curr_layout = 1;
+
+            	}
+
+                google.maps.event.trigger( panorama, 'resize' );
+                google.maps.event.trigger( map, 'resize' );
+                
+            }
+            
+            function do_pause( ) {
+
+                if ( document.getElementById("id_label_pause").innerHTML == "Pause" ) {
+                    clearTimeout( timer_animate );
+                    timer_animate = undefined;
+                    document.getElementById("id_label_pause").innerHTML = "Continue";
+                    console.log( "curr_dist=" + curr_dist );
+                }
+                else if ( document.getElementById("id_label_pause").innerHTML == "Continue" ) {
+                    document.getElementById("id_label_pause").innerHTML = "Pause";
+                    timer_animate = setTimeout( "cb_animate(" + curr_dist + ")", interval );
+                }
+
+            }
+
+            function do_stop( ) {
+
+            	exit_full_screen( );
+            	
+            	document.getElementById('id_body').style.MozTransform = "scale(1.0, 1.0)";
+            	document.getElementById('id_body').style.zoom = "100%";
+        		document.getElementById('id_body').style.zoom = "1.0";
+            	
+            	clearTimeout( timer_animate );
+                timer_animate = undefined;
+
+                document.getElementById("id_btn_start").disabled = false;
+                
+                document.getElementById("id_label_pause").innerHTML = "Pause";
+                
+                document.getElementById("td_map_canvas").style.display = "None";
+                document.getElementById("td_panorama").style.display = "None";
+        		document.getElementById("tr_controls").style.display = "";
+        		document.getElementById("tr_config").style.display = "";
+
+//              map.setOptions({draggableCursor: 'hand'});
+            }
+
+            function cb_step_input( new_step ) {
+                document.getElementById("id_meters").innerHTML = new_step;
+            }
+
+            function cb_step_changed( new_step ) {
+                console.log( "new_step = " + new_step );
+                step = parseInt( new_step );
+            }
+
+            function cb_interval_input( new_interval ) {
+                document.getElementById("id_interval").innerHTML = new_interval;
+            }
+
+            function cb_interval_changed( new_interval ) {
+                console.log( "new_interval = " + new_interval );
+                interval = parseInt( new_interval );
+            }
+            
+            function cb_route1_from( from ) {
+                console.log( "from = " + from );
+            }
+
+            function cb_route1_waypoint1( from ) {
+                console.log( "waypoint1 = " + from );
+            }
+
+            function cb_route1_to( from ) {
+                console.log( "from = " + from );
+            }
+            
+            function alt_map_panorama_full_screen( ) {
+                document.getElementById("tr_config").style.display = "None";
+            	if ( map_is_shown ) {
+                	map_is_shown = false;
+                    document.getElementById("div_map_canvas").style.display = "None";
+                    document.getElementById("div_panorama").style.display = "";
+                    document.getElementById("div_panorama").style.height = "100%";
+                    document.getElementById("div_panorama").style.width  = "100%";
+                    google.maps.event.trigger( panorama, 'resize' );
+                }
+            	else {
+                	map_is_shown = true;
+                    document.getElementById("div_map_canvas").style.display = "";
+                    document.getElementById("div_map_canvas").style.width  = "100%";
+                    document.getElementById("div_map_canvas").style.height = "100%";
+                    document.getElementById("div_panorama").style.display = "None";
+                    google.maps.event.trigger( map, 'resize' );
+            	}
+            }
+            
+            function cb_map_click( evt ) {
+            	console.log( "cb_map_click" );
+                document.getElementById("td_map_canvas").style.display = "None";
+                document.getElementById("td_panorama").style.display = "";
+                google.maps.event.trigger( panorama, 'resize' );
+            }
+            
+            function cb_panorama_click( evt ) {
+   				if ( evt.handled != true ) {
+            		console.log( "cb_panorama_click" );
+                    document.getElementById("td_map_canvas").style.display = "";
+                    document.getElementById("td_panorama").style.display = "None";
+                    google.maps.event.trigger( map, 'resize' );
+   				}
+            }
+            
+            function show_route_distance_duration( dist_meters, duration_secs ) {
+
+                console.log( "dist_meters=" + dist_meters + " duration_secs=" + duration_secs );
+
+                document.getElementById("id_route1_dist").innerHTML = Math.round( dist_meters / 1000 );
+                
+                var nb_hours   = Math.floor( duration_secs / 3600 );
+                var nb_minutes = Math.floor( (duration_secs - (nb_hours * 3600)) / 60 );
+                var nb_seconds = Math.floor( duration_secs - (nb_hours * 3600) - (nb_minutes * 60) );
+                if ( nb_hours == 0 ) {
+                    if ( nb_minutes == 0 ) {
+                        document.getElementById("id_route1_duration").innerHTML = nb_seconds + '"';
+                    }
+                    else {
+                        if ( nb_seconds == 0 )
+                            document.getElementById("id_route1_duration").innerHTML = nb_minutes + "'";
+                        else
+                            document.getElementById("id_route1_duration").innerHTML = nb_minutes + "'" + nb_seconds + '"';
+                    }
+                }
+                else {
+                    document.getElementById("id_route1_duration").innerHTML = nb_hours + "h" + nb_minutes + "'" + nb_seconds + '"';
+                }
+                
+                document.getElementById("id_route1_distance_duration").style.display = "";
+                
+                // Update route slider
+                document.getElementById("id_input_route").max = dist_meters
+                document.getElementById("id_input_route").value = 0;
+                
+            }
+            
+			function move_to_dist( new_pos ) {
+
+				if ( timer_animate != undefined ) { 
+                    clearTimeout( timer_animate );
+                	timer_animate = setTimeout( "cb_animate(" + new_pos + ")", interval );
+				}
+				
+                var p = polyline.GetPointAtDistance( new_pos );
+                if ( !map.getBounds().contains( p ) )
+                    map.panTo( p );
+
+                var bearing = polyline.Bearing( polyline.GetIndexAtDistance( new_pos ) );
+                panorama.setPosition( new google.maps.LatLng( p.G, p.K ) );
+                panorama.setPov({
+                    heading: bearing,
+                    pitch: 10
+                });
+
+				cb_move_to_dist = undefined;
+
+				curr_dist = new_pos;
+			}
+
+            function cb_route_input( new_pos ) {
+				if ( cb_move_to_dist != undefined )
+					clearTimeout( cb_move_to_dist );
+				cb_move_to_dist = setTimeout( "move_to_dist(" + new_pos + ")", 25 );
+            }
+
+			function cb_route_from_or_to_changed( evt ) {
+			
+				console.log( "cb_route_from_or_to_changed" );
+
+                start_location = document.getElementById('id_route1_from').value;
+                end_location = document.getElementById('id_route1_to').value;
+                console.log( "from = " + start_location );
+                console.log( "to   = " + end_location );
+
+                var start_disabled = (start_location == "") || (end_location == "");
+                document.getElementById("id_btn_start").disabled = start_disabled;
+
+			}
+			
+        </script>
+
+    </head>
+
+    <body bgcolor="#E6E6FA" id="id_body" onload="initialize()">
+
+		<table width="100%" height="100%" border="0" cellpadding="1" cellspacing="1">
+		
+			<tr id='tr_config' >
+			
+				<td>
+
+		            <div id="div_config" style="width:100%; height: 100%">
+
+	                    <div align="center">
+                            <table style="font-size:175%">
+                                <tr>
+                                    <td valign="middle" align="right" style="font-size:125%">From</td>
+                                    <td valign="middle" align="left"><input type="text" id="id_route1_from" style="width:24em; font-size:150%"
+                                     onchange="cb_route1_from(this.value)" value=""></td>
+                                </tr>
+                                <tr>
+                                    <td valign="middle" align="right" style="font-size:125%">To</td>
+                                    <td valign="middle" align="left"><input type="text" id="id_route1_to" style="width:24em; font-size:150%"
+                                     onchange="cb_route1_to(this.value)" value=""></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <hr>
+                        <div id="id_route1_distance_duration" style="width:100%; display:None" align="center" >
+                            <table style="width:100%">
+                                <tr>
+                                    <td align="left" valign="middle">
+                                        <b id="id_route1_dist"></b>&nbsp;kms
+                                    </td>
+                                    <td align="right" valign="middle">
+                                        <b id="id_route1_duration">XX</b>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div align="center">
+                            <label>No Highway</label>
+                            <input type="checkbox" id="id_check_no_hwy" checked>
+                            &nbsp; &nbsp; &nbsp;
+                            <label>No Toll</label>
+                            <input type="checkbox" id="id_check_no_toll" checked>
+                        </div>
+                        <br>
+                        <br>
+
+                        <div style="width:100%;" align="center">
+                            <span>Step : <b id="id_meters">250</b> meters</span><br>
+                            <input id="id_input_meters" style="width:100%;  max-width: 320px" type="range" min="50" max="1000" step="50" value="250"
+                             oninput="cb_step_input( this.value )"
+                             onchange="cb_step_changed( this.value )" >
+                            <p>
+                                <span>Interval : <b id="id_interval">1200</b> milliseconds</span><br>
+                                <input id="id_input_interval" style="width:100%; max-width: 320px" type="range" min="500" max="5000" step="50" value="1200"
+                                 oninput="cb_interval_input( this.value )"
+                                 onchange="cb_interval_changed( this.value )" >
+                            </p>
+                        </div>
+
+                        <br>
+                        <br>
+
+                        <div style="width:100%;" align="center">
+				            <button type="button" id="id_btn_start" onclick="do_start()" style="min-width:120px;height:92px" disabled><b style="font-size:325%">Start</b></button>
+                        </div>
+
+                    </div>
+        
+				</td>
+			
+			</tr>
+			
+			<tr >
+				<td id="td_map_canvas" style="display:None">
+        			<div id="div_map_canvas"></div> 
+				</td>
+				<td id="td_panorama" style="display:None">
+        			<div id="div_panorama"></div> 
+				</td>
+			</tr>
+
+			<tr rowspan="2" id="tr_controls" style="height:1%; display:None">
+				<td>
+                    <table width="100%" border="0" cellpadding="1" cellspacing="1">
+                        <tr>
+                            <td width="1%" align="center" height="24px">
+                                <button type="button" id="id_btn_layout" onclick="do_layout()" style="min-width:60px;height:92px;display:"disabled><b ><span style="font-size:175%">Layout</span></b></button>
+                            </td>
+                            <td width="1%" align="center" height="24px">
+                                <button type="button" id="id_btn_pause" onclick="do_pause()" style="min-width:60px;height:92px;display:"disabled><b ><span style="font-size:175%" id="id_label_pause">Pause</span></b></button>
+                            </td>
+                            <td width="1%" align="center" height="24px">
+                                <button type="button" id="id_btn_stop"  onclick="do_stop()" style="min-width:60px;height:92px;display:" disabled><b style="font-size:175%">Stop</b></button>
+                            </td>
+                            <td width="100%" align="center" height="16px" >
+                                <input id="id_input_route" style="width:100%; display:" type="range" min="0" max="0" step="1" value="0"
+                                 oninput="cb_route_input( this.value )" />
+                            </td>
+                        </tr>
+                    </table>
+            	</td>
+			</tr>
+
+		</table>
+
+    </body>
+
+</html>

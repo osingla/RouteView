@@ -82,13 +82,13 @@
 				    <tr>
 					    <td style="text-align:center; vertical-align:middle">
 					        <input data-dojo-type="dojox.mobile.TextBox" intermediateChanges="false" maxLength="128" trim="true" style="width:32em" 
-					         selectOnClick="true" placeHolder="Enter an origin" id="id_route1_from" value="">
+					         selectOnClick="true" placeHolder="Enter an origin" id="id_route1_from" value="Lenoir, NC">
 					    </td>
 				    </tr>
 				    <tr>
 					    <td style="text-align:center; vertical-align:middle">
 					        <input data-dojo-type="dojox.mobile.TextBox" intermediateChanges="false" maxLength="128" trim="true" style="width:32em" 
-					         selectOnClick="true" placeHolder="Enter a destination" id="id_route1_to" value="">
+					         selectOnClick="true" placeHolder="Enter a destination" id="id_route1_to" value="Morganton, NC">
 					    </td>
 				    </tr>
 			    </table>
@@ -105,7 +105,7 @@
 			<br>
             <div align="center">
 
-		        <button class="mblBlueButton" data-dojo-type="dojox.mobile.Button" data-dojo-props='label:"Virtual Drive with StreetView", disabled:true' id="btn_start"
+		        <button class="mblBlueButton" data-dojo-type="dojox.mobile.Button" data-dojo-props='label:"Virtual Drive with StreetView", disabled:false' id="btn_start"
 		         	    onclick='require(["RouteViewMobile.js"], function( s ) { s.do_start(); })'
 		    	 	    style="font-size:100%; font-weight: bold">
 		        </button>
@@ -196,56 +196,44 @@
 
 	    </div>
 
-	    <table id="view_map" style="width:100%; height:100%; display:None">
-	    
-	    	<tr id="yy" style="height:99%">
+	    <div id="view_map" style="display:None">
 
-	    		<td id="td_map_canvas" style="width:50%; height:100%">
-				    <div id="div_map_canvas" style="width:100%; height:100%"></div> 
-	    		</td>
+		    <div id="div_map_canvas"></div> 
 
-	    		<td id="td_panorama" style="width:50%; height:100%">
-				    <div id="div_panorama" style="width:100%; height:100%""></div> 
-	    		</td>
-
-	    	</tr>
-
-	    	<tr style="height:1%">
-
-	    		<td colspan="2" id="td_controls" style="width:100%; height:100%">
-				    <table style="width:100%">
-					    <tr>
-					        <td style="width:1%; text-align:left; vertical-align:middle" id="td_controls_pause">
-						        <button data-dojo-type="dojox.mobile.Button"  id="id_btn_pause" 
-			    					    onclick='require(["RouteViewMobile.js"], function( s ) { s.do_pause(); })'>
-						    	    <span id="id_label_pause">Pause</span>
-							    </button>
-						    </td>
-					        <td style="width:1%; text-align:left; vertical-align:middle" id="td_controls_stop">
-						        <button data-dojo-type="dojox.mobile.Button"  id="id_btn_stop" 
-			    					    onclick='require(["RouteViewMobile.js"], function( s ) { s.do_stop(); })'>
-						    	    Stop
-							    </button>
-						    </td>
-					        <td style="width:1%; text-align:left; vertical-align:middle" id="td_controls_duration"
-	    					    onclick='require(["RouteViewMobile.js"], function( s ) { s.click_duration_distance(); })'>
-					        </td>
-					        <td style="width:96%; text-align:left; vertical-align:middle">
-							    <input id="id_input_route" data-dojo-type="dojox.mobile.Slider" intermediateChanges="true" 
-						    	       onclick='require(["RouteViewMobile.js"], function( s ) { s.cb_route_input_click(); })'
-						    	       onchange='require(["RouteViewMobile.js"], function( s ) { s.cb_route_input_changed(); })'
-								       value="0" min="0" max="0" step="1" type="range" >
-					        </td>
-					    </tr>
-				    </table>
-	    		</td>
-	    		
-	    	</tr>
-	    	
-    	</table>
-
-		<div id="id_hidden" style="display:none">
-		</div>
+			<img id="div_panorama"></img>
+			 
+			<div id="div_controls" >
+				<table style="width:100%">
+					<tr>
+					    <td style="width:1%; text-align:left; vertical-align:middle" id="td_controls_split">
+						    <button data-dojo-type="dojox.mobile.Button"  id="id_btn_split" 
+			    					onclick='require(["RouteViewMobile.js"], function( s ) { s.do_split_unsplit(); })'>
+						    	Split
+							</button>
+						</td>
+					    <td style="width:1%; text-align:left; vertical-align:middle" id="td_controls_pause">
+						    <button data-dojo-type="dojox.mobile.Button"  id="id_btn_pause" 
+			    					onclick='require(["RouteViewMobile.js"], function( s ) { s.do_pause(); })'>
+						    	<span id="id_label_pause">Pause</span>
+							</button>
+						</td>
+					    <td style="width:1%; text-align:left; vertical-align:middle" id="td_controls_stop">
+						    <button data-dojo-type="dojox.mobile.Button"  id="id_btn_stop" 
+			    					onclick='require(["RouteViewMobile.js"], function( s ) { s.do_stop(); })'>
+						    	Stop
+							</button>
+						</td>
+					    <td style="width:1%; text-align:left; vertical-align:middle" id="td_controls_duration"
+	    					onclick='require(["RouteViewMobile.js"], function( s ) { s.click_duration_distance(); })'>
+					    </td>
+					    <td style="width:96%; text-align:left; vertical-align:middle">
+							<input id="id_input_route" data-dojo-type="dojox.mobile.Slider" intermediateChanges="false" 
+						    	   onchange='require(["RouteViewMobile.js"], function( s ) { s.cb_route_input(); })'
+								   value="0" min="0" max="0" step="1" type="range" >
+					    </td>
+					</tr>
+				</table>
+			</div>
 
 	    </div>
 

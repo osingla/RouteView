@@ -65,7 +65,7 @@
 	background-color: white !important;
 }
 
-html, body, #view_map {
+html, body {
 	width: 100%;
 	height: 100%;
 	margin: 0;
@@ -77,16 +77,19 @@ html, body, #view_map {
 }
 
 #div_map_canvas {
+	position: absolute;
     width: 100%;
     height: 100%;
 }
 
 #div_panorama {
+	position: absolute;
 	width: 100%;
     height: 100%;
 }
 
 #div_controls {
+	position: absolute;
 	width: 100%;
 }
 
