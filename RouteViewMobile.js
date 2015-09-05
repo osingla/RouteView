@@ -633,40 +633,72 @@ define( function( m ) {
 
         		require(["dojo/store/Memory"], function( Memory ) {
         		    _list_countries = [
-        		        {id: 0,    list:['Algeria, Ascension Island, Burkina Faso, Faeroe Islands, Ghana, Guinea Republic, Iceland, Ireland, Ivory Coast, Liberia, Mali, Morocco, Sao Tome & Principe, Senegal, Sierra Leone, St Helena, The Gambia, Togo, United Kingdom']},
-        		        {id: 1,    list:['Albania, Andorra, Angola, Australia, Austria, Belgium, Benin, Bosnia, Cameroon, Central Africa Republic, Chad, Congo, Croatia, Czech Republic, Democratic Republic of Congo (Zaire), Denmark, Equatorial Guinea, France, Gabon, Germany, Gibraltar, Guam, Hungary, Italy, Liechtenstein, Luxembourg, Macedonia (Fyrom), Malta, Mariana Islands, Marshall Islands, Micronesia, Monaco, Netherlands, Niger, Nigeria, Norway, Papua New Guinea, Poland, Portugal, San Marino, Serbia, Slovak Republic, Slovenia, Spain, Sweden, Switzerland, Tunisia']},
-        		        {id: -1,   list:['Cape Verde Islands, Cook Islands, French Polynesia, Guinea Bissau, USA']},
-        		        {id: 11,   list:['New Caledonia, Solomon Islands, Vanuatu']},
-        		        {id: -11,  list:['Niue Island, Samoa (American), Samoa (Western), USA']},
+        		        {id: 0,    list:['Algeria','Ascension Island','Burkina Faso','Faeroe Islands','Ghana','Guinea Republic','Iceland','Ireland','Ivory Coast','Liberia','Mali','Morocco','Sao Tome & Principe','Senegal','Sierra Leone','St Helena','The Gambia','Togo','United Kingdom']},
+        		        {id: 1,    list:['Albania','Andorra','Angola','Australia','Austria','Belgium','Benin','Bosnia','Cameroon','Central Africa Republic','Chad','Congo','Croatia','Czech Republic','Democratic Republic of Congo (Zaire)','Denmark','Equatorial Guinea','France','Gabon','Germany','Gibraltar','Guam','Hungary','Italy','Liechtenstein','Luxembourg','Macedonia (Fyrom)','Malta','Mariana Islands','Marshall Islands','Micronesia','Monaco','Netherlands','Niger','Nigeria','Norway','Papua New Guinea','Poland','Portugal','San Marino','Serbia','Slovak Republic','Slovenia','Spain','Sweden','Switzerland','Tunisia']},
+        		        {id: -1,   list:['Cape Verde Islands','Cook Islands','French Polynesia','Guinea Bissau','USA']},
+        		        {id: 11,   list:['New Caledonia','Solomon Islands','Vanuatu']},
+        		        {id: -11,  list:['Niue Island','Samoa (American)','Samoa (Western)','USA']},
         		        {id: 11.5, list:['Norfolk Island']},
-        		        {id: 12,   list:['Fiji Islands, Kiribati, Nauru, New Zealand, Tuvalu, Wallis & Futuna Islands']},
-        		        {id: 2,    list:['Botswana, Bulgaria, Burundi, Cyprus, Democratic Republic of Congo (Zaire), Egypt, Finland, Greece, Israel, Jordan, Lebanon, Lesotho, Libya, Lithuania, Malawi, Mozambique, Namibia, Palestine, Romania, Rwanda, South Africa, Sudan, Swaziland, Syria, Turkey, Zambia, Zimbabwe']},
-        		        {id: 3,    list:['Bahrain, Belarus, Comoros Island, Djibouti, Eritrea, Estonia, Ethiopia, Iraq, Kenya, Kuwait, latvia, Madagascar, Mayotte Islands, Moldova, Qatar, Russia, Saudi Arabia, Somalia, Tanzania, Uganda, Ukraine, Yemen Arab Republic']},
-        		        {id: -3,   list:['Argentina, Brazil, Cuba, Greenland, Guyana, Uruguay']},
+        		        {id: 12,   list:['Fiji Islands','Kiribati','Nauru','New Zealand','Tuvalu','Wallis & Futuna Islands']},
+        		        {id: 2,    list:['Botswana','Bulgaria','Burundi','Cyprus','Democratic Republic of Congo (Zaire)','Egypt','Finland','Greece','Israel','Jordan','Lebanon','Lesotho','Libya','Lithuania','Malawi','Mozambique','Namibia','Palestine','Romania','Rwanda','South Africa','Sudan','Swaziland','Syria','Turkey','Zambia','Zimbabwe']},
+        		        {id: 3,    list:['Bahrain','Belarus','Comoros Island','Djibouti','Eritrea','Estonia','Ethiopia','Iraq','Kenya','Kuwait','latvia','Madagascar','Mayotte Islands','Moldova','Qatar','Russia','Saudi Arabia','Somalia','Tanzania','Uganda','Ukraine','Yemen Arab Republic']},
+        		        {id: -3,   list:['Argentina','Brazil','Cuba','Greenland','Guyana','Uruguay']},
         		        {id: 3.5,  list:['Iran']},
         		        {id: -3.5, list:['Surinam']},
-        		        {id: 4,    list:['Armenia, Azerbaijan, Georgia, Mauritius, Oman, Reunion Island, Seychelles, United Arab Emirates']},
-        		        {id: -4,   list:['Anguilla, Antigua and Barbuda, Aruba, Barbados, Bermuda, Bolivia, Brazil, Canada, Chile, Dominica Islands, Dominican Republic, Falkland Islands, French Guiana , Grenada, Guadeloupe, Martinique, Montserrat, Netherlands Antilles, Paraguay, Puerto Rico, St Kitts & Nevia, St Lucia, Trinidad & Tobago, Venezuela']},
-        		        {id: 5,    list:['Diego Garcia, Maldives Republic, Pakistan, Turkmenistan']},
-        		        {id: -5,   list:['Bahamas, Brazil, Canada, Cayman Islands, Columbia, Ecuador, Haiti, Jamaica, Panama, Peru, Turks & Caicos Islands, USA']},
-        		        {id: 5.5,  list:['Bhutan,India,Nepal,Sri Lanka']},
-        		        {id: 6,    list:['Bangladesh, Kazakhstan, Kyrgyzstan, Tajikistan, Uzbekistan']},
-        		        {id: -6,   list:['Belize, Canada, Costa Rica, El Salvador, Guatemala, Honduras, Mexico, Nicaragua, USA']},
+        		        {id: 4,    list:['Armenia','Azerbaijan','Georgia','Mauritius','Oman','Reunion Island','Seychelles','United Arab Emirates']},
+        		        {id: -4,   list:['Anguilla','Antigua and Barbuda','Aruba','Barbados','Bermuda','Bolivia','Brazil','Canada','Chile','Dominica Islands','Dominican Republic','Falkland Islands','French Guiana ','Grenada','Guadeloupe','Martinique','Montserrat','Netherlands Antilles','Paraguay','Puerto Rico','St Kitts & Nevia','St Lucia','Trinidad & Tobago','Venezuela']},
+        		        {id: 5,    list:['Diego Garcia','Maldives Republic','Pakistan','Turkmenistan']},
+        		        {id: -5,   list:['Bahamas','Brazil','Canada','Cayman Islands','Columbia','Ecuador','Haiti','Jamaica','Panama','Peru','Turks & Caicos Islands','USA']},
+        		        {id: 5.5,  list:['Bhutan,India','Nepal','Sri Lanka']},
+        		        {id: 6,    list:['Bangladesh','Kazakhstan','Kyrgyzstan','Tajikistan','Uzbekistan']},
+        		        {id: -6,   list:['Belize','Canada','Costa Rica','El Salvador','Guatemala','Honduras','Mexico','Nicaragua','USA']},
         		        {id: 6.5,  list:['Myanmar (Burma)']},
-        		        {id: 7,    list:['Australia, Cambodia, Indonesia, Laos, Thailand, Vietnam']},
-        		        {id: -7,   list:['Canada, Mexico, USA']},
-        		        {id: 8,    list:['Australia, Brunei, China, Hong Kong, Indonesia, Macau, Malaysia, Mongolia, Philippines, Singapore, Taiwan']},
-        		        {id: -8,   list:['Canada', 'Mexico', 'USA']},
-        		        {id: 9,    list:['Australia', 'Indonesia', 'Japan', 'Korea', 'Palau']},
+        		        {id: 7,    list:['Australia','Cambodia','Indonesia','Laos','Thailand','Vietnam']},
+        		        {id: -7,   list:['Canada','Mexico','USA']},
+        		        {id: 8,    list:['Australia','Brunei','China','Hong Kong','Indonesia','Macau','Malaysia','Mongolia','Philippines','Singapore','Taiwan']},
+        		        {id: -8,   list:['Canada','Mexico','USA']},
+        		        {id: 9,    list:['Australia','Indonesia','Japan','Korea','Palau']},
         		        {id: -9,   list:['USA']},
         		    ];
             		list_countries = new Memory({data: _list_countries});
         		});
-        		console.log( "XXX" );
         		
         		console.log( list_countries );
         		console.log( list_countries.get(-3.5) );
         		console.log( list_countries.get(11.5) );
+        		
+        		Date.prototype.stdTimezoneOffset = function() {
+        		    var jan = new Date(this.getFullYear(), 0, 1);
+        		    var jul = new Date(this.getFullYear(), 6, 1);
+        		    return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+        		}
+
+        		Date.prototype.dst = function() {
+        		    return this.getTimezoneOffset() < this.stdTimezoneOffset();
+        		}
+        		
+        		var langCode = navigator.language || navigator.systemLanguage;
+        		var lang = langCode.toLowerCase(); 
+        		lang = lang.substr(0,2);
+        		var dateObject = new Date(); //this timezone offset calc taken from http://unmissabletokyo.com/country-detector.html
+        		var timeOffset = - dateObject.getTimezoneOffset() / 60; 
+        		if ( dateObject.dst() )
+        			timeOffset += ((timeOffset < 0) ? -1 : 1);
+        		console.log( "lang=[" + lang + "]" );
+        		console.log( "timeOffset=[" + timeOffset + "]" );
+        		console.log( "dst=" + dateObject.dst() );
+
+        		require(["dojo/store/Memory"], function(Memory){
+        			var list_countries_store = new Memory({ idProperty: "name", data: [ ] });
+        			var l = list_countries.get(timeOffset);
+        			console.log( l );
+        			l.list.forEach( function(entry) {
+            			list_countries_store.add( { name: entry } );
+            			if ( entry == "USA" )
+                			dijit.byId('id_autocomplete_restrict_list_country1').set( 'value', entry );
+        			});
+        			dijit.byId('id_autocomplete_restrict_list_country1').set( 'store', list_countries_store );
+        		});
         		
         		show_duration = true;
         		
