@@ -14,7 +14,7 @@
 
 .mblSimpleDialogInput {
 	margin: 7px 0 14px;
-	width: 260px;
+	width: 100%;
 }
 .mblSimpleDialogButton {
 	margin: 7px 0 0;
@@ -38,6 +38,17 @@
 	font-size: 17px;
 	font-weight: bold;
 	opacity: 0.95;
+}
+
+.mblSimpleDialogButton3r {
+	float: right;
+	width: 92px;
+	margin: 7px 0 0;
+	font-size: 15px;
+	font-weight: bold;
+	opacity: 0.95;
+	text-align:center; 
+	vertical-align:middle;
 }
 .mblSimpleDialog .mblProgressIndicator {
 	position: relative;

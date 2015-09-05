@@ -18,6 +18,10 @@
         <meta name="description" 
         	content="Allows a virtual drive over a Google Maps route using Street View. Step (in meters) and Refresh Rate are configurable. Street View Player. Simulate your Driving Route with this Google Map Web Application. Virtual Ride using Street View.">
         <meta name="revisit-after" content="4 hours">
+        
+        <!-- prevent cache -->
+		<meta http-equiv="cache-control" content="no-cache">
+		<meta http-equiv="pragma" content="no-cache">
 
         <script>
             (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -45,9 +49,11 @@
 		        "dojox/mobile/CheckBox",
 		        "dojox/mobile/Slider",
 		        "dojox/mobile/TextBox",
+		        "dojox/mobile/RadioButton",
 		        "dojox/mobile/ToggleButton",
 		        "dojox/mobile/SimpleDialog",
-		        "dojox/mobile/Icon"
+		        "dojox/mobile/Icon",
+		        "dojox/mobile/ComboBox"
 	        ]);
         </script>
 
@@ -59,7 +65,7 @@
 
 	    <div data-dojo-type="dojox.mobile.View" data-dojo-props='selected:true' id="view_config">
 
-		    <h1 data-dojo-type="dojox.mobile.Heading">
+		    <h1 id="id_main_heading" data-dojo-type="dojox.mobile.Heading">
 		    	<table style="width:100%">
 		    		<tr>
 					    <td style="width:99%; text-align:center; vertical-align:middle">
@@ -76,7 +82,7 @@
 		    	
 		    </h1>
 
-		    <div data-dojo-type="dojox.mobile.RoundRect" data-dojo-props='shadow:true' align="center">
+		    <div id="id_org_dest_pane" data-dojo-type="dojox.mobile.RoundRect" data-dojo-props='shadow:true' align="center">
 
 			    <table style="width:100%">
 				    <tr>
@@ -95,23 +101,237 @@
 
 		    </div>
 
-		    <div data-dojo-type="dojox.mobile.RoundRect" data-dojo-props='shadow:true' align="center">
-			    <button data-dojo-type="dojox.mobile.Button" 
-			    		onclick='require(["RouteViewMobile.js"], function( s ) { s.show_dialog("dlg_settings"); })'>
-			    	Settings
-			    </button>
+		    <div id="view_main" data-dojo-type="dojox/mobile/View">
+		    
+				<ul data-dojo-type="dojox/mobile/RoundRectList">
+    				<li data-dojo-type="dojox/mobile/ListItem" 
+		         	    onclick='require(["RouteViewMobile.js"], function( s ) { s.hide_main(); })'
+				        data-dojo-props='moveTo:"view_settings", transition:"slide"'>
+						Settings
+                    </li>
+  				</ul>
+
 		    </div>
 
 			<br>
             <div align="center">
-
-		        <button class="mblBlueButton" data-dojo-type="dojox.mobile.Button" data-dojo-props='label:"Virtual Drive with StreetView", disabled:true' id="btn_start"
+		        <button data-dojo-type="dojox.mobile.Button" class="mblSimpleDialogButton2 mblRedButton"
+		        		data-dojo-props='label:"Virtual Drive with StreetView", disabled:true' id="btn_start"
 		         	    onclick='require(["RouteViewMobile.js"], function( s ) { s.do_start(); })'
 		    	 	    style="font-size:100%; font-weight: bold">
 		        </button>
 		    </div>
 
+			<!-- ************* -->
+			<!-- SETTINGS VIEW -->
+			<!-- ************* -->
+			
+            <div id="view_settings" data-dojo-type="dojox.mobile.View">
+            
+	            <div data-dojo-type="dojox.mobile.Heading" role="heading">
+		            <span data-dojo-type="dojox.mobile.ToolBarButton" title="Back" role="button" style="float:left;" 
+		         	      onclick='require(["RouteViewMobile.js"], function( s ) { s.show_main(); })'
+		            	  data-dojo-props='arrow:"left", moveTo:"view_main", transitionDir:-1'>
+		            	Back
+		            </span>
+		            Settings
+	            </div>
+	            
+	            <ul data-dojo-type="dojox.mobile.EdgeToEdgeList" role="list">
+
+		            <li data-dojo-type="dojox.mobile.ListItem" role="listitem">
+			            No Highway
+			            <div id="id_check_no_hwy" data-dojo-type="dojox.mobile.Switch" data-dojo-props='value:"on"' role="button"></div>
+		            </li>
+		            
+		            <li data-dojo-type="dojox.mobile.ListItem" role="listitem">
+			            No Toll
+			            <div id="id_check_no_toll" data-dojo-type="dojox.mobile.Switch" data-dojo-props='value:"on"' role="button"></div>
+		            </li>
+		            
+		            <li data-dojo-type="dojox.mobile.ListItem" role="listitem">
+			            Step
+			            <div style="float:right;">
+					        <input id="id_input_meters" data-dojo-type="dojox.mobile.Slider" value="250" min="50" max="1000" step="50" type="range" style="width:200px;"
+					        	   intermediateChanges="true" 
+						    	   onchange='require(["RouteViewMobile.js"], function( s ) { s.cb_meters_changed(); })'>
+						</div>
+			            <div style="float:right;">
+		    		        <span id="id_meters">250</span> meters
+						</div>
+		            </li>
+
+		            <li data-dojo-type="dojox.mobile.ListItem" role="listitem">
+			            Interval
+			            <div style="float:right;">
+					        <input id="id_input_interval" data-dojo-type="dojox.mobile.Slider" value="1200" min="500" max="5000" step="100" type="range" style="width:200px;"
+					        	   intermediateChanges="true" 
+						    	   onchange='require(["RouteViewMobile.js"], function( s ) { s.cb_interval_changed(); })'>
+						</div>
+			            <div style="float:right;">
+		    		        <span id="id_interval">1000</span> milliseconds
+						</div>
+		            </li>
+		            
+		            <li data-dojo-type="dojox.mobile.ListItem" data-dojo-props='' role="listitem">
+			            Wi-Fi
+			            <div style="float:right;">
+				            <input type="radio" id="rb1" dojoType="dojox.mobile.RadioButton" value="Medium" checked><label for="rb1">On</label>
+				            <input type="radio" id="rb2" dojoType="dojox.mobile.RadioButton" value="Small"><label for="rb2">Off</label>		
+			            </div>
+		            </li>
+
+	            </ul>
+	            
+	            <br>
+	            <ul data-dojo-type="dojox.mobile.EdgeToEdgeList" role="list">
+
+		            <li data-dojo-type="dojox.mobile.ListItem" data-dojo-props='moveTo:"view_advanced_settings"' role="button">
+			            Advanced Settings
+		            </li>
+
+				</ul>	            
+	            
+            </div>
+
+			<!-- ********************** -->
+			<!-- ADVANCED SETTINGS VIEW -->
+			<!-- ********************** -->
+			
+            <div id="view_advanced_settings" data-dojo-type="dojox.mobile.View">
+            
+	            <div data-dojo-type="dojox.mobile.Heading" role="heading">
+		            <span data-dojo-type="dojox.mobile.ToolBarButton" title="Back" role="button" style="float:left;" 
+		            	  data-dojo-props='arrow:"left", moveTo:"view_settings", transitionDir:-1'>
+		            	Back
+		            </span>
+		            Advanced Settings
+	            </div>
+	            
+	            <ul data-dojo-type="dojox.mobile.EdgeToEdgeList" role="list">
+
+		            <li data-dojo-type="dojox.mobile.ListItem" role="listitem">
+			            Save Settings
+		        		<div data-dojo-type="dojox.mobile.Button" class="mblSimpleDialogButton3r mblBlueButton" role="button" 
+		         	    	 onclick='require(["RouteViewMobile.js"], function( s ) { s.save_settings(); })'>
+		         	    	Save
+		         	    </div>
+		            </li>
+		            
+		            <li data-dojo-type="dojox.mobile.ListItem" role="listitem">
+			            Clear Settings
+		        		<div data-dojo-type="dojox.mobile.Button" class="mblSimpleDialogButton3r mblBlueButton" role="button" 
+		         	    	 onclick='require(["RouteViewMobile.js"], function( s ) { s.clear_settings(); })'>
+		         	    	Clear
+		         	    </div>
+		            </li>
+		            
+				</ul>	            
+	            <br>
+	            <ul data-dojo-type="dojox.mobile.EdgeToEdgeList" role="list">
+
+		            <li data-dojo-type="dojox.mobile.ListItem" data-dojo-props='rightText:"...", moveTo:"view_use_curr_pos_settings"' role="button">
+			            Use current position for
+		            </li>
+
+		            <li data-dojo-type="dojox.mobile.ListItem" data-dojo-props='moveTo:"view_autocomplete_settings"' role="button">
+			            Autocomplete Settings
+		            </li>
+
+				</ul>	            
+	            
+            </div>
+            
+			<!-- ********************************* -->
+			<!-- USE CURRENT POSITION FOR ... VIEW -->
+			<!-- ********************************* -->
+			
+            <div id="view_use_curr_pos_settings" data-dojo-type="dojox.mobile.View">
+            
+	            <div data-dojo-type="dojox.mobile.Heading" role="heading">
+		            <span data-dojo-type="dojox.mobile.ToolBarButton" title="Back" role="button" style="float:left;" 
+		            	  data-dojo-props='arrow:"left", moveTo:"view_advanced_settings", transitionDir:-1'>
+		            	Back
+		            </span>
+		            Use current position for
+	            </div>
+	            
+	            <ul data-dojo-type="dojox.mobile.EdgeToEdgeList" role="list">
+
+		            <li data-dojo-type="dojox.mobile.ListItem" role="listitem">
+			            origin
+			            <div id="id_use_curr_position_for_org" data-dojo-type="dojox.mobile.Switch" data-dojo-props='value:"off"' role="button"></div>
+		            </li>
+		            
+		            <li data-dojo-type="dojox.mobile.ListItem" role="listitem">
+			            destination
+			            <div id="id_use_curr_position_for_dest" data-dojo-type="dojox.mobile.Switch" data-dojo-props='value:"off"' role="button"></div>
+		            </li>
+		            
+	            </ul>
+		            
+            </div>
+	            
+			<!-- ************************** -->
+			<!-- AUTOCOMPLETE SETTINGS VIEW -->
+			<!-- ************************** -->
+			
+            <div id="view_autocomplete_settings" data-dojo-type="dojox.mobile.View">
+            
+                <select data-dojo-type="dijit/form/DataList"
+                  data-dojo-props='id:"restrict_types_list"'>
+                      <option>geocode</option>
+                      <option>address</option>
+                      <option>establishment</option>
+                      <option selected>(cities)</option>
+                      <option>(regions)</option>
+                </select>
+
+	            <div data-dojo-type="dojox.mobile.Heading" role="heading">
+		            <span data-dojo-type="dojox.mobile.ToolBarButton" title="Back" role="button" style="float:left;" 
+		            	  data-dojo-props='arrow:"left", moveTo:"view_advanced_settings", transitionDir:-1'>
+		            	Back
+		            </span>
+		            Autocomplete Settings
+	            </div>
+	            
+	            <ul data-dojo-type="dojox.mobile.EdgeToEdgeList" role="list">
+
+		            <li data-dojo-type="dojox.mobile.ListItem" role="listitem">
+			            Restrict Type
+			            <div id="id_autocomplete_restrict_type" data-dojo-type="dojox.mobile.Switch" data-dojo-props='value:"on"' role="button"></div>
+		            </li>
+		            
+		            <li data-dojo-type="dojox.mobile.ListItem" role="listitem">
+			            Type Restriction 
+			            <div style="float:right;">
+					        <input data-dojo-type="dojox.mobile.ComboBox" id="id_autocomplete_restrict_cb"
+				        	     data-dojo-props='list:"restrict_types_list", value:"geocode", readonly:true' role="button"></input>
+						</div>
+		            </li>
+
+				</ul>		    
+				<br>        
+	            <ul data-dojo-type="dojox.mobile.EdgeToEdgeList" role="list">
+
+		            <li data-dojo-type="dojox.mobile.ListItem" role="listitem">
+			            Restrict Country
+			            <div id="id_autocomplete_restrict_country" data-dojo-type="dojox.mobile.Switch" data-dojo-props='value:"off"' role="button"></div>
+		            </li>
+		            
+		            <li data-dojo-type="dojox.mobile.ListItem" role="listitem">
+			            Use location
+			            <div id="id_autocomplete_restrict_country_use_loc" data-dojo-type="dojox.mobile.Switch" data-dojo-props='value:"on"' role="button"></div>
+		            </li>
+		            
+	            </ul>
+		            
+            </div>
+	            
+			<!-- ************ -->
 			<!-- ABOUT DIALOG -->
+			<!-- ************ -->
+			
 	        <div id="dlg_about" data-dojo-type="dojox.mobile.SimpleDialog">
 		        <div class="mblSimpleDialogTitle">About RouteView</div>
 
@@ -120,7 +340,7 @@
 					<br><br>
 					(C) Olivier Singla 2015
 					<br>
-					Feedback welcome...
+					Feedback welcome!
 					<br>
 					<b>olivier</b>&nbsp;<i>dot</i>&nbsp;<b>singla</b>&nbsp;<i>at</i>&nbsp;<b>gmail</b>&nbsp;<i>dot</i>&nbsp;<b>com</b>
 					<br>
@@ -131,66 +351,6 @@
 		         	    onclick='require(["RouteViewMobile.js"], function( s ) { s.hide_dialog("dlg_about"); })'>
 			        Close
 		        </button>
-
-	        </div>
-
-			<!-- SETTINGS DIALOG -->
-	        <div id="dlg_settings" data-dojo-type="dojox.mobile.SimpleDialog">
-		        <div class="mblSimpleDialogTitle">Settings</div>
-		        <table style="width:100%">
-			        <tr style="text-align:center">
-				        <td style="text-align:center">
-					        <button data-dojo-type="dojox.mobile.ToggleButton" checked id="id_check_no_hwy">No Highway</button>
-				        </td>
-				        <td style="text-align:center">
-					        <button data-dojo-type="dojox.mobile.ToggleButton" checked id="id_check_no_toll">No Toll</button>
-				        </td>
-			        </tr>
-			        <tr>
-		    	        <td colspan="2" style="text-align:center">
-		    		        <br>
-		    		        Step: <b><span id="id_meters">250</span> meters</b>
-		    	        </td>
-			        </tr>
-			        <tr>
-				        <td colspan="2" >
-					        <input id="id_input_meters" data-dojo-type="dojox.mobile.Slider" value="250" min="50" max="1000" step="50" type="range" style="width:85%;"
-					        	   intermediateChanges="true" 
-						    	   onchange='require(["RouteViewMobile.js"], function( s ) { s.cb_meters_changed(); })'>
-				        </td>
-			        </tr>
-			        <tr>
-		    	        <td colspan="2" style="text-align:center">
-		    		        <br>
-		    		        Step: <b><span id="id_interval">1000</span> milliseconds</b>
-		    	        </td>
-			        </tr>
-			        <tr>
-				        <td colspan="2" >
-					        <input id="id_input_interval" data-dojo-type="dojox.mobile.Slider" value="1200" min="500" max="5000" step="100" type="range" style="width:85%;"
-					        	   intermediateChanges="true" 
-						    	   onchange='require(["RouteViewMobile.js"], function( s ) { s.cb_interval_changed(); })'>
-					        
-				        </td>
-			        </tr>
-		        </table>
-
-				<table>
-					<tr>
-						<td>
-		        <button data-dojo-type="dojox.mobile.Button" class="mblSimpleDialogButton2l mblBlueButton" disabled
-		         	    onclick='require(["RouteViewMobile.js"], function( s ) { s.hide_dialog("dlg_settings"); })'>
-			        Advanced
-		        </button>
-						</td>
-						<td>
-		        <button data-dojo-type="dojox.mobile.Button" class="mblSimpleDialogButton2r mblBlueButton" 
-		         	    onclick='require(["RouteViewMobile.js"], function( s ) { s.hide_dialog("dlg_settings"); })'>
-			        Close
-		        </button>
-						</td>
-					</tr>
-				</table>
 
 	        </div>
 
