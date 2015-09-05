@@ -958,11 +958,26 @@ define( function( m ) {
         		
             });
             
-        	var id_autocomplete_restrict_type = dijit.byId('id_autocomplete_restrict_type');
-        	id_autocomplete_restrict_type.watch( function( name, oldValue, value ) {
+        	dijit.byId('id_autocomplete_restrict_type').watch( function( name, oldValue, value ) {
            		domStyle.set( "id_autocomplete_restrict_li", "display", (value == "on") ? "" : "None" );
             });
 
+        	dijit.byId('id_autocomplete_restrict_country').watch( function( name, oldValue, value ) {
+        		if ( value == "off" ) {
+               		domStyle.set( "id_autocomplete_restrict_country_use_loc_li", "display", "None" );
+               		domStyle.set( "id_autocomplete_restrict_country1_li", "display", "None" );
+        		}
+        		else {
+               		domStyle.set( "id_autocomplete_restrict_country_use_loc_li", "display", "" );
+      	  	       	var use_loc = dijit.byId('id_autocomplete_restrict_type').get( 'value' );
+               		domStyle.set( "id_autocomplete_restrict_country1_li", "display", (use_loc == "on") ? "" : "None" );
+        		}
+            });
+
+        	dijit.byId('id_autocomplete_restrict_country_use_loc').watch( function( name, oldValue, value ) {
+           		domStyle.set( "id_autocomplete_restrict_country1_li", "display", (value == "on") ? "" : "None" );
+        	});
+        	
     	});
         
     } // initialize
