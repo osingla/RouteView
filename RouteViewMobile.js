@@ -15,7 +15,9 @@ define( function( m ) {
     var sv;
     var polyline = undefined;
     var location_from;
+	var autocomplete_from;
     var location_to;
+	var autocomplete_to;
     var timer_animate;
     var dist_route;
     var duration_secs;
@@ -64,10 +66,30 @@ define( function( m ) {
     }
     
     function show_main( ) {
-       	require(["dojo/dom-style", "dojo/ready"], function(domStyle, ready) {
+
+    	require(["dojo/dom-style", "dojo/ready"], function(domStyle, ready) {
+    		
        		domStyle.set( "id_main_heading", "display", "" );
   	       	domStyle.set( "id_org_dest_pane", "display", "" );
   	       	domStyle.set( "btn_start", "display", "" );
+
+  	       	if ( dijit.byId('id_autocomplete_restrict_type').get( 'value' ) == "on" ) {
+  	       		var v = dijit.byId('id_autocomplete_restrict_cb').get( 'value' );
+            	autocomplete_from.setTypes([ v ]);
+            	autocomplete_to.setTypes([ v ]);
+  	       	}
+  	       	else {
+            	autocomplete_from.setTypes([]);
+            	autocomplete_to.setTypes([]);
+  	       	}
+  	       	
+  	       	if ( dijit.byId('id_autocomplete_restrict_country').get( 'value' ) == "on" ) {
+  	       	}
+  	       	else {
+            	autocomplete_from.setComponentRestrictions();
+            	autocomplete_to.setComponentRestrictions();
+  	       	}
+  	       	
        	});
     }
     
@@ -596,13 +618,15 @@ define( function( m ) {
             		componentRestrictions: { country: 'us' },
             		types: ['(cities)']		// geocode
             	};
-            	var autocomplete_from = new google.maps.places.Autocomplete(input_from, autocomplete_options);
-        		on( input_from, "change", function( evt ) {
+            	autocomplete_from = new google.maps.places.Autocomplete(input_from);
+            	autocomplete_from.setComponentRestrictions({country: 'us'});
+            	autocomplete_from.setTypes(['(cities)']);
+            	on( input_from, "change", function( evt ) {
         			cb_route_from_or_to_changed( evt );
        			});
 
             	var input_to = dom.byId('id_route1_to');
-    	        var autocomplete_to = new google.maps.places.Autocomplete(input_to);
+    	        autocomplete_to = new google.maps.places.Autocomplete(input_to);
         		on( input_to, "change", function( evt ) {
         			cb_route_from_or_to_changed( evt );
        			});
