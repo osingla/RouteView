@@ -832,12 +832,11 @@ define( function( m ) {
 		}
 */
     }
-
     function initialize() {
         
     	startup_done = false;
 
-    	require(["dojo/dom", "dojo/on", "dojo/dom-style", "dojo/dom-geometry", "dojo/ready"], function( dom, on, style, domGeom, ready ) {
+    	require(["dojo/dom", "dojo/on", "dojo/dom-style", "dojo/dom-geometry", "dojo/dom-style", "dojo/ready"], function( dom, on, style, domGeom, domStyle, ready ) {
     		
             ready( function() {
             	
@@ -958,8 +957,13 @@ define( function( m ) {
         		show_duration = true;
         		
             });
+            
+        	var id_autocomplete_restrict_type = dijit.byId('id_autocomplete_restrict_type');
+        	id_autocomplete_restrict_type.watch( function( name, oldValue, value ) {
+           		domStyle.set( "id_autocomplete_restrict_li", "display", (value == "on") ? "" : "None" );
+            });
 
-        });
+    	});
         
     } // initialize
     

@@ -204,7 +204,7 @@
 
 		            <li data-dojo-type="dojox.mobile.ListItem" role="listitem">
 			            Save Settings
-		        		<div data-dojo-type="dojox.mobile.Button" class="mblSimpleDialogButton3r mblBlueButton" role="button" 
+		        		<div data-dojo-type="dojox.mobile.Button" class="mblSimpleDialogButton3r mblBlueButton" role="button" disabled
 		         	    	 onclick='require(["RouteViewMobile.js"], function( s ) { s.save_settings(); })'>
 		         	    	Save
 		         	    </div>
@@ -212,7 +212,7 @@
 		            
 		            <li data-dojo-type="dojox.mobile.ListItem" role="listitem">
 			            Clear Settings
-		        		<div data-dojo-type="dojox.mobile.Button" class="mblSimpleDialogButton3r mblBlueButton" role="button" 
+		        		<div data-dojo-type="dojox.mobile.Button" class="mblSimpleDialogButton3r mblBlueButton" role="button" disabled
 		         	    	 onclick='require(["RouteViewMobile.js"], function( s ) { s.clear_settings(); })'>
 		         	    	Clear
 		         	    </div>
@@ -296,7 +296,7 @@
 			            <div id="id_autocomplete_restrict_type" data-dojo-type="dojox.mobile.Switch" data-dojo-props='value:"on"' role="button"></div>
 		            </li>
 		            
-		            <li data-dojo-type="dojox.mobile.ListItem" role="listitem">
+		            <li data-dojo-type="dojox.mobile.ListItem" role="listitem" id="id_autocomplete_restrict_li" >
 			            Type Restriction 
 			            <div style="float:right;">
 					        <input data-dojo-type="dojox.mobile.ComboBox" id="id_autocomplete_restrict_cb"
