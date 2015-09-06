@@ -635,8 +635,8 @@ define( function( m ) {
                 console.log( "from = " + start_location );
                 console.log( "to   = " + end_location );
 
-                var no_hwy  = dijit.byId('id_check_no_hwy').get( 'checked' );
-                var no_toll = dijit.byId('id_check_no_toll').get( 'checked' );
+                var no_hwy  = (dijit.byId('id_check_no_hwy').get( 'value' ) == "on") ? true : false;
+                var no_toll = (dijit.byId('id_check_no_toll').get( 'value' ) == "on") ? true : false;
 
                 var rendererOptions = {
                     map: map,
@@ -835,6 +835,67 @@ define( function( m ) {
 		}
 */
     }
+
+    function save_settings( ) {
+
+    	if ( typeof(Storage) == "undefined" ) {
+    		console.log( "No local storage!" );
+    		return;
+    	}
+    	
+        var no_hwy  = dijit.byId('id_check_no_hwy').get( 'value' );
+    	localStorage.setItem( "no_highway", no_hwy );
+
+    	var no_toll = dijit.byId('id_check_no_toll').get( 'value' );
+    	localStorage.setItem( "no_toll", no_toll );
+
+        var step = dijit.byId('id_input_meters').get( 'value' );
+    	localStorage.setItem( "step", step );
+    	
+        var interval = dijit.byId('id_input_interval').get( 'value' );
+    	localStorage.setItem( "interval", interval );
+    	
+    }
+    
+    function load_settings( ) {
+
+    	if ( typeof(Storage) == "undefined" ) {
+    		console.log( "No local storage!" );
+    		return;
+    	}
+    	
+    	var no_hwy = localStorage.getItem("no_highway");
+    	console.log( "Restored no_hwy= " + no_hwy );
+    	if ( no_hwy )
+            dijit.byId('id_check_no_hwy').set( 'value', no_hwy );
+    	
+    	var no_toll = localStorage.getItem("no_toll");
+    	console.log( "Restored no_toll= " + no_toll );
+    	if ( no_toll )
+            dijit.byId('id_check_no_toll').set( 'value', no_toll );
+
+    	var step = localStorage.getItem("step");
+    	console.log( "Restored step= " + step );
+    	if ( step )
+            dijit.byId('id_input_meters').set( 'value', step );
+    	
+    	var interval = localStorage.getItem("interval");
+    	console.log( "Restored interval= " + interval );
+    	if ( interval )
+            dijit.byId('id_input_interval').set( 'value', interval );
+    	
+    }
+    
+    function clear_settings( ) {
+
+    	if ( typeof(Storage) == "undefined" ) {
+    		console.log( "No local storage!" );
+    		return;
+    	}
+
+    	localStorage.clear( );
+    	
+    }
     
     function initialize() {
         
@@ -993,6 +1054,8 @@ define( function( m ) {
    					if ( (dijit.byId('id_use_curr_position_for_org').get( 'value' ) == "on") || (dijit.byId('id_use_curr_position_for_dest').get( 'value' ) == "on") )
        					navigator.geolocation.getCurrentPosition( got_current_position );
         	    
+   				load_settings( );
+   				
             }); // ready
             
     	});
@@ -1057,6 +1120,9 @@ define( function( m ) {
 		cb_route_from_or_to_changed: function( ) { cb_route_from_or_to_changed(); },
 
 		click_duration_distance:   function( ) { click_duration_distance(); },
+
+		save_settings: 		function( ) { save_settings(); },
+		clear_settings: 	function( ) { clear_settings(); },
 		
     };
  
