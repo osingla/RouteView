@@ -406,9 +406,6 @@ define( function( m ) {
             	
             	if ( status == google.maps.DirectionsStatus.OK ) {
             		
-            		console.log( ">>>>>>>>>>>" );
-            		console.log( response );
-            		console.log( ">>>>>>>>>>>" );
                     var legs = response.routes[0].legs;
                     var leg = legs[0];
                     var distance = leg.distance.text;
@@ -452,6 +449,30 @@ define( function( m ) {
                    		});
                    		
                    	});
+
+            	}
+            	else {
+            		
+                   	require(["dojo/dom-style"], function(domStyle) {
+                   		domStyle.set( "td_small_map_canvas", "display", "None" );
+                   	});
+
+                	var message = "?";
+                    if ( status == google.maps.DirectionsStatus.UNKNOWN_ERROR )
+                    	message = "Request could not be processed. Try again.";
+                    else if ( status == google.maps.DirectionsStatus.OVER_QUERY_LIMIT )
+                    	message = "Over the requests limit in too short a period of time.";
+                    else if ( status == google.maps.DirectionsStatus.NOT_FOUND )
+                    	message = "At least one of the origin or destination could not be geocoded.";
+                    else if ( status == google.maps.DirectionsStatus.REQUEST_DENIED )
+                    	message = "Not allowed to use the directions service.";
+                    else if ( status == google.maps.DirectionsStatus.ZERO_RESULTS )
+                    	message = "No route could be found between the origin and destination.";
+                    else if ( status == google.maps.DirectionsStatus.INVALID_REQUEST )
+                    	message = "The DirectionsRequest provided was invalid.";
+                    console.log( message );
+            		dijit.byId('btn_start').set( 'label', message );
+            		dijit.byId('btn_start').set( 'disabled', true );
 
             	}
             	
