@@ -866,6 +866,30 @@ define( function( m ) {
         var use_curr_pos_for_dest = dijit.byId('id_use_curr_position_for_dest').get( 'value' );
     	localStorage.setItem( "use_curr_position_for_dest", use_curr_pos_for_dest );
     	console.log( "use_curr_pos_for_dest= " + use_curr_pos_for_dest );
+    	
+	    var autocomplete_restrict_type = dijit.byId('id_autocomplete_restrict_type').get( 'value' );
+    	localStorage.setItem( "autocomplete_restrict_type", autocomplete_restrict_type );
+    	console.log( "autocomplete_restrict_type= " + autocomplete_restrict_type );
+    		
+	    var autocomplete_restrict_cb = dijit.byId('id_autocomplete_restrict_cb').get( 'value' );
+    	localStorage.setItem( "autocomplete_restrict_cb", autocomplete_restrict_cb );
+    	console.log( "autocomplete_restrict_cb= " + autocomplete_restrict_cb );
+    		
+	    var autocomplete_restrict_country = dijit.byId('id_autocomplete_restrict_country').get( 'value' );
+    	localStorage.setItem( "autocomplete_restrict_country", autocomplete_restrict_country );
+    	console.log( "autocomplete_restrict_country= " + autocomplete_restrict_country );
+    		
+	    var autocomplete_restrict_country_use_loc = dijit.byId('id_autocomplete_restrict_country_use_loc').get( 'value' );
+    	localStorage.setItem( "autocomplete_restrict_country_use_loc", autocomplete_restrict_country_use_loc );
+    	console.log( "autocomplete_restrict_country_use_loc= " + autocomplete_restrict_country_use_loc );
+    		
+	    var autocomplete_restrict_list_country1 = dijit.byId('id_autocomplete_restrict_list_country1').get( 'value' );
+    	localStorage.setItem( "autocomplete_restrict_list_country1", autocomplete_restrict_list_country1 );
+    	console.log( "autocomplete_restrict_list_country1= " + autocomplete_restrict_list_country1 );
+    		
+	    var autocomplete_restrict_list_country2 = dijit.byId('id_autocomplete_restrict_list_country2').get( 'value' );
+    	localStorage.setItem( "autocomplete_restrict_list_country2", autocomplete_restrict_list_country2 );
+    	console.log( "autocomplete_restrict_list_country2= " + autocomplete_restrict_list_country2 );
     		
     }
     
@@ -905,6 +929,36 @@ define( function( m ) {
     	console.log( "Restored use_curr_position_for_dest= " + use_curr_pos_for_dest );
     	if ( use_curr_pos_for_dest )
             dijit.byId('id_use_curr_position_for_dest').set( 'value', use_curr_pos_for_dest );
+    	
+    	var autocomplete_restrict_type = localStorage.getItem("autocomplete_restrict_type");
+    	console.log( "Restored autocomplete_restrict_type= " + autocomplete_restrict_type );
+    	if ( autocomplete_restrict_type )
+            dijit.byId('id_autocomplete_restrict_type').set( 'value', autocomplete_restrict_type );
+    	
+    	var autocomplete_restrict_cb = localStorage.getItem("autocomplete_restrict_cb");
+    	console.log( "Restored autocomplete_restrict_cb= " + autocomplete_restrict_cb );
+    	if ( autocomplete_restrict_cb )
+            dijit.byId('id_autocomplete_restrict_cb').set( 'value', autocomplete_restrict_cb );
+    	
+    	var autocomplete_restrict_country = localStorage.getItem("autocomplete_restrict_country");
+    	console.log( "Restored autocomplete_restrict_country= " + autocomplete_restrict_country );
+    	if ( autocomplete_restrict_country )
+            dijit.byId('id_autocomplete_restrict_country').set( 'value', autocomplete_restrict_country );
+    	
+    	var autocomplete_restrict_country_use_loc = localStorage.getItem("autocomplete_restrict_country_use_loc");
+    	console.log( "Restored autocomplete_restrict_country_use_loc= " + autocomplete_restrict_country_use_loc );
+    	if ( autocomplete_restrict_country_use_loc )
+            dijit.byId('id_autocomplete_restrict_country_use_loc').set( 'value', autocomplete_restrict_country_use_loc );
+    	
+    	var autocomplete_restrict_list_country1 = localStorage.getItem("autocomplete_restrict_list_country1");
+    	console.log( "Restored autocomplete_restrict_list_country1= " + autocomplete_restrict_list_country1 );
+    	if ( autocomplete_restrict_list_country1 )
+            dijit.byId('id_autocomplete_restrict_list_country1').set( 'value', autocomplete_restrict_list_country1 );
+    	
+    	var autocomplete_restrict_list_country2 = localStorage.getItem("autocomplete_restrict_list_country2");
+    	console.log( "Restored autocomplete_restrict_list_country2= " + autocomplete_restrict_list_country2 );
+    	if ( autocomplete_restrict_list_country2 )
+            dijit.byId('id_autocomplete_restrict_list_country2').set( 'value', autocomplete_restrict_list_country2 );
     	
     }
     
