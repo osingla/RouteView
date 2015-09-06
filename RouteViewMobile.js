@@ -890,8 +890,11 @@ define( function( m ) {
 	    var autocomplete_restrict_list_country2 = dijit.byId('id_autocomplete_restrict_list_country2').get( 'value' );
     	localStorage.setItem( "autocomplete_restrict_list_country2", autocomplete_restrict_list_country2 );
     	console.log( "autocomplete_restrict_list_country2= " + autocomplete_restrict_list_country2 );
-    		
-    }
+    	
+	    var view = dijit.byId('view_advanced_settings');
+	    view.performTransition( "view_main", -1, "scaleOut", this, show_main );
+    	
+    } // save_settings
     
     function load_settings( ) {
 
@@ -960,7 +963,7 @@ define( function( m ) {
     	if ( autocomplete_restrict_list_country2 )
             dijit.byId('id_autocomplete_restrict_list_country2').set( 'value', autocomplete_restrict_list_country2 );
     	
-    }
+    } // load_settings
     
     function clear_settings( ) {
 
@@ -970,6 +973,9 @@ define( function( m ) {
     	}
 
     	localStorage.clear( );
+    	
+	    var view = dijit.byId('view_advanced_settings');
+	    view.performTransition( "view_main", -1, "scaleOut", this, show_main );
     	
     }
     
