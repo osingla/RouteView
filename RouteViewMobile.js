@@ -12,7 +12,7 @@ define( function( m ) {
     var map;
     var panorama;
     var marker = undefined;
-    var sv;
+    var street_view_service;
     var polyline = undefined;
     var location_from;
 	var autocomplete_from;
@@ -362,6 +362,46 @@ define( function( m ) {
         var start_disabled = (start_location == "") || (end_location == "");
 		dijit.byId('btn_start').set( 'disabled', start_disabled );
 		
+		if ( !start_disabled ) {
+
+			var start_location = dijit.byId('id_route1_from').get( 'value' );
+            var end_location   = dijit.byId('id_route1_to').get( 'value' );
+            var no_hwy  = (dijit.byId('id_check_no_hwy').get( 'value' ) == "on") ? true : false;
+            var no_toll = (dijit.byId('id_check_no_toll').get( 'value' ) == "on") ? true : false;
+
+            var directions_service = new google.maps.DirectionsService( );
+            var travelMode = google.maps.DirectionsTravelMode.DRIVING;  
+            var request = {
+                origin: start_location,
+                destination: end_location,
+                travelMode: travelMode,
+                optimizeWaypoints: true,
+                avoidHighways: no_hwy,
+                avoidTolls: no_toll
+            };  
+            directions_service.route( request, function(response, status) {
+            	if ( status == google.maps.DirectionsStatus.OK ) {
+            		console.log( ">>>>>>>>>>>" );
+            		console.log( response );
+            		console.log( ">>>>>>>>>>>" );
+                    var legs = response.routes[0].legs;
+                    var leg = legs[0];
+                    var distance = leg.distance.text;
+                    var meters = leg.distance.value;
+                    var duration = leg.duration.text;
+                    console.log( "distance = " + distance );
+                    console.log( "duration = " + duration );
+            		dijit.byId('btn_start').set( 'label', distance + " , " + duration );
+            	}
+            });
+            
+		}
+		else {
+
+    		dijit.byId('btn_start').set( 'label', "Virtual Drive with StreetView" );
+		
+		}
+		
 	}
 
 	function click_duration_distance( ) {
@@ -415,7 +455,7 @@ define( function( m ) {
 
     	var home = new google.maps.LatLng( 35.733435, -78.907684 );
 
-        sv = new google.maps.StreetViewService();
+    	street_view_service = new google.maps.StreetViewService();
 
         var panorama_options = {
             position: home,
@@ -476,11 +516,11 @@ define( function( m ) {
         var bearing = polyline.Bearing( polyline.GetIndexAtDistance(d) );
 
         var p = polyline.GetPointAtDistance( d );
-      console.log( "d=" + d + " - " + polyline.GetIndexAtDistance(d) + " / " + bearing + " - " + p.lat() + " , " + p.lng());
+        console.log( "d=" + d + " - " + polyline.GetIndexAtDistance(d) + " / " + bearing + " - " + p.lat() + " , " + p.lng());
 
         dijit.byId('id_input_route').set( 'value', curr_dist, false );
 
-        sv.getPanoramaByLocation( new google.maps.LatLng( p.lat(), p.lng() ), 0, function( data, status ) {
+        street_view_service.getPanoramaByLocation( new google.maps.LatLng( p.lat(), p.lng() ), 0, function( data, status ) {
 
             if ( !map.getBounds().contains( p ) )
                	map.panTo( p );
@@ -998,12 +1038,18 @@ define( function( m ) {
             	on( input_from, "change", function( evt ) {
         			cb_route_from_or_to_changed( evt );
        			});
+            	autocomplete_from.addListener('place_changed', function() {
+        			cb_route_from_or_to_changed( );
+            	});
 
             	var input_to = dom.byId('id_route1_to');
     	        autocomplete_to = new google.maps.places.Autocomplete(input_to);
         		on( input_to, "change", function( evt ) {
         			cb_route_from_or_to_changed( evt );
        			});
+        		autocomplete_to.addListener('place_changed', function() {
+        			cb_route_from_or_to_changed( );
+            	});
 
                 var previous_orientation = window.orientation;
         		window.addEventListener("orientationchange", function() {
