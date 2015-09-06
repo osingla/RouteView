@@ -346,6 +346,9 @@ define( function( m ) {
             	autocomplete_to.setComponentRestrictions();
   	       	}
   	       	
+    		if ( small_map != undefined )
+    	        google.maps.event.trigger( small_map, 'resize' );
+  	       	
        	});
     }
     
