@@ -72,7 +72,13 @@
 		                <h1 id="id_main_heading" data-dojo-type="dojox.mobile.Heading">
 		    	            <table style="width:100%">
 		    		            <tr>
-					                <td style="width:99%; text-align:center; vertical-align:middle">
+					                <td style="width:1%; text-align:left; vertical-align:middle">
+					    	            <div data-dojo-type="dojox.mobile.Icon"
+								             data-dojo-props='icon:"icons/icon-fullscreen.png"'
+		         	    		             onclick='require(["RouteViewMobile.js"], function( s ) { s.toggle_full_screen(); })'>
+							            </div>
+		    			            </td>
+					                <td style="width:98%; text-align:center; vertical-align:top">
 					    	            Route View
 		    			            </td>
 					                <td style="width:1%; text-align:right; vertical-align:middle">

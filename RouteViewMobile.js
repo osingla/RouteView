@@ -57,6 +57,20 @@ define( function( m ) {
     	}
 
     }
+    
+    function is_in_full_screen( ) {
+    	if ( document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement )
+    		return true;
+    	return false;
+    }
+    
+    function toggle_full_screen( ) {
+    	if ( !is_in_full_screen( ) )
+    		enter_full_screen( );
+    	else
+    		exit_full_screen( );
+    	
+    }
 
 	require(["dojo/store/Memory"], function( Memory ) {
 		_iso_countries = [
@@ -1292,6 +1306,8 @@ define( function( m ) {
 
         initialize: function( ) { initialize( ); },
 
+        toggle_full_screen: function( ) { toggle_full_screen( ); },
+        
         show_about: function( dlg ) { show_about( dlg ); },
         
         hide_main: function( dlg ) { hide_main( dlg ); },
