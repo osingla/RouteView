@@ -1,4 +1,3 @@
-/* ********************************************************************************************* */
 /* ***                                                                                       *** */ 
 /* *** RouteView - Olivier Singla                                                            *** */
 /* ***                                                                                       *** */ 
@@ -566,16 +565,26 @@ define( function( m ) {
 
     function start_driving( ) {
         
-		if ( timer_animate != undefined )
-            clearTimeout( timer_animate );
-            
-        dist_route = polyline.Distance();
-        map.setCenter( polyline.getPath().getAt(0) );
-        var p = polyline.GetPointAtDistance( 50 );
-        if ( !map.getBounds().contains( p ) )
-           	map.panTo( p );
+       	require(["dojo/ready"], function(ready) {
+       		ready( function() {
+       			
+       			if ( timer_animate != undefined )
+       	            clearTimeout( timer_animate );
+       	            
+       	        dist_route = polyline.Distance();
+       	        map.setCenter( polyline.getPath().getAt(0) );
+       	        var p = polyline.GetPointAtDistance( 50 );
+       	        if ( map.getBounds() == undefined ) {
+       	        }
+       	        else {
+           	        if ( !map.getBounds().contains( p ) )
+           	           	map.panTo( p );
+       	        }
+       	        timer_animate = setTimeout( 'require(["RouteViewMobile.js"], function( s ) { s.cb_animate(50); })', 250 );
 
-        timer_animate = setTimeout( 'require(["RouteViewMobile.js"], function( s ) { s.cb_animate(50); })', 250 );
+       		});
+       	});
+       			
     }
 
     function show_route_distance_duration( dist_meters, duration_secs ) {
@@ -616,17 +625,15 @@ define( function( m ) {
     
     function do_start( init ) {
 
-       	require(["dojo/ready"], function(ready) {
+       	require(["dojo/dom-style", "dojo/ready"], function(domStyle, ready) {
        		
        		ready( function() {
        			
            		if ( init ) {
-           	       	require(["dojo/dom-style", "dojo/ready"], function(domStyle, ready) {
-           	       		domStyle.set( "view_config", "display", "None" );
-           	       		domStyle.set( "view_map", "display", "" );
-           	       		do_start( false );
-           	       		return;
-           	       	});
+       	       		domStyle.set( "view_config", "display", "None" );
+       	       		domStyle.set( "view_map", "display", "" );
+       	       		do_start( false );
+       	       		return;
            		}
            		
             	enter_full_screen( );
@@ -932,7 +939,7 @@ define( function( m ) {
     	console.log( "autocomplete_restrict_list_country2= " + autocomplete_restrict_list_country2 );
     	
 	    var view = dijit.byId('view_advanced_settings');
-	    view.performTransition( "view_main", -1, "scaleOut", this, show_main );
+	    view.performTransition( "view_config", -1, "scaleOut", this, show_main );
     	
     } // save_settings
     
@@ -1015,7 +1022,7 @@ define( function( m ) {
     	localStorage.clear( );
     	
 	    var view = dijit.byId('view_advanced_settings');
-	    view.performTransition( "view_main", -1, "scaleOut", this, show_main );
+	    view.performTransition( "view_config", -1, "scaleOut", this, show_main );
     	
     }
     
