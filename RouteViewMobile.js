@@ -432,8 +432,7 @@ define( function( m ) {
                                 zoom: 14,
                                 overviewMapControl: false,
                                 disableDoubleClickZoom: true,
-                                rotateControl: false,
-                                streetView: panorama
+                                rotateControl: false
                             };
                             small_map = new google.maps.Map( document.getElementById('div_small_map_canvas'), small_map_options );
 
