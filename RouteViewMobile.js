@@ -27,6 +27,7 @@ define( function( m ) {
 	var directions_display = undefined;
 	var show_duration;		// 1:time 2:km 3:miles
 	var map_or_panorama_full_screen;
+	var cb_route_from_or_to_changed_handle = undefined;
     
     function enter_full_screen( ) {
 
@@ -350,7 +351,7 @@ define( function( m ) {
     	});
 	}
 	
-	function cb_route_from_or_to_changed( evt ) {
+	function cb_route_from_or_to_changed( ) {
 		
 		console.log( "cb_route_from_or_to_changed" );
 
@@ -364,8 +365,6 @@ define( function( m ) {
 		
 		if ( !start_disabled ) {
 
-			var start_location = dijit.byId('id_route1_from').get( 'value' );
-            var end_location   = dijit.byId('id_route1_to').get( 'value' );
             var no_hwy  = (dijit.byId('id_check_no_hwy').get( 'value' ) == "on") ? true : false;
             var no_toll = (dijit.byId('id_check_no_toll').get( 'value' ) == "on") ? true : false;
 
@@ -546,7 +545,7 @@ define( function( m ) {
         
     } // startup
     
-    function cb_animate( d ) {
+    function cb_animate( d, restart ) {
 
         curr_dist = d;
 
@@ -558,7 +557,7 @@ define( function( m ) {
         var bearing = polyline.Bearing( polyline.GetIndexAtDistance(d) );
 
         var p = polyline.GetPointAtDistance( d );
-        console.log( "d=" + d + " - " + polyline.GetIndexAtDistance(d) + " / " + bearing + " - " + p.lat() + " , " + p.lng());
+//      console.log( "d=" + d + " - " + polyline.GetIndexAtDistance(d) + " / " + bearing + " - " + p.lat() + " , " + p.lng());
 
         dijit.byId('id_input_route').set( 'value', curr_dist, false );
 
@@ -596,11 +595,10 @@ define( function( m ) {
                 	});
         	}
         	
-            if ( step > 0 ) {
-        		if ( timer_animate != undefined )
-                    clearTimeout( timer_animate );
-            	timer_animate = setTimeout( 'require(["RouteViewMobile.js"], function( s ) { s.cb_animate('+(d+step)+'); })', interval );
-            }
+       		if ( timer_animate != undefined )
+                   clearTimeout( timer_animate );
+       		if ( restart )
+       			timer_animate = setTimeout( 'require(["RouteViewMobile.js"], function( s ) { s.cb_animate('+(d+step)+', true); })', interval );
 
         });
         
@@ -623,7 +621,7 @@ define( function( m ) {
            	        if ( !map.getBounds().contains( p ) )
            	           	map.panTo( p );
        	        }
-       	        timer_animate = setTimeout( 'require(["RouteViewMobile.js"], function( s ) { s.cb_animate(50); })', 250 );
+       	        timer_animate = setTimeout( 'require(["RouteViewMobile.js"], function( s ) { s.cb_animate(50, true); })', 250 );
 
        		});
        	});
@@ -716,6 +714,8 @@ define( function( m ) {
                 	}
             	}
 
+            	dijit.byId('id_input_route').set( 'intermediateChanges', false );
+            	
                 step      = parseInt( dijit.byId('id_input_meters').get( 'value' ) );
                 interval  = parseInt(dijit.byId('id_input_interval').get( 'value' ) );
                 console.log( "step=" + step + " interval=" + interval );
@@ -852,12 +852,14 @@ define( function( m ) {
             timer_animate = undefined;
             document.getElementById("id_label_pause").innerHTML = "Continue";
             console.log( "curr_dist=" + curr_dist );
+        	dijit.byId('id_input_route').set( 'intermediateChanges', true );
         }
         else if ( document.getElementById("id_label_pause").innerHTML == "Continue" ) {
             document.getElementById("id_label_pause").innerHTML = "Pause";
     		if ( timer_animate != undefined )
                 clearTimeout( timer_animate );
-            timer_animate = setTimeout( 'require(["RouteViewMobile.js"], function( s ) { s.cb_animate('+(curr_dist)+'); })', 50 );
+            timer_animate = setTimeout( 'require(["RouteViewMobile.js"], function( s ) { s.cb_animate('+(curr_dist)+', true); })', 50 );
+        	dijit.byId('id_input_route').set( 'intermediateChanges', false );
         }
 
     }
@@ -906,14 +908,22 @@ define( function( m ) {
 		
 		if ( timer_animate != undefined )
             clearTimeout( timer_animate );
-        timer_animate = setTimeout( 'require(["RouteViewMobile.js"], function( s ) { s.cb_animate(' + (new_pos) + '); })', 25 );
+        timer_animate = setTimeout( 'require(["RouteViewMobile.js"], function( s ) { s.cb_animate(' + (new_pos) + ', true ); })', 25 );
 	}
 
     function cb_route_input_changed( ) {
+//    	console.log( "cb_route_input_changed" );
         var new_pos = dijit.byId('id_input_route').get( 'value' );
 		if ( new_pos == 0 )
 			new_pos = 50;
-		move_to_dist( new_pos );
+//		move_to_dist( new_pos );
+		if ( timer_animate != undefined )
+            clearTimeout( timer_animate );
+        var paused = (document.getElementById("id_label_pause").innerHTML == "Continue");
+        if ( paused )
+            timer_animate = setTimeout( 'require(["RouteViewMobile.js"], function( s ) { s.cb_animate(' + (new_pos) + ', false ); })', 25 );
+        else
+            timer_animate = setTimeout( 'require(["RouteViewMobile.js"], function( s ) { s.cb_animate(' + (new_pos) + ', true ); })', 25 );
     }
 
     function cb_route_input_click( ) {
@@ -1086,19 +1096,31 @@ define( function( m ) {
             	autocomplete_from.setComponentRestrictions({country: 'us'});
             	autocomplete_from.setTypes(['(cities)']);
             	on( input_from, "change", function( evt ) {
-        			cb_route_from_or_to_changed( evt );
+            		console.log( "Change" );
+            		if ( cb_route_from_or_to_changed_handle != undefined )
+            			clearTimeout( cb_route_from_or_to_changed_handle );
+            		cb_route_from_or_to_changed_handle = setTimeout( 'require(["RouteViewMobile.js"], function( s ) { s.cb_route_from_or_to_changed(); })', 250 );
        			});
             	autocomplete_from.addListener('place_changed', function() {
-        			cb_route_from_or_to_changed( );
+            		console.log( "Place changed" );
+            		if ( cb_route_from_or_to_changed_handle != undefined )
+            			clearTimeout( cb_route_from_or_to_changed_handle );
+            		cb_route_from_or_to_changed_handle = setTimeout( 'require(["RouteViewMobile.js"], function( s ) { s.cb_route_from_or_to_changed(); })', 250 );
             	});
 
             	var input_to = dom.byId('id_route1_to');
     	        autocomplete_to = new google.maps.places.Autocomplete(input_to);
         		on( input_to, "change", function( evt ) {
-        			cb_route_from_or_to_changed( evt );
+            		console.log( "Change" );
+            		if ( cb_route_from_or_to_changed_handle != undefined )
+            			clearTimeout( cb_route_from_or_to_changed_handle );
+            		cb_route_from_or_to_changed_handle = setTimeout( 'require(["RouteViewMobile.js"], function( s ) { s.cb_route_from_or_to_changed(); })', 250 );
        			});
         		autocomplete_to.addListener('place_changed', function() {
-        			cb_route_from_or_to_changed( );
+            		console.log( "Place changed" );
+            		if ( cb_route_from_or_to_changed_handle != undefined )
+            			clearTimeout( cb_route_from_or_to_changed_handle );
+            		cb_route_from_or_to_changed_handle = setTimeout( 'require(["RouteViewMobile.js"], function( s ) { s.cb_route_from_or_to_changed(); })', 250 );
             	});
 
                 var previous_orientation = window.orientation;
@@ -1285,7 +1307,7 @@ define( function( m ) {
 		do_pause:  			function( ) { do_pause(); },
 		do_stop:   			function( ) { do_stop(); },
 
-		cb_animate: function( d ) { cb_animate( d ); },
+		cb_animate: function( d, restart ) { cb_animate( d, restart ); },
 
 		move_to_dist: function( new_pos ) { move_to_dist( new_pos ); },
 
