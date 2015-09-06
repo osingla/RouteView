@@ -65,11 +65,21 @@ define( function( m ) {
     }
     
     function toggle_full_screen( ) {
+    	
     	if ( !is_in_full_screen( ) )
     		enter_full_screen( );
     	else
     		exit_full_screen( );
+    }
+
+    function reverse_origin_destination( ) {
     	
+    	console.log( "reverse_origin_destination" );
+        start_location = dijit.byId('id_route1_from').get( 'value' );
+        end_location   = dijit.byId('id_route1_to').get( 'value' );
+
+        dijit.byId('id_route1_from').set( 'value', end_location, false );
+        dijit.byId('id_route1_to').set( 'value', start_location, true );
     }
 
 	require(["dojo/store/Memory"], function( Memory ) {
@@ -407,6 +417,10 @@ define( function( m ) {
                     console.log( "distance = " + distance );
                     console.log( "duration = " + duration );
             		dijit.byId('btn_start').set( 'label', distance + " , " + duration );
+                   	require(["dojo/dom-style"], function(domStyle) {
+                   		domStyle.set( "btn_reverse_origin_destination_disabled", "display", "None" );
+                   		domStyle.set( "btn_reverse_origin_destination_enabled", "display", "" );
+                   	});
             		
                    	require(["dojo/dom-style", "dojo/ready"], function(domStyle, ready) {
                    			
@@ -447,6 +461,10 @@ define( function( m ) {
 		else {
 
     		dijit.byId('btn_start').set( 'label', "Virtual Drive with StreetView" );
+           	require(["dojo/dom-style"], function(domStyle) {
+           		domStyle.set( "btn_reverse_origin_destination_disabled", "display", "" );
+           		domStyle.set( "btn_reverse_origin_destination_enabled", "display", "None" );
+           	});
     		
     		if ( small_map != undefined ) {
                	require(["dojo/dom-style"], function(domStyle) {
@@ -691,18 +709,19 @@ define( function( m ) {
        	       		return;
            		}
            		
-            	enter_full_screen( );
+           		if ( dijit.byId('id_check_run_in_full_screen').get( 'value' ) == "on" )
+           			enter_full_screen( );
             	
-/*
-            	try {
-            		screen.orientation.lock('landscape').catch( function() {
-            			console.log( "Orientation is not supported on this device." );
-            		});
-            	}
-            	catch( e ) {
-            		console.log( e );
-            	}
-*/
+           		if ( dijit.byId('id_check_use_landscape').get( 'value' ) == "on" ) {
+                	try {
+                		screen.orientation.lock('landscape').catch( function() {
+                			console.log( "Orientation is not supported on this device." );
+                		});
+                	}
+                	catch( e ) {
+                		console.log( e );
+                	}
+           		}
 
         /*
             	require(["dojo/on"], function( on ) {
@@ -889,12 +908,14 @@ define( function( m ) {
             marker = undefined;
         }
 		
-    	try {
-    		screen.orientation.unlock();
-    	}
-    	catch( e ) {
-    		console.log( e );
-    	}
+   		if ( dijit.byId('id_check_use_landscape').get( 'value' ) == "on" ) {
+   	    	try {
+   	    		screen.orientation.unlock();
+   	    	}
+   	    	catch( e ) {
+   	    		console.log( e );
+   	    	}
+   		}
 
 /*
     	document.getElementById('id_body').style.MozTransform = "scale(1.0, 1.0)";
@@ -973,6 +994,14 @@ define( function( m ) {
     	localStorage.setItem( "interval", interval );
     	console.log( "no_toll= " + no_toll );
     	
+        var run_in_full_screen = dijit.byId('id_check_run_in_full_screen').get( 'value' );
+    	localStorage.setItem( "run_in_full_screen", run_in_full_screen );
+    	console.log( "run_in_full_screen= " + run_in_full_screen );
+
+        var use_landscape = dijit.byId('id_check_use_landscape').get( 'value' );
+    	localStorage.setItem( "use_landscape", use_landscape );
+    	console.log( "use_landscape= " + use_landscape );
+
         var use_curr_pos_for_org = dijit.byId('id_use_curr_position_for_org').get( 'value' );
     	localStorage.setItem( "use_curr_position_for_org", use_curr_pos_for_org );
     	console.log( "use_curr_pos_for_org= " + use_curr_pos_for_org );
@@ -1036,6 +1065,16 @@ define( function( m ) {
     	console.log( "Restored interval= " + interval );
     	if ( interval )
             dijit.byId('id_input_interval').set( 'value', interval );
+    	
+    	var run_in_full_screen = localStorage.getItem("run_in_full_screen");
+    	console.log( "Restored run_in_full_screen= " + run_in_full_screen );
+    	if ( run_in_full_screen )
+            dijit.byId('id_check_run_in_full_screen').set( 'value', run_in_full_screen );
+    	
+    	var use_landscape = localStorage.getItem("use_landscape");
+    	console.log( "Restored use_landscape= " + use_landscape );
+    	if ( use_landscape )
+            dijit.byId('id_check_use_landscape').set( 'value', use_landscape );
     	
     	var use_curr_pos_for_org = localStorage.getItem("use_curr_position_for_org");
     	console.log( "Restored use_curr_position_for_org= " + use_curr_pos_for_org );
@@ -1306,7 +1345,8 @@ define( function( m ) {
 
         initialize: function( ) { initialize( ); },
 
-        toggle_full_screen: function( ) { toggle_full_screen( ); },
+        toggle_full_screen: 		function( ) { toggle_full_screen(); },
+        reverse_origin_destination: function( ) { reverse_origin_destination(); },
         
         show_about: function( dlg ) { show_about( dlg ); },
         

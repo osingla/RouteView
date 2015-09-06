@@ -99,18 +99,36 @@
 
 			                <table style="width:100%">
 				                <tr>
-					                <td style="text-align:center; vertical-align:middle">
-					                    <input data-dojo-type="dojox.mobile.TextBox" intermediateChanges="false" maxLength="128" trim="true" style="width:32em" 
-					                     selectOnClick="true" placeHolder="Enter an origin" id="id_route1_from" value="">
-					                </td>
-				                </tr>
-				                <tr>
-					                <td style="text-align:center; vertical-align:middle">
-					                    <input data-dojo-type="dojox.mobile.TextBox" intermediateChanges="false" maxLength="128" trim="true" style="width:32em" 
-					                     selectOnClick="true" placeHolder="Enter a destination" id="id_route1_to" value="">
+					                <td style="width:99%; text-align:center; vertical-align:middle">
+						                <div align="center">
+			                                <table style="width:1%">
+				                                <tr>
+					                                <td style="width:1%; text-align:right; vertical-align:middle" rowspan="2">
+					    	                            <div data-dojo-type="dojox.mobile.Icon" id="btn_reverse_origin_destination_disabled"
+								                             data-dojo-props='icon:"icons/icon-arrows-two-directions-up-down-disabled.png"' >
+							                            </div>
+					    	                            <div data-dojo-type="dojox.mobile.Icon" id="btn_reverse_origin_destination_enabled" style="display:none"
+								                             data-dojo-props='icon:"icons/icon-arrows-two-directions-up-down-enabled.png"' 
+		         	    		                             onclick='require(["RouteViewMobile.js"], function( s ) { s.reverse_origin_destination(); })'>
+							                            </div>
+				                            	    </td>
+					                                <td style="width:50%; text-align:center; vertical-align:middle">
+					                                    <input data-dojo-type="dojox.mobile.TextBox" intermediateChanges="false" maxLength="128" trim="true" style="width:32em" 
+					                                     selectOnClick="true" placeHolder="Enter an origin" id="id_route1_from" value="">
+					                                </td>
+				                                </tr>
+				                                <tr>
+					                                <td style="text-align:center; vertical-align:middle">
+					                                    <input data-dojo-type="dojox.mobile.TextBox" intermediateChanges="false" maxLength="128" trim="true" style="width:32em" 
+					                                     selectOnClick="true" placeHolder="Enter a destination" id="id_route1_to" value="">
+					                                </td>
+				                                </tr>
+			                                </table>
+			                            </div>
 					                </td>
 				                </tr>
 			                </table>
+			
 		                </div>
 		    		            </td>
 	    		</tr>
@@ -252,6 +270,16 @@
 			</ul>	            
 	        <br>
 	        <ul data-dojo-type="dojox.mobile.EdgeToEdgeList" role="list">
+
+		        <li data-dojo-type="dojox.mobile.ListItem" role="listitem">
+			        Run in Full Screen
+			        <div id="id_check_run_in_full_screen" data-dojo-type="dojox.mobile.Switch" data-dojo-props='value:"on"' role="button"></div>
+		        </li>
+
+		        <li data-dojo-type="dojox.mobile.ListItem" role="listitem">
+			        Use landscape mode
+			        <div id="id_check_use_landscape" data-dojo-type="dojox.mobile.Switch" data-dojo-props='value:"on"' role="button"></div>
+		        </li>
 
 		        <li data-dojo-type="dojox.mobile.ListItem" data-dojo-props='rightText:"...", moveTo:"view_use_curr_pos_settings"' role="button">
 			        Use current position for
