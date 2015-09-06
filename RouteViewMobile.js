@@ -843,18 +843,30 @@ define( function( m ) {
     		return;
     	}
     	
-        var no_hwy  = dijit.byId('id_check_no_hwy').get( 'value' );
+        var no_hwy = dijit.byId('id_check_no_hwy').get( 'value' );
     	localStorage.setItem( "no_highway", no_hwy );
+    	console.log( "no_hwy= " + no_hwy );
 
     	var no_toll = dijit.byId('id_check_no_toll').get( 'value' );
     	localStorage.setItem( "no_toll", no_toll );
+    	console.log( "no_toll= " + no_toll );
 
         var step = dijit.byId('id_input_meters').get( 'value' );
     	localStorage.setItem( "step", step );
+    	console.log( "step= " + step );
     	
         var interval = dijit.byId('id_input_interval').get( 'value' );
     	localStorage.setItem( "interval", interval );
+    	console.log( "no_toll= " + no_toll );
     	
+        var use_curr_pos_for_org = dijit.byId('id_use_curr_position_for_org').get( 'value' );
+    	localStorage.setItem( "use_curr_position_for_org", use_curr_pos_for_org );
+    	console.log( "use_curr_pos_for_org= " + use_curr_pos_for_org );
+    		
+        var use_curr_pos_for_dest = dijit.byId('id_use_curr_position_for_dest').get( 'value' );
+    	localStorage.setItem( "use_curr_position_for_dest", use_curr_pos_for_dest );
+    	console.log( "use_curr_pos_for_dest= " + use_curr_pos_for_dest );
+    		
     }
     
     function load_settings( ) {
@@ -883,6 +895,16 @@ define( function( m ) {
     	console.log( "Restored interval= " + interval );
     	if ( interval )
             dijit.byId('id_input_interval').set( 'value', interval );
+    	
+    	var use_curr_pos_for_org = localStorage.getItem("use_curr_position_for_org");
+    	console.log( "Restored use_curr_position_for_org= " + use_curr_pos_for_org );
+    	if ( use_curr_pos_for_org )
+            dijit.byId('id_use_curr_position_for_org').set( 'value', use_curr_pos_for_org );
+    	
+    	var use_curr_pos_for_dest = localStorage.getItem("use_curr_position_for_dest");
+    	console.log( "Restored use_curr_position_for_dest= " + use_curr_pos_for_dest );
+    	if ( use_curr_pos_for_dest )
+            dijit.byId('id_use_curr_position_for_dest').set( 'value', use_curr_pos_for_dest );
     	
     }
     
