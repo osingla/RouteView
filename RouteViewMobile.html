@@ -64,63 +64,86 @@
  	<body id="id_body" style="visibility:hidden;">
 
 	    <div data-dojo-type="dojox.mobile.View" data-dojo-props='selected:true' id="view_config">
+	    
+	    	<table id="id_table_main">
+	    	
+	    		<tr style="height:1%">
+	    			<td>
+		                <h1 id="id_main_heading" data-dojo-type="dojox.mobile.Heading">
+		    	            <table style="width:100%">
+		    		            <tr>
+					                <td style="width:99%; text-align:center; vertical-align:middle">
+					    	            Route View
+		    			            </td>
+					                <td style="width:1%; text-align:right; vertical-align:middle">
+					    	            <div data-dojo-type="dojox.mobile.Icon"
+								             data-dojo-props='icon:"icons/icon-about.png"'
+		         	    		             onclick='require(["RouteViewMobile.js"], function( s ) { s.show_dialog("dlg_about"); })'>
+							            </div>
+		    			            </td>
+		    		            </tr>
+		    	            </table>
+		                </h1>
+		    		            </td>
+	    		</tr>
+	    	
+	    		<tr style="height:1%">
+	    			<td>
+		                <div id="id_org_dest_pane" data-dojo-type="dojox.mobile.RoundRect" data-dojo-props='shadow:true' align="center">
 
-		    <h1 id="id_main_heading" data-dojo-type="dojox.mobile.Heading">
-		    	<table style="width:100%">
-		    		<tr>
-					    <td style="width:99%; text-align:center; vertical-align:middle">
-					    	Route View
-		    			</td>
-					    <td style="width:1%; text-align:right; vertical-align:middle">
-					    	<div data-dojo-type="dojox.mobile.Icon"
-								 data-dojo-props='icon:"icons/icon-about.png"'
-		         	    		 onclick='require(["RouteViewMobile.js"], function( s ) { s.show_dialog("dlg_about"); })'>
-							</div>
-		    			</td>
-		    		</tr>
-		    	</table>
-		    	
-		    </h1>
-
-		    <div id="id_org_dest_pane" data-dojo-type="dojox.mobile.RoundRect" data-dojo-props='shadow:true' align="center">
-
-			    <table style="width:100%">
-				    <tr>
-					    <td style="text-align:center; vertical-align:middle">
-					        <input data-dojo-type="dojox.mobile.TextBox" intermediateChanges="false" maxLength="128" trim="true" style="width:32em" 
-					         selectOnClick="true" placeHolder="Enter an origin" id="id_route1_from" value="">
-					    </td>
-				    </tr>
-				    <tr>
-					    <td style="text-align:center; vertical-align:middle">
-					        <input data-dojo-type="dojox.mobile.TextBox" intermediateChanges="false" maxLength="128" trim="true" style="width:32em" 
-					         selectOnClick="true" placeHolder="Enter a destination" id="id_route1_to" value="">
-					    </td>
-				    </tr>
-			    </table>
-
-		    </div>
-
-		    <div id="view_main" data-dojo-type="dojox/mobile/View">
-		    
-				<ul data-dojo-type="dojox/mobile/RoundRectList">
-    				<li data-dojo-type="dojox/mobile/ListItem" 
-		         	    onclick='require(["RouteViewMobile.js"], function( s ) { s.hide_main(); })'
-				        data-dojo-props='moveTo:"view_settings", transition:"slide"'>
-						Settings
-                    </li>
-  				</ul>
-
-		    </div>
-
-			<br>
-            <div align="center">
-		        <button data-dojo-type="dojox.mobile.Button" class="mblSimpleDialogButton2 mblRedButton"
-		        		data-dojo-props='label:"Virtual Drive with StreetView", disabled:true' id="btn_start"
-		         	    onclick='require(["RouteViewMobile.js"], function( s ) { s.do_start(); })'
-		    	 	    style="font-size:100%; font-weight: bold">
-		        </button>
-		    </div>
+			                <table style="width:100%">
+				                <tr>
+					                <td style="text-align:center; vertical-align:middle">
+					                    <input data-dojo-type="dojox.mobile.TextBox" intermediateChanges="false" maxLength="128" trim="true" style="width:32em" 
+					                     selectOnClick="true" placeHolder="Enter an origin" id="id_route1_from" value="">
+					                </td>
+				                </tr>
+				                <tr>
+					                <td style="text-align:center; vertical-align:middle">
+					                    <input data-dojo-type="dojox.mobile.TextBox" intermediateChanges="false" maxLength="128" trim="true" style="width:32em" 
+					                     selectOnClick="true" placeHolder="Enter a destination" id="id_route1_to" value="">
+					                </td>
+				                </tr>
+			                </table>
+		                </div>
+		    		            </td>
+	    		</tr>
+	    	
+	    		<tr style="height:1%">
+	    			<td>
+		                <div id="view_main" data-dojo-type="dojox/mobile/View">
+				            <ul data-dojo-type="dojox/mobile/RoundRectList">
+    				            <li data-dojo-type="dojox/mobile/ListItem" 
+		         	                onclick='require(["RouteViewMobile.js"], function( s ) { s.hide_main(); })'
+				                    data-dojo-props='moveTo:"view_settings", transition:"slide"'>
+						            Settings
+                                </li>
+  				            </ul>
+		                </div>
+		    		</td>
+	    		</tr>
+	    	
+	    		<tr style="height:1%">
+	    			<td>
+			            <br>
+                        <div align="center">
+		                    <button data-dojo-type="dojox.mobile.Button" class="mblSimpleDialogButton2 mblRedButton"
+		        		            data-dojo-props='label:"Virtual Drive with StreetView", disabled:true' id="btn_start"
+		         	                onclick='require(["RouteViewMobile.js"], function( s ) { s.do_start(); })'
+		    	 	                style="font-size:100%; font-weight: bold">
+		                    </button>
+		                </div>
+			            <br>
+		    		</td>
+	    		</tr>
+	    	
+	    		<tr style="height:94%">
+	    			<td id="td_small_map_canvas">
+					    <div id="div_small_map_canvas" style="width:100%; height:100%"></div> 
+		    		</td>
+	    		</tr>
+	    	
+	    	</table>
 
 	    </div>
 
@@ -417,6 +440,10 @@
 		    </button>
 
 	    </div>
+
+
+		<div id="id_hidden" style="display:None">
+		</div>
 
         <script>
 		    require(["RouteViewMobile.js", "dojo/ready"], function( s, ready ) {

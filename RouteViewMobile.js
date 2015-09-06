@@ -8,6 +8,7 @@
 define( function( m ) {
 
 	var startup_done;
+	var small_map = undefined;
     var map;
     var panorama;
     var marker = undefined;
@@ -379,7 +380,9 @@ define( function( m ) {
                 avoidTolls: no_toll
             };  
             directions_service.route( request, function(response, status) {
+            	
             	if ( status == google.maps.DirectionsStatus.OK ) {
+            		
             		console.log( ">>>>>>>>>>>" );
             		console.log( response );
             		console.log( ">>>>>>>>>>>" );
@@ -391,13 +394,53 @@ define( function( m ) {
                     console.log( "distance = " + distance );
                     console.log( "duration = " + duration );
             		dijit.byId('btn_start').set( 'label', distance + " , " + duration );
+            		
+                   	require(["dojo/dom-style", "dojo/ready"], function(domStyle, ready) {
+                   			
+                   		domStyle.set( "td_small_map_canvas", "display", "" );
+                   		ready( function() {
+                           	var home = new google.maps.LatLng( 35.733435, -78.907684 );
+                            var small_map_options = {
+                            	center: home,
+                                zoom: 14,
+                                overviewMapControl: false,
+                                disableDoubleClickZoom: true,
+                                rotateControl: false,
+                                streetView: panorama
+                            };
+                            small_map = new google.maps.Map( document.getElementById('div_small_map_canvas'), small_map_options );
+
+                            var bounds = response.routes[0].bounds;
+                            small_map.fitBounds( bounds );
+                            
+                            var rendererOptions = {
+                                map: map,
+                                suppressMarkers : true,
+                                preserveViewport: true
+                            };
+                            var directions_display = new google.maps.DirectionsRenderer( rendererOptions );     
+                            directions_display.setMap( small_map );
+                            directions_display.setDirections( response );
+                            
+                   		});
+                   		
+                   	});
+
             	}
+            	
             });
             
 		}
 		else {
 
     		dijit.byId('btn_start').set( 'label', "Virtual Drive with StreetView" );
+    		
+    		if ( small_map != undefined ) {
+               	require(["dojo/dom-style"], function(domStyle) {
+               		domStyle.set( "td_small_map_canvas", "display", "None" );
+               	});
+        		small_map = undefined;
+    		}
 		
 		}
 		
