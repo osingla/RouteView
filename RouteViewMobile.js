@@ -838,12 +838,12 @@ define( function( m ) {
     
     function initialize() {
         
-    	startup_done = false;
-
     	require(["dojo/dom", "dojo/on", "dojo/dom-style", "dojo/dom-geometry", "dojo/dom-style", "dojo/store/Memory", "dojo/ready"], function( dom, on, style, domGeom, domStyle, Memory, ready ) {
     		
             ready( function() {
             	
+            	startup_done = false;
+
             	var input_from = dom.byId('id_route1_from');
             	var autocomplete_options = {
             		componentRestrictions: { country: 'us' },
@@ -915,8 +915,6 @@ define( function( m ) {
         		    {id: -9,   list:['USA']},
         		];
             	list_countries = new Memory({data: _list_countries});
-            	console.log( "XXXXXXXXXXXX" );
-            	console.log( list_countries.get('12') );
 
             	iso_countries = new Memory({data: _iso_countries});
 
@@ -981,11 +979,46 @@ define( function( m ) {
            		    domStyle.set( "id_autocomplete_restrict_country2_li", "display", (value == "on") ? "None" : "" );
         	    });
         	
+        	    dijit.byId('id_use_curr_position_for_org').watch( function( name, oldValue, value ) {
+        		    if ( value == "on" )
+               			dijit.byId('id_use_curr_position_for_dest').set( 'value', "off" );
+        	    });
+        	    
+        	    dijit.byId('id_use_curr_position_for_dest').watch( function( name, oldValue, value ) {
+        		    if ( value == "on" )
+               			dijit.byId('id_use_curr_position_for_org').set( 'value', "off" );
+        	    });
+
+   				if ( navigator.geolocation )
+   					if ( (dijit.byId('id_use_curr_position_for_org').get( 'value' ) == "on") || (dijit.byId('id_use_curr_position_for_dest').get( 'value' ) == "on") )
+       					navigator.geolocation.getCurrentPosition( got_current_position );
+        	    
             }); // ready
             
     	});
         
     } // initialize
+    
+    function got_current_position( pos ) {
+    	var latlng = {lat: pos.coords.latitude, lng: pos.coords.longitude};
+    	var geocoder = new google.maps.Geocoder;
+    	geocoder.geocode({'location': latlng}, function(results, status) {
+    	    if ( status === google.maps.GeocoderStatus.OK ) {
+    	    	if ( results[0] ) {
+    	    		var addr = results[0].formatted_address;
+        	    	console.log( "current location: " + addr );
+   					if ( dijit.byId('id_use_curr_position_for_org').get( 'value' ) == "on" ) {
+   	   					if ( dijit.byId('id_route1_from').get( 'value' ) == "" )
+   	   	   					dijit.byId('id_route1_from').set( 'value', addr );
+   					}
+   					else if ( dijit.byId('id_use_curr_position_for_dest').get( 'value' ) == "on" ) {
+   	   					if ( dijit.byId('id_route1_to').get( 'value' ) == "" )
+   	   	   					dijit.byId('id_route1_to').set( 'value', addr );
+   					}
+    	    	}
+    	    }
+    	});
+    }
     
     
 	// ---------
