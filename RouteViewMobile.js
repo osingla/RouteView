@@ -436,6 +436,10 @@ define( function( m ) {
                             };
                             small_map = new google.maps.Map( document.getElementById('div_small_map_canvas'), small_map_options );
 
+                    		google.maps.event.addListener( small_map, "click", function( evt ) { 
+                    			if ( evt.handled != true )
+                    				cb_small_map_click( evt ); 
+                    		});
                             var bounds = response.routes[0].bounds;
                             small_map.fitBounds( bounds );
                             
@@ -506,8 +510,13 @@ define( function( m ) {
         show_route_distance_duration( dist_route, duration_secs );
 	}
 	
-    function cb_map_dblclick( evt ) {
-    	console.log( "cb_map_dblclick" );
+    function cb_small_map_click( evt ) {
+    	console.log("cb_small_map_click");
+    	do_start( true );
+    }
+    
+    function cb_map_click( evt ) {
+    	console.log( "cb_map_click" );
 
 		require(["dojo/dom-construct"], function(domConstruct){
 			if ( !map_or_panorama_full_screen ) {
@@ -584,7 +593,7 @@ define( function( m ) {
         
 		google.maps.event.addListener( map, "click", function( evt ) { 
 			if ( evt.handled != true )
-				cb_map_dblclick( evt ); 
+				cb_map_click( evt ); 
 		});
 		document.getElementById('div_panorama').onclick = cb_panorama_dblclick;
 		
