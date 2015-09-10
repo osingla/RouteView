@@ -19,6 +19,11 @@
         	content="Allows a virtual drive over a Google Maps route using Street View. Step (in meters) and Refresh Rate are configurable. Street View Player. Simulate your Driving Route with this Google Map Web Application. Virtual Ride using Street View.">
         <meta name="revisit-after" content="4 hours">
         
+        <!-- Disable Mobile Browser Zoom Function -->
+        <meta content='True' name='HandheldFriendly' />
+		<meta content='width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;' name='viewport' />
+		<meta name="viewport" content="width=device-width" />
+        
         <!-- prevent cache -->
 		<meta http-equiv="cache-control" content="no-cache">
 		<meta http-equiv="pragma" content="no-cache">
@@ -32,12 +37,12 @@
             ga('send', 'pageview');
         </script>
 
-        <script type="text/javascript" src="//maps.google.com/maps/api/js?sensor=false&libraries=places"></script>
-        <script type="text/javascript" src="//gisgraphy.googlecode.com/svn-history/r67/trunk/gisgraphy/src/main/webapp/scripts/v3_epoly.js"></script>
+        <script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false&libraries=places"></script>
+        <script type="text/javascript" src="https://gisgraphy.googlecode.com/svn-history/r67/trunk/gisgraphy/src/main/webapp/scripts/v3_epoly.js"></script>
 
-        <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dojox/mobile/deviceTheme.js"></script>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/dojo/1.10.4/dojox/mobile/deviceTheme.js"></script>
 
-        <script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dojo/dojo.js" data-dojo-config="debug: true, async: true, parseOnLoad: true"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/dojo/1.10.4/dojo/dojo.js" data-dojo-config="debug: true, async: true, parseOnLoad: true"></script>
 
         <script type="text/javascript">
 	        require([
@@ -73,8 +78,8 @@
 		    	            <table style="width:100%">
 		    		            <tr>
 					                <td style="width:1%; text-align:left; vertical-align:middle">
-					    	            <div data-dojo-type="dojox.mobile.Icon"
-								             data-dojo-props='icon:"icons/icon-fullscreen.png"'
+					    	            <div data-dojo-type="dojox.mobile.Icon" id="id_icon_toggle_full_screen"
+								             data-dojo-props='icon:"icons/icon-fullscreen.png"' style="fisplay:None"
 		         	    		             onclick='require(["RouteViewMobile.js"], function( s ) { s.toggle_full_screen(); })'>
 							            </div>
 		    			            </td>

@@ -29,33 +29,37 @@ define( function( m ) {
 	var map_or_panorama_full_screen;
 	var cb_route_from_or_to_changed_handle = undefined;
     
+    function is_full_screen_supported( ) {
+
+    	var d = document.getElementById("id_body");
+    	if ( document.exitFullscreen || document.exitFullscreen || document.webkitExitFullscreen || mozCancelFullScreen || document.msExitFullscreen )
+    		return true;
+    	return false;
+    }
+
     function enter_full_screen( ) {
 
     	var d = document.getElementById("id_body");
-    	if (d.requestFullscreen) {
+    	if (d.requestFullscreen)
     		d.requestFullscreen();
-    	} else if (d.webkitRequestFullscreen) {
+    	else if (d.webkitRequestFullscreen)
     		d.webkitRequestFullscreen();
-    	} else if (d.mozRequestFullScreen) {
+    	else if (d.mozRequestFullScreen)
     		d.mozRequestFullScreen();
-    	} else if (d.msRequestFullscreen) {
+    	else if (d.msRequestFullscreen)
     		d.msRequestFullscreen();
-    	}
-    	
     }
 
     function exit_full_screen( ) {
 
-    	if (document.exitFullscreen) {
+    	if (document.exitFullscreen)
     		document.exitFullscreen();
-    	} else if (document.webkitExitFullscreen) {
+    	else if (document.webkitExitFullscreen)
     		document.webkitExitFullscreen();
-    	} else if (document.mozCancelFullScreen) {
+    	else if (document.mozCancelFullScreen)
     		document.mozCancelFullScreen();
-    	} else if (document.msExitFullscreen) {
+    	else if (document.msExitFullscreen)
     		document.msExitFullscreen();
-    	}
-
     }
     
     function is_in_full_screen( ) {
@@ -1164,13 +1168,39 @@ define( function( m ) {
     	
     }
     
+    function get_params( search_string ) {
+
+    	  var parse = function(params, pairs) {
+    	    var pair = pairs[0];
+    	    var parts = pair.split('=');
+    	    var key = decodeURIComponent(parts[0]);
+    	    var value = decodeURIComponent(parts.slice(1).join('='));
+
+    	    // Handle multiple parameters of the same name
+    	    if (typeof params[key] === "undefined") {
+    	      params[key] = value;
+    	    } else {
+    	      params[key] = [].concat(params[key], value);
+    	    }
+
+    	    return pairs.length == 1 ? params : parse(params, pairs.slice(1))
+    	  }
+
+    	  // Get rid of leading ?
+    	  return search_string.length == 0 ? {} : parse({}, search_string.substr(1).split('&'));
+    }
+
     function initialize() {
         
-    	require(["dojo/dom", "dojo/on", "dojo/dom-style", "dojo/dom-geometry", "dojo/dom-style", "dojo/store/Memory", "dojo/ready"], function( dom, on, style, domGeom, domStyle, Memory, ready ) {
+    	require(["dojo/dom", "dojo/on", "dojo/dom-style", "dojo/dom-geometry", "dojo/store/Memory", "dojo/ready"], function( dom, on, domStyle, domGeom, Memory, ready ) {
     		
             ready( function() {
             	
             	startup_done = false;
+            	
+            	var params = get_params(location.search);
+            	console.log( "params:" );
+            	console.log( params );
 
             	var input_from = dom.byId('id_route1_from');
             	var autocomplete_options = {
@@ -1340,6 +1370,13 @@ define( function( m ) {
        					navigator.geolocation.getCurrentPosition( got_current_position );
         	    
    				load_settings( );
+   				
+   				var f = is_full_screen_supported();
+   				if ( f && (params['full_screen'] == 'disabled') )
+   					f = false;
+   				if ( location.href == "file:///android_asset/RouteViewMobile.html" )
+   					f = false;
+   				domStyle.set( "id_icon_toggle_full_screen", "display", (f) ? "" : "None" );
    				
             }); // ready
             
