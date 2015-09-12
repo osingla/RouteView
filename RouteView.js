@@ -18,8 +18,6 @@ define( function( m ) {
 	var map_or_panorama_full_screen;
     var panorama_full_screen;
     var polyline = [];
-    var location_from = [];
-    var location_to = [];
     var timer_animate = [];
     var eol = [];
     var step;               			// meters
@@ -30,6 +28,7 @@ define( function( m ) {
 	var directions_service = [];
 	var directions_display = [];
 	var route = [];
+	var cb_route_from_or_to_changed_handle = undefined;
 
     function show_route_distance_duration( num_route, dist_meters, duration_secs ) {
 
@@ -233,8 +232,8 @@ define( function( m ) {
 
                     var bounds = new google.maps.LatLngBounds();
                     route[num_route] = response.routes[0];
-                    location_from[num_route] = new Object();
-                    location_to[num_route] = new Object();
+                    var location_from = new Object();
+                    var location_to = new Object();
 
                     polyline[num_route] = new google.maps.Polyline({
                         path: [],
@@ -254,11 +253,11 @@ define( function( m ) {
                         duration_secs += legs[i].duration.value;
                         console.log( i + ": m=" + legs[i].distance.value + " secs=" + legs[i].duration.value );
                         if ( i == 0 ) {
-                            location_from[num_route].latlng  = legs[i].start_location;
-                            location_from[num_route].address = legs[i].start_address;
+                            location_from.latlng  = legs[i].start_location;
+                            location_from.address = legs[i].start_address;
                         }
-                        location_to[num_route].latlng  = legs[i].end_location;
-                        location_to[num_route].address = legs[i].end_address;
+                        location_to.latlng  = legs[i].end_location;
+                        location_to.address = legs[i].end_address;
                         var steps = legs[i].steps;
 
                         for ( j = 0; j < steps.length; j++) {
@@ -446,19 +445,15 @@ define( function( m ) {
             ready( function() {
             	
                 var home = new google.maps.LatLng( 35.733435, -78.907684 );
-//            	if ( navigator.geolocation ) 
-//            		navigator.geolocation.getCurrentPosition( function( pos ) { home = pos.coords; console.log( home ); } );
             	
             	var map_options = {
-                   center: home,
-                   zoom: 14,
-//                 draggableCursor: 'crosshair',            
-//                 draggingCursor: 'pointer'           
+//                   center: home,
+                   zoom: 14
                 };
 
                 map = new google.maps.Map( document.getElementById('id_map_canvas'), map_options );
                 var panorama_options = {
-                    position: home,
+//                    position: home,
                     pov: {
                         heading: 34,
                         pitch: 10
@@ -495,12 +490,6 @@ define( function( m ) {
        				if ( evt.handled != true )
        					cb_panorama_click( );
        			});
-
-        		for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) { 
-            		on( dom.byId('id_route1_wp'+n), "change", function( evt ) {
-            			cb_route1_changed( evt ); 
-           			});
-        		}
 
         		_list_countries = [
         		    {id: 0,    list:['Algeria','Burkina Faso','Faeroe Islands','Ghana','Guinea Republic','Iceland','Ireland','Ivory Coast','Liberia','Mali','Morocco','Sao Tome and Principe','Senegal','Sierra Leone','Saint Helena','Gambia','Togo','United Kingdom']},
@@ -641,17 +630,30 @@ define( function( m ) {
 
                 myDialog = dijit.byId('myDialog');
                 
-   				load_settings( );
-   				
+        		for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) { 
+            		on( dom.byId('id_route1_wp'+n), "change", function( evt ) {
+                		console.log( "Change" );
+                		if ( cb_route_from_or_to_changed_handle != undefined )
+                			clearTimeout( cb_route_from_or_to_changed_handle );
+                		cb_route_from_or_to_changed_handle = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_route_from_or_to_changed(); })', 250 );
+           			});
+        		}
+
            		for ( num_route = 0; num_route < 1; num_route++ ) {
            			autocompletes[num_route] = [];
            			for ( var n = 0; n < MAX_NB_WAYPOINTS+2 - 1; n++ ) { 
            				autocompletes[num_route][n] = new google.maps.places.Autocomplete( dom.byId('id_route'+(num_route+1)+'_wp'+n) );
-           				autocompletes[num_route][n].setComponentRestrictions({country: 'us'});
-           				autocompletes[num_route][n].setTypes(['(cities)']);
+           				autocompletes[num_route][n].addListener('place_changed', function() {
+                    		console.log( "Place changed" );
+                    		if ( cb_route_from_or_to_changed_handle != undefined )
+                    			clearTimeout( cb_route_from_or_to_changed_handle );
+                    		cb_route_from_or_to_changed_handle = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_route_from_or_to_changed(); })', 250 );
+                    	});
            			}
            		}
 
+   				load_settings( );
+   				
    				if ( navigator.geolocation )
    					if ( dijit.byId('id_use_curr_position_for_org').get( 'checked' ) || dijit.byId('id_use_curr_position_for_dest').get( 'checked' ) )
        					navigator.geolocation.getCurrentPosition( got_current_position );
@@ -664,6 +666,8 @@ define( function( m ) {
     
     function got_current_position( pos ) {
     	var latlng = {lat: pos.coords.latitude, lng: pos.coords.longitude};
+		map.setCenter( latlng );
+        panorama.setPosition( latlng );
     	var geocoder = new google.maps.Geocoder;
     	geocoder.geocode({'location': latlng}, function(results, status) {
     	    if ( status === google.maps.GeocoderStatus.OK ) {
@@ -832,7 +836,7 @@ define( function( m ) {
 
     }
     
-    function cb_route1_changed( evt ) {
+    function cb_route_from_or_to_changed( num_route ) {
     	
 		var origin = dijit.byId('id_route1_wp0').get( 'value' );
 		var waypoint1 = dijit.byId('id_route1_wp1').get( 'value' );
@@ -840,15 +844,6 @@ define( function( m ) {
 		console.log( "origin= [" + origin + "]" );
 		console.log( "destination= [" + destination + "]" );
 		console.log( "waypoint1= [" + waypoint1 + "]" );
-
-    	if ( dijit.byId( "id_btn_route" ).get( "disabled" ) && dijit.byId( "id_btn_play" ).get( "disabled" ) ) {
-    		console.log( evt );
-    		console.log( evt.srcElement );
-			var wp = dijit.byId(evt.target.id).get( 'value' );
-			console.log ( wp );
-			if ( wp != '' )
-				dijit.byId('id_btn_route').set( 'disabled', false );
-    	}
 
 //		dijit.byId('id_btn_route').set( 'disabled', false );
 //		dijit.byId('id_btn_play').set( 'disabled', true );
@@ -1484,6 +1479,8 @@ define( function( m ) {
 		cb_click_no_toll: function( ) { cb_click_no_toll(); },
 
 		cb_click_force_panto:  function( ) { cb_click_force_panto(); },
+
+		cb_route_from_or_to_changed: function( ) { cb_route_from_or_to_changed(); },
 
 		cb_click_btn_add:    function( num_route, index ) { cb_click_btn_add( num_route, index ); },
 		cb_click_btn_remove: function( num_route, index ) { cb_click_btn_remove( num_route, index ); },
