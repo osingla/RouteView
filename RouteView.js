@@ -17,9 +17,9 @@ define( function( m ) {
     var panorama;
 	var map_or_panorama_full_screen;
     var panorama_full_screen;
-    var polyline = [];
+    var polyline;
     var timer_animate;
-    var eol = [];
+    var eol;
     var step;               			// meters
     var interval;           			// milliseconds
 	var is_force_panto = true;
@@ -64,22 +64,22 @@ define( function( m ) {
         
     }
     
-    function cb_animate( num_route, d ) {
+    function cb_animate( d ) {
 
         curr_dist = d;
         
-        if ( d > eol[num_route] ) {
-            console.log( "Route " + num_route + " is done" );
+        if ( d > eol ) {
+            console.log( "Route is done" );
             return;
         }
         
-        var p = polyline[num_route].GetPointAtDistance( d );
+        var p = polyline.GetPointAtDistance( d );
         if ( !map.getBounds().contains( p ) )
 			if ( is_force_panto )
             	map.panTo( p );
 
-        var bearing = polyline[num_route].Bearing( polyline[num_route].GetIndexAtDistance(d) );
-        console.log( "d=" + d + " - " + polyline[num_route].GetIndexAtDistance(d) + " / " + bearing);
+        var bearing = polyline.Bearing( polyline.GetIndexAtDistance(d) );
+        console.log( "d=" + d + " - " + polyline.GetIndexAtDistance(d) + " / " + bearing);
         panorama.setPosition( new google.maps.LatLng( p.G, p.K ) );
         panorama.setPov({
             heading: bearing,
@@ -87,21 +87,21 @@ define( function( m ) {
         });
 
         if ( step > 0 )
-            timer_animate = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, '+(d+step)+',50); })', interval );
+            timer_animate = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate('+(d+step)+',50); })', interval );
 
         // Update route slider
 		dijit.byId('id_input_route').set( 'value', d, false );
     }
 
-    function start_driving( num_route ) {
+    function start_driving( ) {
         
         if ( timer_animate ) 
             clearTimeout( timer_animate );
             
-        eol[num_route] = polyline[num_route].Distance();
-        map.setCenter( polyline[num_route].getPath().getAt(0) );
+        eol = polyline.Distance();
+        map.setCenter( polyline.getPath().getAt(0) );
 
-        timer_animate = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, 50); })', 250 );
+        timer_animate = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(50); })', 250 );
     }
 
     function find_first_hidden( num_route ) {
@@ -129,9 +129,9 @@ define( function( m ) {
     		var num_route = 0;
     		directions_display[num_route].setMap( null );
         	directions_display[num_route] = undefined;
-        	if ( polyline[num_route] != undefined ) {
-        		polyline[num_route].setMap( null );
-        		polyline[num_route] = undefined;
+        	if ( polyline != undefined ) {
+        		polyline.setMap( null );
+        		polyline = undefined;
         	}
     	}
 
@@ -235,7 +235,7 @@ define( function( m ) {
                     var location_from = new Object();
                     var location_to = new Object();
 
-                    polyline[num_route] = new google.maps.Polyline({
+                    polyline = new google.maps.Polyline({
                         path: [],
                         strokeColor: '#FFFF00',
                         strokeWeight: 3
@@ -265,7 +265,7 @@ define( function( m ) {
                             var nextSegment = steps[j].path;
 
                             for ( k=0;k < nextSegment.length;k++) {
-                                polyline[num_route].getPath().push(nextSegment[k]);
+                                polyline.getPath().push(nextSegment[k]);
                                 bounds.extend(nextSegment[k]);
                             }
                         }
@@ -273,7 +273,7 @@ define( function( m ) {
                     
                     show_route_distance_duration( dist_meters, duration_secs );
 
-                    polyline[num_route].setMap( map );
+                    polyline.setMap( map );
                     map.fitBounds( bounds );
 
             		dijit.byId('id_input_route').set( 'disabled', true );
@@ -324,8 +324,7 @@ define( function( m ) {
 		if ( left_layout._showing )
 			left_layout.toggle();
     	
-    	var num_route = 0;
-        start_driving( num_route );  
+        start_driving( );  
 
 		dijit.byId('id_btn_route').set( 'disabled', true );
 		dijit.byId('id_btn_play').set( 'disabled', true );
@@ -381,7 +380,7 @@ define( function( m ) {
         else if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" ) {
         	dijit.byId('id_btn_pause').set( 'label', "Pause" );
             var num_route = 0;
-            timer_animate = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, '+(curr_dist)+'); })', 250 );
+            timer_animate = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate('+(curr_dist)+'); })', 250 );
         }
 
 		dijit.byId('id_input_route').set( 'disabled', false );
@@ -731,14 +730,14 @@ define( function( m ) {
 		if ( go_timer) {
 			if ( timer_animate != undefined ) 
 				clearTimeout( timer_animate );
-			timer_animate = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, ' + (new_pos) + '); })', interval );
+			timer_animate = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(' + (new_pos) + '); })', interval );
 		}
 		
-        var p = polyline[num_route].GetPointAtDistance( new_pos );
+        var p = polyline.GetPointAtDistance( new_pos );
         if ( !map.getBounds().contains( p ) )
             map.panTo( p );
 
-        var bearing = polyline[num_route].Bearing( polyline[num_route].GetIndexAtDistance( new_pos ) );
+        var bearing = polyline.Bearing( polyline.GetIndexAtDistance( new_pos ) );
         panorama.setPosition( new google.maps.LatLng( p.G, p.K ) );
         panorama.setPov({
             heading: bearing,
@@ -1466,7 +1465,7 @@ define( function( m ) {
 
 		do_save_gpx: function( ) { do_save_gpx(); },
 		
-		cb_animate: function( num_route, d ) { cb_animate( num_route, d ); },
+		cb_animate: function( d ) { cb_animate( d ); },
 
 		move_to_dist: function( new_pos ) { move_to_dist( new_pos ); },
 
