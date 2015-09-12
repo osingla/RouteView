@@ -18,7 +18,7 @@ define( function( m ) {
 	var map_or_panorama_full_screen;
     var panorama_full_screen;
     var polyline = [];
-    var timer_animate = [];
+    var timer_animate;
     var eol = [];
     var step;               			// meters
     var interval;           			// milliseconds
@@ -30,7 +30,7 @@ define( function( m ) {
 	var route = [];
 	var cb_route_from_or_to_changed_handle = undefined;
 
-    function show_route_distance_duration( num_route, dist_meters, duration_secs ) {
+    function show_route_distance_duration( dist_meters, duration_secs ) {
 
         console.log( "dist_meters=" + dist_meters + " duration_secs=" + duration_secs );
 
@@ -87,7 +87,7 @@ define( function( m ) {
         });
 
         if ( step > 0 )
-            timer_animate[num_route] = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, '+(d+step)+',50); })', interval );
+            timer_animate = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, '+(d+step)+',50); })', interval );
 
         // Update route slider
 		dijit.byId('id_input_route').set( 'value', d, false );
@@ -95,13 +95,13 @@ define( function( m ) {
 
     function start_driving( num_route ) {
         
-        if ( timer_animate[num_route] ) 
-            clearTimeout( timer_animate[num_route] );
+        if ( timer_animate ) 
+            clearTimeout( timer_animate );
             
         eol[num_route] = polyline[num_route].Distance();
         map.setCenter( polyline[num_route].getPath().getAt(0) );
 
-        timer_animate[num_route] = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, 50); })', 250 );
+        timer_animate = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, 50); })', 250 );
     }
 
     function find_first_hidden( num_route ) {
@@ -271,7 +271,7 @@ define( function( m ) {
                         }
                     }
                     
-                    show_route_distance_duration( num_route, dist_meters, duration_secs );
+                    show_route_distance_duration( dist_meters, duration_secs );
 
                     polyline[num_route].setMap( map );
                     map.fitBounds( bounds );
@@ -374,14 +374,14 @@ define( function( m ) {
     	console.log( "PAUSE!" );
         console.log( dijit.byId('id_btn_pause').get( 'label' ) );
         if ( dijit.byId('id_btn_pause').get( 'label' ) == "Pause" ) {
-            clearTimeout( timer_animate[0] );
+            clearTimeout( timer_animate );
         	dijit.byId('id_btn_pause').set( 'label', "Continue" );
             console.log( "curr_dist=" + curr_dist );
         }
         else if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" ) {
         	dijit.byId('id_btn_pause').set( 'label', "Pause" );
             var num_route = 0;
-            timer_animate[num_route] = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, '+(curr_dist)+'); })', 250 );
+            timer_animate = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, '+(curr_dist)+'); })', 250 );
         }
 
 		dijit.byId('id_input_route').set( 'disabled', false );
@@ -400,7 +400,7 @@ define( function( m ) {
 		if ( !left_layout._showing )
 			left_layout.toggle();
     	
-        clearTimeout( timer_animate[0] );
+        clearTimeout( timer_animate );
 
 		for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) 
 			dijit.byId('id_route1_wp'+n).set( 'disabled', false );
@@ -729,9 +729,9 @@ define( function( m ) {
 		var num_route = 0;
 
 		if ( go_timer) {
-			if ( timer_animate[num_route] != undefined ) 
-				clearTimeout( timer_animate[num_route] );
-			timer_animate[num_route] = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, ' + (new_pos) + '); })', interval );
+			if ( timer_animate != undefined ) 
+				clearTimeout( timer_animate );
+			timer_animate = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(0, ' + (new_pos) + '); })', interval );
 		}
 		
         var p = polyline[num_route].GetPointAtDistance( new_pos );
