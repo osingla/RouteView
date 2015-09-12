@@ -520,8 +520,8 @@ define( function( m ) {
     }
     
     function cb_map_click( evt ) {
-    	console.log( "cb_map_click" );
 
+    	console.log( "cb_map_click" );
 		require(["dojo/dom-construct"], function(domConstruct){
 			if ( !map_or_panorama_full_screen ) {
 				domConstruct.place("td_panorama", "id_hidden", "after");
@@ -538,9 +538,9 @@ define( function( m ) {
         google.maps.event.trigger( panorama, 'resize' );
     }
 
-    function cb_panorama_dblclick( evt ) {
+    function cb_panorama_click( evt ) {
 		if ( evt.handled != true ) {
-			console.log( "cb_panorama_dblclick" );
+			console.log( "cb_panorama_click" );
 
 			require(["dojo/dom-construct"], function(domConstruct){
 				if ( !map_or_panorama_full_screen ) {
@@ -599,7 +599,7 @@ define( function( m ) {
 			if ( evt.handled != true )
 				cb_map_click( evt ); 
 		});
-		document.getElementById('div_panorama').onclick = cb_panorama_dblclick;
+		document.getElementById('div_panorama').onclick = cb_panorama_click;
 		
 		map_or_panorama_full_screen = false;
 		
@@ -1254,14 +1254,6 @@ define( function( m ) {
        	            }
         		}, false);
 
-/*
-        		on( dom.byId('id_autocomplete_restrict_types'), "click", function( evt ) {
-        	        var v = dijit.byId('id_autocomplete_restrict_types').get( 'checked' );
-        			console.log( "Autocomplete restrict type changed : " + v );
-        			dijit.byId('id_autocomplete_restrict_cb').set( 'disabled', (v) ? false : true );
-       			});
-*/
-
         		_list_countries = [
         		    {id: 0,    list:['Algeria','Burkina Faso','Faeroe Islands','Ghana','Guinea Republic','Iceland','Ireland','Ivory Coast','Liberia','Mali','Morocco','Sao Tome and Principe','Senegal','Sierra Leone','Saint Helena','Gambia','Togo','United Kingdom']},
         		    {id: 1,    list:['Albania','Andorra','Angola','Australia','Austria','Belgium','Benin','Bosnia','Cameroon','Central Africa Republic','Chad','Congo','Croatia','Czech Republic','Congo, Democratic Republic','Denmark','Equatorial Guinea','France','Gabon','Germany','Gibraltar','Guam','Hungary','Italy','Liechtenstein','Luxembourg','Macedonia (Fyrom)','Malta','Mariana Islands','Marshall Islands','Micronesia','Monaco','Netherlands','Niger','Nigeria','Norway','Papua New Guinea','Poland','Portugal','San Marino','Serbia','Slovakia','Slovenia','Spain','Sweden','Switzerland','Tunisia']},
@@ -1365,12 +1357,12 @@ define( function( m ) {
                			dijit.byId('id_use_curr_position_for_org').set( 'value', "off" );
         	    });
 
+   				load_settings( );
+   				
    				if ( navigator.geolocation )
    					if ( (dijit.byId('id_use_curr_position_for_org').get( 'value' ) == "on") || (dijit.byId('id_use_curr_position_for_dest').get( 'value' ) == "on") )
        					navigator.geolocation.getCurrentPosition( got_current_position );
         	    
-   				load_settings( );
-   				
    				var f = is_full_screen_supported();
    				if ( f && (params['full_screen'] == 'disabled') )
    					f = false;

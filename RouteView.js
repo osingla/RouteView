@@ -14,7 +14,7 @@ define( function( m ) {
     var geocoder;
     var service;
     var panorama;
-    var map_full_screen;
+	var map_or_panorama_full_screen;
     var panorama_full_screen;
     var polyline = [];
     var location_from = [];
@@ -139,7 +139,7 @@ define( function( m ) {
         var no_toll = dijit.byId('id_check_no_toll').get( 'checked' );
         console.log( "no_hwy=" + no_hwy + " no_toll=" + no_toll );
         
-    	step = dijit.byId('id_input_meters').get( 'value' );
+    	step     = dijit.byId('id_input_meters').get( 'value' );
     	interval = dijit.byId('id_input_interval').get( 'value' );
         console.log( "step=" + step + " interval=" + interval );
 
@@ -319,6 +319,11 @@ define( function( m ) {
     function do_play( ) {
 
     	console.log( "Play!" );
+    	
+		var left_layout = dijit.byId('id_left_layout');
+		if ( left_layout._showing )
+			left_layout.toggle();
+    	
     	var num_route = 0;
         start_driving( num_route );  
 
@@ -365,7 +370,9 @@ define( function( m ) {
     }
     
     function do_pause( ) {
-    	
+
+    	console.log( "PAUSE!" );
+        console.log( dijit.byId('id_btn_pause').get( 'label' ) );
         if ( dijit.byId('id_btn_pause').get( 'label' ) == "Pause" ) {
             clearTimeout( timer_animate[0] );
         	dijit.byId('id_btn_pause').set( 'label', "Continue" );
@@ -389,6 +396,10 @@ define( function( m ) {
 
     function do_stop( ) {
 
+		var left_layout = dijit.byId('id_left_layout');
+		if ( !left_layout._showing )
+			left_layout.toggle();
+    	
         clearTimeout( timer_animate[0] );
 
 		for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) 
@@ -429,114 +440,229 @@ define( function( m ) {
 
     function initialize( ) {
 
-        var home = new google.maps.LatLng( 35.733435, -78.907684 );
-//    	if ( navigator.geolocation ) 
-//    		navigator.geolocation.getCurrentPosition( function( pos ) { home = pos.coords; console.log( home ); } );
-    	
-    	require(["dojo/dom"], function( dom ) {
-    		for ( num_route = 0; num_route < 1; num_route++ )
-    			for ( var n = 0; n < MAX_NB_WAYPOINTS+2 - 1; n++ ) 
-    				new google.maps.places.Autocomplete( dom.byId('id_route'+(num_route+1)+'_wp'+n) );
-    	});
-
-    	var map_options = {
-           center: home,
-           zoom: 14,
-//         draggableCursor: 'crosshair',            
-//         draggingCursor: 'pointer'           
-        };
-
-        map = new google.maps.Map( document.getElementById('id_map_canvas'), map_options );
-        var panorama_options = {
-            position: home,
-            pov: {
-                heading: 34,
-                pitch: 10
-            },
-            enableCloseButton: false,
-            linksControl: false,
-            panControl: false,
-            zoomControl: false,
-            clickToGo: false,
-            disableDoubleClickZoom: true,
-        };
-
-        geocoder = new google.maps.Geocoder;
-        
-        service = new google.maps.places.PlacesService( map );
-
-        panorama = new google.maps.StreetViewPanorama( document.getElementById('id_panorama'), panorama_options );
-        map.setStreetView( panorama );
-
-        map_full_screen = false;
-        panorama_full_screen = false;
-        
-        require(["dojo/dom", "dojo/on"], function( dom, on ) {
-
-        	var id_map_canvas = dom.byId('id_map_canvas');
-    		on( id_map_canvas, "click", function( evt ) {
-   				if ( evt.handled != true )
-   					cb_map_click( );
-   			});
+    	require(["dojo/dom", "dojo/on", "dojo/dom-style", "dojo/dom-geometry", "dojo/store/Memory", "dojo/ready"], function( dom, on, domStyle, domGeom, Memory, ready ) {
     		
-    		google.maps.event.addListener( map, "rightclick", function( evt ) {
-    			cb_map_rightclick( evt );
-   			});
-    		
-        	var id_panorama = dom.byId('id_panorama');
-    		on( id_panorama, "click", function( evt ) {
-   				if ( evt.handled != true )
-   					cb_panorama_click( );
-   			});
-
-    		for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) { 
-        		on( dom.byId('id_route1_wp'+n), "change", function( evt ) {
-        			cb_route1_changed( evt ); 
-       			});
-    		}
-    		
-        });
-
-        require(["dojo/ready", "dojo/aspect", "dijit/registry", "dojo/dom-style"], function(ready, aspect, registry, domStyle) {
             ready( function() {
-
-//        		domStyle.set( "id_left_layout", "display", "None" );
             	
-            	aspect.after(registry.byId("id_middle_layout"), "resize", function() {
-                    google.maps.event.trigger( map, 'resize' );
-                    map.setCenter( panorama.location.latLng );
-                    google.maps.event.trigger( panorama, 'resize' );
+                var home = new google.maps.LatLng( 35.733435, -78.907684 );
+//            	if ( navigator.geolocation ) 
+//            		navigator.geolocation.getCurrentPosition( function( pos ) { home = pos.coords; console.log( home ); } );
+            	
+           		for ( num_route = 0; num_route < 1; num_route++ )
+           			for ( var n = 0; n < MAX_NB_WAYPOINTS+2 - 1; n++ ) 
+           				new google.maps.places.Autocomplete( dom.byId('id_route'+(num_route+1)+'_wp'+n) );
+
+            	var map_options = {
+                   center: home,
+                   zoom: 14,
+//                 draggableCursor: 'crosshair',            
+//                 draggingCursor: 'pointer'           
+                };
+
+                map = new google.maps.Map( document.getElementById('id_map_canvas'), map_options );
+                var panorama_options = {
+                    position: home,
+                    pov: {
+                        heading: 34,
+                        pitch: 10
+                    },
+                    enableCloseButton: false,
+                    linksControl: false,
+                    panControl: false,
+                    zoomControl: false,
+                    clickToGo: false,
+                    disableDoubleClickZoom: true,
+                };
+
+                geocoder = new google.maps.Geocoder;
+                
+                service = new google.maps.places.PlacesService( map );
+
+                panorama = new google.maps.StreetViewPanorama( document.getElementById('id_panorama'), panorama_options );
+                map.setStreetView( panorama );
+
+            	map_or_panorama_full_screen = false;
+
+            	var id_map_canvas = dom.byId('id_map_canvas');
+        		on( id_map_canvas, "click", function( evt ) {
+       				if ( evt.handled != true )
+       					cb_map_click( );
+       			});
+        		
+        		google.maps.event.addListener( map, "rightclick", function( evt ) {
+        			cb_map_rightclick( evt );
+       			});
+        		
+            	var id_panorama = dom.byId('id_panorama');
+        		on( id_panorama, "click", function( evt ) {
+       				if ( evt.handled != true )
+       					cb_panorama_click( );
+       			});
+
+        		for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) { 
+            		on( dom.byId('id_route1_wp'+n), "change", function( evt ) {
+            			cb_route1_changed( evt ); 
+           			});
+        		}
+
+        		_list_countries = [
+        		    {id: 0,    list:['Algeria','Burkina Faso','Faeroe Islands','Ghana','Guinea Republic','Iceland','Ireland','Ivory Coast','Liberia','Mali','Morocco','Sao Tome and Principe','Senegal','Sierra Leone','Saint Helena','Gambia','Togo','United Kingdom']},
+        		    {id: 1,    list:['Albania','Andorra','Angola','Australia','Austria','Belgium','Benin','Bosnia','Cameroon','Central Africa Republic','Chad','Congo','Croatia','Czech Republic','Congo, Democratic Republic','Denmark','Equatorial Guinea','France','Gabon','Germany','Gibraltar','Guam','Hungary','Italy','Liechtenstein','Luxembourg','Macedonia (Fyrom)','Malta','Mariana Islands','Marshall Islands','Micronesia','Monaco','Netherlands','Niger','Nigeria','Norway','Papua New Guinea','Poland','Portugal','San Marino','Serbia','Slovakia','Slovenia','Spain','Sweden','Switzerland','Tunisia']},
+        		    {id: -1,   list:['Cape Verde','Cook Islands','French Polynesia','Guinea Bissau','USA']},
+        		    {id: 11,   list:['New Caledonia','Solomon Islands','Vanuatu']},
+        		    {id: -11,  list:['Niue','American Samoa','Samoa','USA']},
+        		    {id: 11.5, list:['Norfolk Island']},
+        		    {id: 12,   list:['Fiji','Kiribati','Nauru','New Zealand','Tuvalu','Wallis and Futuna']},
+        		    {id: 2,    list:['Botswana','Bulgaria','Burundi','Cyprus','Congo, Democratic Republic','Egypt','Finland','Greece','Israel','Jordan','Lebanon','Lesotho','Libya','Lithuania','Malawi','Mozambique','Namibia','Palestine','Romania','Rwanda','South Africa','Sudan','Swaziland','Syria','Turkey','Zambia','Zimbabwe']},
+        		    {id: 3,    list:['Bahrain','Belarus','Comoros','Djibouti','Eritrea','Estonia','Ethiopia','Iraq','Kenya','Kuwait','latvia','Madagascar','Mayotte','Moldova','Qatar','Russia','Saudi Arabia','Somalia','Tanzania','Uganda','Ukraine','Yemen Arab Republic']},
+        		    {id: -3,   list:['Argentina','Brazil','Cuba','Greenland','Guyana','Uruguay']},
+        		    {id: 3.5,  list:['Iran']},
+        		    {id: -3.5, list:['Surinam']},
+        		    {id: 4,    list:['Armenia','Azerbaijan','Georgia','Mauritius','Oman','Reunion','Seychelles','United Arab Emirates']},
+        		    {id: -4,   list:['Anguilla','Antigua and Barbuda','Aruba','Barbados','Bermuda','Bolivia','Brazil','Canada','Chile','Dominica','Dominican Republic','Falkland Islands (Malvinas)','French Guiana ','Grenada','Guadeloupe','Martinique','Montserrat','Netherlands Antilles','Paraguay','Puerto Rico','Saint Kitts and Nevis','Saint Lucia','Trinidad and Tobago','Venezuela']},
+        		    {id: 5,    list:['Diego Garcia','Maldives Republic','Pakistan','Turkmenistan']},
+        		    {id: -5,   list:['Bahamas','Brazil','Canada','Cayman Islands','Colombia','Ecuador','Haiti','Jamaica','Panama','Peru','Turks and Caicos Islands','USA']},
+        		    {id: 5.5,  list:['Bhutan','India','Nepal','Sri Lanka']},
+        		    {id: 6,    list:['Bangladesh','Kazakhstan','Kyrgyzstan','Tajikistan','Uzbekistan']},
+        		    {id: -6,   list:['Belize','Canada','Costa Rica','El Salvador','Guatemala','Honduras','Mexico','Nicaragua','USA']},
+        		    {id: 6.5,  list:['Myanmar']},
+        		    {id: 7,    list:['Australia','Cambodia','Indonesia','Laos','Thailand','Vietnam']},
+        		    {id: -7,   list:['Canada','Mexico','USA']},
+        		    {id: 8,    list:['Australia','Brunei','China','Hong Kong','Indonesia','Macau','Malaysia','Mongolia','Philippines','Singapore','Taiwan']},
+        		    {id: -8,   list:['Canada','Mexico','USA']},
+        		    {id: 9,    list:['Australia','Indonesia','Japan','Korea','Palau']},
+        		    {id: -9,   list:['USA']},
+        		];
+        		list_countries = new Memory({data: _list_countries});
+
+        		iso_countries = new Memory({data: _iso_countries});
+
+        		var list_all_countries_store = new Memory({ idProperty: "name", data: [ ] });
+        		_iso_countries.forEach( function(entry) {
+//        		            		console.log( entry.id );
+        		    list_all_countries_store.add( { name: entry.id } );
+        		});
+        		dijit.byId('id_autocomplete_restrict_list_country2').set( 'store', list_all_countries_store );
+
+        		Date.prototype.stdTimezoneOffset = function() {
+        		    var jan = new Date(this.getFullYear(), 0, 1);
+        		    var jul = new Date(this.getFullYear(), 6, 1);
+        		    return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+        		}
+
+        		Date.prototype.dst = function() {
+        		    return this.getTimezoneOffset() < this.stdTimezoneOffset();
+        		}
+
+        		var langCode = navigator.language || navigator.systemLanguage;
+        		var lang = langCode.toLowerCase(); 
+        		lang = lang.substr(0,2);
+        		var dateObject = new Date(); //this timezone offset calc taken from http://unmissabletokyo.com/country-detector.html
+        		var timeOffset = - dateObject.getTimezoneOffset() / 60; 
+        		if ( dateObject.dst() )
+        		    timeOffset += ((timeOffset < 0) ? -1 : 1);
+        		console.log( "lang=[" + lang + "]" );
+        		console.log( "timeOffset=[" + timeOffset + "]" );
+        		console.log( "dst=" + dateObject.dst() );
+
+        		var list_countries_store = new Memory({ idProperty: "name", data: [ ] });
+        		var l = list_countries.get(timeOffset);
+        		l.list.forEach( function(entry) {
+        		    list_countries_store.add( { name: entry } );
+        		    if ( entry == "USA" )
+        		        dijit.byId('id_autocomplete_restrict_list_country1').set( 'value', entry );
+        		});
+        		dijit.byId('id_autocomplete_restrict_list_country1').set( 'store', list_countries_store );
+        		        		
+        		on( dijit.byId('id_autocomplete_restrict_type'), "change", function( checked ) {
+           		    domStyle.set( "id_autocomplete_restrict_li", "display", (checked) ? "" : "None" );
                 });
-/*
-                aspect.after(registry.byId("id_left_layout"), "resize", function(changeSize) {
-                	console.log( changeSize );
-                	resize_sliders( );                	
-                }, true);                
-*/
 
-            });
-        });
-        
-//		resize_sliders( );
-        
-/*
-        require(["dojo/dnd/Moveable", "dojo/dom", "dojo/on", "dojo/domReady!"], function(Moveable, dom, on){
-        	var dnd = new Moveable( dom.byId("id_route1_mark1") );
-        	on( dnd, "MoveStart", function (e) {
-                console.log( "Move started" );
-        		console.log(e);
-            });
-        	on( dnd, "FirstMove", function (e) {
-                console.log( "First Move" );
-        		console.log(e);
-            });
-   		});
-*/
+        		on( dijit.byId('id_autocomplete_restrict_country'), "change", function( checked ) {
+        		    if ( !checked ) {
+               		    domStyle.set( "id_autocomplete_restrict_country_use_loc_li", "display", "None" );
+               		    domStyle.set( "id_autocomplete_restrict_country1_li", "display", "None" );
+        		    }
+        		    else {
+               		    domStyle.set( "id_autocomplete_restrict_country_use_loc_li", "display", "" );
+      	  	       	    var use_loc = dijit.byId('id_autocomplete_restrict_type').get( 'value' );
+               		    domStyle.set( "id_autocomplete_restrict_country1_li", "display", (use_loc) ? "" : "None" );
+               		    domStyle.set( "id_autocomplete_restrict_country2_li", "display", (use_loc) ? "None" : "" );
+        		    }
+                });
 
-//      update_btns_remove_up_down( );
-//      set_labels_from_wp_to( 0 );
-   
+        		on( dijit.byId('id_autocomplete_restrict_country_use_loc'), "change", function( checked ) {
+           		    domStyle.set( "id_autocomplete_restrict_country1_li", "display", (checked) ? "" : "None" );
+           		    domStyle.set( "id_autocomplete_restrict_country2_li", "display", (checked) ? "None" : "" );
+        	    });
+        	
+        /*
+                require(["dojo/ready", "dojo/aspect", "dijit/registry", "dojo/dom-style"], function(ready, aspect, registry, domStyle) {
+                    ready( function() {
+
+                    	aspect.after(registry.byId("id_middle_layout"), "resize", function() {
+                            google.maps.event.trigger( map, 'resize' );
+                            map.setCenter( panorama.location.latLng );
+                            google.maps.event.trigger( panorama, 'resize' );
+                        });
+
+                    });
+                });
+        */
+                
+//        		resize_sliders( );
+                
+        /*
+                require(["dojo/dnd/Moveable", "dojo/dom", "dojo/on", "dojo/domReady!"], function(Moveable, dom, on){
+                	var dnd = new Moveable( dom.byId("id_route1_mark1") );
+                	on( dnd, "MoveStart", function (e) {
+                        console.log( "Move started" );
+                		console.log(e);
+                    });
+                	on( dnd, "FirstMove", function (e) {
+                        console.log( "First Move" );
+                		console.log(e);
+                    });
+           		});
+        */
+
+//              update_btns_remove_up_down( );
+//              set_labels_from_wp_to( 0 );
+
+                myDialog = dijit.byId('myDialog');
+                
+   				load_settings( );
+   				
+   				if ( navigator.geolocation )
+   					if ( dijit.byId('id_use_curr_position_for_org').get( 'checked' ) || dijit.byId('id_use_curr_position_for_dest').get( 'checked' ) )
+       					navigator.geolocation.getCurrentPosition( got_current_position );
+        	    
+            });
+            
+    	});
+            	
     } // initialize
+    
+    function got_current_position( pos ) {
+    	var latlng = {lat: pos.coords.latitude, lng: pos.coords.longitude};
+    	var geocoder = new google.maps.Geocoder;
+    	geocoder.geocode({'location': latlng}, function(results, status) {
+    	    if ( status === google.maps.GeocoderStatus.OK ) {
+    	    	if ( results[0] ) {
+    	    		var addr = results[0].formatted_address;
+        	    	console.log( "current location: " + addr );
+   					if ( dijit.byId('id_use_curr_position_for_org').get( 'checked' ) ) {
+   	   					if ( dijit.byId('id_route1_wp0').get( 'value' ) == "" )
+   	   	   					dijit.byId('id_route1_wp0').set( 'value', addr );
+   					}
+   					else if ( dijit.byId('id_use_curr_position_for_dest').get( 'checked' ) ) {
+   	   					if ( dijit.byId('id_route1_wp1').get( 'value' ) == "" )
+   	   	   					dijit.byId('id_route1_wp1').set( 'value', addr );
+   					}
+    	    	}
+    	    }
+    	});
+    }
     
 	function move_to_dist( new_pos, go_timer ) {
 
@@ -679,27 +805,45 @@ define( function( m ) {
     
     function cb_map_click( ) {
     	
-        require(["dojo/ready", "dojo/dom-style"], function( ready, domStyle ) {
-            ready( function() {
-
-                if ( !map_full_screen ) {
-                	map_full_screen = true;
-                    console.log( "Map switching to full screen" );
-            		domStyle.set( "id_right_layout", "display", "None" );
-                }
-                else {
-                	map_full_screen = false;
-                    console.log( "Map leaving full screen" );
-            		domStyle.set( "id_right_layout", "display", "" );
-                }
-        		var main_layout = dijit.byId('app_layout');
-        		main_layout.resize();
-        		
-            });
-        });
-            	
+    	console.log( "cb_map_click" );
+		require(["dojo/dom-construct"], function(domConstruct){
+			if ( !map_or_panorama_full_screen ) {
+				domConstruct.place("td_panorama", "id_hidden", "after");
+				map_or_panorama_full_screen = true;	
+			}
+			else {
+				domConstruct.place("td_panorama", "td_map_canvas", "after");
+	            document.getElementById("td_map_canvas").style.width = "50%";
+	            document.getElementById("td_panorama").style.width = "50%";
+				map_or_panorama_full_screen = false;
+			}
+		});
+        google.maps.event.trigger( map, 'resize' );
+        google.maps.event.trigger( panorama, 'resize' );
     }
 
+    function cb_panorama_click( ) {
+		if ( evt.handled != true ) {
+			console.log( "cb_panorama_click" );
+
+			require(["dojo/dom-construct"], function(domConstruct){
+				if ( !map_or_panorama_full_screen ) {
+					domConstruct.place("td_map_canvas", "id_hidden", "after");
+					map_or_panorama_full_screen = true;
+				}
+				else {
+					domConstruct.place("td_map_canvas", "td_panorama", "before");
+		            document.getElementById("td_map_canvas").style.width = "50%";
+		            document.getElementById("td_panorama").style.width = "50%";
+					map_or_panorama_full_screen = false;
+				}
+			});
+			
+          google.maps.event.trigger( map, 'resize' );
+          google.maps.event.trigger( panorama, 'resize' );
+		}
+    }
+    
     function show_waypoint( num_route, index ) {
     	require(["dojo/dom-style"], function( domStyle) {
     		var id = 'id_route' + (num_route+1) + '_tr' + index;
@@ -758,30 +902,6 @@ define( function( m ) {
     	
     }
     
-    function cb_panorama_click( ) {
-    	
-        require(["dojo/ready", "dojo/dom-style"], function( ready, domStyle ) {
-            ready( function() {
-
-                if ( !panorama_full_screen ) {
-                    panorama_full_screen = true;
-                    console.log( "Panorama switching to full screen" );
-            		domStyle.set( "id_right_layout", "width", "100%" );
-                }
-                else {
-                    panorama_full_screen = false;
-                    console.log( "Panorama leaving full screen" );
-            		domStyle.set( "id_right_layout", "width", "50%" );
-                }
-        		var main_layout = dijit.byId('app_layout');
-        		main_layout.resize();
-        		
-            });
-        });
-            	
-        google.maps.event.trigger( panorama, 'resize' );
-    }
-
     function change_waypoint( index_wp, place_name ) {
     	
     	var id_label_wp = "id_route1_wp" + index_wp;
@@ -907,7 +1027,395 @@ define( function( m ) {
    		dijit.byId('id_btn_down_'+(num_route+1)+'_'+(first_hidden-1)).set( 'disabled', true );
     	
 	} // update_btns_remove_up_down
+	
+	function cb_open_settings( ) {
+		require(["dijit/Dialog", "dojo/domReady!"], function( Dialog ) {
+		    dlg = new Dialog({
+		        title: "Settings",
+    		    closable: false,
+		        href: "dlg-settings.html"
+		    });
+		});
+	    dlg.show();
+	}
 
+    function cb_click_use_curr_pos_for_org( ) {
+    	if ( dijit.byId('id_use_curr_position_for_org').get('checked') )
+        	dijit.byId('id_use_curr_position_for_dest').set('checked', false );
+    }
+	
+    function cb_click_use_curr_pos_for_dest( ) {
+    	if ( dijit.byId('id_use_curr_position_for_dest').get('checked') )
+        	dijit.byId('id_use_curr_position_for_org').set('checked', false );
+    }
+
+    function parse( type ) {
+    	return typeof type == 'string' ? JSON.parse(type) : type;
+    }
+    
+    function save_settings( ) {
+
+    	if ( typeof(Storage) == "undefined" ) {
+    		console.log( "No local storage!" );
+    		return;
+    	}
+    	
+        var no_hwy  = dijit.byId('id_check_no_hwy').get( 'checked' );
+    	localStorage.setItem( "no_highway", no_hwy );
+    	console.log( "no_hwy= " + no_hwy );
+
+        var no_toll = dijit.byId('id_check_no_toll').get( 'checked' );
+    	localStorage.setItem( "no_toll", no_toll );
+    	console.log( "no_toll= " + no_toll );
+
+    	var step = dijit.byId('id_input_meters').get( 'value' );
+    	localStorage.setItem( "step", step );
+    	console.log( "step= " + step );
+    	
+    	var interval = dijit.byId('id_input_interval').get( 'value' );
+    	localStorage.setItem( "interval", interval );
+    	console.log( "no_toll= " + no_toll );
+    	
+        var use_curr_pos_for_org = dijit.byId('id_use_curr_position_for_org').get( 'checked' );
+    	localStorage.setItem( "use_curr_position_for_org", use_curr_pos_for_org );
+    	console.log( "use_curr_pos_for_org= " + use_curr_pos_for_org );
+    		
+        var use_curr_pos_for_dest = dijit.byId('id_use_curr_position_for_dest').get( 'checked' );
+    	localStorage.setItem( "use_curr_position_for_dest", use_curr_pos_for_dest );
+    	console.log( "use_curr_pos_for_dest= " + use_curr_pos_for_dest );
+    	
+/*
+	    var autocomplete_restrict_type = dijit.byId('id_autocomplete_restrict_type').get( 'value' );
+    	localStorage.setItem( "autocomplete_restrict_type", autocomplete_restrict_type );
+    	console.log( "autocomplete_restrict_type= " + autocomplete_restrict_type );
+    		
+	    var autocomplete_restrict_cb = dijit.byId('id_autocomplete_restrict_cb').get( 'value' );
+    	localStorage.setItem( "autocomplete_restrict_cb", autocomplete_restrict_cb );
+    	console.log( "autocomplete_restrict_cb= " + autocomplete_restrict_cb );
+    		
+	    var autocomplete_restrict_country = dijit.byId('id_autocomplete_restrict_country').get( 'value' );
+    	localStorage.setItem( "autocomplete_restrict_country", autocomplete_restrict_country );
+    	console.log( "autocomplete_restrict_country= " + autocomplete_restrict_country );
+    		
+	    var autocomplete_restrict_country_use_loc = dijit.byId('id_autocomplete_restrict_country_use_loc').get( 'value' );
+    	localStorage.setItem( "autocomplete_restrict_country_use_loc", autocomplete_restrict_country_use_loc );
+    	console.log( "autocomplete_restrict_country_use_loc= " + autocomplete_restrict_country_use_loc );
+    		
+	    var autocomplete_restrict_list_country1 = dijit.byId('id_autocomplete_restrict_list_country1').get( 'value' );
+    	localStorage.setItem( "autocomplete_restrict_list_country1", autocomplete_restrict_list_country1 );
+    	console.log( "autocomplete_restrict_list_country1= " + autocomplete_restrict_list_country1 );
+    		
+	    var autocomplete_restrict_list_country2 = dijit.byId('id_autocomplete_restrict_list_country2').get( 'value' );
+    	localStorage.setItem( "autocomplete_restrict_list_country2", autocomplete_restrict_list_country2 );
+    	console.log( "autocomplete_restrict_list_country2= " + autocomplete_restrict_list_country2 );
+    	
+	    var view = dijit.byId('view_advanced_settings');
+	    view.performTransition( "view_config", -1, "scaleOut", this, show_main );
+*/
+    	
+    } // save_settings
+    
+    function load_settings( ) {
+
+    	if ( typeof(Storage) == "undefined" ) {
+    		console.log( "No local storage!" );
+    		return;
+    	}
+    	
+    	var no_hwy = localStorage.getItem("no_highway");
+    	console.log( "Restored no_hwy= " + no_hwy );
+    	if ( no_hwy != null )
+            dijit.byId('id_check_no_hwy').set( 'checked', parse(no_hwy), false );
+    	
+    	var no_toll = localStorage.getItem("no_toll");
+    	console.log( "Restored no_toll= " + no_toll );
+    	if ( no_toll != null )
+            dijit.byId('id_check_no_toll').set( 'checked', parse(no_toll), false );
+
+    	var step = localStorage.getItem("step");
+    	console.log( "Restored step= " + step );
+    	if ( step != null )
+            dijit.byId('id_input_meters').set( 'value', parse(step) );
+    	
+    	var interval = localStorage.getItem("interval");
+    	console.log( "Restored interval= " + interval );
+    	if ( interval != null )
+            dijit.byId('id_input_interval').set( 'value', parse(interval) );
+    	
+    	var use_curr_pos_for_org = localStorage.getItem("use_curr_position_for_org");
+    	console.log( "Restored use_curr_position_for_org= " + use_curr_pos_for_org );
+    	if ( use_curr_pos_for_org )
+            dijit.byId('id_use_curr_position_for_org').set( 'checked', parse(use_curr_pos_for_org) );
+    	
+    	var use_curr_pos_for_dest = localStorage.getItem("use_curr_position_for_dest");
+    	console.log( "Restored use_curr_position_for_dest= " + use_curr_pos_for_dest );
+    	if ( use_curr_pos_for_dest )
+            dijit.byId('id_use_curr_position_for_dest').set( 'checked', parse(use_curr_pos_for_dest) );
+    	
+/*
+    	var autocomplete_restrict_type = localStorage.getItem("autocomplete_restrict_type");
+    	console.log( "Restored autocomplete_restrict_type= " + autocomplete_restrict_type );
+    	if ( autocomplete_restrict_type )
+            dijit.byId('id_autocomplete_restrict_type').set( 'value', autocomplete_restrict_type );
+    	
+    	var autocomplete_restrict_cb = localStorage.getItem("autocomplete_restrict_cb");
+    	console.log( "Restored autocomplete_restrict_cb= " + autocomplete_restrict_cb );
+    	if ( autocomplete_restrict_cb )
+            dijit.byId('id_autocomplete_restrict_cb').set( 'value', autocomplete_restrict_cb );
+    	
+    	var autocomplete_restrict_country = localStorage.getItem("autocomplete_restrict_country");
+    	console.log( "Restored autocomplete_restrict_country= " + autocomplete_restrict_country );
+    	if ( autocomplete_restrict_country )
+            dijit.byId('id_autocomplete_restrict_country').set( 'value', autocomplete_restrict_country );
+    	
+    	var autocomplete_restrict_country_use_loc = localStorage.getItem("autocomplete_restrict_country_use_loc");
+    	console.log( "Restored autocomplete_restrict_country_use_loc= " + autocomplete_restrict_country_use_loc );
+    	if ( autocomplete_restrict_country_use_loc )
+            dijit.byId('id_autocomplete_restrict_country_use_loc').set( 'value', autocomplete_restrict_country_use_loc );
+    	
+    	var autocomplete_restrict_list_country1 = localStorage.getItem("autocomplete_restrict_list_country1");
+    	console.log( "Restored autocomplete_restrict_list_country1= " + autocomplete_restrict_list_country1 );
+    	if ( autocomplete_restrict_list_country1 )
+            dijit.byId('id_autocomplete_restrict_list_country1').set( 'value', autocomplete_restrict_list_country1 );
+    	
+    	var autocomplete_restrict_list_country2 = localStorage.getItem("autocomplete_restrict_list_country2");
+    	console.log( "Restored autocomplete_restrict_list_country2= " + autocomplete_restrict_list_country2 );
+    	if ( autocomplete_restrict_list_country2 )
+            dijit.byId('id_autocomplete_restrict_list_country2').set( 'value', autocomplete_restrict_list_country2 );
+*/
+    	
+    } // load_settings
+    
+    function clear_settings( ) {
+
+    	if ( typeof(Storage) == "undefined" ) {
+    		console.log( "No local storage!" );
+    		return;
+    	}
+
+    	localStorage.clear( );
+    	
+    }
+    
+	require(["dojo/store/Memory"], function( Memory ) {
+		_iso_countries = [
+            {code: 'AL', id: 'Albania'},
+            {code: 'DZ', id: 'Algeria'},
+            {code: 'AS', id: 'American Samoa'},
+            {code: 'AD', id: 'Andorra'},
+            {code: 'AO', id: 'Angola'},
+            {code: 'AI', id: 'Anguilla'},
+            {code: 'AG', id: 'Antigua and Barbuda'},
+            {code: 'AR', id: 'Argentina'},
+            {code: 'AM', id: 'Armenia'},
+            {code: 'AW', id: 'Aruba'},
+            {code: 'AU', id: 'Australia'},
+            {code: 'AT', id: 'Austria'},
+            {code: 'AZ', id: 'Azerbaijan'},
+            {code: 'BS', id: 'Bahamas'},
+            {code: 'BH', id: 'Bahrain'},
+            {code: 'BD', id: 'Bangladesh'},
+            {code: 'BB', id: 'Barbados'},
+            {code: 'BY', id: 'Belarus'},
+            {code: 'BE', id: 'Belgium'},
+            {code: 'BZ', id: 'Belize'},
+            {code: 'BJ', id: 'Benin'},
+            {code: 'BM', id: 'Bermuda'},
+            {code: 'BT', id: 'Bhutan'},
+            {code: 'BO', id: 'Bolivia'},
+            {code: 'BA', id: 'Bosnia'},
+            {code: 'BW', id: 'Botswana'},
+            {code: 'BR', id: 'Brazil'},
+            {code: 'BN', id: 'Brunei'},
+            {code: 'BG', id: 'Bulgaria'},
+            {code: 'BF', id: 'Burkina Faso'},
+            {code: 'BI', id: 'Burundi'},
+            {code: 'KH', id: 'Cambodia'},
+            {code: 'CM', id: 'Cameroon'},
+            {code: 'CA', id: 'Canada'},
+            {code: 'CV', id: 'Cape Verde'},
+            {code: 'KY', id: 'Cayman Islands'},
+            {code: 'CF', id: 'Central African Republic'},
+            {code: 'TD', id: 'Chad'},
+            {code: 'CL', id: 'Chile'},
+            {code: 'CN', id: 'China'},
+            {code: 'CO', id: 'Colombia'},
+            {code: 'KM', id: 'Comoros'},
+            {code: 'CG', id: 'Congo'},
+            {code: 'CD', id: 'Congo, Democratic Republic'},
+            {code: 'CK', id: 'Cook Islands'},
+            {code: 'CR', id: 'Costa Rica'},
+            {code: 'CI', id: 'Ivory Coast'},
+            {code: 'HR', id: 'Croatia'},
+            {code: 'CU', id: 'Cuba'},
+            {code: 'CY', id: 'Cyprus'},
+            {code: 'CZ', id: 'Czech Republic'},
+            {code: 'DK', id: 'Denmark'},
+            {code: 'DJ', id: 'Djibouti'},
+            {code: 'DM', id: 'Dominica'},
+            {code: 'DO', id: 'Dominican Republic'},
+            {code: 'EC', id: 'Ecuador'},
+            {code: 'EG', id: 'Egypt'},
+            {code: 'SV', id: 'El Salvador'},
+            {code: 'GQ', id: 'Equatorial Guinea'},
+            {code: 'ER', id: 'Eritrea'},
+            {code: 'EE', id: 'Estonia'},
+            {code: 'ET', id: 'Ethiopia'},
+            {code: 'FK', id: 'Falkland Islands (Malvinas)'},
+            {code: 'FJ', id: 'Fiji'},
+            {code: 'FI', id: 'Finland'},
+            {code: 'FR', id: 'France'},
+            {code: 'GF', id: 'French Guiana'},
+            {code: 'PF', id: 'French Polynesia'},
+            {code: 'GA', id: 'Gabon'},
+            {code: 'GM', id: 'Gambia'},
+            {code: 'GE', id: 'Georgia'},
+            {code: 'DE', id: 'Germany'},
+            {code: 'GH', id: 'Ghana'},
+            {code: 'GI', id: 'Gibraltar'},
+            {code: 'GR', id: 'Greece'},
+            {code: 'GL', id: 'Greenland'},
+            {code: 'GD', id: 'Grenada'},
+            {code: 'GP', id: 'Guadeloupe'},
+            {code: 'GU', id: 'Guam'},
+            {code: 'GT', id: 'Guatemala'},
+            {code: 'GG', id: 'Guernsey'},
+            {code: 'GN', id: 'Guinea'},
+            {code: 'GW', id: 'Guinea Bissau'},
+            {code: 'GY', id: 'Guyana'},
+            {code: 'HT', id: 'Haiti'},
+            {code: 'HN', id: 'Honduras'},
+            {code: 'HK', id: 'Hong Kong'},
+            {code: 'HU', id: 'Hungary'},
+            {code: 'IS', id: 'Iceland'},
+            {code: 'IN', id: 'India'},
+            {code: 'ID', id: 'Indonesia'},
+            {code: 'IR', id: 'Iran'},
+            {code: 'IQ', id: 'Iraq'},
+            {code: 'IE', id: 'Ireland'},
+            {code: 'IL', id: 'Israel'},
+            {code: 'IT', id: 'Italy'},
+            {code: 'JM', id: 'Jamaica'},
+            {code: 'JP', id: 'Japan'},
+            {code: 'JO', id: 'Jordan'},
+            {code: 'KZ', id: 'Kazakhstan'},
+            {code: 'KE', id: 'Kenya'},
+            {code: 'KI', id: 'Kiribati'},
+            {code: 'KR', id: 'Korea'},
+            {code: 'KW', id: 'Kuwait'},
+            {code: 'KG', id: 'Kyrgyzstan'},
+            {code: 'LA', id: 'Laos'},
+            {code: 'LV', id: 'Latvia'},
+            {code: 'LB', id: 'Lebanon'},
+            {code: 'LS', id: 'Lesotho'},
+            {code: 'LR', id: 'Liberia'},
+            {code: 'LY', id: 'Libya'},
+            {code: 'LI', id: 'Liechtenstein'},
+            {code: 'LT', id: 'Lithuania'},
+            {code: 'LU', id: 'Luxembourg'},
+            {code: 'MK', id: 'Macedonia'},
+            {code: 'MG', id: 'Madagascar'},
+            {code: 'MW', id: 'Malawi'},
+            {code: 'MY', id: 'Malaysia'},
+            {code: 'MV', id: 'Maldives'},
+            {code: 'ML', id: 'Mali'},
+            {code: 'MT', id: 'Malta'},
+            {code: 'MH', id: 'Marshall Islands'},
+            {code: 'MQ', id: 'Martinique'},
+            {code: 'MU', id: 'Mauritius'},
+            {code: 'YT', id: 'Mayotte'},
+            {code: 'MX', id: 'Mexico'},
+            {code: 'FM', id: 'Micronesia'},
+            {code: 'MD', id: 'Moldova'},
+            {code: 'MC', id: 'Monaco'},
+            {code: 'MN', id: 'Mongolia'},
+            {code: 'MS', id: 'Montserrat'},
+            {code: 'MA', id: 'Morocco'},
+            {code: 'MZ', id: 'Mozambique'},
+            {code: 'MM', id: 'Myanmar'},
+            {code: 'NA', id: 'Namibia'},
+            {code: 'NR', id: 'Nauru'},
+            {code: 'NP', id: 'Nepal'},
+            {code: 'NL', id: 'Netherlands'},
+            {code: 'AN', id: 'Netherlands Antilles'},
+            {code: 'NC', id: 'New Caledonia'},
+            {code: 'NZ', id: 'New Zealand'},
+            {code: 'NI', id: 'Nicaragua'},
+            {code: 'NE', id: 'Niger'},
+            {code: 'NG', id: 'Nigeria'},
+            {code: 'NU', id: 'Niue'},
+            {code: 'NF', id: 'Norfolk Island'},
+            {code: 'MP', id: 'Mariana Islands'},
+            {code: 'NO', id: 'Norway'},
+            {code: 'OM', id: 'Oman'},
+            {code: 'PK', id: 'Pakistan'},
+            {code: 'PW', id: 'Palau'},
+            {code: 'PA', id: 'Panama'},
+            {code: 'PG', id: 'Papua New Guinea'},
+            {code: 'PY', id: 'Paraguay'},
+            {code: 'PE', id: 'Peru'},
+            {code: 'PH', id: 'Philippines'},
+            {code: 'PL', id: 'Poland'},
+            {code: 'PT', id: 'Portugal'},
+            {code: 'PR', id: 'Puerto Rico'},
+            {code: 'QA', id: 'Qatar'},
+            {code: 'RE', id: 'Reunion'},
+            {code: 'RO', id: 'Romania'},
+            {code: 'RU', id: 'Russia'},
+            {code: 'RW', id: 'Rwanda'},
+            {code: 'SH', id: 'Saint Helena'},
+            {code: 'KN', id: 'Saint Kitts And Nevis'},
+            {code: 'LC', id: 'Saint Lucia'},
+            {code: 'WS', id: 'Samoa'},
+            {code: 'SM', id: 'San Marino'},
+            {code: 'ST', id: 'Sao Tome And Principe'},
+            {code: 'SA', id: 'Saudi Arabia'},
+            {code: 'SN', id: 'Senegal'},
+            {code: 'RS', id: 'Serbia'},
+            {code: 'SC', id: 'Seychelles'},
+            {code: 'SL', id: 'Sierra Leone'},
+            {code: 'SG', id: 'Singapore'},
+            {code: 'SK', id: 'Slovakia'},
+            {code: 'SI', id: 'Slovenia'},
+            {code: 'SB', id: 'Solomon Islands'},
+            {code: 'SO', id: 'Somalia'},
+            {code: 'ZA', id: 'South Africa'},
+            {code: 'ES', id: 'Spain'},
+            {code: 'LK', id: 'Sri Lanka'},
+            {code: 'SD', id: 'Sudan'},
+            {code: 'SR', id: 'Surinam'},
+            {code: 'SZ', id: 'Swaziland'},
+            {code: 'SE', id: 'Sweden'},
+            {code: 'CH', id: 'Switzerland'},
+            {code: 'SY', id: 'Syria'},
+            {code: 'TW', id: 'Taiwan'},
+            {code: 'TJ', id: 'Tajikistan'},
+            {code: 'TZ', id: 'Tanzania'},
+            {code: 'TH', id: 'Thailand'},
+            {code: 'TG', id: 'Togo'},
+            {code: 'TT', id: 'Trinidad And Tobago'},
+            {code: 'TN', id: 'Tunisia'},
+            {code: 'TR', id: 'Turkey'},
+            {code: 'TM', id: 'Turkmenistan'},
+            {code: 'TC', id: 'Turks And Caicos Islands'},
+            {code: 'TV', id: 'Tuvalu'},
+            {code: 'UG', id: 'Uganda'},
+            {code: 'UA', id: 'Ukraine'},
+            {code: 'AE', id: 'United Arab Emirates'},
+            {code: 'GB', id: 'United Kingdom'},
+            {code: 'US', id: 'USA'},
+            {code: 'UY', id: 'Uruguay'},
+            {code: 'UZ', id: 'Uzbekistan'},
+            {code: 'VU', id: 'Vanuatu'},
+            {code: 'VE', id: 'Venezuela'},
+            {code: 'VN', id: 'Vietnam'},
+            {code: 'WF', id: 'Wallis And Futuna'},
+            {code: 'YE', id: 'Yemen'},
+            {code: 'ZM', id: 'Zambia'},
+            {code: 'ZW', id: 'Zimbabwe'}
+        ];
+	});
+    
     
 	// ---------
 	// Externals
@@ -942,6 +1450,14 @@ define( function( m ) {
 		cb_click_btn_remove: function( num_route, index ) { cb_click_btn_remove( num_route, index ); },
 		cb_click_btn_up:     function( num_route, index ) { cb_click_btn_up( num_route, index ); },
 		cb_click_btn_down:   function( num_route, index ) { cb_click_btn_down( num_route, index ); },
+
+		cb_open_settings: function( ) { cb_open_settings( ); },
+		
+		cb_click_use_curr_pos_for_org:		function( ) { cb_click_use_curr_pos_for_org(); },
+		cb_click_use_curr_pos_for_dest:		function( ) { cb_click_use_curr_pos_for_dest(); },
+		
+		save_settings: 		function( ) { save_settings(); },
+		clear_settings: 	function( ) { clear_settings(); },
 		
     };
  

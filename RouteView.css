@@ -160,3 +160,6 @@ html, body {
   outline:none;
 }
 
+#id_input_route {
+	background: grey;
+}
