@@ -415,11 +415,11 @@
                             <span>Use current position for ...</span>
                             <div data-dojo-type="dijit/TooltipDialog">
                                 <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" 
-		                         	    onClick='require(["RouteView.js"], function( s ) { s.cb_click_use_curr_pos_for_org(); })' id="id_use_curr_position_for_org" >
+		                         	    id="id_use_curr_position_for_org" >
                          	        origin
                                 </button>
                                 <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" 
-		                         	    onClick='require(["RouteView.js"], function( s ) { s.cb_click_use_curr_pos_for_dest(); })' id="id_use_curr_position_for_dest" >
+		                         	    id="id_use_curr_position_for_dest" >
                          	        destination
                                 </button>
                             </div>
@@ -441,8 +441,7 @@
                             				Restrict Type:&nbsp;
                             			</td>
 						                <td style="text-align:left; vertical-align:middle">
-	                            			<input id="id_autocomplete_restrict_type" data-dojo-type="dijit/form/CheckBox" 
-    	                        				   onChange="" />
+	                            			<input id="id_autocomplete_restrict_type" data-dojo-type="dijit/form/CheckBox" />
 										</td>
                             		</tr>
                             		<tr id="id_autocomplete_restrict_li" style="display:none">
@@ -465,8 +464,7 @@
                             				Restrict Country:&nbsp;
                             			</td>
 						                <td style="text-align:left; vertical-align:middle">
-	                            			<input id="id_autocomplete_restrict_country" data-dojo-type="dijit/form/CheckBox"  
-    	                        				   onChange="" />
+	                            			<input id="id_autocomplete_restrict_country" data-dojo-type="dijit/form/CheckBox" />
 										</td>
                             		</tr>
                             		<tr id="id_autocomplete_restrict_country_use_loc_li" style="display:none">
@@ -474,8 +472,7 @@
                             				Use current location:&nbsp;
                             			</td>
 						                <td style="text-align:left; vertical-align:middle">
-	                            			<input id="id_autocomplete_restrict_country_use_loc" data-dojo-type="dijit/form/CheckBox" checked
-    	                        				   onChange="" />
+	                            			<input id="id_autocomplete_restrict_country_use_loc" data-dojo-type="dijit/form/CheckBox" checked />
 										</td>
                             		<tr id="id_autocomplete_restrict_country1_li" style="display:none">
 						                <td style="text-align:right; vertical-align:middle">

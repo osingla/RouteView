@@ -317,42 +317,46 @@ define( function( m ) {
 
     	require(["dojo/dom-style", "dojo/ready"], function(domStyle, ready) {
     		
-       		domStyle.set( "id_main_heading", "display", "" );
-  	       	domStyle.set( "id_org_dest_pane", "display", "" );
-  	       	domStyle.set( "btn_start", "display", "" );
+            ready( function() {
+            	
+           		domStyle.set( "id_main_heading", "display", "" );
+      	       	domStyle.set( "id_org_dest_pane", "display", "" );
+      	       	domStyle.set( "btn_start", "display", "" );
 
-  	       	if ( dijit.byId('id_autocomplete_restrict_type').get( 'value' ) == "on" ) {
-  	       		var v = dijit.byId('id_autocomplete_restrict_cb').get( 'value' );
-            	autocomplete_from.setTypes([ v ]);
-            	autocomplete_to.setTypes([ v ]);
-  	       	}
-  	       	else {
-            	autocomplete_from.setTypes([]);
-            	autocomplete_to.setTypes([]);
-  	       	}
-  	       	
-  	       	if ( dijit.byId('id_autocomplete_restrict_country').get( 'value' ) == "on" ) {
-  	       		var country = "";
-  	  	       	if ( dijit.byId('id_autocomplete_restrict_country_use_loc').get( 'value' ) == "on" )
-  	  	       		country = dijit.byId('id_autocomplete_restrict_list_country1').get( 'value' );
-  	  	       	else
-  	  	       		country = dijit.byId('id_autocomplete_restrict_list_country2').get( 'value' );
-  	  	       	console.log( "country = [" + country  + "]" );
-  	  	       	if ( (country != '') && (country != undefined) ) {
-  	  	  	       	var code_country = iso_countries.get( country );
-  	  	  	       	console.log( "code_country = [" + code_country.code + "]" );
-  	            	autocomplete_from.setComponentRestrictions({country: code_country.code});
-  	            	autocomplete_to.setComponentRestrictions({country: code_country.code});
-  	  	       	}
-  	       	}
-  	       	else {
-            	autocomplete_from.setComponentRestrictions();
-            	autocomplete_to.setComponentRestrictions();
-  	       	}
-  	       	
-    		if ( small_map != undefined )
-    	        google.maps.event.trigger( small_map, 'resize' );
-  	       	
+      	       	if ( dijit.byId('id_autocomplete_restrict_type').get( 'value' ) == "on" ) {
+      	       		var v = dijit.byId('id_autocomplete_restrict_cb').get( 'value' );
+                	autocomplete_from.setTypes([ v ]);
+                	autocomplete_to.setTypes([ v ]);
+      	       	}
+      	       	else {
+                	autocomplete_from.setTypes([]);
+                	autocomplete_to.setTypes([]);
+      	       	}
+      	       	
+      	       	if ( dijit.byId('id_autocomplete_restrict_country').get( 'value' ) == "on" ) {
+      	       		var country = "";
+      	  	       	if ( dijit.byId('id_autocomplete_restrict_country_use_loc').get( 'value' ) == "on" )
+      	  	       		country = dijit.byId('id_autocomplete_restrict_list_country1').get( 'value' );
+      	  	       	else
+      	  	       		country = dijit.byId('id_autocomplete_restrict_list_country2').get( 'value' );
+      	  	       	console.log( "country = [" + country  + "]" );
+      	  	       	if ( (country != '') && (country != undefined) ) {
+      	  	  	       	var code_country = iso_countries.get( country );
+      	  	  	       	console.log( "code_country = [" + code_country.code + "]" );
+      	            	autocomplete_from.setComponentRestrictions({country: code_country.code});
+      	            	autocomplete_to.setComponentRestrictions({country: code_country.code});
+      	  	       	}
+      	       	}
+      	       	else {
+                	autocomplete_from.setComponentRestrictions();
+                	autocomplete_to.setComponentRestrictions();
+      	       	}
+      	       	
+        		if ( small_map != undefined )
+        	        google.maps.event.trigger( small_map, 'resize' );
+      	       	
+            });
+            	
        	});
     }
     
@@ -1208,8 +1212,6 @@ define( function( m ) {
             		types: ['(cities)']		// geocode
             	};
             	autocomplete_from = new google.maps.places.Autocomplete(input_from);
-            	autocomplete_from.setComponentRestrictions({country: 'us'});
-            	autocomplete_from.setTypes(['(cities)']);
             	on( input_from, "change", function( evt ) {
             		console.log( "Change" );
             		if ( cb_route_from_or_to_changed_handle != undefined )

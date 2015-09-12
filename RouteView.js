@@ -9,7 +9,8 @@
 define( function( m ) {
 
 	var MAX_NB_WAYPOINTS = 8;
-	
+
+	var autocompletes = [];
     var map;
     var geocoder;
     var service;
@@ -448,10 +449,6 @@ define( function( m ) {
 //            	if ( navigator.geolocation ) 
 //            		navigator.geolocation.getCurrentPosition( function( pos ) { home = pos.coords; console.log( home ); } );
             	
-           		for ( num_route = 0; num_route < 1; num_route++ )
-           			for ( var n = 0; n < MAX_NB_WAYPOINTS+2 - 1; n++ ) 
-           				new google.maps.places.Autocomplete( dom.byId('id_route'+(num_route+1)+'_wp'+n) );
-
             	var map_options = {
                    center: home,
                    zoom: 14,
@@ -574,9 +571,20 @@ define( function( m ) {
         		});
         		dijit.byId('id_autocomplete_restrict_list_country1').set( 'store', list_countries_store );
         		        		
+        		on( dijit.byId('id_use_curr_position_for_org'), "change", function( checked ) {
+        		    if ( checked )
+               			dijit.byId('id_use_curr_position_for_dest').set( 'checked', false );
+        	    });
+        	    
+        		on( dijit.byId('id_use_curr_position_for_dest'), "change", function( checked ) {
+        		    if ( checked )
+               			dijit.byId('id_use_curr_position_for_org').set( 'checked', false );
+        	    });
+
         		on( dijit.byId('id_autocomplete_restrict_type'), "change", function( checked ) {
            		    domStyle.set( "id_autocomplete_restrict_li", "display", (checked) ? "" : "None" );
-                });
+           		    apply_autocomplete_settings( );
+           		 });
 
         		on( dijit.byId('id_autocomplete_restrict_country'), "change", function( checked ) {
         		    if ( !checked ) {
@@ -589,11 +597,13 @@ define( function( m ) {
                		    domStyle.set( "id_autocomplete_restrict_country1_li", "display", (use_loc) ? "" : "None" );
                		    domStyle.set( "id_autocomplete_restrict_country2_li", "display", (use_loc) ? "None" : "" );
         		    }
+           		    apply_autocomplete_settings( );
                 });
 
         		on( dijit.byId('id_autocomplete_restrict_country_use_loc'), "change", function( checked ) {
            		    domStyle.set( "id_autocomplete_restrict_country1_li", "display", (checked) ? "" : "None" );
            		    domStyle.set( "id_autocomplete_restrict_country2_li", "display", (checked) ? "None" : "" );
+           		    apply_autocomplete_settings( );
         	    });
         	
         /*
@@ -633,6 +643,15 @@ define( function( m ) {
                 
    				load_settings( );
    				
+           		for ( num_route = 0; num_route < 1; num_route++ ) {
+           			autocompletes[num_route] = [];
+           			for ( var n = 0; n < MAX_NB_WAYPOINTS+2 - 1; n++ ) { 
+           				autocompletes[num_route][n] = new google.maps.places.Autocomplete( dom.byId('id_route'+(num_route+1)+'_wp'+n) );
+           				autocompletes[num_route][n].setComponentRestrictions({country: 'us'});
+           				autocompletes[num_route][n].setTypes(['(cities)']);
+           			}
+           		}
+
    				if ( navigator.geolocation )
    					if ( dijit.byId('id_use_curr_position_for_org').get( 'checked' ) || dijit.byId('id_use_curr_position_for_dest').get( 'checked' ) )
        					navigator.geolocation.getCurrentPosition( got_current_position );
@@ -662,6 +681,43 @@ define( function( m ) {
     	    	}
     	    }
     	});
+    }
+    
+    function apply_autocomplete_settings( ) {
+    	
+    	require(["dojo/dom-style", "dojo/ready"], function(domStyle, ready) {
+    		
+            ready( function() {
+            	
+            	var restrict_type = dijit.byId('id_autocomplete_restrict_type').get( 'checked' );
+            	var restrict_value = dijit.byId('id_autocomplete_restrict_cb').get( 'value' );
+            	var restrict_country = dijit.byId('id_autocomplete_restrict_country').get( 'checked' );
+  	       		var country = "";
+  	  	       	if ( dijit.byId('id_autocomplete_restrict_country_use_loc').get( 'checked' ) )
+  	  	       		country = dijit.byId('id_autocomplete_restrict_list_country1').get( 'value' );
+  	  	       	else
+  	  	       		country = dijit.byId('id_autocomplete_restrict_list_country2').get( 'value' );
+  	  	       	console.log( "country = [" + country  + "]" );
+  	  	       	var code_country = iso_countries.get( country );
+  	  	       	console.log( "code_country = [" + code_country.code + "]" );
+
+  	           	for ( num_route = 0; num_route < 1; num_route++ ) {
+  	           		for ( var n = 0; n < MAX_NB_WAYPOINTS+2 - 1; n++ ) {
+  	            	    if ( restrict_type )
+  	            	       	autocompletes[num_route][n].setTypes([ restrict_value ]);
+  	            	    else
+  	            	       	autocompletes[num_route][n].setTypes([]);
+
+  	            	    if ( restrict_country && ((country != '') && (country != undefined)) )
+            	  	    	autocompletes[num_route][n].setComponentRestrictions({country: code_country.code});
+  	            	    else
+  	            	    	autocompletes[num_route][n].setComponentRestrictions();
+  	           		}
+  	           	}
+  	  	  	       	
+            });
+            	
+       	});
     }
     
 	function move_to_dist( new_pos, go_timer ) {
@@ -1039,16 +1095,6 @@ define( function( m ) {
 	    dlg.show();
 	}
 
-    function cb_click_use_curr_pos_for_org( ) {
-    	if ( dijit.byId('id_use_curr_position_for_org').get('checked') )
-        	dijit.byId('id_use_curr_position_for_dest').set('checked', false );
-    }
-	
-    function cb_click_use_curr_pos_for_dest( ) {
-    	if ( dijit.byId('id_use_curr_position_for_dest').get('checked') )
-        	dijit.byId('id_use_curr_position_for_org').set('checked', false );
-    }
-
     function parse( type ) {
     	return typeof type == 'string' ? JSON.parse(type) : type;
     }
@@ -1084,8 +1130,7 @@ define( function( m ) {
     	localStorage.setItem( "use_curr_position_for_dest", use_curr_pos_for_dest );
     	console.log( "use_curr_pos_for_dest= " + use_curr_pos_for_dest );
     	
-/*
-	    var autocomplete_restrict_type = dijit.byId('id_autocomplete_restrict_type').get( 'value' );
+	    var autocomplete_restrict_type = dijit.byId('id_autocomplete_restrict_type').get( 'checked' );
     	localStorage.setItem( "autocomplete_restrict_type", autocomplete_restrict_type );
     	console.log( "autocomplete_restrict_type= " + autocomplete_restrict_type );
     		
@@ -1093,11 +1138,11 @@ define( function( m ) {
     	localStorage.setItem( "autocomplete_restrict_cb", autocomplete_restrict_cb );
     	console.log( "autocomplete_restrict_cb= " + autocomplete_restrict_cb );
     		
-	    var autocomplete_restrict_country = dijit.byId('id_autocomplete_restrict_country').get( 'value' );
+	    var autocomplete_restrict_country = dijit.byId('id_autocomplete_restrict_country').get( 'checked' );
     	localStorage.setItem( "autocomplete_restrict_country", autocomplete_restrict_country );
     	console.log( "autocomplete_restrict_country= " + autocomplete_restrict_country );
     		
-	    var autocomplete_restrict_country_use_loc = dijit.byId('id_autocomplete_restrict_country_use_loc').get( 'value' );
+	    var autocomplete_restrict_country_use_loc = dijit.byId('id_autocomplete_restrict_country_use_loc').get( 'checked' );
     	localStorage.setItem( "autocomplete_restrict_country_use_loc", autocomplete_restrict_country_use_loc );
     	console.log( "autocomplete_restrict_country_use_loc= " + autocomplete_restrict_country_use_loc );
     		
@@ -1108,10 +1153,6 @@ define( function( m ) {
 	    var autocomplete_restrict_list_country2 = dijit.byId('id_autocomplete_restrict_list_country2').get( 'value' );
     	localStorage.setItem( "autocomplete_restrict_list_country2", autocomplete_restrict_list_country2 );
     	console.log( "autocomplete_restrict_list_country2= " + autocomplete_restrict_list_country2 );
-    	
-	    var view = dijit.byId('view_advanced_settings');
-	    view.performTransition( "view_config", -1, "scaleOut", this, show_main );
-*/
     	
     } // save_settings
     
@@ -1152,11 +1193,10 @@ define( function( m ) {
     	if ( use_curr_pos_for_dest )
             dijit.byId('id_use_curr_position_for_dest').set( 'checked', parse(use_curr_pos_for_dest) );
     	
-/*
     	var autocomplete_restrict_type = localStorage.getItem("autocomplete_restrict_type");
     	console.log( "Restored autocomplete_restrict_type= " + autocomplete_restrict_type );
     	if ( autocomplete_restrict_type )
-            dijit.byId('id_autocomplete_restrict_type').set( 'value', autocomplete_restrict_type );
+            dijit.byId('id_autocomplete_restrict_type').set( 'checked', parse(autocomplete_restrict_type) );
     	
     	var autocomplete_restrict_cb = localStorage.getItem("autocomplete_restrict_cb");
     	console.log( "Restored autocomplete_restrict_cb= " + autocomplete_restrict_cb );
@@ -1166,12 +1206,12 @@ define( function( m ) {
     	var autocomplete_restrict_country = localStorage.getItem("autocomplete_restrict_country");
     	console.log( "Restored autocomplete_restrict_country= " + autocomplete_restrict_country );
     	if ( autocomplete_restrict_country )
-            dijit.byId('id_autocomplete_restrict_country').set( 'value', autocomplete_restrict_country );
+            dijit.byId('id_autocomplete_restrict_country').set( 'checked', parse(autocomplete_restrict_country) );
     	
     	var autocomplete_restrict_country_use_loc = localStorage.getItem("autocomplete_restrict_country_use_loc");
     	console.log( "Restored autocomplete_restrict_country_use_loc= " + autocomplete_restrict_country_use_loc );
     	if ( autocomplete_restrict_country_use_loc )
-            dijit.byId('id_autocomplete_restrict_country_use_loc').set( 'value', autocomplete_restrict_country_use_loc );
+            dijit.byId('id_autocomplete_restrict_country_use_loc').set( 'checked', parse(autocomplete_restrict_country_use_loc) );
     	
     	var autocomplete_restrict_list_country1 = localStorage.getItem("autocomplete_restrict_list_country1");
     	console.log( "Restored autocomplete_restrict_list_country1= " + autocomplete_restrict_list_country1 );
@@ -1182,7 +1222,6 @@ define( function( m ) {
     	console.log( "Restored autocomplete_restrict_list_country2= " + autocomplete_restrict_list_country2 );
     	if ( autocomplete_restrict_list_country2 )
             dijit.byId('id_autocomplete_restrict_list_country2').set( 'value', autocomplete_restrict_list_country2 );
-*/
     	
     } // load_settings
     
@@ -1452,9 +1491,6 @@ define( function( m ) {
 		cb_click_btn_down:   function( num_route, index ) { cb_click_btn_down( num_route, index ); },
 
 		cb_open_settings: function( ) { cb_open_settings( ); },
-		
-		cb_click_use_curr_pos_for_org:		function( ) { cb_click_use_curr_pos_for_org(); },
-		cb_click_use_curr_pos_for_dest:		function( ) { cb_click_use_curr_pos_for_dest(); },
 		
 		save_settings: 		function( ) { save_settings(); },
 		clear_settings: 	function( ) { clear_settings(); },
