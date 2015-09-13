@@ -860,25 +860,22 @@ define( function( m ) {
     }
 
     function cb_panorama_click( ) {
-		if ( evt.handled != true ) {
-			console.log( "cb_panorama_click" );
 
-			require(["dojo/dom-construct"], function(domConstruct){
-				if ( !map_or_panorama_full_screen ) {
-					domConstruct.place("td_map_canvas", "id_hidden", "after");
-					map_or_panorama_full_screen = true;
-				}
-				else {
-					domConstruct.place("td_map_canvas", "td_panorama", "before");
-		            document.getElementById("td_map_canvas").style.width = "50%";
-		            document.getElementById("td_panorama").style.width = "50%";
-					map_or_panorama_full_screen = false;
-				}
-			});
-			
-          google.maps.event.trigger( map, 'resize' );
-          google.maps.event.trigger( panorama, 'resize' );
-		}
+		require(["dojo/dom-construct"], function(domConstruct){
+			if ( !map_or_panorama_full_screen ) {
+				domConstruct.place("td_map_canvas", "id_hidden", "after");
+				map_or_panorama_full_screen = true;
+			}
+			else {
+				domConstruct.place("td_map_canvas", "td_panorama", "before");
+		        document.getElementById("td_map_canvas").style.width = "50%";
+		        document.getElementById("td_panorama").style.width = "50%";
+				map_or_panorama_full_screen = false;
+			}
+			google.maps.event.trigger( map, 'resize' );
+			google.maps.event.trigger( panorama, 'resize' );
+		});
+
     }
     
     function show_waypoint( index ) {
