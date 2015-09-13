@@ -25,9 +25,9 @@ define( function( m ) {
 	var is_force_panto = true;
     var curr_dist;
 	var cb_move_to_dist = undefined;
-	var directions_service = [];
-	var directions_display = [];
-	var route = [];
+	var directions_service;
+	var directions_display;
+	var route;
 	var cb_route_from_or_to_changed_handle = undefined;
 
     function show_route_distance_duration( dist_meters, duration_secs ) {
@@ -104,12 +104,12 @@ define( function( m ) {
         timer_animate = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate(50); })', 250 );
     }
 
-    function find_first_hidden( num_route ) {
+    function find_first_hidden( ) {
 
         var first_hidden = MAX_NB_WAYPOINTS + 2;
     	require(["dojo/dom-style"], function( domStyle) {
             for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
-            	var id = 'id_route' + (num_route+1) + '_tr' + n;
+            	var id = 'id_route1_tr' + n;
         		var display = domStyle.get( id, "display" );
 //            	console.log( id + " --> " + display );
             	if ( display == "none" ) {
@@ -124,11 +124,11 @@ define( function( m ) {
     
     function do_route( ) {
 
-    	if ( directions_display[0] != undefined ) {
+    	if ( directions_display != undefined ) {
     		console.log( "Delete current route" )
     		var num_route = 0;
-    		directions_display[num_route].setMap( null );
-        	directions_display[num_route] = undefined;
+    		directions_display.setMap( null );
+        	directions_display = undefined;
         	if ( polyline != undefined ) {
         		polyline.setMap( null );
         		polyline = undefined;
@@ -144,7 +144,7 @@ define( function( m ) {
         console.log( "step=" + step + " interval=" + interval );
 
         var num_route = 0;
-        var first_hidden = find_first_hidden( num_route);
+        var first_hidden = find_first_hidden();
     	console.log( "first_hidden=" + first_hidden );
         
         var start_location = new Array();
@@ -170,9 +170,9 @@ define( function( m ) {
 
         for ( var num_route = 0; num_route < start_location.length; num_route++ ) {
 
-            directions_service[num_route] = new google.maps.DirectionsService( );
+            directions_service = new google.maps.DirectionsService( );
             
-            directions_display[num_route] = new google.maps.DirectionsRenderer({
+            directions_display = new google.maps.DirectionsRenderer({
                 draggable: true,
                 map: map,
                 hideRouteList: false,
@@ -180,9 +180,9 @@ define( function( m ) {
                 suppressMarkers : false,
              });
 
-            directions_display[num_route].addListener('directions_changed', function() {
+            directions_display.addListener('directions_changed', function() {
             	var num_route = 0;
-            	var new_dir = directions_display[num_route].getDirections();
+            	var new_dir = directions_display.getDirections();
                 console.log( new_dir );
                 var index_waypoint = new_dir.request.j;
                 if ( index_waypoint != undefined ) {
@@ -217,7 +217,7 @@ define( function( m ) {
                 avoidTolls: no_toll
             };  
 
-            directions_service[num_route].route( request, cb_make_route( num_route ) );
+            directions_service.route( request, cb_make_route( ) );
 
         }
         
@@ -227,11 +227,11 @@ define( function( m ) {
 
                 if ( status == google.maps.DirectionsStatus.OK ) {
 
-                	directions_display[num_route].setMap( map );
-                	directions_display[num_route].setDirections( response );
+                	directions_display.setMap( map );
+                	directions_display.setDirections( response );
 
                     var bounds = new google.maps.LatLngBounds();
-                    route[num_route] = response.routes[0];
+                    route = response.routes[0];
                     var location_from = new Object();
                     var location_to = new Object();
 
@@ -242,8 +242,8 @@ define( function( m ) {
                     });
 
                     // For each route, display summary information.
-                    var path = route[num_route].overview_path;
-                    var legs = route[num_route].legs;
+                    var path = route.overview_path;
+                    var legs = route.legs;
 
                     // Markers
                     var dist_meters = 0;
@@ -308,7 +308,7 @@ define( function( m ) {
         } // cb_make_route
 
         update_btns_remove_up_down( );
-//      set_labels_from_wp_to( 0 );
+//      set_labels_from_wp_to( );
     
         map.setOptions({draggableCursor: 'crosshair'});
 
@@ -318,12 +318,16 @@ define( function( m ) {
     
     function do_play( ) {
 
-    	console.log( "Play!" );
-    	
 		var left_layout = dijit.byId('id_left_layout');
-		if ( left_layout._showing )
+		if ( left_layout._showing ) {
 			left_layout.toggle();
-    	
+            setTimeout( 'require(["RouteView.js"], function( s ) { s.do_play(); })', 400 );
+            return;
+		}
+
+        google.maps.event.trigger( map, 'resize' );
+        google.maps.event.trigger( panorama, 'resize' );
+
         start_driving( );  
 
 		dijit.byId('id_btn_route').set( 'disabled', true );
@@ -340,7 +344,7 @@ define( function( m ) {
 		dijit.byId('id_check_no_toll').set( 'disabled', true );
 
         var renderer_options = { draggable: true };
-       	directions_display[0].setOptions( renderer_options );
+       	directions_display.setOptions( renderer_options );
     		
     	update_btns_remove_up_down( false );
         map.setOptions({draggableCursor: 'hand'});
@@ -379,7 +383,6 @@ define( function( m ) {
         }
         else if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" ) {
         	dijit.byId('id_btn_pause').set( 'label', "Pause" );
-            var num_route = 0;
             timer_animate = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate('+(curr_dist)+'); })', 250 );
         }
 
@@ -387,7 +390,7 @@ define( function( m ) {
 		dijit.byId('id_input_route').set( 'intermediateChanges', true );
 
         var renderer_options = { draggable: false };
-       	directions_display[0].setOptions( renderer_options );
+       	directions_display.setOptions( renderer_options );
     
         map.setOptions({draggableCursor: 'hand'});
         
@@ -396,9 +399,15 @@ define( function( m ) {
     function do_stop( ) {
 
 		var left_layout = dijit.byId('id_left_layout');
-		if ( !left_layout._showing )
+		if ( !left_layout._showing ) {
 			left_layout.toggle();
+            setTimeout( 'require(["RouteView.js"], function( s ) { s.do_stop(); })', 400 );
+            return;
+		}
     	
+        google.maps.event.trigger( map, 'resize' );
+        google.maps.event.trigger( panorama, 'resize' );
+
         clearTimeout( timer_animate );
 
 		for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) 
@@ -417,24 +426,11 @@ define( function( m ) {
 		dijit.byId('id_input_route').set( 'intermediateChanges', false );
 		
         var renderer_options = { draggable: false };
-       	directions_display[0].setOptions( renderer_options );
+       	directions_display.setOptions( renderer_options );
 
     	update_btns_remove_up_down( false );
     	map.setOptions({draggableCursor: 'hand'});
         
-    }
-
-    function resize_sliders( ) {
-    	
-    	require(["dojo/dom-geometry", "dojo/dom", "dojo/dom-style"], function( domGeom, dom, domStyle) {
-		    var node = dom.byId("id_left_layout");
-		    var computedStyle = domStyle.getComputedStyle( node );
-		    var output = domGeom.getContentBox( node, computedStyle );
-    		domStyle.set( "id_input_meters",   "width", (output.w - 22)+ "px" );
-    		domStyle.set( "id_input_interval", "width", (output.w - 22)+ "px" );
-//		    console.log( output );
-   		});
-    	
     }
 
     function initialize( ) {
@@ -608,8 +604,6 @@ define( function( m ) {
                 });
         */
                 
-//        		resize_sliders( );
-                
         /*
                 require(["dojo/dnd/Moveable", "dojo/dom", "dojo/on", "dojo/domReady!"], function(Moveable, dom, on){
                 	var dnd = new Moveable( dom.byId("id_route1_mark1") );
@@ -624,9 +618,6 @@ define( function( m ) {
            		});
         */
 
-//              update_btns_remove_up_down( );
-//              set_labels_from_wp_to( 0 );
-
                 myDialog = dijit.byId('myDialog');
                 
         		for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) { 
@@ -638,7 +629,7 @@ define( function( m ) {
            			});
         		}
 
-           		for ( num_route = 0; num_route < 1; num_route++ ) {
+           		for ( var num_route = 0; num_route < 1; num_route++ ) {
            			autocompletes[num_route] = [];
            			for ( var n = 0; n < MAX_NB_WAYPOINTS+2 - 1; n++ ) { 
            				autocompletes[num_route][n] = new google.maps.places.Autocomplete( dom.byId('id_route'+(num_route+1)+'_wp'+n) );
@@ -704,7 +695,7 @@ define( function( m ) {
   	  	       	var code_country = iso_countries.get( country );
   	  	       	console.log( "code_country = [" + code_country.code + "]" );
 
-  	           	for ( num_route = 0; num_route < 1; num_route++ ) {
+  	           	for ( var num_route = 0; num_route < 1; num_route++ ) {
   	           		for ( var n = 0; n < MAX_NB_WAYPOINTS+2 - 1; n++ ) {
   	            	    if ( restrict_type )
   	            	       	autocompletes[num_route][n].setTypes([ restrict_value ]);
@@ -724,8 +715,6 @@ define( function( m ) {
     }
     
 	function move_to_dist( new_pos, go_timer ) {
-
-		var num_route = 0;
 
 		if ( go_timer) {
 			if ( timer_animate != undefined ) 
@@ -800,11 +789,9 @@ define( function( m ) {
     	
     	// xmllint --noout --schema http://www.topografix.com/GPX/1/0/gpx.xsd testfile.gpx
     	
-    	var num_route = 0;
-    	
     	console.log( "XXXXXXXXXXXXXXXXXXXXXXXX" );
-    	console.log( route[num_route].summary );
-    	console.log( route[num_route] );
+    	console.log( route.summary );
+    	console.log( route );
 
     	var crlf = String.fromCharCode(13) + String.fromCharCode(10);
     	
@@ -814,17 +801,17 @@ define( function( m ) {
         	'<gpx version="1.0" creator="" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/0" xsi:schemaLocation="http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd">' + crlf + 
         	'<time>2015-06-12T21:36:34Z</time>' +crlf;
 
-    	var op = route[num_route].overview_path;
+    	var op = route.overview_path;
         for ( n = 0; n < op.length; n++ ) {
         	gpx += '<wpt lat="'+op[n].G+'" lon="'+op[n].K+'">' + ' </wpt>' + crlf;
         }
         
         gpx += '<rte>' + crlf;
-        gpx += '<name>' + route[num_route].summary + '</name>' + crlf;
+        gpx += '<name>' + route.summary + '</name>' + crlf;
 //        for ( n = 0; n < op.length; n++ ) {
 //        	gpx += '<rtept lat="'+op[n].G+'" lon="'+op[n].K+'">' + ' </rtept>' + crlf;
 //        }
-    	var legs = route[num_route].legs;
+    	var legs = route.legs;
         for ( n = 0; n < legs.length; n++)
         	gpx += '<rtept lat="'+legs[n].start_location.G+'" lon="'+legs[n].start_location.K+'">' + ' </rtept>' + crlf;
     	gpx += '<rtept lat="'+legs[legs.length-1].end_location.G+'" lon="'+legs[legs.length-1].end_location.K+'">' + ' </rtept>' + crlf;
@@ -835,7 +822,7 @@ define( function( m ) {
 
     }
     
-    function cb_route_from_or_to_changed( num_route ) {
+    function cb_route_from_or_to_changed( ) {
     	
 		var origin = dijit.byId('id_route1_wp0').get( 'value' );
 		var waypoint1 = dijit.byId('id_route1_wp1').get( 'value' );
@@ -894,26 +881,26 @@ define( function( m ) {
 		}
     }
     
-    function show_waypoint( num_route, index ) {
+    function show_waypoint( index ) {
     	require(["dojo/dom-style"], function( domStyle) {
-    		var id = 'id_route' + (num_route+1) + '_tr' + index;
+    		var id = 'id_route_tr' + index;
     		domStyle.set( id, "display", "" );
     	});
     }
     
-    function set_labels_from_wp_to( num_route ) {
+    function set_labels_from_wp_to( ) {
 
     	require(["dojo/dom-style"], function( domStyle) {
             for ( var n = 1; n < MAX_NB_WAYPOINTS+2; n++ ) {
-            	var id = 'id_route' + (num_route+1) + '_tr' + n;
+            	var id = 'id_route_tr' + n;
         		var display = domStyle.get( id, "display" );
             	if ( display == "none" ) {
-                	var id_label = 'id_route' + (num_route+1) + '_label' + (n-1);
+                	var id_label = 'id_route_label' + (n-1);
                     document.getElementById(id_label).innerHTML = "To&nbsp;";
             		break;
             	}
             	else {
-                	var id_label = 'id_route' + (num_route+1) + '_label' + n;
+                	var id_label = 'id_route_label' + n;
                     document.getElementById(id_label).innerHTML = "Through&nbsp;";
             	}
             }
@@ -935,10 +922,10 @@ define( function( m ) {
     	    	console.log( results[0].formatted_address );
 
     	        var num_route = 0;
-    	        var first_hidden = find_first_hidden( num_route);
+    	        var first_hidden = find_first_hidden();
     	        console.log( "first_hidden=" + first_hidden );
     	        if ( first_hidden != (MAX_NB_WAYPOINTS + 2) ) {
-    	        	show_waypoint( num_route, first_hidden );
+    	        	show_waypoint( first_hidden );
     	    		var id = 'id_route' + (num_route+1) + '_wp' + first_hidden;
    	        		dijit.byId( id ).set( "value", results[0].formatted_address );
 //    	            set_labels_from_wp_to( num_route );
@@ -969,7 +956,7 @@ define( function( m ) {
 		
 		console.log( "*** Add: num_route=" + num_route + " index=" + index );
 
-        var first_hidden = find_first_hidden( num_route);
+        var first_hidden = find_first_hidden();
     	console.log( "first_hidden=" + first_hidden );
 
     	for ( var n = first_hidden - 1; n >= index; n-- ) {
@@ -996,7 +983,7 @@ define( function( m ) {
 		
 		console.log( "*** Remove: num_route=" + num_route + " index=" + index );
 
-        var first_hidden = find_first_hidden( num_route);
+        var first_hidden = find_first_hidden();
     	console.log( "first_hidden=" + first_hidden );
 
 		for ( var n = index; n < first_hidden - 1; n++ ) {
@@ -1052,7 +1039,7 @@ define( function( m ) {
 		
     	var num_route = 0;
     	
-        var first_hidden = find_first_hidden( num_route);
+        var first_hidden = find_first_hidden();
     	console.log( "first_hidden=" + first_hidden );
 
 		dijit.byId('id_route'+(num_route+1)+'_wp0').set( 'placeHolder', "Enter an origin" );
