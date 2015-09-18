@@ -29,6 +29,7 @@ define( function( m ) {
 	var directions_display;
 	var route;
 	var cb_route_from_or_to_changed_handle = undefined;
+	var got_location;
 
     function show_route_distance_duration( dist_meters, duration_secs ) {
 
@@ -439,16 +440,12 @@ define( function( m ) {
     		
             ready( function() {
             	
-                var home = new google.maps.LatLng( 35.733435, -78.907684 );
-            	
             	var map_options = {
-//                   center: home,
                    zoom: 14
                 };
-
                 map = new google.maps.Map( document.getElementById('id_map_canvas'), map_options );
+
                 var panorama_options = {
-//                    position: home,
                     pov: {
                         heading: 34,
                         pitch: 10
@@ -590,19 +587,15 @@ define( function( m ) {
            		    apply_autocomplete_settings( );
         	    });
         	
-        /*
                 require(["dojo/ready", "dojo/aspect", "dijit/registry", "dojo/dom-style"], function(ready, aspect, registry, domStyle) {
                     ready( function() {
-
-                    	aspect.after(registry.byId("id_middle_layout"), "resize", function() {
+                    	aspect.after(registry.byId("id_left_layout"), "resize", function() {
+                    		console.log( "XXXXXXXXXXXXXXX" );
                             google.maps.event.trigger( map, 'resize' );
-                            map.setCenter( panorama.location.latLng );
                             google.maps.event.trigger( panorama, 'resize' );
                         });
-
                     });
                 });
-        */
                 
         /*
                 require(["dojo/dnd/Moveable", "dojo/dom", "dojo/on", "dojo/domReady!"], function(Moveable, dom, on){
@@ -643,6 +636,32 @@ define( function( m ) {
            		}
 
    				load_settings( );
+
+   				got_location = false;
+   				
+            	var restrict_country = dijit.byId('id_autocomplete_restrict_country').get( 'checked' );
+  	       		console.log( "restrict_country = " + restrict_country );
+            	if ( restrict_country ) {
+      	       		var country_use_loc = dijit.byId('id_autocomplete_restrict_country_use_loc').get( 'checked' );
+      	       		console.log( "country_use_loc = " + country_use_loc );
+      	       		var country = "";
+      	  	       	if ( country_use_loc )
+      	  	       		country = dijit.byId('id_autocomplete_restrict_list_country1').get( 'value' );
+      	  	       	else
+      	  	       		country = dijit.byId('id_autocomplete_restrict_list_country2').get( 'value' );
+       				var geocoder = new google.maps.Geocoder();
+       				geocoder.geocode( { 'address': country}, function(results, status) {
+       					if (status == google.maps.GeocoderStatus.OK) {
+       						console.log( results );
+       						if ( !got_location ) {
+       							console.log( "Got gelocation for country " + country );
+       							map.setCenter( results[0].geometry.location );
+       							map.setOptions({zoom:7});
+       					        panorama.setPosition( results[0].geometry.location );
+       						}
+       					}
+       				});
+            	}
    				
    				if ( navigator.geolocation )
    					if ( dijit.byId('id_use_curr_position_for_org').get( 'checked' ) || dijit.byId('id_use_curr_position_for_dest').get( 'checked' ) )
@@ -656,6 +675,8 @@ define( function( m ) {
     
     function got_current_position( pos ) {
     	var latlng = {lat: pos.coords.latitude, lng: pos.coords.longitude};
+    	console.log( "Got current position" );
+    	got_location = true;
 		map.setCenter( latlng );
         panorama.setPosition( latlng );
     	var geocoder = new google.maps.Geocoder;
