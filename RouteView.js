@@ -66,22 +66,27 @@ define( function( m ) {
     }
     
     function cb_animate( d ) {
-
-        curr_dist = d;
+        console.log("d = " + d);
         
+        curr_dist = d;
         if ( d > eol ) {
             console.log( "Route is done" );
             return;
         }
         
-        var p = polyline.GetPointAtDistance( d );
+        var p = polyline.GetPointAtDistance(d);
+        console.log("p = " + p);
         if ( !map.getBounds().contains( p ) )
 			if ( is_force_panto )
             	map.panTo( p );
 
-        var bearing = polyline.Bearing( polyline.GetIndexAtDistance(d) );
-        console.log( "d=" + d + " - " + polyline.GetIndexAtDistance(d) + " / " + bearing);
-        panorama.setPosition( new google.maps.LatLng( p.G, p.K ) );
+        var iad = polyline.GetIndexAtDistance(d);
+        console.log("iad = " + iad);
+        
+        var bearing = polyline.Bearing(iad);
+        console.log("bearing = " + bearing);
+        
+        panorama.setPosition(p);
         panorama.setPov({
             heading: bearing,
             pitch: 1
@@ -748,7 +753,7 @@ define( function( m ) {
             map.panTo( p );
 
         var bearing = polyline.Bearing( polyline.GetIndexAtDistance( new_pos ) );
-        panorama.setPosition( new google.maps.LatLng( p.G, p.K ) );
+        panorama.setPosition(p);
         panorama.setPov({
             heading: bearing,
             pitch: 1
@@ -933,7 +938,7 @@ define( function( m ) {
     	if ( !dijit.byId( "id_btn_route" ).get( "disabled" ) || dijit.byId( "id_btn_play" ).get( "disabled" ) )
     		return;
     	
-    	var latlng = {lat: evt.latLng.G, lng: evt.latLng.K};
+    	var latlng = {lat: evt.latLng.lat, lng: evt.latLng.lng};
     	geocoder.geocode( {'location': latlng}, function( results, status ) {
     	    if (status === google.maps.GeocoderStatus.OK) {
 
