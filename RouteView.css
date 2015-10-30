@@ -74,11 +74,20 @@ html, body {
     background-color: #d0e9fc;
 }
 
+#td_map_canvas {
+    height: 100%;
+}
+
 #id_map_canvas {
     height: 100%;
     margin: 0;
     padding: 0;
 }
+
+#td_panorama {
+    height: 100%;
+}
+
 
 .dijitButtonDisabled .icon_btn_add {
   background-image: url('icons/btn-plus-disabled.png');

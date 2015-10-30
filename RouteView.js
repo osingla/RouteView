@@ -1065,7 +1065,6 @@ define( function( m ) {
         var first_hidden = find_first_hidden();
     	console.log( "first_hidden=" + first_hidden );
 
-		dijit.byId('id_route'+(num_route+1)+'_wp0').set( 'placeHolder', "Enter an origin" );
 		var origin = dijit.byId('id_route'+(num_route+1)+'_wp0').get( 'value' );
    		dijit.byId('id_btn_add_'+(num_route+1)+'_0').set( 'disabled', (first_hidden < (MAX_NB_WAYPOINTS+2)) ? false : true );
    		dijit.byId('id_btn_remove_'+(num_route+1)+'_0').set( 'disabled', (first_hidden > 2) ? false : true );
@@ -1079,7 +1078,6 @@ define( function( m ) {
 	   		dijit.byId('id_btn_down_'+(num_route+1)+'_'+n).set( 'disabled', (waypoint == '') ? true : false ); 
 		}
 		
-		dijit.byId('id_route'+(num_route+1)+'_wp'+(first_hidden-1)).set( 'placeHolder', "Enter a destination" );
    		dijit.byId('id_btn_add_'+(num_route+1)+'_'+(first_hidden-1)).set( 'disabled', (first_hidden < (MAX_NB_WAYPOINTS+2)) ? false : true );
    		dijit.byId('id_btn_remove_'+(num_route+1)+'_'+(first_hidden-1)).set( 'disabled', (first_hidden > 2) ? false : true );
 		var destination = dijit.byId('id_route'+(num_route+1)+'_wp'+(first_hidden-1)).get( 'value' );
