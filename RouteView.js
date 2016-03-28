@@ -30,6 +30,7 @@ define( function( m ) {
 	var route;
 	var cb_route_from_or_to_changed_handle = undefined;
 	var got_location;
+   	var streetViewLayer = undefined;
 
     function show_route_distance_duration( dist_meters, duration_secs ) {
 
@@ -128,6 +129,19 @@ define( function( m ) {
     	return first_hidden;
     }
     
+    function do_street_view( ) {
+		is_street_view = dijit.byId('id_btn_street_view').get( 'checked' );
+    	console.log("Street View! " + is_street_view);
+    	if (is_street_view) {
+    		if (streetViewLayer == undefined)
+    			streetViewLayer = new google.maps.StreetViewCoverageLayer();
+			streetViewLayer.setMap(map);
+		}
+		else {
+			streetViewLayer.setMap(null);
+		}
+    }
+    
     function do_route( ) {
 
     	if ( directions_display != undefined ) {
@@ -224,6 +238,8 @@ define( function( m ) {
             };  
 
             directions_service.route( request, cb_make_route( ) );
+            
+			dijit.byId('id_btn_street_view').set( 'disabled', false );
 
         }
         
@@ -336,6 +352,9 @@ define( function( m ) {
 
         start_driving( );  
 
+		dijit.byId('id_btn_street_view').set( 'checked', false );
+		do_street_view();
+		dijit.byId('id_btn_street_view').set( 'disabled', true );
 		dijit.byId('id_btn_route').set( 'disabled', true );
 		dijit.byId('id_btn_play').set( 'disabled', true );
 		dijit.byId('id_btn_pause').set( 'disabled', false );
@@ -422,6 +441,7 @@ define( function( m ) {
 		dijit.byId('id_check_no_hwy').set( 'disabled', false );
 		dijit.byId('id_check_no_toll').set( 'disabled', false );
 
+		dijit.byId('id_btn_street_view').set( 'disabled', false );
 		dijit.byId('id_btn_route').set( 'disabled', false );
 		dijit.byId('id_btn_play').set( 'disabled', true );
 		dijit.byId('id_btn_pause').set( 'disabled', true );
@@ -857,7 +877,9 @@ define( function( m ) {
 		console.log( "destination= [" + destination + "]" );
 		console.log( "waypoint1= [" + waypoint1 + "]" );
 
-//		dijit.byId('id_btn_route').set( 'disabled', false );
+		var nok_route = ((origin == "") || ((waypoint1 == "") && (destination == ""))) ? true : false;
+//		dijit.byId('id_btn_street_view').set( 'disabled', nok_route );
+		dijit.byId('id_btn_route').set( 'disabled', nok_route );
 //		dijit.byId('id_btn_play').set( 'disabled', true );
         
     	update_btns_remove_up_down( );
@@ -1466,6 +1488,7 @@ define( function( m ) {
 
         initialize: function( ) { initialize( ); },
 		
+        do_street_view: function( ) { do_street_view(); },
         do_route: function( ) { do_route(); },
         do_play:  function( ) { do_play(); },
 		do_pause: function( ) { do_pause(); },

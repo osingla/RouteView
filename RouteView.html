@@ -528,7 +528,8 @@
 
                 <div style="width:100%" align="center">
 
-                    <button dojoType="dijit.form.Button" type="button" id="id_btn_route" onclick='require(["RouteView.js"], function( s ) { s.do_route(); })'>Route</button>
+                    <button dojoType="dijit.form.ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" type="button" id="id_btn_street_view" onclick='require(["RouteView.js"], function( s ) { s.do_street_view(); })' disabled>Street View</button>
+                    <button dojoType="dijit.form.Button" type="button" id="id_btn_route" onclick='require(["RouteView.js"], function( s ) { s.do_route(); })' disabled >Route</button>
                     <button dojoType="dijit.form.Button" type="button" id="id_btn_play"  onclick='require(["RouteView.js"], function( s ) { s.do_play(); })' disabled>Play</button>
                     <br>
                     <button dojoType="dijit.form.Button" type="button" id="id_btn_save_gpx" onclick='require(["RouteView.js"], function( s ) { s.do_save_gpx(); })' disabled>Save GPX file</button>
