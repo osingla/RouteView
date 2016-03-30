@@ -10,7 +10,7 @@ define( function( m ) {
 
 	var MAX_NB_WAYPOINTS = 8;
 
-	var autocompletes = [];
+	var autocompletes;
     var map;
     var geocoder;
     var service;
@@ -114,7 +114,7 @@ define( function( m ) {
         var first_hidden = MAX_NB_WAYPOINTS + 2;
     	require(["dojo/dom-style"], function( domStyle) {
             for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
-            	var id = 'id_route1_tr' + n;
+            	var id = 'id_tr' + n;
         		var display = domStyle.get( id, "display" );
 //            	console.log( id + " --> " + display );
             	if ( display == "none" ) {
@@ -130,9 +130,9 @@ define( function( m ) {
     function do_street_view( ) {
 		is_street_view = dijit.byId('id_btn_street_view').get( 'checked' );
     	console.log("Street View! " + is_street_view);
+   		if (streetViewLayer == undefined)
+   			streetViewLayer = new google.maps.StreetViewCoverageLayer();
     	if (is_street_view) {
-    		if (streetViewLayer == undefined)
-    			streetViewLayer = new google.maps.StreetViewCoverageLayer();
 			streetViewLayer.setMap(map);
 		}
 		else {
@@ -144,7 +144,6 @@ define( function( m ) {
 
     	if ( directions_display != undefined ) {
     		console.log( "Delete current route" )
-    		var num_route = 0;
     		directions_display.setMap( null );
         	directions_display = undefined;
         	if ( polyline != undefined ) {
@@ -161,18 +160,16 @@ define( function( m ) {
     	interval = dijit.byId('id_input_interval').get( 'value' );
         console.log( "step=" + step + " interval=" + interval );
 
-        var num_route = 0;
         var first_hidden = find_first_hidden();
     	console.log( "first_hidden=" + first_hidden );
         
-        var start_location = new Array();
-        start_location[num_route] = dijit.byId('id_route'+(num_route+1)+'_wp0').get( 'value' );
-        console.log( "from = " + start_location[num_route] );
+        var start_location = dijit.byId('id_wp0').get( 'value' );
+        console.log( "from = " + start_location );
 
         var way_points = [];
         for ( var n = 1; n < first_hidden-1; n++ ) {
         	
-            waypt = dijit.byId('id_route'+(num_route+1)+'_wp'+n).get( 'value' );
+            waypt = dijit.byId('id_wp'+n).get( 'value' );
             console.log( "n=" + n + " => [" + waypt + "]" );
             if ( waypt != "" ) {
                 way_points.push({
@@ -182,86 +179,80 @@ define( function( m ) {
             }
         }
 
-        var end_location = new Array();
-        end_location[num_route] = dijit.byId('id_route'+(num_route+1)+'_wp'+(first_hidden-1)).get( 'value' );
-        console.log( "to   = " + end_location[num_route] );
+        var end_location = dijit.byId('id_wp'+(first_hidden-1)).get( 'value' );
+        console.log( "to   = " + end_location );
 
-        for ( var num_route = 0; num_route < start_location.length; num_route++ ) {
+        directions_service = new google.maps.DirectionsService( );
 
-            directions_service = new google.maps.DirectionsService( );
-            
-            directions_display = new google.maps.DirectionsRenderer({
-                draggable: true,
-                map: map,
-                hideRouteList: false,
-                preserveViewport: true,
-                suppressMarkers: false,
-                ['index']: 123456
-            });
+        directions_display = new google.maps.DirectionsRenderer({
+            draggable: true,
+            map: map,
+            hideRouteList: false,
+            preserveViewport: true,
+            suppressMarkers: false,
+            ['index']: 123456
+        });
 
-           	var old_nb_waypoints = way_points.length + 2;
-            directions_display.addListener('directions_changed', function() {
-            	var num_route = 0;
-            	var new_dir = directions_display.getDirections();
-            	console.log("XXXXX");
-                console.log( new_dir );
-                var index_waypoint = (new_dir.request.Xc != undefined) ? new_dir.request.Xc : new_dir.request.Yc;
+        var old_nb_waypoints = way_points.length + 2;
+        directions_display.addListener('directions_changed', function() {
+            var new_dir = directions_display.getDirections();
+            console.log("XXXXX");
+            console.log( new_dir );
+            var index_waypoint = (new_dir.request.Xc != undefined) ? new_dir.request.Xc : new_dir.request.Yc;
+            console.log( index_waypoint );
+            if ( index_waypoint != undefined ) {
+
+				console.log("ZZZZ");                	
+                console.log( directions_display );
+                var new_nb_waypoints = new_dir.geocoded_waypoints.length;
+                console.log( old_nb_waypoints );
+                console.log( new_nb_waypoints );
                 console.log( index_waypoint );
-                if ( index_waypoint != undefined ) {
+                var place_id = new_dir.geocoded_waypoints[index_waypoint].place_id;
 
-					console.log("ZZZZ");                	
-                	console.log( directions_display );
-                	var new_nb_waypoints = new_dir.geocoded_waypoints.length;
-                	console.log( old_nb_waypoints );
-                	console.log( new_nb_waypoints );
-                	console.log( index_waypoint );
-                    var place_id = new_dir.geocoded_waypoints[index_waypoint].place_id;
-
-                	service.getDetails({
-                	    placeId: place_id
-                	  }, function ( place, status ) {
-                	    if ( status === google.maps.places.PlacesServiceStatus.OK ) {
-                	    	console.log("YYYYY");
-		                	console.log( old_nb_waypoints );
-                			console.log( new_nb_waypoints );
-		                	console.log( index_waypoint );
-                	    	console.log( place.formatted_address );
-                	    	if (new_nb_waypoints == old_nb_waypoints) {
-                	    		change_waypoint( index_waypoint, place.formatted_address );
-                	    	}
-                	    	else {
-                	    		cb_click_btn_add(0, new_nb_waypoints)
-                	    		for (var n = old_nb_waypoints - 1; n >= index_waypoint; n--) {
-						            var w = dijit.byId('id_route1_wp'+n).get( 'value' );
-						            dijit.byId('id_route1_wp'+(n+1)).set( 'value', w );
-                	    		}
-                	    		change_waypoint( index_waypoint, place.formatted_address );
-                	    	}
+                service.getDetails({
+                	placeId: place_id
+                  }, function ( place, status ) {
+                	if ( status === google.maps.places.PlacesServiceStatus.OK ) {
+                	    console.log("YYYYY");
+		                console.log( old_nb_waypoints );
+                		console.log( new_nb_waypoints );
+		                console.log( index_waypoint );
+                	    console.log( place.formatted_address );
+                	    if (new_nb_waypoints == old_nb_waypoints) {
+                	    	change_waypoint( index_waypoint, place.formatted_address );
                 	    }
-                	  });
-                	
-//                 	show_error( "Sorry, this feature is not yet implemented!" );
-                }
+                	    else {
+                	    	cb_click_btn_add(new_nb_waypoints)
+                	    	for (var n = old_nb_waypoints - 1; n >= index_waypoint; n--) {
+						        var w = dijit.byId('id_wp'+n).get( 'value' );
+						        dijit.byId('id_wp'+(n+1)).set( 'value', w );
+                	    	}
+                	    	change_waypoint( index_waypoint, place.formatted_address );
+                	    }
+                	}
+                  });
 
-            });
+//             	show_error( "Sorry, this feature is not yet implemented!" );
+            }
 
-            var request = {
-                origin: start_location[num_route],
-                destination: end_location[num_route],
-                travelMode: google.maps.DirectionsTravelMode.DRIVING,
-                waypoints: way_points,
-                optimizeWaypoints: false,
-                avoidHighways: no_hwy,
-                avoidTolls: no_toll
-            };  
+        });
 
-            directions_service.route( request, cb_make_route( ) );
-            
-			dijit.byId('id_btn_street_view').set( 'disabled', false );
+        var request = {
+            origin: start_location,
+            destination: end_location,
+            travelMode: google.maps.DirectionsTravelMode.DRIVING,
+            waypoints: way_points,
+            optimizeWaypoints: false,
+            avoidHighways: no_hwy,
+            avoidTolls: no_toll
+        };  
 
-        }
-        
-        function cb_make_route( num_route ) {
+        directions_service.route( request, cb_make_route( ) );
+
+		dijit.byId('id_btn_street_view').set( 'disabled', false );
+
+        function cb_make_route( ) {
 
             return function( response, status ) {
 
@@ -381,7 +372,7 @@ define( function( m ) {
 		dijit.byId('id_btn_save_gpx').set( 'disabled', true );
         
 		for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) 
-			dijit.byId('id_route1_wp'+n).set( 'disabled', true );
+			dijit.byId('id_wp'+n).set( 'disabled', true );
 
 		dijit.byId('id_check_no_hwy').set( 'disabled', true );
 		dijit.byId('id_check_no_toll').set( 'disabled', true );
@@ -454,7 +445,7 @@ define( function( m ) {
         clearTimeout( timer_animate );
 
 		for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) 
-			dijit.byId('id_route1_wp'+n).set( 'disabled', false );
+			dijit.byId('id_wp'+n).set( 'disabled', false );
 
 		dijit.byId('id_check_no_hwy').set( 'disabled', false );
 		dijit.byId('id_check_no_toll').set( 'disabled', false );
@@ -642,7 +633,7 @@ define( function( m ) {
                 
         /*
                 require(["dojo/dnd/Moveable", "dojo/dom", "dojo/on", "dojo/domReady!"], function(Moveable, dom, on){
-                	var dnd = new Moveable( dom.byId("id_route1_mark1") );
+                	var dnd = new Moveable( dom.byId("id_mark1") );
                 	on( dnd, "MoveStart", function (e) {
                         console.log( "Move started" );
                 		console.log(e);
@@ -657,7 +648,7 @@ define( function( m ) {
                 myDialog = dijit.byId('myDialog');
                 
         		for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) { 
-            		on( dom.byId('id_route1_wp'+n), "change", function( evt ) {
+            		on( dom.byId('id_wp'+n), "change", function( evt ) {
                 		console.log( "Change" );
                 		if ( cb_route_from_or_to_changed_handle != undefined )
                 			clearTimeout( cb_route_from_or_to_changed_handle );
@@ -665,18 +656,16 @@ define( function( m ) {
            			});
         		}
 
-           		for ( var num_route = 0; num_route < 1; num_route++ ) {
-           			autocompletes[num_route] = [];
-           			for ( var n = 0; n < MAX_NB_WAYPOINTS+2 - 1; n++ ) { 
-           				autocompletes[num_route][n] = new google.maps.places.Autocomplete( dom.byId('id_route'+(num_route+1)+'_wp'+n) );
-           				autocompletes[num_route][n].addListener('place_changed', function() {
-                    		console.log( "Place changed" );
-                    		if ( cb_route_from_or_to_changed_handle != undefined )
-                    			clearTimeout( cb_route_from_or_to_changed_handle );
-                    		cb_route_from_or_to_changed_handle = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_route_from_or_to_changed(); })', 250 );
-                    	});
-           			}
-           		}
+       			autocompletes = [];
+       			for ( var n = 0; n < MAX_NB_WAYPOINTS+2 - 1; n++ ) { 
+       				autocompletes[n] = new google.maps.places.Autocomplete( dom.byId('id_wp'+n) );
+       				autocompletes[n].addListener('place_changed', function() {
+                		console.log( "Place changed" );
+                		if ( cb_route_from_or_to_changed_handle != undefined )
+                			clearTimeout( cb_route_from_or_to_changed_handle );
+                		cb_route_from_or_to_changed_handle = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_route_from_or_to_changed(); })', 250 );
+                	});
+       			}
 
    				load_settings( );
 
@@ -729,12 +718,12 @@ define( function( m ) {
     	    		var addr = results[0].formatted_address;
         	    	console.log( "current location: " + addr );
    					if ( dijit.byId('id_use_curr_position_for_org').get( 'checked' ) ) {
-   	   					if ( dijit.byId('id_route1_wp0').get( 'value' ) == "" )
-   	   	   					dijit.byId('id_route1_wp0').set( 'value', addr );
+   	   					if ( dijit.byId('id_wp0').get( 'value' ) == "" )
+   	   	   					dijit.byId('id_wp0').set( 'value', addr );
    					}
    					else if ( dijit.byId('id_use_curr_position_for_dest').get( 'checked' ) ) {
-   	   					if ( dijit.byId('id_route1_wp1').get( 'value' ) == "" )
-   	   	   					dijit.byId('id_route1_wp1').set( 'value', addr );
+   	   					if ( dijit.byId('id_wp1').get( 'value' ) == "" )
+   	   	   					dijit.byId('id_wp1').set( 'value', addr );
    					}
     	    	}
     	    }
@@ -759,19 +748,17 @@ define( function( m ) {
   	  	       	var code_country = iso_countries.get( country );
   	  	       	console.log( "code_country = [" + code_country.code + "]" );
 
-  	           	for ( var num_route = 0; num_route < 1; num_route++ ) {
-  	           		for ( var n = 0; n < MAX_NB_WAYPOINTS+2 - 1; n++ ) {
-  	            	    if ( restrict_type )
-  	            	       	autocompletes[num_route][n].setTypes([ restrict_value ]);
-  	            	    else
-  	            	       	autocompletes[num_route][n].setTypes([]);
+           		for ( var n = 0; n < MAX_NB_WAYPOINTS+2 - 1; n++ ) {
+            	    if ( restrict_type )
+            	       	autocompletes[n].setTypes([ restrict_value ]);
+            	    else
+            	       	autocompletes[n].setTypes([]);
 
-  	            	    if ( restrict_country && ((country != '') && (country != undefined)) )
-            	  	    	autocompletes[num_route][n].setComponentRestrictions({country: code_country.code});
-  	            	    else
-  	            	    	autocompletes[num_route][n].setComponentRestrictions();
-  	           		}
-  	           	}
+            	    if ( restrict_country && ((country != '') && (country != undefined)) )
+        	  	    	autocompletes[n].setComponentRestrictions({country: code_country.code});
+            	    else
+            	    	autocompletes[n].setComponentRestrictions();
+           		}
   	  	  	       	
             });
             	
@@ -888,9 +875,9 @@ define( function( m ) {
     
     function cb_route_from_or_to_changed( ) {
     	
-		var origin = dijit.byId('id_route1_wp0').get( 'value' );
-		var waypoint1 = dijit.byId('id_route1_wp1').get( 'value' );
-		var destination = dijit.byId('id_route1_wp2').get( 'value' );
+		var origin = dijit.byId('id_wp0').get( 'value' );
+		var waypoint1 = dijit.byId('id_wp1').get( 'value' );
+		var destination = dijit.byId('id_wp2').get( 'value' );
 		console.log( "origin= [" + origin + "]" );
 		console.log( "destination= [" + destination + "]" );
 		console.log( "waypoint1= [" + waypoint1 + "]" );
@@ -946,7 +933,7 @@ define( function( m ) {
     
     function show_waypoint( index ) {
     	require(["dojo/dom-style"], function( domStyle) {
-    		var id = 'id_route_tr' + index;
+    		var id = 'id_tr' + index;
     		domStyle.set( id, "display", "" );
     	});
     }
@@ -955,15 +942,15 @@ define( function( m ) {
 
     	require(["dojo/dom-style"], function( domStyle) {
             for ( var n = 1; n < MAX_NB_WAYPOINTS+2; n++ ) {
-            	var id = 'id_route_tr' + n;
+            	var id = 'id_tr' + n;
         		var display = domStyle.get( id, "display" );
             	if ( display == "none" ) {
-                	var id_label = 'id_route_label' + (n-1);
+                	var id_label = 'id_label' + (n-1);
                     document.getElementById(id_label).innerHTML = "To&nbsp;";
             		break;
             	}
             	else {
-                	var id_label = 'id_route_label' + n;
+                	var id_label = 'id_label' + n;
                     document.getElementById(id_label).innerHTML = "Through&nbsp;";
             	}
             }
@@ -984,14 +971,13 @@ define( function( m ) {
 
     	    	console.log( results[0].formatted_address );
 
-    	        var num_route = 0;
     	        var first_hidden = find_first_hidden();
     	        console.log( "first_hidden=" + first_hidden );
     	        if ( first_hidden != (MAX_NB_WAYPOINTS + 2) ) {
     	        	show_waypoint( first_hidden );
-    	    		var id = 'id_route' + (num_route+1) + '_wp' + first_hidden;
+    	    		var id = 'id_route_wp' + first_hidden;
    	        		dijit.byId( id ).set( "value", results[0].formatted_address );
-//    	            set_labels_from_wp_to( num_route );
+//    	            set_labels_from_wp_to( );
 //    	            update_btns_remove_up_down( );
     	        }
     	        
@@ -1005,7 +991,7 @@ define( function( m ) {
     function change_waypoint( index_wp, place_name ) {
     
     	console.log( index_wp + " -> " + place_name );
-    	var id_label_wp = "id_route1_wp" + index_wp;
+    	var id_label_wp = "id_wp" + index_wp;
 		dijit.byId(id_label_wp).set( 'value', place_name );
 
 		do_route( );
@@ -1016,74 +1002,74 @@ define( function( m ) {
     	
     }
 
-	function cb_click_btn_add( num_route, index ) {
+	function cb_click_btn_add( index ) {
 		
-		console.log( "*** Add: num_route=" + num_route + " index=" + index );
+		console.log( "*** Add: index=" + index );
 
         var first_hidden = find_first_hidden();
     	console.log( "first_hidden=" + first_hidden );
 
     	for ( var n = first_hidden - 1; n >= index; n-- ) {
-			var wp = dijit.byId('id_route'+(num_route+1)+'_wp'+(n)).get( 'value' );
+			var wp = dijit.byId('id_wp'+(n)).get( 'value' );
 			console.log( n + " -> " + wp );
-			dijit.byId('id_route'+(num_route+1)+'_wp'+(n+1)).set( 'value', wp );
+			dijit.byId('id_wp'+(n+1)).set( 'value', wp );
     	}
-		dijit.byId('id_route'+(num_route+1)+'_wp'+(index)).set( 'value', "" );
+		dijit.byId('id_wp'+(index)).set( 'value', "" );
 
     	require(["dojo/dom-style"], function( domStyle) {
-    		domStyle.set( 'id_route'+(num_route+1)+'_tr'+(first_hidden), "display", "" );
+    		domStyle.set( 'id_tr'+(first_hidden), "display", "" );
     	});
     	
 		dijit.byId('id_btn_play').set( 'disabled', true );
 		
 		require([ "dijit/focus", "dojo/dom", "dojo/domReady!" ], function(focusUtil, dom){
-			focusUtil.focus(dom.byId('id_route'+(num_route+1)+'_wp'+(index)));
+			focusUtil.focus(dom.byId('id_wp'+(index)));
 		});
 		
 		update_btns_remove_up_down( );		
 	}
 		
-	function cb_click_btn_remove( num_route, index ) {
+	function cb_click_btn_remove( index ) {
 		
-		console.log( "*** Remove: num_route=" + num_route + " index=" + index );
+		console.log( "*** Remove: index=" + index );
 
         var first_hidden = find_first_hidden();
     	console.log( "first_hidden=" + first_hidden );
 
 		for ( var n = index; n < first_hidden - 1; n++ ) {
-			var wp = dijit.byId('id_route'+(num_route+1)+'_wp'+(n+1)).get( 'value' );
-			dijit.byId('id_route'+(num_route+1)+'_wp'+(n)).set( 'value', wp );
+			var wp = dijit.byId('id_wp'+(n+1)).get( 'value' );
+			dijit.byId('id_wp'+(n)).set( 'value', wp );
 		}
 
     	require(["dojo/dom-style"], function( domStyle) {
-    		domStyle.set( 'id_route'+(num_route+1)+'_tr'+(first_hidden-1), "display", "None" );
+    		domStyle.set( 'id_tr'+(first_hidden-1), "display", "None" );
     	});
 		
 		do_route( );
 	}
 
-	function cb_click_btn_up( num_route, index ) {
+	function cb_click_btn_up( index ) {
 		
-		console.log( "Up: num_route=" + num_route + " index=" + index );
+		console.log( "Up: index=" + index );
 
-		var wp_a = dijit.byId('id_route'+(num_route+1)+'_wp'+(index)).get( 'value' );
-		var wp_b = dijit.byId('id_route'+(num_route+1)+'_wp'+(index-1)).get( 'value' );
+		var wp_a = dijit.byId('id_wp'+(index)).get( 'value' );
+		var wp_b = dijit.byId('id_wp'+(index-1)).get( 'value' );
 
-		dijit.byId('id_route'+(num_route+1)+'_wp'+(index)).set( 'value', wp_b );
-		dijit.byId('id_route'+(num_route+1)+'_wp'+(index-1)).set( 'value', wp_a );
+		dijit.byId('id_wp'+(index)).set( 'value', wp_b );
+		dijit.byId('id_wp'+(index-1)).set( 'value', wp_a );
 		
 		do_route( );
 	}
 
-	function cb_click_btn_down( num_route, index ) {
+	function cb_click_btn_down( index ) {
 		
-		console.log( "Down: num_route=" + num_route + " index=" + index );
+		console.log( "Down: index=" + index );
 
-		var wp_a = dijit.byId('id_route'+(num_route+1)+'_wp'+(index)).get( 'value' );
-		var wp_b = dijit.byId('id_route'+(num_route+1)+'_wp'+(index+1)).get( 'value' );
+		var wp_a = dijit.byId('id_wp'+(index)).get( 'value' );
+		var wp_b = dijit.byId('id_wp'+(index+1)).get( 'value' );
 
-		dijit.byId('id_route'+(num_route+1)+'_wp'+(index)).set( 'value', wp_b );
-		dijit.byId('id_route'+(num_route+1)+'_wp'+(index+1)).set( 'value', wp_a );
+		dijit.byId('id_wp'+(index)).set( 'value', wp_b );
+		dijit.byId('id_wp'+(index+1)).set( 'value', wp_a );
 		
 		do_route( );
 	}
@@ -1091,39 +1077,36 @@ define( function( m ) {
 	function update_btns_remove_up_down( all ) {
 		
 		if ( all == false ) {
-			var num_route = 0;
             for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
-           		dijit.byId('id_btn_add_'+(num_route+1)+'_'+n).set( 'disabled', true ); 
-		   		dijit.byId('id_btn_remove_'+(num_route+1)+'_'+n).set( 'disabled', true ); 
-		   		dijit.byId('id_btn_up_'+(num_route+1)+'_'+n).set( 'disabled', true ); 
-		   		dijit.byId('id_btn_down_'+(num_route+1)+'_'+n).set( 'disabled', true ); 
+           		dijit.byId('id_btn_add_'+n).set( 'disabled', true ); 
+		   		dijit.byId('id_btn_remove_'+n).set( 'disabled', true ); 
+		   		dijit.byId('id_btn_up_'+n).set( 'disabled', true ); 
+		   		dijit.byId('id_btn_down_'+n).set( 'disabled', true ); 
 			}
 			return;
 		}
 		
-    	var num_route = 0;
-    	
         var first_hidden = find_first_hidden();
     	console.log( "first_hidden=" + first_hidden );
 
-		var origin = dijit.byId('id_route'+(num_route+1)+'_wp0').get( 'value' );
-   		dijit.byId('id_btn_add_'+(num_route+1)+'_0').set( 'disabled', (first_hidden < (MAX_NB_WAYPOINTS+2)) ? false : true );
-   		dijit.byId('id_btn_remove_'+(num_route+1)+'_0').set( 'disabled', (first_hidden > 2) ? false : true );
-   		dijit.byId('id_btn_down_'+(num_route+1)+'_0').set( 'disabled', (origin == '') ? true : false ); 
+		var origin = dijit.byId('id_wp0').get( 'value' );
+   		dijit.byId('id_btn_add_0').set( 'disabled', (first_hidden < (MAX_NB_WAYPOINTS+2)) ? false : true );
+   		dijit.byId('id_btn_remove_0').set( 'disabled', (first_hidden > 2) ? false : true );
+   		dijit.byId('id_btn_down_0').set( 'disabled', (origin == '') ? true : false ); 
     	
 		for ( var n = 1; n < first_hidden - 1; n++ ) {
-			var waypoint = dijit.byId('id_route'+(num_route+1)+'_wp'+n).get( 'value' );
-	   		dijit.byId('id_btn_add_'+(num_route+1)+'_'+n).set( 'disabled', false ); 
-	   		dijit.byId('id_btn_remove_'+(num_route+1)+'_'+n).set( 'disabled', false ); 
-	   		dijit.byId('id_btn_up_'+(num_route+1)+'_'+n).set( 'disabled', (waypoint == '') ? true : false ); 
-	   		dijit.byId('id_btn_down_'+(num_route+1)+'_'+n).set( 'disabled', (waypoint == '') ? true : false ); 
+			var waypoint = dijit.byId('id_wp'+n).get( 'value' );
+	   		dijit.byId('id_btn_add_'+n).set( 'disabled', false ); 
+	   		dijit.byId('id_btn_remove_'+n).set( 'disabled', false ); 
+	   		dijit.byId('id_btn_up_'+n).set( 'disabled', (waypoint == '') ? true : false ); 
+	   		dijit.byId('id_btn_down_'+n).set( 'disabled', (waypoint == '') ? true : false ); 
 		}
 		
-   		dijit.byId('id_btn_add_'+(num_route+1)+'_'+(first_hidden-1)).set( 'disabled', (first_hidden < (MAX_NB_WAYPOINTS+2)) ? false : true );
-   		dijit.byId('id_btn_remove_'+(num_route+1)+'_'+(first_hidden-1)).set( 'disabled', (first_hidden > 2) ? false : true );
-		var destination = dijit.byId('id_route'+(num_route+1)+'_wp'+(first_hidden-1)).get( 'value' );
-   		dijit.byId('id_btn_up_'+(num_route+1)+'_'+(first_hidden-1)).set( 'disabled', (destination == '') ? true : false );
-   		dijit.byId('id_btn_down_'+(num_route+1)+'_'+(first_hidden-1)).set( 'disabled', true );
+   		dijit.byId('id_btn_add_'+(first_hidden-1)).set( 'disabled', (first_hidden < (MAX_NB_WAYPOINTS+2)) ? false : true );
+   		dijit.byId('id_btn_remove_'+(first_hidden-1)).set( 'disabled', (first_hidden > 2) ? false : true );
+		var destination = dijit.byId('id_wp'+(first_hidden-1)).get( 'value' );
+   		dijit.byId('id_btn_up_'+(first_hidden-1)).set( 'disabled', (destination == '') ? true : false );
+   		dijit.byId('id_btn_down_'+(first_hidden-1)).set( 'disabled', true );
     	
 	} // update_btns_remove_up_down
 	
@@ -1531,10 +1514,10 @@ define( function( m ) {
 
 		cb_route_from_or_to_changed: function( ) { cb_route_from_or_to_changed(); },
 
-		cb_click_btn_add:    function( num_route, index ) { cb_click_btn_add( num_route, index ); },
-		cb_click_btn_remove: function( num_route, index ) { cb_click_btn_remove( num_route, index ); },
-		cb_click_btn_up:     function( num_route, index ) { cb_click_btn_up( num_route, index ); },
-		cb_click_btn_down:   function( num_route, index ) { cb_click_btn_down( num_route, index ); },
+		cb_click_btn_add:    function( index ) { cb_click_btn_add( index ); },
+		cb_click_btn_remove: function( index ) { cb_click_btn_remove( index ); },
+		cb_click_btn_up:     function( index ) { cb_click_btn_up( index ); },
+		cb_click_btn_down:   function( index ) { cb_click_btn_down( index ); },
 
 		cb_open_settings: function( ) { cb_open_settings( ); },
 		
