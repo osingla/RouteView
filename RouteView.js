@@ -67,7 +67,6 @@ define( function( m ) {
     }
     
     function cb_animate( d ) {
-        console.log("d = " + d);
         
         curr_dist = d;
         if ( d > eol ) {
@@ -76,7 +75,6 @@ define( function( m ) {
         }
         
         var p = polyline.GetPointAtDistance(d);
-        console.log("p = " + p);
         if ( !map.getBounds().contains( p ) )
 			if ( is_force_panto )
             	map.panTo( p );
@@ -197,32 +195,52 @@ define( function( m ) {
                 map: map,
                 hideRouteList: false,
                 preserveViewport: true,
-                suppressMarkers : false,
-             });
+                suppressMarkers: false,
+                ['index']: 123456
+            });
 
+           	var old_nb_waypoints = way_points.length + 2;
             directions_display.addListener('directions_changed', function() {
             	var num_route = 0;
             	var new_dir = directions_display.getDirections();
+            	console.log("XXXXX");
                 console.log( new_dir );
-                var index_waypoint = new_dir.request.j;
+                var index_waypoint = (new_dir.request.Xc != undefined) ? new_dir.request.Xc : new_dir.request.Yc;
+                console.log( index_waypoint );
                 if ( index_waypoint != undefined ) {
-                	
-                    console.log( index_waypoint );
-                    var place_id = new_dir.geocoded_waypoints[index_waypoint].place_id ;
-                    console.log( place_id );
+
+					console.log("ZZZZ");                	
+                	console.log( directions_display );
+                	var new_nb_waypoints = new_dir.geocoded_waypoints.length;
+                	console.log( old_nb_waypoints );
+                	console.log( new_nb_waypoints );
+                	console.log( index_waypoint );
+                    var place_id = new_dir.geocoded_waypoints[index_waypoint].place_id;
 
                 	service.getDetails({
                 	    placeId: place_id
                 	  }, function ( place, status ) {
                 	    if ( status === google.maps.places.PlacesServiceStatus.OK ) {
-                	    	console.log( place );
-                	    	console.log( place.name );
+                	    	console.log("YYYYY");
+		                	console.log( old_nb_waypoints );
+                			console.log( new_nb_waypoints );
+		                	console.log( index_waypoint );
                 	    	console.log( place.formatted_address );
-                	    	change_waypoint( index_waypoint, place.formatted_address );
+                	    	if (new_nb_waypoints == old_nb_waypoints) {
+                	    		change_waypoint( index_waypoint, place.formatted_address );
+                	    	}
+                	    	else {
+                	    		cb_click_btn_add(0, new_nb_waypoints)
+                	    		for (var n = old_nb_waypoints - 1; n >= index_waypoint; n--) {
+						            var w = dijit.byId('id_route1_wp'+n).get( 'value' );
+						            dijit.byId('id_route1_wp'+(n+1)).set( 'value', w );
+                	    		}
+                	    		change_waypoint( index_waypoint, place.formatted_address );
+                	    	}
                 	    }
                 	  });
                 	
-//                 	show_error( "Sorry, this feature is not yet implemented!<br><br>Hopefuly I'll have time next week-end to work on it..." );
+//                 	show_error( "Sorry, this feature is not yet implemented!" );
                 }
 
             });
@@ -985,7 +1003,8 @@ define( function( m ) {
     }
     
     function change_waypoint( index_wp, place_name ) {
-    	
+    
+    	console.log( index_wp + " -> " + place_name );
     	var id_label_wp = "id_route1_wp" + index_wp;
 		dijit.byId(id_label_wp).set( 'value', place_name );
 
