@@ -2,7 +2,7 @@
 /* ***                                                                                       *** */ 
 /* *** RouteView - Olivier Singla                                                            *** */
 /* ***                                                                                       *** */ 
-/* *** StreetView Player - Virtual Drive or Virtual Ride, using Google Maps and Street View  *** */
+/* *** StreetView Player - Virtual Ride, using Google Maps and Street View                   *** */
 /* ***                                                                                       *** */ 
 /* ********************************************************************************************* */
 
@@ -199,10 +199,8 @@ define( function( m ) {
             console.log("XXXXX");
             console.log( new_dir );
             var index_waypoint = (new_dir.request.Xc != undefined) ? new_dir.request.Xc : new_dir.request.Yc;
-            console.log( index_waypoint );
             if ( index_waypoint != undefined ) {
 
-				console.log("ZZZZ");                	
                 console.log( directions_display );
                 var new_nb_waypoints = new_dir.geocoded_waypoints.length;
                 console.log( old_nb_waypoints );
@@ -213,8 +211,7 @@ define( function( m ) {
                 service.getDetails({
                 	placeId: place_id
                   }, function ( place, status ) {
-                	if ( status === google.maps.places.PlacesServiceStatus.OK ) {
-                	    console.log("YYYYY");
+                	if ( status == google.maps.places.PlacesServiceStatus.OK ) {
 		                console.log( old_nb_waypoints );
                 		console.log( new_nb_waypoints );
 		                console.log( index_waypoint );
@@ -230,6 +227,11 @@ define( function( m ) {
                 	    	}
                 	    	change_waypoint( index_waypoint, place.formatted_address );
                 	    }
+                	}
+                	else {
+                		console.log("XXXXXXX");
+                		console.log(status);
+                		console.log(google.maps.places.PlacesServiceStatus);
                 	}
                   });
 
@@ -257,6 +259,17 @@ define( function( m ) {
             return function( response, status ) {
 
                 if ( status == google.maps.DirectionsStatus.OK ) {
+
+                    var legs = response.routes[0].legs;
+                    var leg = legs[0];
+                    var distance = leg.distance.text;
+                    var meters = leg.distance.value;
+                    var duration = leg.duration.text;
+                    console.log( "distance = " + distance );
+                    console.log( "duration = " + duration );
+			    	require(["dojo/dom"], function( dom ) {
+            			dom.byId('id_route_info').innerHTML = "- " + distance + " , " + duration;
+    				});
 
                 	directions_display.setMap( map );
                 	directions_display.setDirections( response );
@@ -309,7 +322,6 @@ define( function( m ) {
 
             		dijit.byId('id_input_route').set( 'disabled', true );
             		
-            		dijit.byId('id_btn_route').set( 'disabled', true );
             		dijit.byId('id_btn_play').set( 'disabled', false );
             		dijit.byId('id_btn_pause').set( 'disabled', true );
             		dijit.byId('id_btn_stop').set( 'disabled', true );
@@ -349,6 +361,9 @@ define( function( m ) {
     
     function do_play( ) {
 
+        document.getElementById("td_map_canvas").style.width = "50%";
+        document.getElementById("td_panorama").style.width = "50%";
+
 		var left_layout = dijit.byId('id_left_layout');
 		if ( left_layout._showing ) {
 			left_layout.toggle();
@@ -364,7 +379,6 @@ define( function( m ) {
 		dijit.byId('id_btn_street_view').set( 'checked', false );
 		do_street_view();
 		dijit.byId('id_btn_street_view').set( 'disabled', true );
-		dijit.byId('id_btn_route').set( 'disabled', true );
 		dijit.byId('id_btn_play').set( 'disabled', true );
 		dijit.byId('id_btn_pause').set( 'disabled', false );
 		dijit.byId('id_btn_stop').set( 'disabled', false );
@@ -382,7 +396,7 @@ define( function( m ) {
     		
     	update_btns_remove_up_down( false );
         map.setOptions({draggableCursor: 'hand'});
-        
+
     }
     
     function show_error( message ) {
@@ -451,8 +465,7 @@ define( function( m ) {
 		dijit.byId('id_check_no_toll').set( 'disabled', false );
 
 		dijit.byId('id_btn_street_view').set( 'disabled', false );
-		dijit.byId('id_btn_route').set( 'disabled', false );
-		dijit.byId('id_btn_play').set( 'disabled', true );
+		dijit.byId('id_btn_play').set( 'disabled', false );
 		dijit.byId('id_btn_pause').set( 'disabled', true );
     	dijit.byId('id_btn_pause').set( 'label', "Pause" );
 		dijit.byId('id_btn_stop').set( 'disabled', true );
@@ -624,7 +637,6 @@ define( function( m ) {
                 require(["dojo/ready", "dojo/aspect", "dijit/registry", "dojo/dom-style"], function(ready, aspect, registry, domStyle) {
                     ready( function() {
                     	aspect.after(registry.byId("id_left_layout"), "resize", function() {
-                    		console.log( "XXXXXXXXXXXXXXX" );
                             google.maps.event.trigger( map, 'resize' );
                             google.maps.event.trigger( panorama, 'resize' );
                         });
@@ -840,9 +852,10 @@ define( function( m ) {
     	
     	// xmllint --noout --schema http://www.topografix.com/GPX/1/0/gpx.xsd testfile.gpx
     	
-    	console.log( "XXXXXXXXXXXXXXXXXXXXXXXX" );
     	console.log( route.summary );
     	console.log( route );
+//      var new_dir = directions_display.getDirections();
+//      console.log( new_dir );
 
     	var crlf = String.fromCharCode(13) + String.fromCharCode(10);
     	
@@ -854,7 +867,7 @@ define( function( m ) {
 
     	var op = route.overview_path;
         for ( n = 0; n < op.length; n++ ) {
-        	gpx += '<wpt lat="'+op[n].G+'" lon="'+op[n].K+'">' + ' </wpt>' + crlf;
+        	gpx += '<wpt lat="'+op[n].lat()+'" lon="'+op[n].lng()+'">' + ' </wpt>' + crlf;
         }
         
         gpx += '<rte>' + crlf;
@@ -883,13 +896,11 @@ define( function( m ) {
 		console.log( "waypoint1= [" + waypoint1 + "]" );
 
 		var nok_route = ((origin == "") || ((waypoint1 == "") && (destination == ""))) ? true : false;
-//		dijit.byId('id_btn_street_view').set( 'disabled', nok_route );
-		dijit.byId('id_btn_route').set( 'disabled', nok_route );
-//		dijit.byId('id_btn_play').set( 'disabled', true );
         
     	update_btns_remove_up_down( );
     	
-    	if ( !dijit.byId( "id_btn_play" ).get( "disabled" ) )
+//    	if ( !dijit.byId( "id_btn_play" ).get( "disabled" ) )
+		if ( !nok_route )
     		do_route();
     }
     
@@ -962,7 +973,7 @@ define( function( m ) {
     	
     	console.log( "Right click: " + evt.latLng );
 
-    	if ( !dijit.byId( "id_btn_route" ).get( "disabled" ) || dijit.byId( "id_btn_play" ).get( "disabled" ) )
+    	if ( dijit.byId( "id_btn_play" ).get( "disabled" ) )
     		return;
     	
     	var latlng = {lat: evt.latLng.lat, lng: evt.latLng.lng};
@@ -1014,7 +1025,8 @@ define( function( m ) {
 			console.log( n + " -> " + wp );
 			dijit.byId('id_wp'+(n+1)).set( 'value', wp );
     	}
-		dijit.byId('id_wp'+(index)).set( 'value', "" );
+    	if (index < MAX_NB_WAYPOINTS+2)
+			dijit.byId('id_wp'+(index)).set( 'value', "" );
 
     	require(["dojo/dom-style"], function( domStyle) {
     		domStyle.set( 'id_tr'+(first_hidden), "display", "" );

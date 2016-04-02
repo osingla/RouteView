@@ -2,7 +2,7 @@
 <!-- ---                                                                                      --- -->
 <!-- --- RouteView - Olivier Singla                                                           --- -->
 <!-- ---                                                                                      --- -->
-<!-- --- StreetView Player - Virtual Drive or Virtual Ride, using Google Maps and Street View --- -->
+<!-- --- StreetView Player - Virtual Ride, using Google Maps and Street View                  --- -->
 <!-- ---                                                                                      --- -->
 <!-- -------------------------------------------------------------------------------------------- -->
 
@@ -14,7 +14,7 @@
 	    <meta charset="utf-8">
 	    <title>RouteView - StreetView player</title>
         <meta name="description" 
-        	content="Allows a virtual drive over a Google Maps route using Street View. Step (in meters) and Refresh Rate are configurable. Street View Player. Simulate your Driving Route with this Google Map Web Application. Virtual Ride using Street View.">
+        	content="Allows a virtual ride over a Google Maps route using Street View. Step (in meters) and Refresh Rate are configurable. Street View Player. Simulate your Driving Route with this Google Map Web Application. Virtual Ride using Street View.">
         <meta name="revisit-after" content="4 hours">
 
         <script>
@@ -73,7 +73,7 @@
                         	<a href="https://rawgit.com/osingla/RouteView/master/RouteViewMobile.html" target="_blank">Mobile&nbsp;Version</a>
                 		</td>
                         <td valign="middle" align="center" style="width:100%"" >
-			                <b>RouteView - Google StreetView Player - Virtual Drive / Virtual Ride using Google Street View</b>
+			                <b>RouteView - Google StreetView Player - Virtual Ride using Google Street View</b>&nbsp;<b id='id_route_info' ></b>
                 		</td>
                         <td valign="middle" align="right" id='id_link_to_github_project'>
                         	<a href="https://github.com/osingla/RouteView" target="_blank">Github&nbsp;Project</a>
@@ -318,7 +318,7 @@
                     <hr>
                     <div id="id_route1_distance_duration" style="width:100%; display:None" align="center" >
                         <table style="width:100%">
-                            <tr>
+                            <tr style="font-size: 150%;">
                                 <td align="left" valign="middle">
                                     <span></span><b id="id_route1_dist_kms"></b>&nbsp;kms</span>
                                     &nbsp;-&nbsp;
@@ -528,9 +528,9 @@
 
                 <div style="width:100%" align="center">
 
-                    <button dojoType="dijit.form.ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" type="button" id="id_btn_street_view" onclick='require(["RouteView.js"], function( s ) { s.do_street_view(); })' disabled>Street View</button>
-                    <button dojoType="dijit.form.Button" type="button" id="id_btn_route" onclick='require(["RouteView.js"], function( s ) { s.do_route(); })' disabled >Route</button>
-                    <button dojoType="dijit.form.Button" type="button" id="id_btn_play"  onclick='require(["RouteView.js"], function( s ) { s.do_play(); })' disabled>Play</button>
+                    <button dojoType="dijit.form.ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" type="button" id="id_btn_street_view" onclick='require(["RouteView.js"], function( s ) { s.do_street_view(); })' disabled>Show all Street View</button>
+					<br>                    
+                    <button dojoType="dijit.form.Button" type="button" style="font-size:x-large; height: 150%;" id="id_btn_play" onclick='require(["RouteView.js"], function( s ) { s.do_play(); })' disabled>Virtual Ride with Street View</button>
                     <br>
                     <button dojoType="dijit.form.Button" type="button" id="id_btn_save_gpx" onclick='require(["RouteView.js"], function( s ) { s.do_save_gpx(); })' disabled>Save GPX file</button>
 
@@ -542,7 +542,7 @@
                         Once a route has been defined,<br>
                         this allows you to play the route using Street View.
                         <br><br>
-                        Basically, a Virtual Drive or Virtual Ride!
+                        Basically, a Virtual Ride!
                     </div>
 
                     <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_save_gpx',position:['below-centered'],showDelay:750,hideDelay:0">
@@ -570,10 +570,10 @@
              	 data-dojo-props="region:'center', splitter:true, title:'View'">
              	 <table style="width:100%; height:100%">
              	 	<tr>
-             	 		<td id="td_map_canvas" style="width:50%">
+             	 		<td id="td_map_canvas" style="width:100%">
 			                <div id="id_map_canvas" style="width: 100%; height: 100%; float:left"></div>
              	 		</td>
-             	 		<td id="td_panorama" style="width:50%">
+             	 		<td id="td_panorama" style="width:0%">
 			                <div id="id_panorama" style="width: 100%; height: 100%; float:left"> </div>
              	 		</td>
              	 	</tr>
