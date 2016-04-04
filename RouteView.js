@@ -26,11 +26,13 @@ define( function( m ) {
     var curr_dist;
 	var cb_move_to_dist = undefined;
 	var directions_service;
-	var directions_display;
+	var directions_display = undefined;
 	var route;
 	var cb_route_from_or_to_changed_handle = undefined;
 	var got_location;
    	var streetViewLayer = undefined;
+   	var street_view_check;
+   	var marker_no_street_view;
 
     function show_route_distance_duration( dist_meters, duration_secs ) {
 
@@ -79,20 +81,27 @@ define( function( m ) {
 			if ( is_force_panto )
             	map.panTo( p );
 
-        var iad = polyline.GetIndexAtDistance(d);
-        console.log("iad = " + iad);
-        
-        var bearing = polyline.Bearing(iad);
-        console.log("bearing = " + bearing);
-        
-        panorama.setPosition(p);
-        panorama.setPov({
-            heading: bearing,
-            pitch: 1
-        });
 
-        if ( step > 0 )
+		street_view_check.getPanoramaByLocation(p, 50, function(result, status) {
+		    if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
+		        console.log( "No street view available" );        
+        		marker_no_street_view.setPosition( p );
+		    }
+		    else {
+        		marker_no_street_view.setPosition( null );
+		        var iad = polyline.GetIndexAtDistance(d);
+        		var bearing = polyline.Bearing(iad);
+        		panorama.setPosition( p );
+		        panorama.setPov({
+            		heading: bearing,
+		            pitch: 1
+        		});
+		    }
+		});
+
+        if ( step > 0 ) {
             timer_animate = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_animate('+(d+step)+',50); })', interval );
+        }
 
         // Update route slider
 		dijit.byId('id_input_route').set( 'value', d, false );
@@ -194,6 +203,7 @@ define( function( m ) {
         });
 
         var old_nb_waypoints = way_points.length + 2;
+		google.maps.event.clearListeners( directions_display, 'directions_changed' );
         directions_display.addListener('directions_changed', function() {
             var new_dir = directions_display.getDirections();
             console.log("XXXXX");
@@ -209,8 +219,8 @@ define( function( m ) {
                 var place_id = new_dir.geocoded_waypoints[index_waypoint].place_id;
 
                 service.getDetails({
-                	placeId: place_id
-                  }, function ( place, status ) {
+	              	placeId: place_id
+                }, function ( place, status ) {
                 	if ( status == google.maps.places.PlacesServiceStatus.OK ) {
 		                console.log( old_nb_waypoints );
                 		console.log( new_nb_waypoints );
@@ -233,7 +243,7 @@ define( function( m ) {
                 		console.log(status);
                 		console.log(google.maps.places.PlacesServiceStatus);
                 	}
-                  });
+                });
 
 //             	show_error( "Sorry, this feature is not yet implemented!" );
             }
@@ -259,6 +269,8 @@ define( function( m ) {
             return function( response, status ) {
 
                 if ( status == google.maps.DirectionsStatus.OK ) {
+
+console.log( response );
 
                     var legs = response.routes[0].legs;
                     var leg = legs[0];
@@ -292,23 +304,24 @@ define( function( m ) {
                     // Markers
                     var dist_meters = 0;
                     var duration_secs = 0;
+                    console.log("XXXXXXXX");
                     for ( i = 0; i < legs.length; i++) {
                         dist_meters += legs[i].distance.value;
                         duration_secs += legs[i].duration.value;
-                        console.log( i + ": m=" + legs[i].distance.value + " secs=" + legs[i].duration.value );
+                        var steps = legs[i].steps;
+                        console.log( i + ": m=" + legs[i].distance.value + " secs=" + legs[i].duration.value + " - len=" + steps.length );
                         if ( i == 0 ) {
                             location_from.latlng  = legs[i].start_location;
                             location_from.address = legs[i].start_address;
                         }
                         location_to.latlng  = legs[i].end_location;
                         location_to.address = legs[i].end_address;
-                        var steps = legs[i].steps;
 
-                        for ( j = 0; j < steps.length; j++) {
+                        for ( var j = 0; j < steps.length; j++) {
                             var nextSegment = steps[j].path;                
                             var nextSegment = steps[j].path;
 
-                            for ( k=0;k < nextSegment.length;k++) {
+                            for ( var k=0; k < nextSegment.length;k++) {
                                 polyline.getPath().push(nextSegment[k]);
                                 bounds.extend(nextSegment[k]);
                             }
@@ -357,7 +370,7 @@ define( function( m ) {
 
 		dijit.byId('id_btn_save_gpx').set( 'disabled', false );
         
-    } // do_route
+    }
     
     function do_play( ) {
 
@@ -506,8 +519,18 @@ define( function( m ) {
                 };
 
                 geocoder = new google.maps.Geocoder;
+                console.log( "ZZZZZZZZZZZ" );
+                console.log( geocoder );
                 
                 service = new google.maps.places.PlacesService( map );
+                
+                street_view_check = new google.maps.StreetViewService( );
+
+   				marker_no_street_view = new google.maps.Marker({
+					map: map,
+					title: 'No Street View available',
+					icon: "http://www.google.com/mapfiles/arrow.png"
+				});
 
                 panorama = new google.maps.StreetViewPanorama( document.getElementById('id_panorama'), panorama_options );
                 map.setStreetView( panorama );
@@ -520,6 +543,7 @@ define( function( m ) {
        					cb_map_click( );
        			});
         		
+				google.maps.event.clearListeners( map, 'rightclick' );
         		google.maps.event.addListener( map, "rightclick", function( evt ) {
         			cb_map_rightclick( evt );
        			});
@@ -657,25 +681,28 @@ define( function( m ) {
            		});
         */
 
-                myDialog = dijit.byId('myDialog');
-                
+/*                
         		for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) { 
             		on( dom.byId('id_wp'+n), "change", function( evt ) {
-                		console.log( "Change" );
+                		console.log( "Change: " );
                 		if ( cb_route_from_or_to_changed_handle != undefined )
                 			clearTimeout( cb_route_from_or_to_changed_handle );
                 		cb_route_from_or_to_changed_handle = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_route_from_or_to_changed(); })', 250 );
            			});
         		}
+*/
 
        			autocompletes = [];
        			for ( var n = 0; n < MAX_NB_WAYPOINTS+2 - 1; n++ ) { 
        				autocompletes[n] = new google.maps.places.Autocomplete( dom.byId('id_wp'+n) );
-       				autocompletes[n].addListener('place_changed', function() {
-                		console.log( "Place changed" );
+       				google.maps.event.clearListeners( autocompletes[n], 'place_changed' );
+       				autocompletes[n].addListener('place_changed', function( ) {
+       					var index = autocompletes.indexOf( this );
+                		console.log( "Place changed: " + index );
                 		if ( cb_route_from_or_to_changed_handle != undefined )
                 			clearTimeout( cb_route_from_or_to_changed_handle );
-                		cb_route_from_or_to_changed_handle = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_route_from_or_to_changed(); })', 250 );
+                		cb_route_from_or_to_changed_handle = setTimeout( function() { require(["RouteView.js"], function( s ) { s.cb_route_from_or_to_changed(index); }); }, 250 );
+//                		cb_route_from_or_to_changed_handle = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_route_from_or_to_changed(0); })', 250 );
                 	});
        			}
 
@@ -789,12 +816,21 @@ define( function( m ) {
         if ( !map.getBounds().contains( p ) )
             map.panTo( p );
 
-        var bearing = polyline.Bearing( polyline.GetIndexAtDistance( new_pos ) );
-        panorama.setPosition(p);
-        panorama.setPov({
-            heading: bearing,
-            pitch: 1
-        });
+		street_view_check.getPanoramaByLocation(p, 50, function(result, status) {
+		    if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
+		        console.log( "No street view available" );        
+        		marker_no_street_view.setPosition( p );
+		    }
+		    else {
+        		marker_no_street_view.setPosition( null );
+        		panorama.setPosition( p );
+		        var bearing = polyline.Bearing( polyline.GetIndexAtDistance( new_pos ) );
+		        panorama.setPov({
+            		heading: bearing,
+		            pitch: 1
+        		});
+		    }
+		});
 
 		cb_move_to_dist = undefined;
 
@@ -851,6 +887,50 @@ define( function( m ) {
     function do_save_gpx( ) {
     	
     	// xmllint --noout --schema http://www.topografix.com/GPX/1/0/gpx.xsd testfile.gpx
+
+		console.log( "do_save_gpx..." );
+        var new_dir = directions_display.getDirections();
+        console.log( new_dir );
+		gpx_loc = new Array( new_dir.geocoded_waypoints.length );
+        for ( var n = 0; n < new_dir.geocoded_waypoints.length; n++ )
+        	gpx_loc[n] = "";
+        for ( var n = 0; n < new_dir.geocoded_waypoints.length; n++ ) {
+        	if ( gpx_loc[n] == "" ) {
+				gpx_loc_index = n; 
+	        	var place_id = new_dir.geocoded_waypoints[n].place_id;
+	            service.getDetails({
+	              	placeId: place_id,
+	              	['INDEX']: n
+	            }, function ( place, status ) {
+	            	if ( status == google.maps.places.PlacesServiceStatus.OK ) {
+	            		console.log( "------------------" );
+	            		console.log( n );
+	            	    console.log( place );
+	            	    console.log( place.formatted_address );
+	            	    gpx_loc[gpx_loc_index].lat = place.geometry.location.lat();
+	            	    gpx_loc[gpx_loc_index].lng = place.geometry.location.lng();
+            			setTimeout( 'require(["RouteView.js"], function( s ) { s.do_save_gpx(); })', 50 );
+            			return;
+	            	}
+	            	else {
+	            		console.log("XXXXXXX");
+	            		console.log(status);
+	            		console.log(google.maps.places.PlacesServiceStatus);
+	            	}
+	            });
+	            return;
+        	}
+        }
+        console.log("QQQQQQQQQQQQQQQQQQQQ");
+    	require(["dojo/dom-style"], function( domStyle) {
+            for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
+            	var id = 'id_tr' + n;
+        		var display = domStyle.get( id, "display" );
+            	if ( display != "none" ) {
+            		console.log( n + ' ==> ' + gpx_loc[n].lat + " , " + gpx_loc[n].lng );
+            	}
+            }
+ 		});
     	
     	console.log( route.summary );
     	console.log( route );
@@ -886,8 +966,8 @@ define( function( m ) {
 
     }
     
-    function cb_route_from_or_to_changed( ) {
-    	
+    function cb_route_from_or_to_changed( index ) {
+
 		var origin = dijit.byId('id_wp0').get( 'value' );
 		var waypoint1 = dijit.byId('id_wp1').get( 'value' );
 		var destination = dijit.byId('id_wp2').get( 'value' );
@@ -899,7 +979,7 @@ define( function( m ) {
         
     	update_btns_remove_up_down( );
     	
-//    	if ( !dijit.byId( "id_btn_play" ).get( "disabled" ) )
+//		if ( !nok_route &&  !dijit.byId( "id_btn_play" ).get( "disabled" ) )
 		if ( !nok_route )
     		do_route();
     }
@@ -1524,7 +1604,7 @@ define( function( m ) {
 
 		cb_click_force_panto:  function( ) { cb_click_force_panto(); },
 
-		cb_route_from_or_to_changed: function( ) { cb_route_from_or_to_changed(); },
+		cb_route_from_or_to_changed: function( index ) { cb_route_from_or_to_changed( index ); },
 
 		cb_click_btn_add:    function( index ) { cb_click_btn_add( index ); },
 		cb_click_btn_remove: function( index ) { cb_click_btn_remove( index ); },
