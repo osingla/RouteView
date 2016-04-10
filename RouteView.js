@@ -235,8 +235,10 @@ define( function( m ) {
                 	    	for (var n = old_nb_waypoints - 1; n >= index_waypoint; n--) {
 						        var w = dijit.byId('id_wp'+n).get( 'value' );
 						        dijit.byId('id_wp'+(n+1)).set( 'value', w );
+						        places[n+1] = places[n];
                 	    	}
                 	    	change_waypoint( index_waypoint, place.formatted_address );
+                	    	places[index_waypoint] = place;
                 	    }
                 	}
                 	else {
@@ -1088,6 +1090,7 @@ console.log( response );
 			var wp = dijit.byId('id_wp'+(n)).get( 'value' );
 			console.log( n + " -> " + wp );
 			dijit.byId('id_wp'+(n+1)).set( 'value', wp );
+			places[n+1] = places[n];
     	}
     	if (index < MAX_NB_WAYPOINTS+2)
 			dijit.byId('id_wp'+(index)).set( 'value', "" );
