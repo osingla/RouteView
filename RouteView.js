@@ -28,7 +28,8 @@ define( function( m ) {
 	var directions_service;
 	var directions_display = undefined;
 	var route;
-	var cb_route_from_or_to_changed_handle = undefined;
+	var cb_route_from_or_to_changed_handle = [];
+	var places = [];
 	var got_location;
    	var streetViewLayer = undefined;
    	var street_view_check;
@@ -698,11 +699,17 @@ console.log( response );
        				google.maps.event.clearListeners( autocompletes[n], 'place_changed' );
        				autocompletes[n].addListener('place_changed', function( ) {
        					var index = autocompletes.indexOf( this );
-                		console.log( "Place changed: " + index );
-                		if ( cb_route_from_or_to_changed_handle != undefined )
-                			clearTimeout( cb_route_from_or_to_changed_handle );
-                		cb_route_from_or_to_changed_handle = setTimeout( function() { require(["RouteView.js"], function( s ) { s.cb_route_from_or_to_changed(index); }); }, 250 );
-//                		cb_route_from_or_to_changed_handle = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_route_from_or_to_changed(0); })', 250 );
+                		console.log( "Place changed: index=" + index );
+                		console.log( autocompletes[index] );
+                		var place = autocompletes[index].getPlace();
+                		console.log( place );
+                		if ( cb_route_from_or_to_changed_handle[index] != undefined )
+                			clearTimeout( cb_route_from_or_to_changed_handle[index] );
+                		places[index] = place;
+					   	require(["dojo/dom"], function( dom ) {
+    						dom.byId("gps_loc_wp"+index).innerHTML = "<b>" + place.geometry.location.lat() + " " + place.geometry.location.lng() + "</b>";
+					   	});
+                		cb_route_from_or_to_changed_handle[index] = setTimeout( function() { require(["RouteView.js"], function( s ) { s.cb_route_from_or_to_changed(index); }); }, 250 );
                 	});
        			}
 
@@ -877,6 +884,7 @@ console.log( response );
     }
 
     function download_file( text, name, type ) {
+    
         var a = document.createElement("a");
         var file = new Blob([text], {type: type});
         a.href = URL.createObjectURL(file);
@@ -889,54 +897,17 @@ console.log( response );
     	// xmllint --noout --schema http://www.topografix.com/GPX/1/0/gpx.xsd testfile.gpx
 
 		console.log( "do_save_gpx..." );
-        var new_dir = directions_display.getDirections();
-        console.log( new_dir );
-		gpx_loc = new Array( new_dir.geocoded_waypoints.length );
-        for ( var n = 0; n < new_dir.geocoded_waypoints.length; n++ )
-        	gpx_loc[n] = "";
-        for ( var n = 0; n < new_dir.geocoded_waypoints.length; n++ ) {
-        	if ( gpx_loc[n] == "" ) {
-				gpx_loc_index = n; 
-	        	var place_id = new_dir.geocoded_waypoints[n].place_id;
-	            service.getDetails({
-	              	placeId: place_id,
-	              	['INDEX']: n
-	            }, function ( place, status ) {
-	            	if ( status == google.maps.places.PlacesServiceStatus.OK ) {
-	            		console.log( "------------------" );
-	            		console.log( n );
-	            	    console.log( place );
-	            	    console.log( place.formatted_address );
-	            	    gpx_loc[gpx_loc_index].lat = place.geometry.location.lat();
-	            	    gpx_loc[gpx_loc_index].lng = place.geometry.location.lng();
-            			setTimeout( 'require(["RouteView.js"], function( s ) { s.do_save_gpx(); })', 50 );
-            			return;
-	            	}
-	            	else {
-	            		console.log("XXXXXXX");
-	            		console.log(status);
-	            		console.log(google.maps.places.PlacesServiceStatus);
-	            	}
-	            });
-	            return;
-        	}
-        }
-        console.log("QQQQQQQQQQQQQQQQQQQQ");
+		var nb_wp = 0;
     	require(["dojo/dom-style"], function( domStyle) {
             for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
-            	var id = 'id_tr' + n;
-        		var display = domStyle.get( id, "display" );
+        		var display = domStyle.get( 'id_tr' + n, "display" );
             	if ( display != "none" ) {
-            		console.log( n + ' ==> ' + gpx_loc[n].lat + " , " + gpx_loc[n].lng );
+            		console.log( n + " ==> " + places[n].name + " : " + places[n].geometry.location.lat() + " , " + places[n].geometry.location.lng() );
+            		nb_wp++;
             	}
             }
- 		});
+ 		})
     	
-    	console.log( route.summary );
-    	console.log( route );
-//      var new_dir = directions_display.getDirections();
-//      console.log( new_dir );
-
     	var crlf = String.fromCharCode(13) + String.fromCharCode(10);
     	
         var gpx = '';
@@ -945,24 +916,37 @@ console.log( response );
         	'<gpx version="1.0" creator="" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/0" xsi:schemaLocation="http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd">' + crlf + 
         	'<time>2015-06-12T21:36:34Z</time>' +crlf;
 
-    	var op = route.overview_path;
-        for ( n = 0; n < op.length; n++ ) {
-        	gpx += '<wpt lat="'+op[n].lat()+'" lon="'+op[n].lng()+'">' + ' </wpt>' + crlf;
+		var src = '';
+		var dst = '';
+
+        for ( n = 0; n < nb_wp; n++ ) {
+        	if ( n == 0 )
+        		src = places[n].name;
+        	dst = places[n].name;
+        	gpx += '<wpt ' + crlf;
+        	gpx += '  lat="' + places[n].geometry.location.lat() + '" lon="' + places[n].geometry.location.lng() + '">' + crlf;
+        	gpx += '  <name>' + places[n].name + '</name>' + crlf;
+        	gpx += '</wpt>' + crlf;
         }
         
         gpx += '<rte>' + crlf;
-        gpx += '<name>' + route.summary + '</name>' + crlf;
-//        for ( n = 0; n < op.length; n++ ) {
-//        	gpx += '<rtept lat="'+op[n].G+'" lon="'+op[n].K+'">' + ' </rtept>' + crlf;
-//        }
-    	var legs = route.legs;
-        for ( n = 0; n < legs.length; n++)
-        	gpx += '<rtept lat="'+legs[n].start_location.G+'" lon="'+legs[n].start_location.K+'">' + ' </rtept>' + crlf;
-    	gpx += '<rtept lat="'+legs[legs.length-1].end_location.G+'" lon="'+legs[legs.length-1].end_location.K+'">' + ' </rtept>' + crlf;
+//      gpx += '  <name>' + route.summary + '</name>' + crlf;
+        gpx += '  <name>' + src + ' to ' + dst + '</name>' + crlf;
+        for ( n = 0; n < nb_wp; n++ ) {
+        	gpx += '  <rtept ' + crlf;
+        	gpx += '    lat="' + places[n].geometry.location.lat() + '" lon="' + places[n].geometry.location.lng() + '">' + crlf;
+        	gpx += '    <name>' + places[n].name + '</name>' + crlf;
+        	gpx += '  </rtept>' + crlf;
+        }
         gpx += '</rte>' + crlf;
         gpx += '</gpx>' + crlf;
         	
-    	download_file( gpx, "test.gpx", "application/gpx+xml" );
+		var d = new Date();
+		var year = d.getFullYear();
+		var mon  = d.getMonth() + 1;
+		var day  = d.getDay();
+		var fname = year + '-' + ((mon < 10) ? '0' : '') + mon + '-' + ((day < 10) ? '0' : '') + day + '.gpx';	
+    	download_file( gpx, fname, "application/gpx+xml" );
 
     }
     
