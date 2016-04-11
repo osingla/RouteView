@@ -508,6 +508,92 @@ console.log( response );
                 };
                 map = new google.maps.Map( document.getElementById('id_map_canvas'), map_options );
 
+map.set('styles', [
+    {
+        "featureType": "road",
+        "elementType": "geometry",
+        "stylers": [
+            {
+                "visibility": "simplified"
+            }
+        ]
+    },
+    {
+        "featureType": "road.arterial",
+        "stylers": [
+            {
+                "hue": 149
+            },
+            {
+                "saturation": -78
+            },
+            {
+                "lightness": 0
+            }
+        ]
+    },
+    {
+        "featureType": "road.highway",
+        "stylers": [
+            {
+                "hue": -31
+            },
+            {
+                "saturation": -40
+            },
+            {
+                "lightness": 2.8
+            }
+        ]
+    },
+    {
+        "featureType": "poi",
+        "elementType": "label",
+        "stylers": [
+            {
+                "visibility": "off"
+            }
+        ]
+    },
+    {
+        "featureType": "landscape",
+        "stylers": [
+            {
+                "hue": 163
+            },
+            {
+                "saturation": -26
+            },
+            {
+                "lightness": -1.1
+            }
+        ]
+    },
+    {
+        "featureType": "transit",
+        "stylers": [
+            {
+                "visibility": "off"
+            }
+        ]
+    },
+    {
+        "featureType": "water",
+        "stylers": [
+            {
+                "hue": 3
+            },
+            {
+                "saturation": -24.24
+            },
+            {
+                "lightness": -38.57
+            }
+        ]
+    }
+
+]);
+
                 var panorama_options = {
                     pov: {
                         heading: 34,
@@ -965,9 +1051,12 @@ console.log( response );
         
     	update_btns_remove_up_down( );
     	
-//		if ( !nok_route &&  !dijit.byId( "id_btn_play" ).get( "disabled" ) )
-		if ( !nok_route )
+		if ( !nok_route ) {
     		do_route();
+    	}
+    	else if ( (origin != "") && (waypoint1 == "") && (destination == "") ) {
+           	map.panTo( places[0].geometry.location );
+    	}
     }
     
     function cb_map_click( ) {
