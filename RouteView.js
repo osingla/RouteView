@@ -26,7 +26,7 @@ define( function( m ) {
     var curr_dist;
 	var cb_move_to_dist = undefined;
 	var directions_service;
-	var directions_display = undefined;
+	var directions_renderer = undefined;
 	var route;
 	var cb_route_from_or_to_changed_handle = [];
 	var places = [];
@@ -152,10 +152,10 @@ define( function( m ) {
     
     function do_route( ) {
 
-    	if ( directions_display != undefined ) {
+    	if ( directions_renderer != undefined ) {
     		console.log( "Delete current route" )
-    		directions_display.setMap( null );
-        	directions_display = undefined;
+    		directions_renderer.setMap( null );
+        	directions_renderer = undefined;
         	if ( polyline != undefined ) {
         		polyline.setMap( null );
         		polyline = undefined;
@@ -194,25 +194,24 @@ define( function( m ) {
 
         directions_service = new google.maps.DirectionsService( );
 
-        directions_display = new google.maps.DirectionsRenderer({
+        directions_renderer = new google.maps.DirectionsRenderer({
             draggable: true,
             map: map,
             hideRouteList: false,
             preserveViewport: true,
             suppressMarkers: false,
-            ['index']: 123456
         });
 
         var old_nb_waypoints = way_points.length + 2;
-		google.maps.event.clearListeners( directions_display, 'directions_changed' );
-        directions_display.addListener('directions_changed', function() {
-            var new_dir = directions_display.getDirections();
+		google.maps.event.clearListeners( directions_renderer, 'directions_changed' );
+        directions_renderer.addListener('directions_changed', function() {
+            var new_dir = directions_renderer.getDirections();
             console.log("XXXXX");
             console.log( new_dir );
             var index_waypoint = (new_dir.request.Xc != undefined) ? new_dir.request.Xc : new_dir.request.Yc;
             if ( index_waypoint != undefined ) {
 
-                console.log( directions_display );
+                console.log( directions_renderer );
                 var new_nb_waypoints = new_dir.geocoded_waypoints.length;
                 console.log( old_nb_waypoints );
                 console.log( new_nb_waypoints );
@@ -253,6 +252,14 @@ define( function( m ) {
 
         });
 
+		dijit.byId('id_btn_street_view').set( 'disabled', false );
+
+        update_btns_remove_up_down( );
+    
+        map.setOptions({draggableCursor: 'crosshair'});
+
+		dijit.byId('id_btn_save_gpx').set( 'disabled', false );
+        
         var request = {
             origin: start_location,
             destination: end_location,
@@ -260,121 +267,105 @@ define( function( m ) {
             waypoints: way_points,
             optimizeWaypoints: false,
             avoidHighways: no_hwy,
-            avoidTolls: no_toll
-        };  
+            avoidTolls: no_toll,
+        };
 
-        directions_service.route( request, cb_make_route( ) );
-
-		dijit.byId('id_btn_street_view').set( 'disabled', false );
-
-        function cb_make_route( ) {
-
-            return function( response, status ) {
-
-                if ( status == google.maps.DirectionsStatus.OK ) {
-
-console.log( response );
-
-                    var legs = response.routes[0].legs;
-                    var leg = legs[0];
-                    var distance = leg.distance.text;
-                    var meters = leg.distance.value;
-                    var duration = leg.duration.text;
-                    console.log( "distance = " + distance );
-                    console.log( "duration = " + duration );
-			    	require(["dojo/dom"], function( dom ) {
-            			dom.byId('id_route_info').innerHTML = "- " + distance + " , " + duration;
-    				});
-
-                	directions_display.setMap( map );
-                	directions_display.setDirections( response );
-
-                    var bounds = new google.maps.LatLngBounds();
-                    route = response.routes[0];
-                    var location_from = new Object();
-                    var location_to = new Object();
-
-                    polyline = new google.maps.Polyline({
-                        path: [],
-                        strokeColor: '#FFFF00',
-                        strokeWeight: 3
-                    });
-
-                    // For each route, display summary information.
-                    var path = route.overview_path;
-                    var legs = route.legs;
-
-                    // Markers
-                    var dist_meters = 0;
-                    var duration_secs = 0;
-                    console.log("XXXXXXXX");
-                    for ( i = 0; i < legs.length; i++) {
-                        dist_meters += legs[i].distance.value;
-                        duration_secs += legs[i].duration.value;
-                        var steps = legs[i].steps;
-                        console.log( i + ": m=" + legs[i].distance.value + " secs=" + legs[i].duration.value + " - len=" + steps.length );
-                        if ( i == 0 ) {
-                            location_from.latlng  = legs[i].start_location;
-                            location_from.address = legs[i].start_address;
-                        }
-                        location_to.latlng  = legs[i].end_location;
-                        location_to.address = legs[i].end_address;
-
-                        for ( var j = 0; j < steps.length; j++) {
-                            var nextSegment = steps[j].path;                
-                            var nextSegment = steps[j].path;
-
-                            for ( var k=0; k < nextSegment.length;k++) {
-                                polyline.getPath().push(nextSegment[k]);
-                                bounds.extend(nextSegment[k]);
-                            }
-                        }
-                    }
-                    
-                    show_route_distance_duration( dist_meters, duration_secs );
-
-                    polyline.setMap( map );
-                    map.fitBounds( bounds );
-
-            		dijit.byId('id_input_route').set( 'disabled', true );
-            		
-            		dijit.byId('id_btn_play').set( 'disabled', false );
-            		dijit.byId('id_btn_pause').set( 'disabled', true );
-            		dijit.byId('id_btn_stop').set( 'disabled', true );
-
-                }
-                else {
-                	
-                	var message = "?";
-                    if ( status == google.maps.DirectionsStatus.UNKNOWN_ERROR )
-                    	message = "A directions request could not be processed due to a server error. The request may succeed if you try again.";
-                    else if ( status == google.maps.DirectionsStatus.OVER_QUERY_LIMIT )
-                    	message = "The webpage has gone over the requests limit in too short a period of time.";
-                    else if ( status == google.maps.DirectionsStatus.NOT_FOUND )
-                    	message = "At least one of the origin, destination, or waypoints could not be geocoded.";
-                    else if ( status == google.maps.DirectionsStatus.REQUEST_DENIED )
-                    	message = "The webpage is not allowed to use the directions service.";
-                    else if ( status == google.maps.DirectionsStatus.ZERO_RESULTS )
-                    	message = "No route could be found between the origin and destination.";
-                    else if ( status == google.maps.DirectionsStatus.INVALID_REQUEST )
-                    	message = "The DirectionsRequest provided was invalid.";
-                    show_error( message );
-
-                }
-
-            }
-
-        } // cb_make_route
-
-        update_btns_remove_up_down( );
-//      set_labels_from_wp_to( );
-    
-        map.setOptions({draggableCursor: 'crosshair'});
-
-		dijit.byId('id_btn_save_gpx').set( 'disabled', false );
-        
+      	directions_service.route( request, function(response, status) { require(["RouteView.js"], function(s) { s.cb_make_route(response, status); }) } );
     }
     
+	function cb_make_route(response, status) {
+
+        if ( status == google.maps.DirectionsStatus.OK ) {
+
+			console.log( response );
+
+            var legs = response.routes[0].legs;
+            var leg = legs[0];
+            var distance = leg.distance.text;
+            var meters = leg.distance.value;
+            var duration = leg.duration.text;
+            console.log( "distance = " + distance );
+            console.log( "duration = " + duration );
+//	    	require(["dojo/dom"], function( dom ) {
+//    			dom.byId('id_route_info').innerHTML = "- " + distance + " , " + duration;
+//			});
+
+        	directions_renderer.setMap( map );
+        	directions_renderer.setDirections( response );
+
+            var bounds = new google.maps.LatLngBounds();
+            route = response.routes[0];
+            var location_from = new Object();
+            var location_to = new Object();
+
+            polyline = new google.maps.Polyline({
+                path: [],
+                strokeColor: '#FFFF00',
+                strokeWeight: 3
+            });
+
+            // For each route, display summary information.
+            var path = route.overview_path;
+            var legs = route.legs;
+
+            // Markers
+            var dist_meters = 0;
+            var duration_secs = 0;
+            console.log("XXXXXXXX");
+            for ( i = 0; i < legs.length; i++) {
+                dist_meters += legs[i].distance.value;
+                duration_secs += legs[i].duration.value;
+                var steps = legs[i].steps;
+                console.log( i + ": m=" + legs[i].distance.value + " secs=" + legs[i].duration.value + " - len=" + steps.length );
+                if ( i == 0 ) {
+                    location_from.latlng  = legs[i].start_location;
+                    location_from.address = legs[i].start_address;
+                }
+                location_to.latlng  = legs[i].end_location;
+                location_to.address = legs[i].end_address;
+
+                for ( var j = 0; j < steps.length; j++) {
+                    var nextSegment = steps[j].path;
+                    for ( var k=0; k < nextSegment.length;k++) {
+                        polyline.getPath().push(nextSegment[k]);
+                        bounds.extend(nextSegment[k]);
+                    }
+                }
+            }
+            
+            show_route_distance_duration( dist_meters, duration_secs );
+
+            polyline.setMap( map );
+            map.fitBounds( bounds );
+
+    		dijit.byId('id_input_route').set( 'disabled', true );
+    		
+    		dijit.byId('id_btn_play').set( 'disabled', false );
+    		dijit.byId('id_btn_pause').set( 'disabled', true );
+    		dijit.byId('id_btn_stop').set( 'disabled', true );
+
+        }
+        else {
+        	
+        	var message = "?";
+            if ( status == google.maps.DirectionsStatus.UNKNOWN_ERROR )
+            	message = "A directions request could not be processed due to a server error. The request may succeed if you try again.";
+            else if ( status == google.maps.DirectionsStatus.OVER_QUERY_LIMIT )
+            	message = "The webpage has gone over the requests limit in too short a period of time.";
+            else if ( status == google.maps.DirectionsStatus.NOT_FOUND )
+            	message = "At least one of the origin, destination, or waypoints could not be geocoded.";
+            else if ( status == google.maps.DirectionsStatus.REQUEST_DENIED )
+            	message = "The webpage is not allowed to use the directions service.";
+            else if ( status == google.maps.DirectionsStatus.ZERO_RESULTS )
+            	message = "No route could be found between the origin and destination.";
+            else if ( status == google.maps.DirectionsStatus.INVALID_REQUEST )
+            	message = "The DirectionsRequest provided was invalid.";
+            show_error( message );
+
+        }
+
+        }
+
     function do_play( ) {
 
         document.getElementById("td_map_canvas").style.width = "50%";
@@ -408,7 +399,7 @@ console.log( response );
 		dijit.byId('id_check_no_toll').set( 'disabled', true );
 
         var renderer_options = { draggable: true };
-       	directions_display.setOptions( renderer_options );
+       	directions_renderer.setOptions( renderer_options );
     		
     	update_btns_remove_up_down( false );
         map.setOptions({draggableCursor: 'hand'});
@@ -454,7 +445,7 @@ console.log( response );
 		dijit.byId('id_input_route').set( 'intermediateChanges', true );
 
         var renderer_options = { draggable: false };
-       	directions_display.setOptions( renderer_options );
+       	directions_renderer.setOptions( renderer_options );
     
         map.setOptions({draggableCursor: 'hand'});
         
@@ -490,25 +481,45 @@ console.log( response );
 		dijit.byId('id_input_route').set( 'intermediateChanges', false );
 		
         var renderer_options = { draggable: false };
-       	directions_display.setOptions( renderer_options );
+       	directions_renderer.setOptions( renderer_options );
 
     	update_btns_remove_up_down( false );
     	map.setOptions({draggableCursor: 'hand'});
         
     }
 
+    function start( ) {
+
+    	require(["dojo/dom", "dojo/on", "dojo/dom-style", "dojo/dom-geometry", "dojo/store/Memory", "dojo/ready"], function( dom, on, domStyle, domGeom, Memory, ready ) {
+            ready( function() {
+   				load_settings( );
+
+				dojoConfig = { gmaps: { v: '3.exp', libraries: 'places,geometry' } };
+				require(["//maps.google.com/maps/api/js?sensor=false&libraries=places"], function( ) {
+					require(["//gisgraphy.googlecode.com/svn-history/r67/trunk/gisgraphy/src/main/webapp/scripts/v3_epoly.js"], function( ) {
+						require(["RouteView.js", "dojo/domReady!"], function( ) {
+			 				initialize( );
+						});
+					});
+				});
+   				
+   			});
+		});
+	}
+
     function initialize( ) {
 
     	require(["dojo/dom", "dojo/on", "dojo/dom-style", "dojo/dom-geometry", "dojo/store/Memory", "dojo/ready"], function( dom, on, domStyle, domGeom, Memory, ready ) {
     		
             ready( function() {
-            	
+
             	var map_options = {
                    zoom: 14
                 };
                 map = new google.maps.Map( document.getElementById('id_map_canvas'), map_options );
 
 map.set('styles', [
+
     {
         "featureType": "road",
         "elementType": "geometry",
@@ -608,7 +619,6 @@ map.set('styles', [
                 };
 
                 geocoder = new google.maps.Geocoder;
-                console.log( "ZZZZZZZZZZZ" );
                 console.log( geocoder );
                 
                 service = new google.maps.places.PlacesService( map );
@@ -677,7 +687,7 @@ map.set('styles', [
 
         		var list_all_countries_store = new Memory({ idProperty: "name", data: [ ] });
         		_iso_countries.forEach( function(entry) {
-//        		            		console.log( entry.id );
+//	         		console.log( entry.id );
         		    list_all_countries_store.add( { name: entry.id } );
         		});
         		dijit.byId('id_autocomplete_restrict_list_country2').set( 'store', list_all_countries_store );
@@ -800,8 +810,6 @@ map.set('styles', [
                 		cb_route_from_or_to_changed_handle[index] = setTimeout( function() { require(["RouteView.js"], function( s ) { s.cb_route_from_or_to_changed(index); }); }, 250 );
                 	});
        			}
-
-   				load_settings( );
 
    				got_location = false;
    				
@@ -1656,8 +1664,13 @@ map.set('styles', [
 
     return {
 
-        initialize: function( ) { initialize( ); },
-		
+		start: function( ) {
+			require(["dojo/domReady!"], function( ) {
+				start( );
+			});
+		},
+        initialize: function( ) { initialize(); },
+
         do_street_view: function( ) { do_street_view(); },
         do_route: function( ) { do_route(); },
         do_play:  function( ) { do_play(); },
@@ -1671,6 +1684,8 @@ map.set('styles', [
 		move_to_dist: function( new_pos ) { move_to_dist( new_pos ); },
 
 		cb_route_input: function( ) { cb_route_input( ); },
+
+        cb_make_route: function( response, status ) { cb_make_route( response, status ); },
 
 		cb_step_changed:     function( ) { cb_step_changed(); },
 		cb_interval_changed: function( ) { cb_interval_changed(); },
