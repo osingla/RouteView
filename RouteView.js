@@ -92,11 +92,8 @@ define( function( m ) {
         		marker_no_street_view.setPosition( null );
 		        var iad = polyline.GetIndexAtDistance(d);
         		var bearing = polyline.Bearing(iad);
+        		setTimeout( function() { panorama.setPov( { heading: bearing, pitch: 1 } ); }, 5 );
         		panorama.setPosition( p );
-		        panorama.setPov({
-            		heading: bearing,
-		            pitch: 1
-        		});
 		    }
 		});
 
