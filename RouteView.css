@@ -57,15 +57,8 @@ html, body {
     padding: 0;
 }
 
-#id_middle_layout {
-    width: 60%;
-    min-width: 200px;
-    margin: 0;
-    padding: 0;
-}
-
-#id_right_layout {
-    width: 40%;
+#id_center_layout {
+//    width: 40%;
     margin: 0;
     padding: 0;
 }
@@ -159,6 +152,26 @@ html, body {
 
 .icon_btn_down {
   background-image: url('icons/btn-down.png');
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  border: none; 
+  outline:none;
+}
+
+.dijitButtonDisabled .icon_btn_drive {
+  background-image: url('icons/btn-drive-disabled.png');
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+}
+
+.icon_btn_drive {
+  background-image: url('icons/btn-drive.png');
   background-repeat: no-repeat;
   width: 16px;
   height: 16px;

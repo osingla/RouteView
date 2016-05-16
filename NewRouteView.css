@@ -1,0 +1,53 @@
+p {
+	font-size:		1em;
+	margin:			1ex 0;
+}
+p.buttons {
+	text-align:		center;
+	line-height:	2.5em;
+}
+button {
+	line-height:	normal;
+}
+.hidden {
+	display:		none;
+}
+
+/*
+ *	Rules for simulated drop-down/pop-up lists
+ */
+ul {
+	/* rules common to BOTH inner and outer UL */
+	z-index:	100000;
+	margin:		1ex 0;
+	padding:	0;
+	list-style:	none;
+	cursor:		pointer;
+	border:		1px solid Black;
+	/* rules for outer UL only */
+	width:		15ex;
+	position:	relative;
+}
+ul li {
+	background-color: #EEE;
+	padding: 0.15em 1em 0.3em 5px;
+}
+ul ul {
+	display:	none;
+	position:	absolute;
+	width:		100%;
+	left:		-1px;
+	/* Pop-Up */
+	bottom:		0;
+	margin:		0;
+	margin-bottom: 1.55em;
+}
+.ui-layout-north ul ul {
+	/* Drop-Down */
+	bottom:		auto;
+	margin:		0;
+	margin-top:	1.45em;
+}
+ul ul li		{ padding: 3px 1em 3px 5px; }
+ul ul li:hover	{ background-color: #FF9; }
+ul li:hover ul	{ display:	block; background-color: #EEE; }

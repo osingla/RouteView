@@ -57,7 +57,8 @@
 
     <body class="claro">
 
-        <div id="app_layout" class="demoLayout" data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="design: 'headline', gutters:true, liveSplitters:true">
+        <div id="app_layout" class="demoLayout" data-dojo-type="dijit/layout/BorderContainer" 
+             data-dojo-props="design: 'headline', gutters:true, liveSplitters:true">
         
             <!-- ---------- -->
             <!-- TOP layout -->            
@@ -97,502 +98,488 @@
 
             <!-- ----------- -->            
             <!-- LEFT Layout -->
-            <!-- ----------- -->            
-	        <div id="id_left_layout" style="display:" class="edgePanel" data-dojo-type="dojox/layout/ExpandoPane" 
-	         data-dojo-props="region:'left', splitter:false, title:'Configuration', doLayout:true, duration:350">
-
-                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:true">
-                    <legend>Route</legend>
-                    <table cellspacing="0" cellpadding="0">
-                        <tr id="id_tr0">
-                            <td valign="middle" align="right">A&nbsp;</td>
-                            <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit.form.TextBox" style="width:22em" 
-                            	 data-dojo-props="trim:true, intermediateChanges:false" selectOnClick="true" id="id_wp0" value="">
-                            </td>
-                            <td valign="middle" align="right">
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_add', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_add(1); })' id="id_btn_add_0" disabled />
-							</td>
-                            <td>
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_remove', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_remove(0); })' id="id_btn_remove_0" disabled />
-							</td>
-							<td>                            	
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_up',     showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_up(0); })' id="id_btn_up_0" disabled />
-							</td>
-							<td>                            	
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_down',   showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_down(0); })' id="id_btn_down_0" disabled />
-							</td>
-                    		<div id="gps_loc_wp0" data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_wp0',position:['after-centered'],showDelay:650,hideDelay:0">
-                    		</div>
-                        </tr>
-                        <tr id="id_tr1">
-                            <td valign="middle" align="right" id='id_mark1'>B&nbsp;</td>
-<!--                        <td id="id_label1" valign="middle" align="right">Through</td> -->
-                            <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit.form.TextBox" style="width:22em" 
-                            	 data-dojo-props="trim:true, intermediateChanges:false" selectOnClick="true"  id="id_wp1" value="">
-                            </td>
-                            <td valign="middle" align="right">
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_add', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_add(2); })' id="id_btn_add_1" disabled />
-							</td>
-                            <td>
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_remove', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_remove(1); })' id="id_btn_remove_1" disabled />
-							</td>
-							<td>                            	
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_up',     showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_up(1); })' id="id_btn_up_1" disabled />
-							</td>
-							<td>                            	
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_down',   showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_down(1); })' id="id_btn_down_1" disabled />
-							</td>
-                    		<div id="gps_loc_wp1" data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_wp1',position:['after-centered'],showDelay:750,hideDelay:0">
-                    		</div>
-                        </tr>
-                        <tr id="id_tr2" style="display:None">
-                            <td valign="middle" align="right">C&nbsp;</td>
-<!--                        <td id="id_label2" valign="middle" align="right">To</td> -->
-                            <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit.form.TextBox" style="width:22em" 
-                            	 data-dojo-props="trim:true, intermediateChanges:false" selectOnClick="true" 
-				                 id="id_wp2" value="">
-                            </td>
-                            <td valign="middle" align="right">
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_add', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_add(3); })' id="id_btn_add_2" disabled />
-							</td>
-                            <td>
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_remove', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_remove(2); })' id="id_btn_remove_2" disabled />
-							</td>
-							<td cellspacing="10">                            	
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_up',     showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_up(2); })' id="id_btn_up_2" disabled />
-							</td>
-							<td>                            	
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_down',   showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_down(2); })' id="id_btn_down_2" disabled />
-							</td>
-                    		<div id="gps_loc_wp2" data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_wp2',position:['after-centered'],showDelay:750,hideDelay:0">
-                    		</div>
-                        </tr>
-                        <tr id="id_tr3" style="display:None">
-                            <td valign="middle" align="right">D&nbsp;</td>
-<!--                        <td id="id_label3" valign="middle" align="right">Through</td> -->
-                            <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit.form.TextBox" style="width:22em" 
-                            	 data-dojo-props="trim:true, intermediateChanges:false" selectOnClick="true" 
-				                 id="id_wp3" value="">
-                            </td>
-                            <td valign="middle" align="right">
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_add', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_add(4); })' id="id_btn_add_3" disabled />
-							</td>
-                            <td>
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_remove', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_remove(3); })' id="id_btn_remove_3" disabled />
-							</td>
-							<td>                            	
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_up',     showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_up(3); })' id="id_btn_up_3" disabled />
-							</td>
-							<td>                            	
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_down',   showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_down(3); })' id="id_btn_down_3" disabled />
-							</td>
-                    		<div id="gps_loc_wp3" data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_wp3',position:['after-centered'],showDelay:750,hideDelay:0">
-                    		</div>
-                        </tr>
-                        <tr id="id_tr4" style="display:None">
-                            <td valign="middle" align="right">E&nbsp;</td>
-<!--                        <td id="id_label4" valign="middle" align="right">Through</td> -->
-                            <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit.form.TextBox" style="width:22em" 
-                            	 data-dojo-props="trim:true, intermediateChanges:false" selectOnClick="true" 
-				                 id="id_wp4" value="">
-                            </td>
-                            <td valign="middle" align="right">
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_add', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_add(5); })' id="id_btn_add_4" disabled />
-							</td>
-                            <td>
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_remove', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_remove(4); })' id="id_btn_remove_4" disabled />
-							</td>
-							<td>                            	
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_up',     showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_up(4); })' id="id_btn_up_4" disabled />
-							</td>
-							<td>                            	
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_down',   showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_down(4); })' id="id_btn_down_4" disabled />
-							</td>
-                    		<div id="gps_loc_wp4" data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_wp4',position:['after-centered'],showDelay:750,hideDelay:0">
-                    		</div>
-                        </tr>
-                        <tr id="id_tr5" style="display:None">
-                            <td valign="middle" align="right">F&nbsp;</td>
-<!--                        <td id="id_label5" valign="middle" align="right">Through</td> -->
-                            <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit.form.TextBox" style="width:22em" 
-                            	 data-dojo-props="trim:true, intermediateChanges:false" selectOnClick="true" 
-				                 id="id_wp5" value="">
-                            </td>
-                            <td valign="middle" align="right">
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_add', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_add(6); })' id="id_btn_add_5" disabled />
-							</td>
-                            <td>
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_remove', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_remove(5); })' id="id_btn_remove_5" disabled />
-							</td>
-							<td>                            	
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_up',     showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_up(5); })' id="id_btn_up_5" disabled />
-							</td>
-							<td>                            	
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_down',   showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_down(5); })' id="id_btn_down_5" disabled />
-							</td>
-                    		<div id="gps_loc_wp5" data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_wp5',position:['after-centered'],showDelay:750,hideDelay:0">
-                    		</div>
-                        </tr>
-                        <tr id="id_tr6" style="display:None">
-                            <td valign="middle" align="right">G&nbsp;</td>
-<!--                        <td id="id_label6" valign="middle" align="right">Through</td> -->
-                            <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit.form.TextBox" style="width:22em" 
-                            	 data-dojo-props="trim:true, intermediateChanges:false" selectOnClick="true" 
-				                 id="id_wp6" value="">
-                            </td>
-                            <td valign="middle" align="right">
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_add', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_add(7); })' id="id_btn_add_6" disabled />
-							</td>
-                            <td>
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_remove', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_remove(6); })' id="id_btn_remove_6" disabled />
-							</td>
-							<td>                            	
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_up',     showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_up(6); })' id="id_btn_up_6" disabled />
-							</td>
-							<td>                            	
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_down',   showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_down(6); })' id="id_btn_down_6" disabled />
-							</td>
-                    		<div id="gps_loc_wp6" data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_wp6',position:['after-centered'],showDelay:750,hideDelay:0">
-                    		</div>
-                        </tr>
-                        <tr id="id_tr7" style="display:None">
-                            <td valign="middle" align="right">H&nbsp;</td>
-<!--                        <td id="id_label7" valign="middle" align="right">Through</td> -->
-                            <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit.form.TextBox" style="width:22em" 
-                            	 data-dojo-props="trim:true, intermediateChanges:false" selectOnClick="true" 
-				                 id="id_wp7" value="">
-                            </td>
-                            <td valign="middle" align="right">
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_add', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_add(8); })' id="id_btn_add_7" disabled />
-							</td>
-                            <td>
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_remove', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_remove(7); })' id="id_btn_remove_7" disabled />
-							</td>
-							<td>                            	
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_up',     showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_up(7); })' id="id_btn_up_7" disabled />
-							</td>
-							<td>                            	
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_down',   showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_down(7); })' id="id_btn_down_7" disabled />
-							</td>
-                    		<div id="gps_loc_wp7" data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_wp7',position:['after-centered'],showDelay:750,hideDelay:0">
-                    		</div>
-                        </tr>
-                        <tr id="id_tr8" style="display:None">
-                            <td valign="middle" align="right">I&nbsp;</td>
-<!--                        <td id="id_label8" valign="middle" align="right">Through</td> -->
-                            <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit.form.TextBox" style="width:22em" 
-                            	 data-dojo-props="trim:true, intermediateChanges:false" selectOnClick="true" 
-				                 id="id_wp8" value="">
-                            </td>
-                            <td valign="middle" align="right">
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_add', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_add(9); })' id="id_btn_add_8" disabled />
-							</td>
-                            <td>
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_remove', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_remove(8); })' id="id_btn_remove_8" disabled />
-							</td>
-							<td>                            	
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_up',     showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_up(8); })' id="id_btn_up_8" disabled />
-							</td>
-							<td>                            	
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_down',   showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_down(8); })' id="id_btn_down_8" disabled />
-							</td>
-                    		<div id="gps_loc_wp8" data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_wp8',position:['after-centered'],showDelay:750,hideDelay:0">
-                    		</div>
-                        </tr>
-                        <tr id="id_tr9" style="display:None">
-                            <td valign="middle" align="right">J&nbsp;</td>
-<!--                        <td id="id_label9" valign="middle" align="right">Through</td> -->
-                            <td valign="middle" align="left">
-                            	<input type="text" data-dojo-type="dijit.form.TextBox" style="width:22em" 
-                            	 data-dojo-props="trim:true, intermediateChanges:false" selectOnClick="true" 
-				                 id="id_wp9" value="">
-                            </td>
-                            <td valign="middle" align="right">
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_add', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_add(10); })' id="id_btn_add_9" disabled />
-							</td>
-                            <td>
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_remove', showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_remove(9); })' id="id_btn_remove_9" disabled />
-							</td>
-							<td>                            	
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_up',     showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_up(9); })' id="id_btn_up_9" disabled />
-							</td>
-							<td>                            	
-                            	<button data-dojo-type="dijit.form.Button" data-dojo-props="iconClass:'icon_btn_down',   showLabel: false" type="button" onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_down(9); })' id="id_btn_down_9" disabled />
-							</td>
-                    		<div id="gps_loc_wp9" data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_wp9',position:['after-centered'],showDelay:750,hideDelay:0">
-                    		</div>
-                        </tr>
-                    </table>
-                    <hr>
-                    <div id="id_route1_distance_duration" style="width:100%; display:None" align="center" >
-                        <table style="width:100%">
-                            <tr style="font-size: 150%;">
-                                <td align="left" valign="middle">
-                                    <span></span><b id="id_route1_dist_kms"></b>&nbsp;kms</span>
-                                    &nbsp;-&nbsp;
-                                    <span></span><b id="id_route1_dist_miles"></b>&nbsp;miles</span>
-                                </td>
-                                <td align="right" valign="middle">
-                                    <b id="id_route1_duration">XX</b>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div align="center">
-                        
-                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" 
-		                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_hwy(); })' id="id_check_no_hwy" >
-                         No Highway
-                        </button>
-
-                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" 
-		                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_toll(); })' id="id_check_no_toll" >
-                         No Toll
-                         </button>
-
-	                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_hwy',position:['below-centered'],showDelay:750,hideDelay:0">
-							When selected, this asks Google Maps service to create a route not using Highways.<br>
-							Using this button will recreate the route, and incidentally will 'rewind' the route at the beginning.
-	                    </div>
-
-	                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_toll',position:['below-centered'],showDelay:750,hideDelay:0">
-							When selected, this asks Google Maps service to create a route not using Toll routes.<br>
-							Using this button will recreate the route, and incidentally will 'rewind' the route at the beginning.
-	                    </div>
-
-                    </div>
-                </fieldset>
-                <br>
-                <br>
-
-                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:true">
-                    <legend>Configuration</legend>
-                    <div style="width:100%" align="center">
-                    
-                        <span>Step : <span></span><b id="id_meters">175</b> meters</span>&nbsp;-&nbsp;</span><b id="id_feet">575</b> feet</span></span><br>
-                        <div id="id_input_meters"
-                            style="width:400px;"
-                            name="horizontalSlider"
-                            data-dojo-type="dijit/form/HorizontalSlider"
-                            data-dojo-props="value:175,
-                            minimum: 50,
-                            maximum:1000,
-                            discreteValues:20,
-                            intermediateChanges:true,
-                            showButtons:true"
-	                        onChange='require(["RouteView.js"], function( s ) { s.cb_step_changed(); })'>
-                        </div>
-
-                        <span>Interval : <b id="id_interval">1200</b> milliseconds</span><br>
-                        <div id="id_input_interval"
-                            style="width:400px;"
-                            name="horizontalSlider"
-                            data-dojo-type="dijit/form/HorizontalSlider"
-                            data-dojo-props="value:1200,
-                            minimum: 500,
-                            maximum:5000,
-                            discreteValues:46,
-                            intermediateChanges:true,
-                            showButtons:true"
-	                        onChange='require(["RouteView.js"], function( s ) { s.cb_interval_changed(); })'>
-                        </div>					
-
-                		<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_input_meters',position:['after-centered'],showDelay:750,hideDelay:0">
-							This slider lets you define the step in the route.<br><br>
-							Default is 250 meters, meaning that each Street View image are 250 meters apart. 
-                		</div>
-
-                		<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_input_interval',position:['after-centered'],showDelay:750,hideDelay:0">
-							This slider lets you define the time interval between each Street View image.<br><br>
-							Default is 800 milliseconds, meaning that each Street View image is displayed for 800 milliseconds. 
-                		</div>
-
-                    </div>
-
-                    <div style="width:100%" align="center">
-
-                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" 
-		                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_force_panto(); })' id="id_check_force_panto" >
-                         	Force Pan To
-                        </button>
-                        <br>
-                        
-                        <div data-dojo-type="dijit/form/DropDownButton">
-                            <span>Use current position for ...</span>
-                            <div data-dojo-type="dijit/TooltipDialog">
-                                <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" 
-		                         	    id="id_use_curr_position_for_org" >
-                         	        origin
-                                </button>
-                                <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" 
-		                         	    id="id_use_curr_position_for_dest" >
-                         	        destination
-                                </button>
-                            </div>
-                        </div>                        
-
-                        <div data-dojo-type="dijit/form/DropDownButton" data-dojo-props='autoWidth:false'>
-                            <span>Autocomplete Settings</span>
-                            <div data-dojo-type="dijit/TooltipDialog">
-			                    <select data-dojo-type="dijit/form/DataList" data-dojo-props='id:"restrict_types_list"'>
-				                    <option>geocode</option>
-                                    <option>address</option>
-                                    <option>establishment</option>
-                                    <option selected>(cities)</option>
-                                    <option>(regions)</option>
-                                </select>
-                            	<table>
-                            		<tr>
-						                <td style="text-align:right; vertical-align:middle">
-                            				Restrict Type:&nbsp;
-                            			</td>
-						                <td style="text-align:left; vertical-align:middle">
-	                            			<input id="id_autocomplete_restrict_type" data-dojo-type="dijit/form/CheckBox" />
-										</td>
-                            		</tr>
-                            		<tr id="id_autocomplete_restrict_li" style="display:none">
-						                <td style="text-align:right; vertical-align:middle">
-                            				Type Restriction:&nbsp;
-                            			</td>
-						                <td style="text-align:left; vertical-align:middle">
-                                            <select data-dojo-type="dijit/form/ComboBox" data-dojo-props='list:"restrict_types_list", value:"geocode", readonly:true' 
-                                            		id="id_autocomplete_restrict_cb">
-                                            </select>                            			
-                            			</td>
-                            		</tr>
-                            		<tr>
-                            			<td colspan="2">
-                            				<hr>
-                            			</td>
-                           			</tr>
-                            		<tr>
-						                <td style="text-align:right; vertical-align:middle">
-                            				Restrict Country:&nbsp;
-                            			</td>
-						                <td style="text-align:left; vertical-align:middle">
-	                            			<input id="id_autocomplete_restrict_country" data-dojo-type="dijit/form/CheckBox" />
-										</td>
-                            		</tr>
-                            		<tr id="id_autocomplete_restrict_country_use_loc_li" style="display:none">
-						                <td style="text-align:right; vertical-align:middle">
-                            				Use current location:&nbsp;
-                            			</td>
-						                <td style="text-align:left; vertical-align:middle">
-	                            			<input id="id_autocomplete_restrict_country_use_loc" data-dojo-type="dijit/form/CheckBox" checked />
-										</td>
-                            		<tr id="id_autocomplete_restrict_country1_li" style="display:none">
-						                <td style="text-align:right; vertical-align:middle">
-                            				Country:&nbsp;
-                            			</td>
-						                <td style="text-align:left; vertical-align:middle">
-                                            <select data-dojo-type="dijit/form/ComboBox" data-dojo-props='list:"restrict_countries_list", value:"", readonly:true'  
-                                            		id="id_autocomplete_restrict_list_country1">
-                                            </select>                            			
-                            			</td>
-                            		</tr>
-                            		<tr id="id_autocomplete_restrict_country2_li" style="display:none">
-						                <td style="text-align:right; vertical-align:middle">
-                            				Country:&nbsp;
-                            			</td>
-						                <td style="text-align:left; vertical-align:middle">
-                                            <select data-dojo-type="dijit/form/ComboBox" data-dojo-props='list:"restrict_countries_list", value:"", readonly:true'  
-                                            		id="id_autocomplete_restrict_list_country2">
-                                            </select>                            			
-                            			</td>
-                            		</tr>
-                            	</table>
-                            	<br>
-                            </div>
-                        </div>
-                        
-                        <hr>
-                                              
-                        <table>
-                            <tr>
-                            	<td>
-				                    <button dojoType="dijit.form.Button" type="button" id="id_btn_save_settings" 
-				                    		onclick='require(["RouteView.js"], function( s ) { s.save_settings(); })'>
-				                    	Save Settings
-				                    </button>
-                            	</td>
-                            	<td>
-				                    <button dojoType="dijit.form.Button" type="button" id="id_btn_clear_settings" 
-				                    		onclick='require(["RouteView.js"], function( s ) { s.clear_settings(); })'>
-				                    	Clear Settings
-				                    </button>
-                            	</td>
-                            </tr>
-                        </table>
-                        
-                    </div>
-
-                	<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_force_panto',position:['below-centered'],showDelay:750,hideDelay:0">
-						When this option is selected, if the current location of the route is not shown onto the map,<br>
-						the map is scrolled so the current location becomes the center of the map.
-                	</div>
-
-                </fieldset>
-                <br>
-
-                <div style="width:100%" align="center">
-
-                    <button dojoType="dijit.form.ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" type="button" id="id_btn_street_view" onclick='require(["RouteView.js"], function( s ) { s.do_street_view(); })' disabled>Show all Street View</button>
-					<br>                    
-                    <button dojoType="dijit.form.Button" type="button" style="font-size:x-large; height: 150%;" id="id_btn_play" onclick='require(["RouteView.js"], function( s ) { s.do_play(); })' disabled>Virtual Ride with Street View</button>
-                    <br>
-                    <button dojoType="dijit.form.Button" type="button" style="Display: " id="id_btn_save_gpx" onclick='require(["RouteView.js"], function( s ) { s.do_save_gpx(); })' disabled>Save GPX file</button>
-
-                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_route',position:['below-centered'],showDelay:750,hideDelay:0">
-                        This will ask Google Maps service to create the Route.
-                    </div>
-
-                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_play',position:['below-centered'],showDelay:750,hideDelay:0">
-                        Once a route has been defined,<br>
-                        this allows you to play the route using Street View.
-                        <br><br>
-                        Basically, a Virtual Ride!
-                    </div>
-
-                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_save_gpx',position:['below-centered'],showDelay:750,hideDelay:0">
-                        Once a route has been defined, this option allows you to create a GPX file (GPS exchange format).<br>
-                        This file can then be uploaded to a GPS device (for instance a Garmin).
-                    </div>
-
-                </div>
-
-            </div>
+            <!-- ----------- -->
+<!--
+	        <div id="id_left_layout" style="display: ; overflow-x:hidden; overflow-y:scroll;" class="edgePanel" data-dojo-type="dojox/layout/ExpandoPane" 
+	         data-dojo-props="region:'left', splitter:true, title:'Configuration', doLayout:true, duration:350">
+-->
             
             <!-- ------------ -->
-            <!-- MIDDLE panel -->
+            <!-- RIGHT panel  -->
             <!-- ------------ -->
-            <!-- 
-	        <div id="id_middle_layout" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" 
-             	 data-dojo-props="region:'center', splitter:true, title:'Map'">
-	        </div>
-			-->
-            
-             <!-- ------------ -->
-             <!-- RIGHT panel  -->
-             <!-- ------------ -->
-	        <div id="id_right_layout" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" 
+			<div id="id_right_layout" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" 
              	 data-dojo-props="region:'center', splitter:true, title:'View'">
              	 <table style="width:100%; height:100%">
              	 	<tr>
-             	 		<td id="td_map_canvas" style="width:100%">
+             	 	
+						<td id="id_left_layout" >
+						             	 	
+					        <div style="border:1px solid; overflow:scroll; height:100%">
+				
+								<!-- Route #1 -->
+				                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:true" id="id_fieldset_route_0">
+				                    <legend>
+				                    	Route 1 
+				                        <span id="id_route0_distance_duration" style="display:None">
+				                			&nbsp;:&nbsp;
+				                            <span><b id="id_route0_dist_kms"></b>&nbsp;kms</span>
+				                            &nbsp;-&nbsp;
+				                            <span><b id="id_route0_dist_miles"></b>&nbsp;miles</span>
+				                            &nbsp;-&nbsp;
+				                            <span><b id="id_route0_duration"></b></span>
+				                        </span>
+				                    </legend>
+				                    <table cellspacing="0" cellpadding="0" style="white-space: nowrap" >
+				                    	<tr >
+				                    		<td>
+							                    <table cellspacing="0" cellpadding="0" style="white-space: nowrap" id="id_table_route0">
+							                    </table>
+				                    		</td>
+				                    		<td>
+					                    		<table cellspacing="0" cellpadding="0" style="height:100%; white-space: nowrap" id="id_table_drive_0">
+					                    		</table>
+				                    		</td>
+				                    	</tr>
+					                </table>
+				                    <hr size="7" color="#0066cc">
+				                    <table style="width:100%">
+				                    	<tr>
+				                            <td align="left" valign="middle">
+				
+							                    <div align="left">
+							                        
+							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" style="font-size: 100%;"
+									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_hwy(0); })' id="id_check_no_hwy_0" >
+							                         No Highway
+							                        </button>
+							
+							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" style="font-size: 100%;" 
+									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_toll(0); })' id="id_check_no_toll_0" >
+							                         No Toll
+							                         </button>
+							
+								                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_hwy_0',position:['below-centered'],showDelay:750,hideDelay:0">
+														When selected, this asks Google Maps service to create a route not using Highways.<br>
+														Using this button will recreate the route, and incidentally will 'rewind' the route at the beginning.
+								                    </div>
+							
+								                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_toll_0',position:['below-centered'],showDelay:750,hideDelay:0">
+														When selected, this asks Google Maps service to create a route not using Toll routes.<br>
+														Using this button will recreate the route, and incidentally will 'rewind' the route at the beginning.
+								                    </div>
+							
+							                    </div>
+				
+				                    		</td>
+				                            <td align="right" valign="middle">
+				
+							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" style="font-size: 100%;"
+									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_use_route(1); })' id="id_check_use_route_1" >
+							                         Route 2
+							                        </button>
+							
+				                    		</td>
+				                    	</tr>
+				                    </table>
+				                </fieldset>
+				
+								<!-- Route #2 -->
+				                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:true" id="id_fieldset_route_1" style="display:none">
+				                    <legend>
+				                    	Route 2
+				                        <span id="id_route1_distance_duration" style="display:None">
+				                			&nbsp;:&nbsp;
+				                            <span><b id="id_route1_dist_kms"></b>&nbsp;kms</span>
+				                            &nbsp;-&nbsp;
+				                            <span><b id="id_route1_dist_miles"></b>&nbsp;miles</span>
+				                            &nbsp;-&nbsp;
+				                            <span><b id="id_route1_duration"></b></span>
+				                        </span>
+				                    </legend>
+				                    <table cellspacing="0" cellpadding="0" style="white-space: nowrap" >
+				                    	<tr >
+				                    		<td>
+							                    <table cellspacing="0" cellpadding="0" style="white-space: nowrap" id="id_table_route1">
+							                    </table>
+				                    		</td>
+				                    		<td>
+					                    		<table cellspacing="0" cellpadding="0" style="height:100%; white-space: nowrap" id="id_table_drive_1">
+					                    		</table>
+				                    		</td>
+				                    	</tr>
+					                </table>
+				                    <hr size="7" color="#00cc00">
+				                    <table style="width:100%">
+				                    	<tr>
+				                            <td align="left" valign="middle">
+				
+							                    <div align="left">
+							                        
+							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" style="font-size: 100%;"
+									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_hwy(1); })' id="id_check_no_hwy_1" >
+							                         No Highway
+							                        </button>
+							
+							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" style="font-size: 100%;" 
+									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_toll(1); })' id="id_check_no_toll_1" >
+							                         No Toll
+							                         </button>
+							
+								                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_hwy_1',position:['below-centered'],showDelay:750,hideDelay:0">
+														When selected, this asks Google Maps service to create a route not using Highways.<br>
+														Using this button will recreate the route, and incidentally will 'rewind' the route at the beginning.
+								                    </div>
+							
+								                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_toll_1',position:['below-centered'],showDelay:750,hideDelay:0">
+														When selected, this asks Google Maps service to create a route not using Toll routes.<br>
+														Using this button will recreate the route, and incidentally will 'rewind' the route at the beginning.
+								                    </div>
+							
+							                    </div>
+				
+				                    		</td>
+				                            <td align="right" valign="middle">
+				
+							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" style="font-size: 100%;"
+									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_use_route(2); })' id="id_check_use_route_2" >
+							                         Route 3
+							                        </button>
+							
+				                    		</td>
+				                    	</tr>
+				                    </table>
+				                </fieldset>
+				
+								<!-- Route #3 -->
+				                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:true" id="id_fieldset_route_2" style="display:none">
+				                    <legend>
+				                    	Route 3
+				                        <span id="id_route2_distance_duration" style="display:None">
+				                			&nbsp;:&nbsp;
+				                            <span><b id="id_route2_dist_kms"></b>&nbsp;kms</span>
+				                            &nbsp;-&nbsp;
+				                            <span><b id="id_route2_dist_miles"></b>&nbsp;miles</span>
+				                            &nbsp;-&nbsp;
+				                            <span><b id="id_route2_duration"></b></span>
+				                        </span>
+				                    </legend>
+				                    <table cellspacing="0" cellpadding="0" style="white-space: nowrap" >
+				                    	<tr >
+				                    		<td>
+							                    <table cellspacing="0" cellpadding="0" style="white-space: nowrap" id="id_table_route2">
+							                    </table>
+				                    		</td>
+				                    		<td>
+					                    		<table cellspacing="0" cellpadding="0" style="height:100%; white-space: nowrap" id="id_table_drive_2">
+					                    		</table>
+				                    		</td>
+				                    	</tr>
+					                </table>
+				                    <hr size="7" color="#ff6600">
+				                    <table style="width:100%">
+				                    	<tr>
+				                            <td align="left" valign="middle">
+				
+							                    <div align="left">
+							                        
+							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" style="font-size: 100%;"
+									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_hwy(2); })' id="id_check_no_hwy_2" >
+							                         No Highway
+							                        </button>
+							
+							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" style="font-size: 100%;" 
+									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_toll(2); })' id="id_check_no_toll_2" >
+							                         No Toll
+							                         </button>
+							
+								                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_hwy_2',position:['below-centered'],showDelay:750,hideDelay:0">
+														When selected, this asks Google Maps service to create a route not using Highways.<br>
+														Using this button will recreate the route, and incidentally will 'rewind' the route at the beginning.
+								                    </div>
+							
+								                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_toll_2',position:['below-centered'],showDelay:750,hideDelay:0">
+														When selected, this asks Google Maps service to create a route not using Toll routes.<br>
+														Using this button will recreate the route, and incidentally will 'rewind' the route at the beginning.
+								                    </div>
+							
+							                    </div>
+				
+				                    		</td>
+				                            <td align="right" valign="middle">
+				
+							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" style="font-size: 100%;"
+									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_use_route(3); })' id="id_check_use_route_3" >
+							                         Route 4
+							                        </button>
+							
+				                    		</td>
+				                    	</tr>
+				                    </table>
+				                </fieldset>
+				
+								<!-- Route #4 -->
+				                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:true" id="id_fieldset_route_3" style="display:none">
+				                    <legend>
+				                    	Route 4
+				                        <span id="id_route3_distance_duration" style="display:None">
+				                			&nbsp;:&nbsp;
+				                            <span><b id="id_route3_dist_kms"></b>&nbsp;kms</span>
+				                            &nbsp;-&nbsp;
+				                            <span><b id="id_route3_dist_miles"></b>&nbsp;miles</span>
+				                            &nbsp;-&nbsp;
+				                            <span><b id="id_route3_duration"></b></span>
+				                        </span>
+				                    </legend>
+				                    <table cellspacing="0" cellpadding="0" style="white-space: nowrap" >
+				                    	<tr >
+				                    		<td>
+							                    <table cellspacing="0" cellpadding="0" style="white-space: nowrap" id="id_table_route3">
+							                    </table>
+				                    		</td>
+				                    		<td>
+					                    		<table cellspacing="0" cellpadding="0" style="height:100%; white-space: nowrap" id="id_table_drive_3">
+					                    		</table>
+				                    		</td>
+				                    	</tr>
+					                </table>
+				                    <hr size="7" color="#cc33ff">
+				                    <table style="width:100%">
+				                    	<tr>
+				                            <td align="left" valign="middle">
+				
+							                    <div align="left">
+							                        
+							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" style="font-size: 100%;"
+									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_hwy(3); })' id="id_check_no_hwy_3" >
+							                         No Highway
+							                        </button>
+							
+							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" style="font-size: 100%;" 
+									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_toll(3); })' id="id_check_no_toll_3" >
+							                         No Toll
+							                         </button>
+							
+								                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_hwy_3',position:['below-centered'],showDelay:750,hideDelay:0">
+														When selected, this asks Google Maps service to create a route not using Highways.<br>
+														Using this button will recreate the route, and incidentally will 'rewind' the route at the beginning.
+								                    </div>
+							
+								                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_toll_3',position:['below-centered'],showDelay:750,hideDelay:0">
+														When selected, this asks Google Maps service to create a route not using Toll routes.<br>
+														Using this button will recreate the route, and incidentally will 'rewind' the route at the beginning.
+								                    </div>
+							
+							                    </div>
+				
+				                    		</td>
+				                    	</tr>
+				                    </table>
+				                </fieldset>
+				
+				                <br>
+				                <br>
+				
+				                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:true">
+				                    <legend>Configuration</legend>
+				                    <div style="width:100%" align="center">
+				                    
+				                        <span>Step : <span></span><b id="id_meters">175</b> meters</span>&nbsp;-&nbsp;</span><b id="id_feet">575</b> feet</span></span><br>
+				                        <div id="id_input_meters"
+				                            style="width:400px;"
+				                            name="horizontalSlider"
+				                            data-dojo-type="dijit/form/HorizontalSlider"
+				                            data-dojo-props="value:175,
+				                            minimum: 50,
+				                            maximum:1000,
+				                            discreteValues:20,
+				                            intermediateChanges:true,
+				                            showButtons:true"
+					                        onChange='require(["RouteView.js"], function( s ) { s.cb_step_changed(); })'>
+				                        </div>
+				
+				                        <span>Interval : <b id="id_interval">1200</b> milliseconds</span><br>
+				                        <div id="id_input_interval"
+				                            style="width:400px;"
+				                            name="horizontalSlider"
+				                            data-dojo-type="dijit/form/HorizontalSlider"
+				                            data-dojo-props="value:1200,
+				                            minimum: 500,
+				                            maximum:5000,
+				                            discreteValues:46,
+				                            intermediateChanges:true,
+				                            showButtons:true"
+					                        onChange='require(["RouteView.js"], function( s ) { s.cb_interval_changed(); })'>
+				                        </div>					
+				
+				                		<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_input_meters',position:['after-centered'],showDelay:750,hideDelay:0">
+											This slider lets you define the step in the route.<br><br>
+											Default is 250 meters, meaning that each Street View image are 250 meters apart. 
+				                		</div>
+				
+				                		<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_input_interval',position:['after-centered'],showDelay:750,hideDelay:0">
+											This slider lets you define the time interval between each Street View image.<br><br>
+											Default is 800 milliseconds, meaning that each Street View image is displayed for 800 milliseconds. 
+				                		</div>
+				
+				                    </div>
+				
+				                    <div style="width:100%" align="center">
+				
+				                        <div data-dojo-type="dijit/form/DropDownButton">
+				                            <span>Use current position for ...</span>
+				                            <div data-dojo-type="dijit/TooltipDialog">
+				                                <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" 
+						                         	    id="id_use_curr_position_for_org" >
+				                         	        origin
+				                                </button>
+				                                <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" 
+						                         	    id="id_use_curr_position_for_dest" >
+				                         	        destination
+				                                </button>
+				                            </div>
+				                        </div>                        
+				
+				                        <div data-dojo-type="dijit/form/DropDownButton" data-dojo-props='autoWidth:false'>
+				                            <span>Autocomplete Settings</span>
+				                            <div data-dojo-type="dijit/TooltipDialog">
+							                    <select data-dojo-type="dijit/form/DataList" data-dojo-props='id:"restrict_types_list"'>
+								                    <option>geocode</option>
+				                                    <option>address</option>
+				                                    <option>establishment</option>
+				                                    <option selected>(cities)</option>
+				                                    <option>(regions)</option>
+				                                </select>
+				                            	<table>
+				                            		<tr>
+										                <td style="text-align:right; vertical-align:middle">
+				                            				Restrict Type:&nbsp;
+				                            			</td>
+										                <td style="text-align:left; vertical-align:middle">
+					                            			<input id="id_autocomplete_restrict_type" data-dojo-type="dijit/form/CheckBox" />
+														</td>
+				                            		</tr>
+				                            		<tr id="id_autocomplete_restrict_li" style="display:none">
+										                <td style="text-align:right; vertical-align:middle">
+				                            				Type Restriction:&nbsp;
+				                            			</td>
+										                <td style="text-align:left; vertical-align:middle">
+				                                            <select data-dojo-type="dijit/form/ComboBox" data-dojo-props='list:"restrict_types_list", value:"geocode", readonly:true' 
+				                                            		id="id_autocomplete_restrict_cb">
+				                                            </select>                            			
+				                            			</td>
+				                            		</tr>
+				                            		<tr>
+				                            			<td colspan="2">
+				                            				<hr>
+				                            			</td>
+				                           			</tr>
+				                            		<tr>
+										                <td style="text-align:right; vertical-align:middle">
+				                            				Restrict Country:&nbsp;
+				                            			</td>
+										                <td style="text-align:left; vertical-align:middle">
+					                            			<input id="id_autocomplete_restrict_country" data-dojo-type="dijit/form/CheckBox" />
+														</td>
+				                            		</tr>
+				                            		<tr id="id_autocomplete_restrict_country_use_loc_li" style="display:none">
+										                <td style="text-align:right; vertical-align:middle">
+				                            				Use current location:&nbsp;
+				                            			</td>
+										                <td style="text-align:left; vertical-align:middle">
+					                            			<input id="id_autocomplete_restrict_country_use_loc" data-dojo-type="dijit/form/CheckBox" checked />
+														</td>
+				                            		<tr id="id_autocomplete_restrict_country1_li" style="display:none">
+										                <td style="text-align:right; vertical-align:middle">
+				                            				Country:&nbsp;
+				                            			</td>
+										                <td style="text-align:left; vertical-align:middle">
+				                                            <select data-dojo-type="dijit/form/ComboBox" data-dojo-props='list:"restrict_countries_list", value:"", readonly:true'  
+				                                            		id="id_autocomplete_restrict_list_country1">
+				                                            </select>                            			
+				                            			</td>
+				                            		</tr>
+				                            		<tr id="id_autocomplete_restrict_country2_li" style="display:none">
+										                <td style="text-align:right; vertical-align:middle">
+				                            				Country:&nbsp;
+				                            			</td>
+										                <td style="text-align:left; vertical-align:middle">
+				                                            <select data-dojo-type="dijit/form/ComboBox" data-dojo-props='list:"restrict_countries_list", value:"", readonly:true'  
+				                                            		id="id_autocomplete_restrict_list_country2">
+				                                            </select>                            			
+				                            			</td>
+				                            		</tr>
+				                            	</table>
+				                            	<br>
+				                            </div>
+				                        </div>
+				                        
+				                        <hr>
+				                        <table>
+				                            <tr>
+				                            	<td>
+								                    <button dojoType="dijit.form.Button" type="button" id="id_btn_save_settings" 
+								                    		onclick='require(["RouteView.js"], function( s ) { s.save_settings(); })'>
+								                    	Save Settings
+								                    </button>
+				                            	</td>
+				                            	<td>
+								                    <button dojoType="dijit.form.Button" type="button" id="id_btn_clear_settings" 
+								                    		onclick='require(["RouteView.js"], function( s ) { s.clear_settings(); })'>
+								                    	Clear Settings
+								                    </button>
+				                            	</td>
+				                            </tr>
+				                        </table>
+				                        
+				                        <hr>
+				                        <table>
+				                            <tr>
+				                            	<td>
+								                    <button dojoType="dijit.form.ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" type="button" id="id_btn_street_view" onclick='require(["RouteView.js"], function( s ) { s.do_street_view(); })' disabled>Show all Street View</button>
+				                            	</td>
+				                            	<td>
+								                    <button dojoType="dijit.form.Button" type="button" style="Display: " id="id_btn_save_gpx" onclick='require(["RouteView.js"], function( s ) { s.do_save_gpx(); })' disabled>Save GPX file</button>
+				                            	</td>
+				                            </tr>
+				                        </table>
+				
+				                    </div>
+				
+				                </fieldset>
+				                <br>
+				
+				                <div style="width:100%" align="center">
+				
+				                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_route',position:['below-centered'],showDelay:750,hideDelay:0">
+				                        This will ask Google Maps service to create the Route.
+				                    </div>
+				
+				                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_play',position:['below-centered'],showDelay:750,hideDelay:0">
+				                        Once a route has been defined,<br>
+				                        this allows you to play the route using Street View.
+				                        <br><br>
+				                        Basically, a Virtual Ride!
+				                    </div>
+				
+				                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_save_gpx',position:['below-centered'],showDelay:750,hideDelay:0">
+				                        Once a route has been defined, this option allows you to create a GPX file (GPS exchange format).<br>
+				                        This file can then be uploaded to a GPS device (for instance a Garmin).
+				                    </div>
+				
+				                </div>
+				
+				            </div>
+				            
+						</td>             	 	
+             	 	
+             	 		<td id="td_map_canvas" style="width:100%; overflow-x:hidden; overflow-y:hidden">
 			                <div id="id_map_canvas" style="width: 100%; height: 100%; float:left"></div>
              	 		</td>
-             	 		<td id="td_panorama" style="width:0%">
+
+             	 		<td id="td_panorama" style="width:0%; overflow-x:hidden; overflow-y:hidden">
 			                <div id="id_panorama" style="width: 100%; height: 100%; float:left"> </div>
              	 		</td>
+
              	 	</tr>
              	 	<tr>
 		                <td colspan="2" style="width:100%; height:1%; text-align:center; vertical-align:middle">
