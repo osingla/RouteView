@@ -633,7 +633,7 @@ define( function( m ) {
 
         dijit.byId('id_input_route').set( 'value', curr_dist, false );
 
-        street_view_service.getPanoramaByLocation( new google.maps.LatLng( p.lat(), p.lng() ), 0, function( data, status ) {
+        street_view_service.getPanoramaByLocation( p, 50, function( data, status ) {
 
             if ( !map.getBounds().contains( p ) )
                	map.panTo( p );
