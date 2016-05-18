@@ -13,7 +13,6 @@ define( function( m ) {
 
 	var autocompletes = [];
     var map;
-    var geocoder;
     var service;
     var panorama;
 	var map_or_panorama_full_screen;
@@ -37,6 +36,7 @@ define( function( m ) {
    	var streetViewLayer = undefined;
    	var street_view_check = [];
    	var marker_no_street_view;
+   	var selected_route_index = 0;
    	
    	var route_colors = [
    		"#0066cc",
@@ -792,9 +792,6 @@ define( function( m ) {
                     disableDoubleClickZoom: true,
                 };
 
-                geocoder = new google.maps.Geocoder;
-                console.log( geocoder );
-                
                 service = new google.maps.places.PlacesService( map );
                 
    				marker_no_street_view = new google.maps.Marker({
@@ -1315,10 +1312,9 @@ console.log("RESIZE!");
 
     }
     
-    function show_waypoint( index ) {
-    var route = 0;
+    function show_waypoint( route_index, index ) {
     	require(["dojo/dom-style"], function( domStyle) {
-    		var id = 'id_tr'+route+'_' + index;
+    		var id = 'id_tr' + route_index + '_' + index;
     		domStyle.set( id, "display", "" );
     	});
     }
@@ -1348,26 +1344,25 @@ console.log("RESIZE!");
     	
     	console.log( "Right click: " + evt.latLng );
 
-//    	if ( dijit.byId( "id_btn_play" ).get( "disabled" ) )
-//    		return;
+    	if ( dijit.byId("id_btn_drive_"+selected_route_index+"_1").get("disabled") )
+    		return;
     	
     	var latlng = {lat: evt.latLng.lat, lng: evt.latLng.lng};
-    	geocoder.geocode( {'location': latlng}, function( results, status ) {
+		var geocoder = new google.maps.Geocoder();
+    	geocoder.geocode( {'location': evt.latLng}, function( results, status ) {
     	    if (status === google.maps.GeocoderStatus.OK) {
 
     	    	console.log( results[0].formatted_address );
 
-    	        var first_hidden = find_first_hidden();
+    	        var first_hidden = find_first_hidden( selected_route_index );
     	        console.log( "first_hidden=" + first_hidden );
     	        if ( first_hidden != (MAX_NB_WAYPOINTS + 2) ) {
-    	        	show_waypoint( first_hidden );
-    	    		var id = 'id_route_wp' + first_hidden;
+    	        	show_waypoint( selected_route_index, first_hidden );
+    	    		var id = 'id_wp' + selected_route_index + "_" + first_hidden;
    	        		dijit.byId( id ).set( "value", results[0].formatted_address );
-//    	            set_labels_from_wp_to( );
-//    	            update_btns_remove_up_down( );
     	        }
     	        
-    	        do_route( );
+    	        do_route( selected_route_index );
     	    	
     	    }
     	});
@@ -1552,21 +1547,22 @@ console.log("RESIZE!");
     
     function save_settings( ) {
 
-return;
-
     	if ( typeof(Storage) == "undefined" ) {
     		console.log( "No local storage!" );
     		return;
     	}
 
-		var route = 0;    	
-        var no_hwy  = dijit.byId('id_check_no_hwy_'+route).get( 'checked' );
-    	localStorage.setItem( "no_highway_"+route, no_hwy );
-    	console.log( "no_hwy= " + no_hwy );
+		for (var route_index = 0; route_index < MAX_NB_ROUTES; route_index++) {
+	        var no_hwy  = dijit.byId('id_check_no_hwy_'+route_index).get( 'checked' );
+	    	localStorage.setItem( "no_highway_"+route_index, no_hwy );
+	    	console.log( "Route " + route_index + " no_hwy= " + no_hwy );
+		}
 
-        var no_toll = dijit.byId('id_check_no_toll').get( 'checked' );
-    	localStorage.setItem( "no_toll", no_toll );
-    	console.log( "no_toll= " + no_toll );
+		for (var route_index = 0; route_index < MAX_NB_ROUTES; route_index++) {
+	        var no_toll = dijit.byId('id_check_no_toll_'+route_index).get( 'checked' );
+	    	localStorage.setItem( "no_toll_"+route_index, no_hwy );
+	    	console.log( "Route " + route_index + " no_toll= " + no_hwy );
+	    }
 
     	var step = dijit.byId('id_input_meters').get( 'value' );
     	localStorage.setItem( "step", step );
@@ -1574,7 +1570,7 @@ return;
     	
     	var interval = dijit.byId('id_input_interval').get( 'value' );
     	localStorage.setItem( "interval", interval );
-    	console.log( "no_toll= " + no_toll );
+    	console.log( "interval= " + interval );
     	
         var use_curr_pos_for_org = dijit.byId('id_use_curr_position_for_org').get( 'checked' );
     	localStorage.setItem( "use_curr_position_for_org", use_curr_pos_for_org );
@@ -1612,24 +1608,24 @@ return;
     
     function load_settings( ) {
 
-return;
-
     	if ( typeof(Storage) == "undefined" ) {
     		console.log( "No local storage!" );
     		return;
     	}
     	
-    	var route = 0;
+		for (var route_index = 0; route_index < MAX_NB_ROUTES; route_index++) {
+	    	var no_hwy = localStorage.getItem("no_highway_"+route_index);
+    		console.log( "Route " + route_index + " - Restored no_hwy= " + no_hwy );
+	    	if ( no_hwy != null )
+    	        dijit.byId('id_check_no_hwy_'+route_index).set( 'checked', parse(no_hwy), false );
+		}
     	
-    	var no_hwy = localStorage.getItem("no_highway");
-    	console.log( "Restored no_hwy= " + no_hwy );
-    	if ( no_hwy != null )
-            dijit.byId('id_check_no_hwy_'+route).set( 'checked', parse(no_hwy), false );
-    	
-    	var no_toll = localStorage.getItem("no_toll");
-    	console.log( "Restored no_toll= " + no_toll );
-    	if ( no_toll != null )
-            dijit.byId('id_check_no_toll_'+route).set( 'checked', parse(no_toll), false );
+		for (var route_index = 0; route_index < MAX_NB_ROUTES; route_index++) {
+	    	var no_toll = localStorage.getItem("no_toll_"+route_index);
+    		console.log( "Route " + route_index + " - Restored no_toll= " + no_toll );
+    		if ( no_toll != null )
+            	dijit.byId('id_check_no_toll_'+route_index).set( 'checked', parse(no_toll), false );
+		}
 
     	var step = localStorage.getItem("step");
     	console.log( "Restored step= " + step );
