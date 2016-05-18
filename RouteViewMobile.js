@@ -668,7 +668,7 @@ define( function( m ) {
         	}
         	
        		if ( timer_animate != undefined )
-                   clearTimeout( timer_animate );
+                clearTimeout( timer_animate );
        		if ( restart )
        			timer_animate = setTimeout( 'require(["RouteViewMobile.js"], function( s ) { s.cb_animate('+(d+step)+', true); })', interval );
 

@@ -151,7 +151,8 @@ define( function( m ) {
     }
 
 	function cb_click_use_route( route ) {
-	
+
+console.log(1);	
         var is_route = dijit.byId('id_check_use_route_'+(route)).get( 'checked' );
     	require(["dojo/dom-style"], function( domStyle) {
 			if (is_route) {
@@ -161,12 +162,29 @@ define( function( m ) {
 				for (var n = route; n < MAX_NB_ROUTES; n++)
 					domStyle.set( "id_fieldset_route_"+n, "display", "None" );
 				for (var n = route+1; n < MAX_NB_ROUTES; n++) {
-				console.log( "--> " + 'id_check_use_route_'+n);
+					console.log( "--> " + 'id_check_use_route_'+n);
 					dijit.byId('id_check_use_route_'+n).set('checked', false, false);
-					}
+				}
 			}
 		});
 		
+	}
+    
+	function cb_click_fieldset_route( route_index ) {
+
+console.log(2);	
+    	require(["dojo/dom-style"], function( domStyle) {
+
+			for (var n = 0; n < MAX_NB_ROUTES; n++ ) {
+	           	var id = 'id_fieldset_route_' + n;
+//    	   		console.log( domStyle.get( id, "background") );
+	       		domStyle.set( id, "background", (n == route_index) ? "#80c1ff": "#b3daff");
+	       	}
+	       	
+	       	selected_route_index = route_index;
+
+    	});
+	
 	}
     
     function do_street_view( ) {
@@ -416,7 +434,6 @@ define( function( m ) {
 
     		dijit.byId('id_input_route').set( 'disabled', true );
     		
-//    		dijit.byId('id_btn_play').set( 'disabled', false );
     		dijit.byId('id_btn_pause').set( 'disabled', true );
     		dijit.byId('id_btn_stop').set( 'disabled', true );
 
@@ -516,7 +533,6 @@ define( function( m ) {
 		dijit.byId('id_check_no_toll_'+route_index).set( 'disabled', false );
 
 		dijit.byId('id_btn_street_view').set( 'disabled', false );
-//		dijit.byId('id_btn_play').set( 'disabled', false );
 		dijit.byId('id_btn_pause').set( 'disabled', true );
     	dijit.byId('id_btn_pause').set( 'label', "Pause" );
 		dijit.byId('id_btn_stop').set( 'disabled', true );
@@ -1341,7 +1357,8 @@ console.log("RESIZE!");
     }
     
     function cb_map_rightclick( evt ) {
-    	
+
+		console.log( evt );    	
     	console.log( "Right click: " + evt.latLng );
 
     	if ( dijit.byId("id_btn_drive_"+selected_route_index+"_1").get("disabled") )
@@ -1357,12 +1374,14 @@ console.log("RESIZE!");
     	        var first_hidden = find_first_hidden( selected_route_index );
     	        console.log( "first_hidden=" + first_hidden );
     	        if ( first_hidden != (MAX_NB_WAYPOINTS + 2) ) {
-    	        	show_waypoint( selected_route_index, first_hidden );
+//    	        	show_waypoint( selected_route_index, first_hidden );
+	    	        var new_nb_waypoints = first_hidden;
+	       	    	cb_click_btn_add(selected_route_index, new_nb_waypoints)
     	    		var id = 'id_wp' + selected_route_index + "_" + first_hidden;
    	        		dijit.byId( id ).set( "value", results[0].formatted_address );
+			    	update_btns_remove_up_down( selected_route_index );
+	    	        do_route( selected_route_index );
     	        }
-    	        
-    	        do_route( selected_route_index );
     	    	
     	    }
     	});
@@ -1404,8 +1423,6 @@ console.log("RESIZE!");
     		domStyle.set( 'id_drive_tr_'+route_index+"_"+(first_hidden), "display", "" );
     	});
     	
-//		dijit.byId('id_btn_play').set( 'disabled', true );
-		
 		require([ "dijit/focus", "dojo/dom", "dojo/domReady!" ], function(focusUtil, dom){
 			focusUtil.focus(dom.byId('id_wp'+route_index+'_'+(index)));
 		});
@@ -1488,18 +1505,6 @@ console.log("RESIZE!");
 	
 	function update_btns_remove_up_down( route_index, all ) {
 		
-/*
-		if ( all == false ) {
-            for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
-           		dijit.byId('id_btn_add_'+route_index+'_'+n).set( 'disabled', true ); 
-		   		dijit.byId('id_btn_remove_'+route_index+'_'+n).set( 'disabled', true ); 
-		   		dijit.byId('id_btn_up_'+route_index+'_'+n).set( 'disabled', true ); 
-		   		dijit.byId('id_btn_down_'+route_index+'_'+n).set( 'disabled', true ); 
-			}
-			return;
-		}
-*/
-		
         var first_hidden = find_first_hidden( route_index );
     	console.log( "first_hidden=" + first_hidden );
 
@@ -1519,6 +1524,8 @@ console.log("RESIZE!");
 		for ( var n = 1; n < first_hidden; n++ ) {
 			var wp0 = dijit.byId('id_wp'+route_index+'_'+(n-1)).get( 'value' );
 			var wp1 = dijit.byId('id_wp'+route_index+'_'+n).get( 'value' );
+console.log( wp0 );
+console.log( wp1 );
 	   		dijit.byId('id_btn_drive_'+route_index+"_"+n).set( 'disabled', ((wp0 == '') || (wp1 == '')) ? true : false ); 
 		}
 		
@@ -1924,6 +1931,8 @@ console.log("RESIZE!");
         initialize: function( ) { initialize(); },
 
 		cb_click_use_route: function( route ) { cb_click_use_route( route ); },
+		
+		cb_click_fieldset_route: function( route_index ) { cb_click_fieldset_route( route_index ); },
 
         do_street_view: function( ) { do_street_view(); },
 		do_pause: function( ) { do_pause(); },

@@ -117,7 +117,9 @@
 					        <div style="border:1px solid; overflow:scroll; height:100%">
 				
 								<!-- Route #1 -->
-				                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:true" id="id_fieldset_route_0">
+				                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:true" id="id_fieldset_route_0"
+				                		  style="background:#b3daff"
+						                  onClick='require(["RouteView.js"], function( s ) { s.cb_click_fieldset_route(0); })'>
 				                    <legend>
 				                    	Route 1 
 				                        <span id="id_route0_distance_duration" style="display:None">
@@ -172,11 +174,11 @@
 				
 				                    		</td>
 				                            <td align="right" valign="middle">
-				
-							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" style="font-size: 100%;"
-									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_use_route(1); })' id="id_check_use_route_1" >
-							                         Route 2
-							                        </button>
+			
+						                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" style="font-size: 100%;"
+  								                        onClick='require(["RouteView.js"], function( s ) { s.cb_click_use_route(1); })' id="id_check_use_route_1" >
+													Route 2
+							                    </button>
 							
 				                    		</td>
 				                    	</tr>
@@ -184,7 +186,9 @@
 				                </fieldset>
 				
 								<!-- Route #2 -->
-				                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:true" id="id_fieldset_route_1" style="display:none">
+				                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:true" id="id_fieldset_route_1" style="display:none"
+				                		  style="background:#b3daff"
+						                  onClick='require(["RouteView.js"], function( s ) { s.cb_click_fieldset_route(1); })'>
 				                    <legend>
 				                    	Route 2
 				                        <span id="id_route1_distance_duration" style="display:None">
@@ -251,7 +255,9 @@
 				                </fieldset>
 				
 								<!-- Route #3 -->
-				                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:true" id="id_fieldset_route_2" style="display:none">
+				                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:true" id="id_fieldset_route_2" style="display:none"
+				                		  style="background:#b3daff"
+						                  onClick='require(["RouteView.js"], function( s ) { s.cb_click_fieldset_route(2); })'>
 				                    <legend>
 				                    	Route 3
 				                        <span id="id_route2_distance_duration" style="display:None">
@@ -318,7 +324,9 @@
 				                </fieldset>
 				
 								<!-- Route #4 -->
-				                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:true" id="id_fieldset_route_3" style="display:none">
+				                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:true" id="id_fieldset_route_3" style="display:none"
+				                		  style="background:#b3daff"
+						                  onClick='require(["RouteView.js"], function( s ) { s.cb_click_fieldset_route(3); })'>
 				                    <legend>
 				                    	Route 4
 				                        <span id="id_route3_distance_duration" style="display:None">
@@ -379,7 +387,7 @@
 				                <br>
 				                <br>
 				
-				                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:true">
+				                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:true" style="background:#b3daff">
 				                    <legend>Configuration</legend>
 				                    <div style="width:100%" align="center">
 				                    
@@ -425,8 +433,8 @@
 				
 				                    <div style="width:100%" align="center">
 				
-				                        <div data-dojo-type="dijit/form/DropDownButton">
-				                            <span>Use current position for ...</span>
+				                        <div data-dojo-type="dijit/form/DropDownButton" style="display:none">
+				                            <span>Set Starting Position</span>
 				                            <div data-dojo-type="dijit/TooltipDialog">
 				                                <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" 
 						                         	    id="id_use_curr_position_for_org" >
