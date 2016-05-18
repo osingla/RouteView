@@ -29,6 +29,7 @@ define( function( m ) {
 	var directions_service_request = [];
 	var directions_renderer = [];
 	var polylines = [];
+    var route_bounds = [];
 	var xroute;
 	var cb_route_from_or_to_changed_handle = [];
 	var places = [];
@@ -150,9 +151,24 @@ define( function( m ) {
     	return first_hidden;
     }
 
+	function cb_show_all_routes( ) {
+	
+		if ( dijit.byId("id_btn_drive_0_1").get("disabled") )
+			return;
+		 
+        var is_show_all_routes = dijit.byId('id_check_show_all_routes').get('checked');
+        if ( !is_show_all_routes ) {
+            map.fitBounds( route_bounds[selected_route_index] );
+        }
+        else {
+        	var b = new google.maps.LatLngBounds;
+			route_bounds.forEach( function(e) { b.union(e); });
+            map.fitBounds( b );
+        }
+	}
+
 	function cb_click_use_route( route ) {
 
-console.log(1);	
         var is_route = dijit.byId('id_check_use_route_'+(route)).get( 'checked' );
     	require(["dojo/dom-style"], function( domStyle) {
 			if (is_route) {
@@ -172,7 +188,6 @@ console.log(1);
     
 	function cb_click_fieldset_route( route_index ) {
 
-console.log(2);	
     	require(["dojo/dom-style"], function( domStyle) {
 
 			for (var n = 0; n < MAX_NB_ROUTES; n++ ) {
@@ -393,7 +408,7 @@ console.log(2);
             var dist_meters = 0;
             var duration_secs = 0;
             console.log("XXXXXXXX - legs.length=" + legs.length);
-            route_bounds = new google.maps.LatLngBounds();
+            route_bounds[route_index] = new google.maps.LatLngBounds();
             polylines[route_index] = [];
             legs_bounds = [];
             for ( i = 0; i < legs.length; i++) {
@@ -421,7 +436,7 @@ console.log(2);
                     for ( var k=0; k < nextSegment.length;k++) {
                         polylines[route_index][i].getPath().push(nextSegment[k]);
                         legs_bounds[i].extend(nextSegment[k]);
-                        route_bounds.extend(nextSegment[k]);
+                        route_bounds[route_index].extend(nextSegment[k]);
                     }
                 }
                 
@@ -430,7 +445,8 @@ console.log(2);
             show_route_distance_duration( route_index, dist_meters, duration_secs );
 
 			polylines[route_index].forEach( function(e) { e.setMap(map); })
-            map.fitBounds( route_bounds );
+//            map.fitBounds( route_bounds[route_index] );
+			cb_show_all_routes();
 
     		dijit.byId('id_input_route').set( 'disabled', true );
     		
@@ -1931,6 +1947,7 @@ console.log( wp1 );
         initialize: function( ) { initialize(); },
 
 		cb_click_use_route: function( route ) { cb_click_use_route( route ); },
+		cb_show_all_routes: function( ) { cb_show_all_routes( ); },
 		
 		cb_click_fieldset_route: function( route_index ) { cb_click_fieldset_route( route_index ); },
 
