@@ -230,17 +230,22 @@
 
 									                    <div style="width:100%" align="center">
 									
-									                        <div data-dojo-type="dijit/form/DropDownButton" style="display:none">
+									                        <div data-dojo-type="dijit/form/DropDownButton" >
 									                            <span>Set Starting Position</span>
 									                            <div data-dojo-type="dijit/TooltipDialog">
-									                                <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" 
-											                         	    id="id_use_curr_position_for_org" >
-									                         	        origin
-									                                </button>
-									                                <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" 
-											                         	    id="id_use_curr_position_for_dest" >
-									                         	        destination
-									                                </button>
+									                            	<table>
+									                            		<tr>
+															                <td style="text-align:left; vertical-align:middle">
+										                            			<input id="id_is_addr_for_orig" data-dojo-type="dijit/form/CheckBox" />
+																			</td>
+																			<td>
+																				<input type="text" name="firstname" value=""
+        																			   dojoType="dijit.form.TextBox"
+        																				trim="true" id="id_addr_for_orig" maxlength="80"
+        																				propercase="true">
+        																			</td>
+									                            		</tr>
+									                            	</table>
 									                            </div>
 									                        </div>                        
 									

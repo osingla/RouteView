@@ -88,6 +88,8 @@ define( function( m ) {
         curr_dist = d;
         if ( d > eol ) {
             console.log( "Route " + route_index + " is done" );
+			if ( timer_animate != undefined ) 
+				clearTimeout( timer_animate );
             return;
         }
         
@@ -104,7 +106,8 @@ define( function( m ) {
         		marker_no_street_view.setPosition( null );
 		        var iad = polylines[route_index][curr_leg].GetIndexAtDistance(d);
         		var bearing = polylines[route_index][curr_leg].Bearing(iad);
-        		setTimeout( function() { panorama.setPov( { heading: bearing, pitch: 1 } ); }, 5 );
+//				console.log( d + " / " + eol + " --> " + bearing);
+        		timer_animate = setTimeout( function() { panorama.setPov( { heading: bearing, pitch: 1 } ); }, 5 );
         		panorama.setPosition( p );
 		    }
 	        if ( step > 0 )
@@ -445,7 +448,6 @@ define( function( m ) {
             show_route_distance_duration( route_index, dist_meters, duration_secs );
 
 			polylines[route_index].forEach( function(e) { e.setMap(map); })
-//            map.fitBounds( route_bounds[route_index] );
 			cb_show_all_routes();
 
     		dijit.byId('id_input_route').set( 'disabled', true );
@@ -473,7 +475,7 @@ define( function( m ) {
 
         }
 
-        }
+    }
 
     function show_error( message ) {
     	
@@ -502,7 +504,8 @@ define( function( m ) {
 
         console.log( dijit.byId('id_btn_pause').get( 'label' ) );
         if ( dijit.byId('id_btn_pause').get( 'label' ) == "Pause" ) {
-            clearTimeout( timer_animate );
+			if ( timer_animate != undefined ) 
+				clearTimeout( timer_animate );
         	dijit.byId('id_btn_pause').set( 'label', "Continue" );
             console.log( "curr_dist=" + curr_dist );
         }
@@ -528,19 +531,9 @@ define( function( m ) {
     	require(["dojo/dom-style"], function( domStyle) {
 			domStyle.set( "id_left_layout", "display", "" );
 		});
-/*		
-		var left_layout = dijit.byId('id_left_layout');
-		if ( !left_layout._showing ) {
-			left_layout.toggle();
-    	   	setTimeout( function() { do_stop(); }, 400 );
-            return;
-		}
-*/
     	
-        google.maps.event.trigger( map, 'resize' );
-        google.maps.event.trigger( panorama, 'resize' );
-
-        clearTimeout( timer_animate );
+		if ( timer_animate != undefined ) 
+			clearTimeout( timer_animate );
 
 		for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) 
 			dijit.byId('id_wp'+route_index+'_'+n).set( 'disabled', false );
@@ -923,16 +916,10 @@ define( function( m ) {
         		});
         		dijit.byId('id_autocomplete_restrict_list_country1').set( 'store', list_countries_store );
         		        		
-        		on( dijit.byId('id_use_curr_position_for_org'), "change", function( checked ) {
-        		    if ( checked )
-               			dijit.byId('id_use_curr_position_for_dest').set( 'checked', false );
+        		on( dijit.byId('id_is_addr_for_orig'), "change", function( checked ) {
+					dijit.byId( "id_addr_for_orig").set("disabled", !checked );
         	    });
         	    
-        		on( dijit.byId('id_use_curr_position_for_dest'), "change", function( checked ) {
-        		    if ( checked )
-               			dijit.byId('id_use_curr_position_for_org').set( 'checked', false );
-        	    });
-
         		on( dijit.byId('id_autocomplete_restrict_type'), "change", function( checked ) {
            		    domStyle.set( "id_autocomplete_restrict_li", "display", (checked) ? "" : "None" );
            		    apply_autocomplete_settings( );
@@ -961,7 +948,6 @@ define( function( m ) {
                 require(["dojo/ready", "dojo/aspect", "dijit/registry", "dojo/dom-style"], function(ready, aspect, registry, domStyle) {
                     ready( function() {
                     	aspect.after(dom.byId("id_left_layout"), "resize", function() {
-console.log("RESIZE!");
                             google.maps.event.trigger( map, 'resize' );
                             google.maps.event.trigger( panorama, 'resize' );
                         });
@@ -1018,7 +1004,7 @@ console.log("RESIZE!");
 						   	require(["dojo/dom"], function( dom ) {
 	    						dijit.byId("gps_loc_wp_"+route_index+"_"+waypoint_index).innerHTML = "<b>" + place.geometry.location.lat() + " " + place.geometry.location.lng() + "</b>";
 						   	});
-			            	setTimeout( function() { cb_route_from_or_to_changed(route_index, waypoint_index); }, interval, 250 );
+			            	setTimeout( function() { cb_route_from_or_to_changed(route_index, waypoint_index); }, interval, 25 );
 	                	});
 	       			}
        			}
@@ -1049,10 +1035,20 @@ console.log("RESIZE!");
        				});
             	}
    				
-   				if ( navigator.geolocation )
-   					if ( dijit.byId('id_use_curr_position_for_org').get( 'checked' ) || dijit.byId('id_use_curr_position_for_dest').get( 'checked' ) )
-       					navigator.geolocation.getCurrentPosition( got_current_position );
-        	    
+				var is_addr_for_orig = dijit.byId('id_is_addr_for_orig').get( 'checked' );
+				if (is_addr_for_orig) {
+					dijit.byId('id_wp0_0').set('value', dijit.byId('id_addr_for_orig').get( 'value'));
+					var geocoder = new google.maps.Geocoder();
+					geocoder.geocode( { 'address': dijit.byId('id_addr_for_orig').get( 'value')}, function(results, status) {
+						if ( status == google.maps.GeocoderStatus.OK ) {
+					    	map.setCenter(results[0].geometry.location);
+					    } 
+					    else {
+					    	console.log("Geocode was not successful for the following reason: " + status);
+					    }
+				    });
+				}
+				
             });
             
     	window.onerror = function(message, file, lineNumber) {
@@ -1064,34 +1060,6 @@ console.log("RESIZE!");
 
 	});
             	
-    }
-    
-    function got_current_position( pos ) {
-    
-    	var route = 0;
-    
-    	var latlng = {lat: pos.coords.latitude, lng: pos.coords.longitude};
-    	console.log( "Got current position" );
-    	got_location = true;
-		map.setCenter( latlng );
-        panorama.setPosition( latlng );
-    	var geocoder = new google.maps.Geocoder;
-    	geocoder.geocode({'location': latlng}, function(results, status) {
-    	    if ( status === google.maps.GeocoderStatus.OK ) {
-    	    	if ( results[0] ) {
-    	    		var addr = results[0].formatted_address;
-        	    	console.log( "current location: " + addr );
-   					if ( dijit.byId('id_use_curr_position_for_org').get( 'checked' ) ) {
-   	   					if ( dijit.byId('id_wp'+route+'_0').get( 'value' ) == "" )
-   	   	   					dijit.byId('id_wp'+route+'_0').set( 'value', addr );
-   					}
-   					else if ( dijit.byId('id_use_curr_position_for_dest').get( 'checked' ) ) {
-   	   					if ( dijit.byId('id_wp1').get( 'value' ) == "" )
-   	   	   					dijit.byId('id_wp1').set( 'value', addr );
-   					}
-    	    	}
-    	    }
-    	});
     }
     
     function apply_autocomplete_settings( ) {
@@ -1168,8 +1136,10 @@ console.log("RESIZE!");
     function cb_route_input( ) {
 		var new_pos = dijit.byId('id_input_route').get( 'value' );
 		new_pos = Math.round( new_pos );
-		if ( cb_move_to_dist != undefined )
+		if ( cb_move_to_dist != undefined ) {
 			clearTimeout( cb_move_to_dist );
+			cb_move_to_dist = undefined;
+		}
 		if ( new_pos == 0 )
 			new_pos = 50;
 		cb_move_to_dist = setTimeout( 'require(["RouteView.js"], function( s ) { s.move_to_dist('+new_pos+', false); })', 25 );
@@ -1303,6 +1273,22 @@ console.log("RESIZE!");
     	}
     	else if ( (origin != "") && (waypoint1 == "") && (destination == "") ) {
            	map.panTo( places[route_index][0].geometry.location );
+/*
+	        var is_show_all_routes = dijit.byId('id_check_show_all_routes').get('checked');
+	        if ( !is_show_all_routes ) {
+	           	map.panTo( places[route_index][0].geometry.location );
+	        }
+	        else {
+	        	if ( route_bounds.length == 1 ) {
+		           	map.panTo( places[route_index][0].geometry.location );
+	        	}
+	        	else {
+	        		var b = new google.maps.LatLngBounds;
+					route_bounds.forEach( function(e) { b.union(e); });
+					b.extend( places[route_index][0].geometry.location );
+				}
+	        }
+*/
     	}
     }
     
@@ -1376,6 +1362,12 @@ console.log("RESIZE!");
 
 		console.log( evt );    	
     	console.log( "Right click: " + evt.latLng );
+
+		if ( !dijit.byId("id_btn_stop").get("disabled") )
+			return;
+
+		if ( !dijit.byId("id_btn_pause").get("disabled") && (dijit.byId('id_btn_pause').get('label') == "Pause") )
+			return;
 
     	if ( dijit.byId("id_btn_drive_"+selected_route_index+"_1").get("disabled") )
     		return;
@@ -1595,14 +1587,14 @@ console.log( wp1 );
     	localStorage.setItem( "interval", interval );
     	console.log( "interval= " + interval );
     	
-        var use_curr_pos_for_org = dijit.byId('id_use_curr_position_for_org').get( 'checked' );
-    	localStorage.setItem( "use_curr_position_for_org", use_curr_pos_for_org );
-    	console.log( "use_curr_pos_for_org= " + use_curr_pos_for_org );
+        var is_addr_for_orig = dijit.byId('id_is_addr_for_orig').get( 'checked' );
+    	localStorage.setItem( "id_is_addr_for_orig", is_addr_for_orig );
+    	console.log( "is_addr_for_orig= " + is_addr_for_orig );
     		
-        var use_curr_pos_for_dest = dijit.byId('id_use_curr_position_for_dest').get( 'checked' );
-    	localStorage.setItem( "use_curr_position_for_dest", use_curr_pos_for_dest );
-    	console.log( "use_curr_pos_for_dest= " + use_curr_pos_for_dest );
-    	
+        var addr_for_orig = dijit.byId('id_addr_for_orig').get( 'value' );
+    	localStorage.setItem( "id_addr_for_orig", addr_for_orig );
+    	console.log( "addr_for_orig= " + addr_for_orig );
+    		
 	    var autocomplete_restrict_type = dijit.byId('id_autocomplete_restrict_type').get( 'checked' );
     	localStorage.setItem( "autocomplete_restrict_type", autocomplete_restrict_type );
     	console.log( "autocomplete_restrict_type= " + autocomplete_restrict_type );
@@ -1660,15 +1652,17 @@ console.log( wp1 );
     	if ( interval != null )
             dijit.byId('id_input_interval').set( 'value', parse(interval) );
     	
-    	var use_curr_pos_for_org = localStorage.getItem("use_curr_position_for_org");
-    	console.log( "Restored use_curr_position_for_org= " + use_curr_pos_for_org );
-    	if ( use_curr_pos_for_org )
-            dijit.byId('id_use_curr_position_for_org').set( 'checked', parse(use_curr_pos_for_org) );
+    	var is_addr_for_orig = localStorage.getItem("id_is_addr_for_orig");
+    	console.log( "Restored is_addr_for_orig= " + is_addr_for_orig );
+    	if ( is_addr_for_orig )
+            dijit.byId('id_is_addr_for_orig').set( 'checked', parse(is_addr_for_orig) );
     	
-    	var use_curr_pos_for_dest = localStorage.getItem("use_curr_position_for_dest");
-    	console.log( "Restored use_curr_position_for_dest= " + use_curr_pos_for_dest );
-    	if ( use_curr_pos_for_dest )
-            dijit.byId('id_use_curr_position_for_dest').set( 'checked', parse(use_curr_pos_for_dest) );
+    	var addr_for_orig = localStorage.getItem("id_addr_for_orig");
+    	console.log( "Restored addr_for_orig= " + addr_for_orig );
+    	if ( addr_for_orig ) {
+            dijit.byId('id_addr_for_orig').set( 'value', addr_for_orig );
+			dijit.byId( "id_addr_for_orig").set("disabled", !is_addr_for_orig );
+        }
     	
     	var autocomplete_restrict_type = localStorage.getItem("autocomplete_restrict_type");
     	console.log( "Restored autocomplete_restrict_type= " + autocomplete_restrict_type );
