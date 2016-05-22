@@ -29,6 +29,8 @@
  		<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dijit/themes/claro/claro.css" media="screen" >
  		<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dojox/layout/resources/ExpandoPane.css" media="screen" >
 
+		<script src="https://apis.google.com/js/client.js?onload=load"></script>
+
 		<script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dojo/dojo.js"
             data-dojo-config="isDebug: true, async: true, parseOnLoad: true">
         </script>
@@ -70,7 +72,7 @@
                         <td valign="middle" align="left" id="id_mobile_version">
                         	<a href="https://rawgit.com/osingla/RouteView/master/RouteViewMobile.html" target="_blank">Mobile&nbsp;Version</a>
                 		</td>
-                        <td valign="middle" align="center" style="width:100%"" >
+                        <td valign="middle" align="center" style="width:100%" >
 			                <b>RouteView - Google StreetView Player - Virtual Ride using Google Street View</b>&nbsp;<b id='id_route_info' ></b>
                 		</td>
                         <td valign="middle" align="right" id='id_link_to_github_project'>
@@ -345,10 +347,22 @@
 									                        <table>
 									                            <tr>
 									                            	<td>
-													                    <button dojoType="dijit.form.ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" type="button" id="id_btn_street_view" onclick='require(["RouteView.js"], function( s ) { s.do_street_view(); })' disabled>Show all Street View</button>
+													                    <button dojoType="dijit.form.ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" type="button" id="id_btn_street_view" 
+													                     onclick='require(["RouteView.js"], function( s ) { s.do_street_view(); })' disabled>Show all Street View</button>
 									                            	</td>
 									                            	<td>
-													                    <button dojoType="dijit.form.Button" type="button" style="Display: " id="id_btn_save_gpx" onclick='require(["RouteView.js"], function( s ) { s.do_save_gpx(); })' disabled>Save GPX file</button>
+													                    <button dojoType="dijit.form.Button" type="button" style="Display: " id="id_btn_save_gpx" 
+													                     onclick='require(["RouteView.js"], function( s ) { s.do_save_gpx(); })' disabled>Save GPX file</button>
+									                            	</td>
+									                            </tr>
+									                            <tr>
+                        											<td valign="middle" align="center">
+													                    <button dojoType="dijit.form.Button" type="button" style="Display: " id="id_btn_create_long_url" 
+													                     onclick='require(["RouteView.js"], function( s ) { s.do_create_long_url(); })' disabled>Create Long URL</button>
+									                            	</td>
+                        											<td valign="middle" align="center">
+													                    <button dojoType="dijit.form.Button" type="button" style="Display: " id="id_btn_create_short_url" disabled 
+													                     onclick='require(["RouteView.js"], function( s ) { s.do_create_short_url(); })' disabled>Create Short URL</button>
 									                            	</td>
 									                            </tr>
 									                        </table>
