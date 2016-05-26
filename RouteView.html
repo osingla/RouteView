@@ -179,7 +179,7 @@
 				                    		</td>
 				                    		
 				                            <td align="center" valign="middle">
-				                        		<div data-dojo-type="dijit/form/DropDownButton" data-dojo-props='autoWidth:false'>
+				                        		<div data-dojo-type="dijit/form/DropDownButton" data-dojo-props='autoWidth:false' id="id_configuration_dlg">
 				                            		<span>Configuration</span>
 						                            <div data-dojo-type="dijit/TooltipDialog">
 
@@ -373,15 +373,21 @@
 
 						                            </div>
 				                            	</div>
+							                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_configuration_dlg',position:['below-centered'],showDelay:750,hideDelay:0">
+													This dialog let you configure a few things like the distance and time intervals between images,<br>
+													a default starting point, autocomplete settings, etc...
+							                    </div>
 				                    		</td>
 				                    		
 				                            <td align="right" valign="middle">
-			
 						                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" style="font-size: 100%;"
   								                        onClick='require(["RouteView.js"], function( s ) { s.cb_click_use_route(1); })' id="id_check_use_route_1" >
 													Route 2
 							                    </button>
-							
+							                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_use_route_1',position:['below-centered'],showDelay:750,hideDelay:0">
+													This allow you to create a new Route, with a starting point, a destination,<br>
+													and up to 8 waypoints in between 
+							                    </div>
 				                    		</td>
 				                    	</tr>
 				                    </table>
@@ -445,12 +451,14 @@
 				
 				                    		</td>
 				                            <td align="right" valign="middle">
-				
-							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" style="font-size: 100%;"
+						                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" style="font-size: 100%;"
 									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_use_route(2); })' id="id_check_use_route_2" >
 							                         Route 3
-							                        </button>
-							
+						                        </button>
+							                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_use_route_2',position:['below-centered'],showDelay:750,hideDelay:0">
+													This allow you to create a new Route, with a starting point, a destination,<br>
+													and up to 8 waypoints in between 
+							                    </div>
 				                    		</td>
 				                    	</tr>
 				                    </table>
@@ -514,12 +522,14 @@
 				
 				                    		</td>
 				                            <td align="right" valign="middle">
-				
-							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" style="font-size: 100%;"
+						                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" style="font-size: 100%;"
 									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_use_route(3); })' id="id_check_use_route_3" >
 							                         Route 4
-							                        </button>
-							
+						                        </button>
+							                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_use_route_3',position:['below-centered'],showDelay:750,hideDelay:0">
+													This allow you to create a new Route, with a starting point, a destination,<br>
+													and up to 8 waypoints in between 
+							                    </div>
 				                    		</td>
 				                    	</tr>
 				                    </table>
