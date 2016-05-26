@@ -253,6 +253,8 @@ define( function( m ) {
     
     function do_route( route_index ) {
 
+	    dijit.byId("id_pane_standby").show();
+
     	if ( directions_renderer[route_index] != undefined ) {
     		console.log( "Delete current route " + route_index )
     		directions_renderer[route_index].setMap( null );
@@ -321,6 +323,8 @@ define( function( m ) {
 				index_waypoint = new_dir.request.Xc;
             if (new_dir.request.Yc != undefined)
 				index_waypoint = new_dir.request.Yc;
+            if (new_dir.request.Uc != undefined)
+				index_waypoint = new_dir.request.Uc;
             if (new_dir.request.Vc != undefined)
 				index_waypoint = new_dir.request.Vc;
             if ( index_waypoint != undefined ) {
@@ -403,6 +407,8 @@ define( function( m ) {
 
         if ( status == google.maps.DirectionsStatus.OK ) {
 
+		    dijit.byId("id_pane_standby").hide();
+
 			console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 			console.log( response );
 			var route_index = directions_service_request.indexOf( response.request );
@@ -478,6 +484,8 @@ define( function( m ) {
         }
         else {
         	
+		    dijit.byId("id_pane_standby").hide();
+
         	var message = "?";
             if ( status == google.maps.DirectionsStatus.UNKNOWN_ERROR )
             	message = "A directions request could not be processed due to a server error. The request may succeed if you try again.";
@@ -497,7 +505,7 @@ define( function( m ) {
 
     }
 
-    function do_show_message( is_error, message, title ) {
+    function do_show_message( is_error, title, message ) {
     	
     	require(["dijit/Dialog", "dojo/domReady!"], function(Dialog){
 
@@ -507,7 +515,7 @@ define( function( m ) {
     			"</div>";
     		
     		dlg_error = new Dialog({
-    	        title: (is_error) ? "Error" : title,
+    	        title: title,
     	        closable: false,
     	        duration:250,
     	        content: message,
@@ -519,11 +527,38 @@ define( function( m ) {
     }
     
     function show_error( message ) {
-    	do_show_message( true, message );
+    	do_show_message( true, "Error", message );
     }
     
     function show_message( title, message ) {
-    	do_show_message( false, message, title );
+    	do_show_message( false, title, message );
+    }
+    
+    function do_copy_message( title, message, text ) {
+    	
+    	require(["dijit/Dialog", "dojo/domReady!"], function(Dialog){
+
+			var d =  message + "<br>" + 
+				"<br>" +
+				"<p><textarea readonly row=1 class='js-copytextarea' style='width:100%'>" + text + "</textarea></p>" +
+				"<br>" +
+				"<hr>" +
+				"<br>" +
+    			"<div align='right'>" +
+    			"  <button dojoType='dijit/form/Button' type='button' onclick='require([\"RouteView.js\"], function( s ) { s.cb_copy_long_url(); dlg_copy_text.hide(); })'>Copy to Clipboard</button>" +
+    			"  <button dojoType='dijit/form/Button' type='button' onclick='dlg_copy_text.hide()'>Cancel</button>" +
+    			"</div>";
+
+    		dlg_copy_text = new Dialog({
+    	        title: title,
+    	        closable: false,
+    	        duration:250,
+    	        content: d,
+    	        style: "min-width:450px; min-heigh:350px"
+    	    });
+    		
+    		dlg_copy_text.show();
+    	});
     }
     
     function do_pause( ) {
@@ -596,8 +631,8 @@ define( function( m ) {
             ready( function() {
    				load_settings( );
 
-				dojoConfig = { gmaps: { v: '3.exp', libraries: 'places,geometry' } };
-				require(["//maps.google.com/maps/api/js?sensor=false&libraries=places"], function( ) {
+				dojoConfig = { gmaps: { v: '3.22', libraries: 'places,geometry' } };
+				require(["//maps.google.com/maps/api/js?v=3.23&sensor=false&libraries=places"], function( ) {
 					require(["v3_epoly.js"], function( ) {
 						require(["RouteView.js", "dojo/domReady!"], function( ) {
 			 				initialize( );
@@ -722,6 +757,33 @@ define( function( m ) {
 		});
 	}
 
+	function decode_url_params() {
+	
+		var query = location.search.substr(1);
+	  	var result = [];
+		query.split("&").forEach(function(part) {
+	    	var item = part.split("=");
+	    	console.log(item);
+	    	if (item != "") {
+		    	result.push( decodeURIComponent(item[1]) );
+			    console.log( decodeURIComponent(item[1]) );
+			}
+	  	});	
+
+	  	console.log(result);
+		var nb_routes = result.length;
+		console.log( "nb_routes=" + nb_routes );
+		var waypoints = [];
+	  	for (var n = 0; n < nb_routes; n++)
+	  		waypoints[n] = result[n].split(";");
+	  	console.log( waypoints );
+	  	console.log( waypoints.length );
+	  	if (waypoints.length == 0)
+	  		return false;
+	  	
+	  	return true;
+	}
+
     function initialize( ) {
 
     	require(["dojo/dom", "dojo/on", "dojo/dom-style", "dojo/dom-geometry", "dojo/store/Memory", "dojo/ready"], 
@@ -730,10 +792,10 @@ define( function( m ) {
             ready( function() {
 
             	var map_options = {
+// 				   animatedZoom: false,
                    zoom: 14
                 };
                 map = new google.maps.Map( document.getElementById('id_map_canvas'), map_options );
-
 				create_route_dlg();
 
 				map.set('styles', [
@@ -1073,6 +1135,8 @@ define( function( m ) {
        					}
        				});
             	}
+   				
+   				decode_url_params();
    				
 				var is_addr_for_orig = dijit.byId('id_is_addr_for_orig').get( 'checked' );
 				if (is_addr_for_orig) {
@@ -1449,7 +1513,8 @@ define( function( m ) {
 
     function do_create_long_url( ) {
 
-		var url = location.origin + "?";
+		var url = location.origin + location.pathname;
+		url += "?";
 
 		var nb_routes = 0;
 		var nb_wp = [];
@@ -1458,16 +1523,17 @@ define( function( m ) {
         		var display = domStyle.get( 'id_fieldset_route_'+route_index, "display" );
         		if (display == "none")
         			break;
+				if (route_index > 0)
+					url += "&"; 
+				url += "route"+(route_index+1)+"="; 
         		nb_routes++;
 				nb_wp[route_index] = 0;
-				if (route_index > 0)
-					url += encodeURIComponent(";"); 
 	            for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
 	        		var display = domStyle.get( 'id_tr'+route_index+'_' + n, "display" );
 	            	if ( display != "none" ) {
 	            		console.log( n + " ==> " + places[route_index][n].name + " : " + places[route_index][n].geometry.location.lat() + " , " + places[route_index][n].geometry.location.lng() );
 						if (n > 0)
-							url += encodeURIComponent(","); 
+							url += encodeURIComponent(";"); 
 						var v = dijit.byId('id_wp'+route_index+'_'+n).get( 'value');
 		    	        url += encodeURIComponent(v);
 	            	}
@@ -1475,8 +1541,8 @@ define( function( m ) {
 	            console.log("Route " + route_index + " : " + nb_wp[route_index] + " waypoints");
     		}
  		})
-    	
-		show_message("Long URL", "Here is the long URL:<br><br>"+url+"<br>");
+
+		do_copy_message( "Long URL", "Long URL to create these routes", url );
     
     }
 
@@ -1900,6 +1966,23 @@ return;
 	    dlg.show();
 	}
 
+	function cb_copy_long_url( ) {
+	
+		console.log(1);
+		
+  var copyTextarea = document.querySelector('.js-copytextarea');
+  copyTextarea.select();
+
+  try {
+    var successful = document.execCommand('copy');
+    var msg = successful ? 'successful' : 'unsuccessful';
+    console.log('Copying text command was ' + msg);
+  } catch (err) {
+    console.log('Oops, unable to copy');
+  }
+		
+	}
+
     function parse( type ) {
     	return typeof type == 'string' ? JSON.parse(type) : type;
     }
@@ -2308,6 +2391,8 @@ return;
 		cb_click_no_toll: function( route_index ) { cb_click_no_toll( route_index ); },
 
 		cb_open_settings: function( ) { cb_open_settings( ); },
+
+		cb_copy_long_url: function( ) { cb_copy_long_url( ); },
 		
 		save_settings: 		function( ) { save_settings(); },
 		clear_settings: 	function( ) { clear_settings(); },
