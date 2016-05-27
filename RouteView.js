@@ -680,6 +680,14 @@ define( function( m ) {
 						route_index: route_index,
 						waypoint_index: n
 			  		}, id_td3); 
+
+			  		new Tooltip({
+	 			        connectId: ["id_btn_add_"+route_index+'_'+n],
+	 			        position:['below-centered'],
+	 			        label: "Create a new Waypoint",
+	 			        showDelay:650,
+	 			        hideDelay:0
+			  		});
 	
 			  		var id_td4 = domConstruct.create("td", { 
 			  			align:"right", 
@@ -695,6 +703,14 @@ define( function( m ) {
 						waypoint_index: n
 			  		}, id_td4);
 	
+			  		new Tooltip({
+	 			        connectId: ["id_btn_remove_"+route_index+'_'+n],
+	 			        position:['below-centered'],
+	 			        label: "Delete the Waypoint",
+	 			        showDelay:650,
+	 			        hideDelay:0
+			  		});
+	
 			  		var id_td5 = domConstruct.create("td", { 
 			  			align:"right", 
 			  			valign:"middle"
@@ -709,6 +725,14 @@ define( function( m ) {
 						waypoint_index: n
 			  		}, id_td5);
 	
+			  		new Tooltip({
+	 			        connectId: ["id_btn_up_"+route_index+'_'+n],
+	 			        position:['below-centered'],
+	 			        label: "Move the Waypoint up",
+	 			        showDelay:650,
+	 			        hideDelay:0
+			  		});
+	
 			  		var id_td6 = domConstruct.create("td", { 
 			  			align:"right", 
 			  			valign:"middle"
@@ -722,6 +746,14 @@ define( function( m ) {
 						route_index: route_index,
 						waypoint_index: n
 			  		}, id_td6);
+	
+			  		new Tooltip({
+	 			        connectId: ["id_btn_down_"+route_index+'_'+n],
+	 			        position:['below-centered'],
+	 			        label: "Move the Waypoint down",
+	 			        showDelay:650,
+	 			        hideDelay:0
+			  		});
 	
 			  		var tooltip = new Tooltip({
 			  			id: "gps_loc_wp_"+route_index+"_"+n,
@@ -750,6 +782,15 @@ define( function( m ) {
 						route_index: route_index,
 						waypoint_index: n-1
 			  		}, id_td);
+
+			  		new Tooltip({
+	 			        connectId: ["id_btn_drive_"+route_index+'_'+n],
+	 			        position:['below-centered'],
+	 			        label: "Virtual Ride!<br>Play the route using StreetView",
+	 			        showDelay:650,
+	 			        hideDelay:0
+			  		});
+	
 				}
 	
 			}
