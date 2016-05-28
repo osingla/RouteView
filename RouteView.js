@@ -160,7 +160,7 @@ define( function( m ) {
         var first_hidden = MAX_NB_WAYPOINTS + 2;
     	require(["dojo/dom-style"], function( domStyle) {
             for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
-            	var id = 'id_tr' + route_index + '_' + n;
+            	var id = 'id_tr_' + route_index + '_' + n;
         		var display = domStyle.get( id, "display" );
 //            	console.log( id + " --> " + display );
             	if ( display == "none" ) {
@@ -274,13 +274,13 @@ define( function( m ) {
         var first_hidden = find_first_hidden( route_index );
     	console.log( "first_hidden=" + first_hidden );
         
-        var start_location = dijit.byId('id_wp'+route_index+'_0').get( 'value' );
+        var start_location = dijit.byId('id_wp_'+route_index+'_0').get( 'value' );
         console.log( "from = " + start_location );
 
         var way_points = [];
         for ( var n = 1; n < first_hidden-1; n++ ) {
         	
-            waypt = dijit.byId('id_wp'+route_index+'_'+n).get( 'value' );
+            waypt = dijit.byId('id_wp_'+route_index+'_'+n).get( 'value' );
             console.log( "n=" + n + " => [" + waypt + "]" );
             if ( waypt != "" ) {
                 way_points.push({
@@ -290,7 +290,7 @@ define( function( m ) {
             }
         }
 
-        var end_location = dijit.byId('id_wp'+route_index+'_'+(first_hidden-1)).get( 'value' );
+        var end_location = dijit.byId('id_wp_'+route_index+'_'+(first_hidden-1)).get( 'value' );
         console.log( "to   = " + end_location );
 
         street_view_check[route_index] = new google.maps.StreetViewService( );
@@ -348,8 +348,8 @@ define( function( m ) {
                 	    else {
                 	    	cb_click_btn_add(route_index, new_nb_waypoints)
                 	    	for (var n = old_nb_waypoints - 1; n >= index_waypoint; n--) {
-						        var w = dijit.byId('id_wp'+route_index+'_'+n).get( 'value' );
-						        dijit.byId('id_wp'+route_index+'_'+(n+1)).set( 'value', w );
+						        var w = dijit.byId('id_wp_'+route_index+'_'+n).get( 'value' );
+						        dijit.byId('id_wp_'+route_index+'_'+(n+1)).set( 'value', w );
 						        places[route_index][n+1] = places[route_index][n];
                 	    	}
                 	    	change_waypoint( route_index, index_waypoint, place.formatted_address );
@@ -599,18 +599,15 @@ define( function( m ) {
 
     	require(["dojo/dom-style"], function( domStyle) {
 			domStyle.set( "id_left_layout", "display", "" );
+            		document.getElementById("td_map_canvas").style.width = "100%";
+		            document.getElementById("td_panorama").style.width = "0%";
+			        google.maps.event.trigger( map, 'resize' );
+			        google.maps.event.trigger( panorama, 'resize' );
 		});
     	
 		if ( timer_animate != undefined ) 
 			clearTimeout( timer_animate );
 
-//		for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) 
-//			dijit.byId('id_wp'+route_index+'_'+n).set( 'disabled', false );
-
-//		dijit.byId('id_check_no_hwy_'+route_index).set( 'disabled', false );
-//		dijit.byId('id_check_no_toll_'+route_index).set( 'disabled', false );
-
-//		dijit.byId('id_btn_street_view').set( 'disabled', false );
 		dijit.byId('id_btn_pause').set( 'disabled', true );
     	dijit.byId('id_btn_pause').set( 'label', "Pause" );
 		dijit.byId('id_btn_stop').set( 'disabled', true );
@@ -653,18 +650,20 @@ define( function( m ) {
 				for (var n = 0; n < MAX_NB_WAYPOINTS+2; n++) { 
 	
 			  		var id_tr = domConstruct.create("tr", { 
-			  			id: "id_tr"+route_index+"_"+n,
+			  			id: "id_tr_"+route_index+"_"+n,
 			  			style: "display:" + ((n < 2) ? "" : "None") 
 			  		}, "id_table_route"+route_index, "last");
 			  		domConstruct.create("td", { innerHTML:String.fromCharCode(n+65)+"&nbsp;", align:"right", valign:"middle"}, id_tr, "first");
 	
 			  		var id_td2 = domConstruct.create("td", { align:"left", valign:"middle"}, id_tr, "last");
 			  		var input = new TextBox({
-			  			id: "id_wp"+route_index+'_'+n,
+			  			id: "id_wp_"+route_index+'_'+n,
 			  			type: "text", 
 			  			style: "width:22em", 
 			  			trim: true,
-			  			intermediateChanges: false
+			  			intermediateChanges: false,
+			  			['route_index']: route_index,
+			  			['waypoint_index']: n 
 			  		}, id_td2, "last");
 	
 			  		var id_td3 = domConstruct.create("td", { 
@@ -682,10 +681,11 @@ define( function( m ) {
 			  		}, id_td3); 
 
 			  		new Tooltip({
+	 			        id: ["id_tooltip_btn_add_"+route_index+'_'+n],
 	 			        connectId: ["id_btn_add_"+route_index+'_'+n],
 	 			        position:['below-centered'],
 	 			        label: "Create a new Waypoint",
-	 			        showDelay:650,
+	 			        showDelay:999999,
 	 			        hideDelay:0
 			  		});
 	
@@ -704,10 +704,11 @@ define( function( m ) {
 			  		}, id_td4);
 	
 			  		new Tooltip({
+						id: "id_tooltip_btn_remove_"+route_index+'_'+n,
 	 			        connectId: ["id_btn_remove_"+route_index+'_'+n],
 	 			        position:['below-centered'],
 	 			        label: "Delete the Waypoint",
-	 			        showDelay:650,
+	 			        showDelay:999999,
 	 			        hideDelay:0
 			  		});
 	
@@ -726,10 +727,11 @@ define( function( m ) {
 			  		}, id_td5);
 	
 			  		new Tooltip({
+	 			        id: ["id_tooltip_btn_up_"+route_index+'_'+n],
 	 			        connectId: ["id_btn_up_"+route_index+'_'+n],
 	 			        position:['below-centered'],
 	 			        label: "Move the Waypoint up",
-	 			        showDelay:650,
+	 			        showDelay:999999,
 	 			        hideDelay:0
 			  		});
 	
@@ -748,16 +750,17 @@ define( function( m ) {
 			  		}, id_td6);
 	
 			  		new Tooltip({
+	 			        id: ["id_tooltip_btn_down_"+route_index+'_'+n],
 	 			        connectId: ["id_btn_down_"+route_index+'_'+n],
 	 			        position:['below-centered'],
 	 			        label: "Move the Waypoint down",
-	 			        showDelay:650,
+	 			        showDelay:999999,
 	 			        hideDelay:0
 			  		});
 	
 			  		var tooltip = new Tooltip({
 			  			id: "gps_loc_wp_"+route_index+"_"+n,
-	 			        connectId: ["id_wp"+route_index+"_"+n],
+	 			        connectId: ["id_wp_"+route_index+"_"+n],
 	 			        position:['after-centered'],
 	 			        showDelay:650,
 	 			        hideDelay:0
@@ -784,10 +787,11 @@ define( function( m ) {
 			  		}, id_td);
 
 			  		new Tooltip({
+						id: "id_tooltip_btn_drive_"+route_index+"_"+n,
 	 			        connectId: ["id_btn_drive_"+route_index+'_'+n],
 	 			        position:['below-centered'],
 	 			        label: "Virtual Ride!<br>Play the route using StreetView",
-	 			        showDelay:650,
+	 			        showDelay:9999999,
 	 			        hideDelay:0
 			  		});
 	
@@ -824,6 +828,113 @@ define( function( m ) {
 	  	
 	  	return true;
 	}
+	
+	function set_map_style( ) {
+
+		map.set('styles', [
+		    {
+		        "featureType": "administrative",
+		        "stylers": [
+		            {
+		                "visibility": "on"
+		            }
+		        ]
+		    },
+		    {
+		        "featureType": "poi",
+		        "stylers": [
+		            {
+		                "visibility": "simplified"
+		            }
+		        ]
+		    },
+		    {
+		        "featureType": "road",
+		        "elementType": "labels",
+		        "stylers": [
+		            {
+		                "visibility": "on"
+		            }
+		        ]
+		    },
+		    {
+		        "featureType": "water",
+		        "stylers": [
+		            {
+		                "visibility": "simplified"
+		            }
+		        ]
+		    },
+		    {
+		        "featureType": "transit",
+		        "stylers": [
+		            {
+		                "visibility": "simplified"
+		            }
+		        ]
+		    },
+		    {
+		        "featureType": "landscape",
+		        "stylers": [
+		            {
+		                "visibility": "simplified"
+		            }
+		        ]
+		    },
+		    {
+		        "featureType": "road.local",
+		        "stylers": [
+		            {
+		                "visibility": "simplified"
+		            },
+		            {
+		                "lightness": 0
+		            }
+		        ]
+		    },
+		    {
+		        "featureType": "road.highway",
+		        "elementType": "geometry",
+		        "stylers": [
+		            {
+		                "visibility": "on",
+		            }
+		            
+		        ]
+		    },
+		    {
+		        "featureType": "water",
+		        "stylers": [
+		            {
+		                "color": "#84afa3"
+		            },
+		            {
+		                "lightness": 52
+		            }
+		        ]
+		    },
+		    {
+		        "stylers": [
+		            {
+		                "saturation": -17
+		            },
+		            {
+		                "gamma": 0.36
+		            }
+		        ]
+		    },
+		    {
+		        "featureType": "transit.line",
+		        "elementType": "geometry",
+		        "stylers": [
+		            {
+		                "color": "#3f518c"
+		            }
+		        ]
+		    }
+		]);
+
+	}
 
     function initialize( ) {
 
@@ -839,108 +950,7 @@ define( function( m ) {
                 map = new google.maps.Map( document.getElementById('id_map_canvas'), map_options );
 				create_route_dlg();
 
-				map.set('styles', [
-				    {
-				        "featureType": "administrative",
-				        "stylers": [
-				            {
-				                "visibility": "on"
-				            }
-				        ]
-				    },
-				    {
-				        "featureType": "poi",
-				        "stylers": [
-				            {
-				                "visibility": "simplified"
-				            }
-				        ]
-				    },
-				    {
-				        "featureType": "road",
-				        "elementType": "labels",
-				        "stylers": [
-				            {
-				                "visibility": "on"
-				            }
-				        ]
-				    },
-				    {
-				        "featureType": "water",
-				        "stylers": [
-				            {
-				                "visibility": "simplified"
-				            }
-				        ]
-				    },
-				    {
-				        "featureType": "transit",
-				        "stylers": [
-				            {
-				                "visibility": "simplified"
-				            }
-				        ]
-				    },
-				    {
-				        "featureType": "landscape",
-				        "stylers": [
-				            {
-				                "visibility": "simplified"
-				            }
-				        ]
-				    },
-				    {
-				        "featureType": "road.local",
-				        "stylers": [
-				            {
-				                "visibility": "simplified"
-				            },
-				            {
-				                "lightness": 0
-				            }
-				        ]
-				    },
-				    {
-				        "featureType": "road.highway",
-				        "elementType": "geometry",
-				        "stylers": [
-				            {
-				                "visibility": "on",
-				            }
-				            
-				        ]
-				    },
-				    {
-				        "featureType": "water",
-				        "stylers": [
-				            {
-				                "color": "#84afa3"
-				            },
-				            {
-				                "lightness": 52
-				            }
-				        ]
-				    },
-				    {
-				        "stylers": [
-				            {
-				                "saturation": -17
-				            },
-				            {
-				                "gamma": 0.36
-				            }
-				        ]
-				    },
-				    {
-				        "featureType": "transit.line",
-				        "elementType": "geometry",
-				        "stylers": [
-				            {
-				                "color": "#3f518c"
-				            }
-				        ]
-				    }
-				]);
+				set_map_style( );
 
                 var panorama_options = {
                     pov: {
@@ -1110,15 +1120,29 @@ define( function( m ) {
            		});
         */
 
-/*                
-        		for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) { 
-            		on( dom.byId('id_wp'+n), "change", function( evt ) {
-                		console.log( "Change: " );
-                		if ( cb_route_from_or_to_changed_handle != undefined )
-                			clearTimeout( cb_route_from_or_to_changed_handle );
-                		cb_route_from_or_to_changed_handle = setTimeout( 'require(["RouteView.js"], function( s ) { s.cb_route_from_or_to_changed(); })', 250 );
-           			});
-        		}
+				for (var r = 0; r < MAX_NB_ROUTES; r++) {
+					cb_route_from_or_to_changed_handle[r] = [];
+					for (var n = 0; n < MAX_NB_WAYPOINTS+2; n++)
+						cb_route_from_or_to_changed_handle[r][n] = undefined;
+				}
+
+/*
+       			for ( var route = 0; route < MAX_NB_ROUTES; route++ ) {
+	        		for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) { 
+	            		on( dom.byId('id_wp_'+route+"_"+n), "change", function( evt ) {
+		            		console.log( evt.target );
+	            			var id = dijit.byId(evt.target.id);
+	            			console.log(id);
+	            			var route_index = id.get('route_index');
+	            			var waypoint_index = id.get('waypoint_index');
+	                		console.log( "Change: route:" + route_index + " waypoint:" + waypoint_index );
+	                		if ( cb_route_from_or_to_changed_handle[route_index][waypoint_index] != undefined )
+	                			clearTimeout( cb_route_from_or_to_changed_handle[route_index][waypoint_index] );
+	                		cb_route_from_or_to_changed_handle[route_index][waypoint_index] = setTimeout( 
+			            		function() { cb_route_from_or_to_changed(route_index, waypoint_index); }, interval, 250 );
+	           			});
+	        		}
+       			}
 */
 
        			autocompletes = [];
@@ -1127,7 +1151,7 @@ define( function( m ) {
 	       			autocompletes[route] = [];
 	       			places[route] = [];
 	       			for ( var n = 0; n < MAX_NB_WAYPOINTS+2 - 1; n++ ) { 
-	       				autocompletes[route][n] = new google.maps.places.Autocomplete( dom.byId('id_wp'+route+'_'+n) );
+	       				autocompletes[route][n] = new google.maps.places.Autocomplete( dom.byId('id_wp_'+route+'_'+n) );
 	       				google.maps.event.clearListeners( autocompletes[route][n], 'place_changed' );
 	       				autocompletes[route][n].addListener('place_changed', function( ) {
 		       				console.log("ZZZZZ");
@@ -1140,13 +1164,15 @@ define( function( m ) {
 	                		console.log( autocompletes[route_index][waypoint_index] );
 	                		var place = autocompletes[route_index][waypoint_index].getPlace();
 	                		console.log( place );
-	                		if ( cb_route_from_or_to_changed_handle[waypoint_index] != undefined )
-	                			clearTimeout( cb_route_from_or_to_changed_handle[waypoint_index] );
+	                		if ( cb_route_from_or_to_changed_handle[route_index][waypoint_index] != undefined )
+	                			clearTimeout( cb_route_from_or_to_changed_handle[route_index][waypoint_index] );
 	                		places[route_index][waypoint_index] = place;
 						   	require(["dojo/dom"], function( dom ) {
-	    						dijit.byId("gps_loc_wp_"+route_index+"_"+waypoint_index).innerHTML = "<b>" + place.geometry.location.lat() + " " + place.geometry.location.lng() + "</b>";
+						   		if ( place.geometry && place.geometry.location )
+	    							dijit.byId("gps_loc_wp_"+route_index+"_"+waypoint_index).innerHTML = "<b>" + place.geometry.location.lat() + " " + place.geometry.location.lng() + "</b>";
 						   	});
-			            	setTimeout( function() { cb_route_from_or_to_changed(route_index, waypoint_index); }, interval, 25 );
+			            	cb_route_from_or_to_changed_handle[route_index][waypoint_index] = setTimeout( 
+			            		function() { cb_route_from_or_to_changed(route_index, waypoint_index); }, interval, 250 );
 	                	});
 	       			}
        			}
@@ -1225,7 +1251,7 @@ define( function( m ) {
 		window.onkeydown = function(evt) {
 			var prev_ctrl_down = ctrl_down;
 			ctrl_down = ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == true));
-			console.log("Ctrl Down");
+//			console.log("Ctrl Down");
 			if (ctrl_down && !prev_ctrl_down) {
 			}
 		}
@@ -1233,7 +1259,7 @@ define( function( m ) {
 		window.onkeyup = function(evt) {
 		
 			var prev_ctrl_down = ctrl_down;
-			console.log(evt);
+//			console.log(evt);
 			var no_cd = ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == false));
 			
 			if (prev_ctrl_down && no_cd) {
@@ -1570,12 +1596,12 @@ define( function( m ) {
         		nb_routes++;
 				nb_wp[route_index] = 0;
 	            for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
-	        		var display = domStyle.get( 'id_tr'+route_index+'_' + n, "display" );
+	        		var display = domStyle.get( 'id_tr_'+route_index+'_' + n, "display" );
 	            	if ( display != "none" ) {
 	            		console.log( n + " ==> " + places[route_index][n].name + " : " + places[route_index][n].geometry.location.lat() + " , " + places[route_index][n].geometry.location.lng() );
 						if (n > 0)
 							url += encodeURIComponent(";"); 
-						var v = dijit.byId('id_wp'+route_index+'_'+n).get( 'value');
+						var v = dijit.byId('id_wp_'+route_index+'_'+n).get( 'value');
 		    	        url += encodeURIComponent(v);
 	            	}
 	            }
@@ -1620,7 +1646,7 @@ define( function( m ) {
         		nb_routes++;
 				nb_wp[route_index] = 0;
 	            for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
-	        		var display = domStyle.get( 'id_tr'+route_index+'_' + n, "display" );
+	        		var display = domStyle.get( 'id_tr_'+route_index+'_' + n, "display" );
 	            	if ( display != "none" ) {
 	            		console.log( n + " ==> " + places[route_index][n].name + " : " + places[route_index][n].geometry.location.lat() + " , " + places[route_index][n].geometry.location.lng() );
 	            		nb_wp[route_index]++;
@@ -1683,9 +1709,11 @@ define( function( m ) {
 
 		console.log( 'cb_route_from_or_to_changed: ' + route_index + " --- " + waypoint_index );
 
-		var origin = dijit.byId('id_wp'+route_index+'_0').get( 'value' );
-		var waypoint1 = dijit.byId('id_wp'+route_index+'_1').get( 'value' );
-		var destination = dijit.byId('id_wp'+route_index+'_2').get( 'value' );
+		cb_route_from_or_to_changed_handle[route_index][waypoint_index] = undefined; 
+
+		var origin = dijit.byId('id_wp_'+route_index+'_0').get( 'value' );
+		var waypoint1 = dijit.byId('id_wp_'+route_index+'_1').get( 'value' );
+		var destination = dijit.byId('id_wp_'+route_index+'_2').get( 'value' );
 		console.log( "origin= [" + origin + "]" );
 		console.log( "destination= [" + destination + "]" );
 		console.log( "waypoint1= [" + waypoint1 + "]" );
@@ -1699,7 +1727,10 @@ define( function( m ) {
     		do_route( route_index );
     	}
     	else if ( (origin != "") && (waypoint1 == "") && (destination == "") ) {
-           	map.panTo( places[route_index][0].geometry.location );
+    		console.log( places[route_index][0] );
+    		console.log( places[route_index][0].geometry );
+    		if (places[route_index][0].geometry.location != undefined )
+           		map.panTo( places[route_index][0].geometry.location );
 /*
 	        var is_show_all_routes = dijit.byId('id_check_show_all_routes').get('checked');
 	        if ( !is_show_all_routes ) {
@@ -1760,7 +1791,7 @@ define( function( m ) {
     
     function show_waypoint( route_index, index ) {
     	require(["dojo/dom-style"], function( domStyle) {
-    		var id = 'id_tr' + route_index + '_' + index;
+    		var id = 'id_tr_' + route_index + '_' + index;
     		domStyle.set( id, "display", "" );
     	});
     }
@@ -1770,7 +1801,7 @@ define( function( m ) {
     	require(["dojo/dom-style"], function( domStyle) {
     	var route = 0;
             for ( var n = 1; n < MAX_NB_WAYPOINTS+2; n++ ) {
-            	var id = 'id_tr'+route+'_' + n;
+            	var id = 'id_tr_'+route+'_' + n;
         		var display = domStyle.get( id, "display" );
             	if ( display == "none" ) {
                 	var id_label = 'id_label' + (n-1);
@@ -1819,7 +1850,7 @@ define( function( m ) {
 //    	        	show_waypoint( selected_route_index, first_hidden );
 	    	        var new_nb_waypoints = first_hidden;
 	       	    	cb_click_btn_add(selected_route_index, new_nb_waypoints)
-    	    		var id = 'id_wp' + selected_route_index + "_" + first_hidden;
+    	    		var id = 'id_wp_' + selected_route_index + "_" + first_hidden;
    	        		dijit.byId( id ).set( "value", results[0].formatted_address );
 			    	update_btns_remove_up_down( selected_route_index );
 	    	        do_route( selected_route_index );
@@ -1852,7 +1883,7 @@ return;
     function change_waypoint( route_index, index_wp, place_name ) {
 
     	console.log( index_wp + " -> " + place_name );
-    	var id_label_wp = "id_wp" + route_index + "_" + index_wp;
+    	var id_label_wp = "id_wp_" + route_index + "_" + index_wp;
 		dijit.byId(id_label_wp).set( 'value', place_name );
 
 		do_route( route_index );
@@ -1871,21 +1902,21 @@ return;
     	console.log( "first_hidden=" + first_hidden );
 
     	for ( var n = first_hidden - 1; n >= index; n-- ) {
-			var wp = dijit.byId('id_wp'+route_index+'_'+(n)).get( 'value' );
+			var wp = dijit.byId('id_wp_'+route_index+'_'+(n)).get( 'value' );
 			console.log( n + " -> " + wp );
-			dijit.byId('id_wp'+route_index+'_'+(n+1)).set( 'value', wp );
+			dijit.byId('id_wp_'+route_index+'_'+(n+1)).set( 'value', wp );
 			places[route_index][n+1] = places[route_index][n];
     	}
     	if (index < MAX_NB_WAYPOINTS+2)
-			dijit.byId('id_wp'+route_index+'_'+(index)).set( 'value', "" );
+			dijit.byId('id_wp_'+route_index+'_'+(index)).set( 'value', "" );
 
     	require(["dojo/dom-style"], function( domStyle) {
-    		domStyle.set( 'id_tr'+route_index+'_'+(first_hidden), "display", "" );
+    		domStyle.set( 'id_tr_'+route_index+'_'+(first_hidden), "display", "" );
     		domStyle.set( 'id_drive_tr_'+route_index+"_"+(first_hidden), "display", "" );
     	});
     	
 		require([ "dijit/focus", "dojo/dom", "dojo/domReady!" ], function(focusUtil, dom){
-			focusUtil.focus(dom.byId('id_wp'+route_index+'_'+(index)));
+			focusUtil.focus(dom.byId('id_wp_'+route_index+'_'+(index)));
 		});
 		
 		update_btns_remove_up_down( route_index );		
@@ -1899,12 +1930,12 @@ return;
     	console.log( "first_hidden=" + first_hidden );
 
 		for ( var n = index; n < first_hidden - 1; n++ ) {
-			var wp = dijit.byId('id_wp'+route_index+'_'+(n+1)).get( 'value' );
-			dijit.byId('id_wp'+route_index+'_'+(n)).set( 'value', wp );
+			var wp = dijit.byId('id_wp_'+route_index+'_'+(n+1)).get( 'value' );
+			dijit.byId('id_wp_'+route_index+'_'+(n)).set( 'value', wp );
 		}
 
     	require(["dojo/dom-style"], function( domStyle) {
-    		domStyle.set( 'id_tr'+route_index+'_'+(first_hidden-1), "display", "None" );
+    		domStyle.set( 'id_tr_'+route_index+'_'+(first_hidden-1), "display", "None" );
     	});
 		
 		do_route( route_index );
@@ -1914,11 +1945,11 @@ return;
 
 		console.log( "*** Up: route_index=" + route_index + " index=" + index );
 
-		var wp_a = dijit.byId('id_wp'+route_index+'_'+(index)).get( 'value' );
-		var wp_b = dijit.byId('id_wp'+route_index+'_'+(index-1)).get( 'value' );
+		var wp_a = dijit.byId('id_wp_'+route_index+'_'+(index)).get( 'value' );
+		var wp_b = dijit.byId('id_wp_'+route_index+'_'+(index-1)).get( 'value' );
 
-		dijit.byId('id_wp'+route_index+'_'+(index)).set( 'value', wp_b );
-		dijit.byId('id_wp'+route_index+'_'+(index-1)).set( 'value', wp_a );
+		dijit.byId('id_wp_'+route_index+'_'+(index)).set( 'value', wp_b );
+		dijit.byId('id_wp_'+route_index+'_'+(index-1)).set( 'value', wp_a );
 		
 		do_route( route_index );
 	}
@@ -1927,11 +1958,11 @@ return;
 
 		console.log( "*** Down: route_index=" + route_index + " index=" + index );
 
-		var wp_a = dijit.byId('id_wp'+route_index+'_'+(index)).get( 'value' );
-		var wp_b = dijit.byId('id_wp'+route_index+'_'+(index+1)).get( 'value' );
+		var wp_a = dijit.byId('id_wp_'+route_index+'_'+(index)).get( 'value' );
+		var wp_b = dijit.byId('id_wp_'+route_index+'_'+(index+1)).get( 'value' );
 
-		dijit.byId('id_wp'+route_index+'_'+(index)).set( 'value', wp_b );
-		dijit.byId('id_wp'+route_index+'_'+(index+1)).set( 'value', wp_a );
+		dijit.byId('id_wp_'+route_index+'_'+(index)).set( 'value', wp_b );
+		dijit.byId('id_wp_'+route_index+'_'+(index+1)).set( 'value', wp_a );
 		
 		do_route( route_index );
 	}
@@ -1969,31 +2000,50 @@ return;
         var first_hidden = find_first_hidden( route_index );
     	console.log( "first_hidden=" + first_hidden );
 
-		var origin = dijit.byId('id_wp'+route_index+'_0').get( 'value' );
+		var origin = dijit.byId('id_wp_'+route_index+'_0').get( 'value' );
    		dijit.byId('id_btn_add_'+route_index+'_0').set( 'disabled', (first_hidden < (MAX_NB_WAYPOINTS+2)) ? false : true );
+   		dijit.byId('id_tooltip_btn_add_'+route_index+'_0').set( 'showDelay', (first_hidden < (MAX_NB_WAYPOINTS+2)) ? 650 : 999999 );
    		dijit.byId('id_btn_remove_'+route_index+'_0').set( 'disabled', (first_hidden > 2) ? false : true );
+   		dijit.byId('id_tooltip_btn_remove_'+route_index+'_0').set( 'showDelay', (first_hidden > 2) ? 650 : 999999 );
    		dijit.byId('id_btn_down_'+route_index+'_0').set( 'disabled', (origin == '') ? true : false ); 
+   		dijit.byId('id_tooltip_btn_down_'+route_index+'_0').set( 'showDelay', (origin == '') ? 999999 : 650 ); 
     	
 		for ( var n = 1; n < first_hidden - 1; n++ ) {
-			var waypoint = dijit.byId('id_wp'+route_index+'_'+n).get( 'value' );
+			var waypoint = dijit.byId('id_wp_'+route_index+'_'+n).get( 'value' );
 	   		dijit.byId('id_btn_add_'+route_index+'_'+n).set( 'disabled', false ); 
+	   		dijit.byId('id_tooltip_btn_add_'+route_index+'_'+n).set( 'showDelay', 650 ); 
 	   		dijit.byId('id_btn_remove_'+route_index+'_'+n).set( 'disabled', false ); 
+	   		dijit.byId('id_tooltip_btn_remove_'+route_index+'_'+n).set( 'showDelay', 650 ); 
 	   		dijit.byId('id_btn_up_'+route_index+'_'+n).set( 'disabled', (waypoint == '') ? true : false ); 
+	   		dijit.byId('id_tooltip_btn_up_'+route_index+'_'+n).set( 'showDelay', (waypoint == '') ? 999999 : 650 ); 
 	   		dijit.byId('id_btn_down_'+route_index+'_'+n).set( 'disabled', (waypoint == '') ? true : false ); 
+	   		dijit.byId('id_tooltip_btn_down_'+route_index+'_'+n).set( 'showDelay', (waypoint == '') ? 9999999 : 650 ); 
 		}
 		
 		for ( var n = 1; n < first_hidden; n++ ) {
-			var wp0 = dijit.byId('id_wp'+route_index+'_'+(n-1)).get( 'value' );
-			var wp1 = dijit.byId('id_wp'+route_index+'_'+n).get( 'value' );
-	   		dijit.byId('id_btn_drive_'+route_index+"_"+n).set( 'disabled', ((wp0 == '') || (wp1 == '')) ? true : false ); 
+			var wp0 = dijit.byId('id_wp_'+route_index+'_'+(n-1)).get( 'value' );
+			var wp1 = dijit.byId('id_wp_'+route_index+'_'+n).get( 'value' );
+// 			dijit.byId('id_btn_drive_'+route_index+"_"+n).set( 'disabled', ((wp0 == '') || (wp1 == '')) ? true : false );
+	   		if ( (wp0 == '') || (wp1 == '') ) {
+		   		dijit.byId('id_btn_drive_'+route_index+"_"+n).set( 'disabled', true );
+				dijit.byId('id_tooltip_btn_drive_'+route_index+"_"+n).set( 'showDelay', 999999 );
+	   		}
+	   		else {
+		   		dijit.byId('id_btn_drive_'+route_index+"_"+n).set( 'disabled', false );
+				dijit.byId('id_tooltip_btn_drive_'+route_index+"_"+n).set( 'showDelay', 650 );
+	   		}
 		}
 		
    		dijit.byId('id_btn_add_'+route_index+'_'+(first_hidden-1)).set( 'disabled', (first_hidden < (MAX_NB_WAYPOINTS+2)) ? false : true );
+   		dijit.byId('id_tooltip_btn_add_'+route_index+'_'+(first_hidden-1)).set( 'showDelay', (first_hidden < (MAX_NB_WAYPOINTS+2)) ? 650 : 999999 );
    		dijit.byId('id_btn_remove_'+route_index+'_'+(first_hidden-1)).set( 'disabled', (first_hidden > 2) ? false : true );
-		var destination = dijit.byId('id_wp'+route_index+'_'+(first_hidden-1)).get( 'value' );
+   		dijit.byId('id_tooltip_btn_remove_'+route_index+'_'+(first_hidden-1)).set( 'showDelay', (first_hidden > 2) ? 650 : 999999 );
+		var destination = dijit.byId('id_wp_'+route_index+'_'+(first_hidden-1)).get( 'value' );
    		dijit.byId('id_btn_up_'+route_index+'_'+(first_hidden-1)).set( 'disabled', (destination == '') ? true : false );
+   		dijit.byId('id_tooltip_btn_up_'+route_index+'_'+(first_hidden-1)).set( 'showDelay', (destination == '') ? 999999 : 650 );
    		dijit.byId('id_btn_down_'+route_index+'_'+(first_hidden-1)).set( 'disabled', true );
-    	
+   		dijit.byId('id_tooltip_btn_down_'+route_index+'_'+(first_hidden-1)).set( 'showDelay', 999999 );
+	
 	}
 	
 	function cb_open_settings( ) {

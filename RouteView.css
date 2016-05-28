@@ -185,3 +185,8 @@ html, body {
 #id_input_route {
 	background: grey;
 }
+
+.claro .dijitTooltipContainer {
+    background: Khaki  !important;
+}
+
