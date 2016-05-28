@@ -57,7 +57,7 @@
 
     </head>
 
-    <body class="claro">
+    <body class="claro" id="id_body">
 
 		<div id="id_pane_standby" data-dojo-type="dojox/widget/Standby" data-dojo-props="target:'app_layout', color:'lightwhite', image:'', imageText: ''"></div>
 
@@ -69,6 +69,7 @@
             <!-- ---------- -->            
 	        <div id="id_top_layout" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'top'">
 
+				<div id="id_div_top_layout">
             	<table style="width:100%">
                 	<tr>
                         <td valign="middle" align="left" id="id_mobile_version">
@@ -97,17 +98,10 @@
 					A lot of features are still missing, or not are not yet fully functional.<br><br>
 					I am working on it on my spare time, so please stay tuned ;-) 
                 </div>
+				</div>
 
             </div>
 
-            <!-- ----------- -->            
-            <!-- LEFT Layout -->
-            <!-- ----------- -->
-<!--
-	        <div id="id_left_layout" style="display: ; overflow-x:hidden; overflow-y:scroll;" class="edgePanel" data-dojo-type="dojox/layout/ExpandoPane" 
-	         data-dojo-props="region:'left', splitter:true, title:'Configuration', doLayout:true, duration:350">
--->
-            
             <!-- ------------ -->
             <!-- RIGHT panel  -->
             <!-- ------------ -->
@@ -690,17 +684,9 @@
              	 </table>
             </div>
             
-            <!-- ------------ -->
-            <!-- BOTTOM panel -->
-            <!-- ------------ -->
-            <div id="id_bottom_layout" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="splitter: false, region: 'bottom'">
-            
-            </div>
-
         </div>
 
-		<div id="id_hidden" style="display:None">
-		</div>
+		<div id="id_hidden" style="display:None"></div>
 
         <script>
 		    require(["RouteView.js", "dojo/ready"], function( s, ready ) {

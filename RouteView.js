@@ -597,12 +597,14 @@ define( function( m ) {
 			return;
 		}
 
-    	require(["dojo/dom-style"], function( domStyle) {
+    	require(["dojo/dom-style"], function( domStyle ) {
+			domStyle.set( "id_top_layout", "display", "" );
 			domStyle.set( "id_left_layout", "display", "" );
-            		document.getElementById("td_map_canvas").style.width = "100%";
-		            document.getElementById("td_panorama").style.width = "0%";
-			        google.maps.event.trigger( map, 'resize' );
-			        google.maps.event.trigger( panorama, 'resize' );
+    		dijit.byId('app_layout').resize();
+    		document.getElementById("td_map_canvas").style.width = "100%";
+            document.getElementById("td_panorama").style.width = "0%";
+	        google.maps.event.trigger( map, 'resize' );
+	        google.maps.event.trigger( panorama, 'resize' );
 		});
     	
 		if ( timer_animate != undefined ) 
@@ -936,6 +938,27 @@ define( function( m ) {
 
 	}
 
+	function blah(e) {
+		console.log( "!!!!!!!!!!!!!!!!!! Full screen" );
+		console.log(e);
+	}
+
+    function is_full_screen_supported( ) {
+
+    	var d = document.getElementById("id_body");
+    	if ( document.exitFullscreen || document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen )
+    		return true;
+
+    	return false;
+    }
+
+    function is_in_full_screen( ) {
+		if ( !window.screenTop && !window.screenY )
+			return true;
+		else
+			return false; 
+    }
+    
     function initialize( ) {
 
     	require(["dojo/dom", "dojo/on", "dojo/dom-style", "dojo/dom-geometry", "dojo/store/Memory", "dojo/ready"], 
@@ -1245,7 +1268,14 @@ define( function( m ) {
 					    }
 				    });
 				}
-				
+
+        		on( window, "resize", function( evt ) {
+	        		if ( is_in_full_screen() )
+						domStyle.set( "id_top_layout", "display", "None" );
+	        		else
+						domStyle.set( "id_top_layout", "display", "" );
+					dijit.byId('app_layout').resize();
+       			});
             });
 
 		window.onkeydown = function(evt) {
@@ -1977,8 +2007,10 @@ return;
         document.getElementById("td_map_canvas").style.width = "50%";
         document.getElementById("td_panorama").style.width = "50%";
 
-    	require(["dojo/dom-style"], function( domStyle) {
+    	require(["dojo/dom-style"], function( domStyle ) {
+			domStyle.set( "id_top_layout", "display", "None" );
 			domStyle.set( "id_left_layout", "display", "None" );
+			dijit.byId('app_layout').resize();
 		});
 
         document.getElementById("td_map_canvas").style.width = "50%";

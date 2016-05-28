@@ -1,6 +1,6 @@
 #
 # RouteView
-# (C) Olivier Singla 2015
+# (C) Olivier Singla 2015, 2016
 #
 
 Use GoogleMaps / StreetView to simulate a route
@@ -30,11 +30,8 @@ Code is created with Google Maps API v3, and use the EPolys extension:
 
 The code is using Dojo.
 
-The latest version of this web application is hosted on github:
-https://rawgit.com/osingla/RouteView/master/RouteView.html
+The latest version of this web application is hosted here:
 
-or also:
-
-https://osingla.github.io/RouteView/
+http://routeview.org/
 
 Feedback and comments are welcome - olivier dot singla at gmail dot com
