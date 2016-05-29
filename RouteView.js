@@ -1300,25 +1300,7 @@ define( function( m ) {
    				
 				var is_addr_for_orig = dijit.byId('id_is_addr_for_orig').get( 'checked' );
 				if (is_addr_for_orig) {
-					dijit.byId('id_wp0_0').set('value', dijit.byId('id_addr_for_orig').get( 'value'));
-
-/*
-					var request = {
-					    input: dijit.byId('id_addr_for_orig').get( 'value')
-					};
-					var autocomplete_service = new google.maps.places.AutocompleteService();
-  					autocomplete_service.getPlacePredictions(request, function(result, status) {
-  						if (status == google.maps.places.PlacesServiceStatus.OK) {
-			                service.getDetails({
-				              	placeId: result[0].place_id
-			                }, function ( place, status ) {
-			                	if ( status == google.maps.places.PlacesServiceStatus.OK ) {
-			                		places[0][0] = place;
-			                	}
-			                });
-  						}
-  					});
-*/
+					dijit.byId('id_wp_0_0').set('value', dijit.byId('id_addr_for_orig').get( 'value'));
 
 					var geocoder = new google.maps.Geocoder();
 					geocoder.geocode( { 'address': dijit.byId('id_addr_for_orig').get( 'value')}, function(results, status) {
