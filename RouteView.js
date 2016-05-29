@@ -419,7 +419,6 @@ define( function( m ) {
 
 		    dijit.byId("id_pane_standby").hide();
 
-			console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 			console.log( response );
 			var route_index = directions_service_request.indexOf( response.request );
 			console.log( route_index );
@@ -446,7 +445,7 @@ define( function( m ) {
             // Markers
             var dist_meters = 0;
             var duration_secs = 0;
-            console.log("XXXXXXXX - legs.length=" + legs.length);
+            console.log("legs.length=" + legs.length);
             route_bounds[route_index] = new google.maps.LatLngBounds();
             polylines[route_index] = [];
             legs_bounds[route_index] = [];
@@ -1040,9 +1039,11 @@ define( function( m ) {
     		
             ready( function() {
 
-            	var map_options = {
-// 				   animatedZoom: false,
-                   zoom: 14
+				var map_options = {
+// 					animatedZoom: false,
+					disableDoubleClickZoom: true,
+					fullscreenControl: false,
+                   	zoom: 14
                 };
                 map = new google.maps.Map( document.getElementById('id_map_canvas'), map_options );
 				create_route_dlg();
