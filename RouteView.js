@@ -4,6 +4,8 @@
 /* ***                                                                                       *** */ 
 /* *** StreetView Player - Virtual Ride, using Google Maps and Street View                   *** */
 /* ***                                                                                       *** */ 
+/* *** http://routeview.org                                                                  *** */ 
+/* ***                                                                                       *** */ 
 /* ********************************************************************************************* */
 
 define( function( m ) {
@@ -42,13 +44,13 @@ define( function( m ) {
    	var selected_route_index = 0;
    	var timer_map_mousemove = undefined;
    	var dlg_panorama_map_mousemove;
+
    	var ctrl_down = false;
    	var ctrl_mode = false;
-   	
    	var temp_directions_service = undefined;
 	var temp_directions_service_request;
- 	var temp_directions_renderer;
-	var temp_polylines;
+ 	var temp_directions_renderer = undefined;
+	var temp_polylines = undefined;
    	
    	var route_colors = [
    		"#0066cc",
@@ -99,8 +101,10 @@ define( function( m ) {
         curr_dist = d;
         if ( d > eol ) {
             console.log( "Route " + route_index + " is done" );
-			if ( timer_animate != undefined ) 
+			if ( timer_animate != undefined ) { 
 				clearTimeout( timer_animate );
+				timer_animate = undefined;
+			} 
 			if (route_index == -1)
 				stop_driving_temporary_route( );
             return;
@@ -156,6 +160,9 @@ define( function( m ) {
 		dijit.byId('id_input_route').set( 'value', 0 );
 
         map.setOptions({draggableCursor: 'hand'});
+
+		directions_renderer.forEach( function( e ) {
+	       	e.setOptions( { draggable: false } ); })
     }
 
     function find_first_hidden( route_index ) {
@@ -570,8 +577,20 @@ define( function( m ) {
 
         console.log( dijit.byId('id_btn_pause').get( 'label' ) );
         if ( dijit.byId('id_btn_pause').get( 'label' ) == "Pause" ) {
-			if ( timer_animate != undefined ) 
+			if ( timer_animate != undefined ) { 
 				clearTimeout( timer_animate );
+				timer_animate = undefined;
+			}				
+	    	require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct ) {
+				if ( map_or_panorama_full_screen ) {
+					domConstruct.place("td_map_canvas", "td_panorama", "before");
+		        	document.getElementById("td_map_canvas").style.width = "50%";
+			        document.getElementById("td_panorama").style.width = "50%";
+					map_or_panorama_full_screen = false;
+				}
+	    		dijit.byId('app_layout').resize();
+		        google.maps.event.trigger( map, 'resize' );
+			});
         	dijit.byId('id_btn_pause').set( 'label', "Continue" );
             console.log( "curr_dist=" + curr_dist );
         }
@@ -582,34 +601,38 @@ define( function( m ) {
 
 		dijit.byId('id_input_route').set( 'disabled', false );
 		dijit.byId('id_input_route').set( 'intermediateChanges', true );
-
-/*
-        var renderer_options = { draggable: false };
-       	directions_renderer[route_index].setOptions( renderer_options );
-*/
-        
     }
 
     function do_stop( ) {
 
+    	require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct ) {
+			domStyle.set( "id_top_layout", "display", "" );
+			domStyle.set( "id_left_layout", "display", (ctrl_mode) ? "none" : "table-cell" );
+    		document.getElementById("td_map_canvas").style.width = "100%";
+            document.getElementById("td_panorama").style.width = "0%";
+			if ( !map_or_panorama_full_screen ) {
+				domConstruct.place("td_panorama", "id_hidden", "after");
+				map_or_panorama_full_screen = true;	
+			}
+			else {
+				domConstruct.place("td_map_canvas", "td_panorama", "before");
+				domConstruct.place("td_panorama", "td_map_canvas", "after");
+				map_or_panorama_full_screen = false;
+			}
+    		dijit.byId('app_layout').resize();
+	        google.maps.event.trigger( map, 'resize' );
+		});
+    	
 		var route_index = curr_route;
 		if ( curr_route == -1 ) {
 			stop_driving_temporary_route( );
 			return;
 		}
 
-    	require(["dojo/dom-style"], function( domStyle ) {
-			domStyle.set( "id_top_layout", "display", "" );
-			domStyle.set( "id_left_layout", "display", "table-cell" );
-    		dijit.byId('app_layout').resize();
-    		document.getElementById("td_map_canvas").style.width = "100%";
-            document.getElementById("td_panorama").style.width = "0%";
-	        google.maps.event.trigger( map, 'resize' );
-	        google.maps.event.trigger( panorama, 'resize' );
-		});
-    	
-		if ( timer_animate != undefined ) 
+		if ( timer_animate != undefined ) {
 			clearTimeout( timer_animate );
+			timer_animate = undefined;
+		}
 
 		dijit.byId('id_btn_pause').set( 'disabled', true );
     	dijit.byId('id_btn_pause').set( 'label', "Pause" );
@@ -618,10 +641,10 @@ define( function( m ) {
 		dijit.byId('id_input_route').set( 'disabled', true );
 		dijit.byId('id_input_route').set( 'intermediateChanges', false );
 		
-        var renderer_options = { draggable: true };
-       	directions_renderer[route_index].setOptions( renderer_options );
-
         map.setOptions({draggableCursor: 'crosshair'});
+
+		directions_renderer.forEach( function( e ) {
+	       	e.setOptions( { draggable: true } ); })
     }
 
     function start( ) {
@@ -965,6 +988,7 @@ define( function( m ) {
     	
 			domStyle.set( "id_div_top_layout", "display", "none" );
 			domStyle.set( "id_div_top_layout_ctrl_mode", "display", "" );
+			domStyle.set( "id_text_cancel_ctrl_mode", "display", "" );
 			domStyle.set( "id_left_layout", "display", "none" );
 			dijit.byId('app_layout').resize();
 			domConstruct.place("td_panorama", "id_hidden", "after");
@@ -976,16 +1000,12 @@ define( function( m ) {
 
 //	        map.setOptions({draggableCursor: 'url(icons/map-select-start.png), auto' });
 	        map.setOptions({draggableCursor: 'crosshair'});
-			
-			if (curr_route != -1) {
-				curr_route = -1;	
-				curr_leg = -1;
-			}
-			else {
-				curr_route = 0;	
-				curr_leg = 0;
-				stop_driving_temporary_route( );
-			}
+
+			directions_renderer.forEach( function( e ) {
+		       	e.setOptions( { draggable: false } ); })
+
+			curr_route = -1;	
+			curr_leg = -1;
 
     	});
 	
@@ -997,14 +1017,17 @@ define( function( m ) {
     	
 			domStyle.set( "id_div_top_layout", "display", "" );
 			domStyle.set( "id_div_top_layout_ctrl_mode", "display", "none" );
+			domStyle.set( "id_text_cancel_ctrl_mode", "display", "" );
 			domStyle.set( "id_left_layout", "display", "" );
 			dijit.byId('app_layout').resize();
 			domConstruct.place("td_panorama", "td_map_canvas", "after");
-            document.getElementById("td_map_canvas").style.width = "50%";
-            document.getElementById("td_panorama").style.width = "50%";
+            document.getElementById("td_map_canvas").style.width = "100%";
+          	document.getElementById("td_panorama").style.width = "0%";	
 	        google.maps.event.trigger( map, 'resize' );
-	        google.maps.event.trigger( panorama, 'resize' );
 			map_or_panorama_full_screen = false;	
+
+    		directions_renderer.forEach( function( e ) {
+		       	e.setOptions( { draggable: true } ); })
 
     	});
 	
@@ -1026,6 +1049,14 @@ define( function( m ) {
 
 				set_map_style( );
 
+                service = new google.maps.places.PlacesService( map );
+                
+   				marker_no_street_view = new google.maps.Marker({
+					map: map,
+					title: 'No Street View available',
+					icon: "http://www.google.com/mapfiles/arrow.png"
+				});
+
                 var panorama_options = {
                     pov: {
                         heading: 34,
@@ -1037,26 +1068,14 @@ define( function( m ) {
                     zoomControl: false,
                     clickToGo: false,
                     disableDoubleClickZoom: true,
+                    fullscreenControl: false
                 };
-
-                service = new google.maps.places.PlacesService( map );
-                
-   				marker_no_street_view = new google.maps.Marker({
-					map: map,
-					title: 'No Street View available',
-					icon: "http://www.google.com/mapfiles/arrow.png"
-				});
 
                 panorama = new google.maps.StreetViewPanorama( document.getElementById('id_panorama'), panorama_options );
                 map.setStreetView( panorama );
 
             	map_or_panorama_full_screen = false;
 
-//            	var id_map_canvas = dom.byId('id_map_canvas');
-//        		on( id_map_canvas, "click", function( evt ) {
-//       				if ( evt.handled != true )
-//       					cb_map_click( evt );
-//       			});
         		google.maps.event.addListener( map, "click", function( evt ) {
         			cb_map_click( evt );
        			});
@@ -1336,7 +1355,7 @@ define( function( m ) {
 
 			if (ctrl_down && !prev_ctrl_down) {
 
-				console.log("Ctrl Down");
+				console.log("Ctrl Down - ctrl_mode=" + ctrl_mode);
 				if ( map.getCenter() == undefined ) {
 					console.log( "Ignored" );
 					return;
@@ -1353,7 +1372,7 @@ define( function( m ) {
 			
 			if ( prev_ctrl_down && no_cd ) {
 
-				console.log("Ctrl Up");
+				console.log("Ctrl Up - ctrl_mode=" + ctrl_mode);
 	       		var display = domStyle.get( "id_left_layout", "display" );
 				if ( (map.getCenter() == undefined) || (!ctrl_mode && (display == "none")) ) {
 					console.log( "Ignored" );
@@ -1362,16 +1381,14 @@ define( function( m ) {
 				ctrl_down = false;
 				
 				if ( !ctrl_mode ) {
-				
 					ctrl_mode = true;
         			begin_ctrl_mode();
-				
 				}
 				else {
-				
-					ctrl_mode = false;
-        			end_ctrl_mode();
-				
+					if ( (timer_animate == undefined) && (temp_directions_renderer == undefined) ) {
+						ctrl_mode = false;
+	        			end_ctrl_mode();
+	        		}
 				}
 				
 				return;
@@ -1555,9 +1572,6 @@ define( function( m ) {
 		dijit.byId('id_input_route').set( 'disabled', false );
 		dijit.byId('id_input_route').set( 'intermediateChanges', false );
 
-        if ( timer_animate ) 
-            clearTimeout( timer_animate );
-
         eol = temp_polylines[0].Distance();
         map.setCenter( temp_polylines[0].getPath().getAt(0) );
 		map.fitBounds( legs_bounds );
@@ -1568,6 +1582,8 @@ define( function( m ) {
 
         street_view_check[0] = new google.maps.StreetViewService( );
 
+        if ( timer_animate ) 
+            clearTimeout( timer_animate );
        	timer_animate = setTimeout( function() { cb_animate(-1, 50); }, 250 );
 
         // Update route slider
@@ -1581,6 +1597,11 @@ define( function( m ) {
 	function start_temporary_route( latLng ) {
 	
 		console.log( "Start temporary route" );
+
+    	require(["dojo/dom-style"], function( domStyle) {
+			domStyle.set( "id_text_cancel_ctrl_mode", "display", "none" );
+		});
+
 		map.setOptions({draggableCursor: 'crosshair'});
 
         temp_directions_service = new google.maps.DirectionsService( );
@@ -1602,6 +1623,7 @@ define( function( m ) {
             var new_dir = temp_directions_renderer.getDirections();
             console.log( new_dir );
             if ( new_dir.geocoded_waypoints[0].place_id != new_dir.geocoded_waypoints[1].place_id ) {
+		       	temp_directions_renderer.setOptions( { draggable: false } );
             	start_driving_temporary_route( new_dir.routes[0] );
             }
         });
@@ -1618,7 +1640,6 @@ define( function( m ) {
       	temp_directions_service.route( temp_directions_service_request, 
 			(function(temp_directions_renderer) { return function(response, status) {
 				if ( status == google.maps.DirectionsStatus.OK ) {
-					console.log( "!!!" );
 					console.log( response );
 		        	temp_directions_renderer.setMap( map );
 	    	    	temp_directions_renderer.setDirections( response );
@@ -1631,27 +1652,35 @@ define( function( m ) {
 	
 		console.log("stop_driving_temporary_route");
 	
-		if ( timer_animate != undefined ) 
-			clearTimeout( timer_animate );
-
-		dijit.byId('id_btn_pause').set( 'disabled', true );
-    	dijit.byId('id_btn_pause').set( 'label', "Pause" );
-		dijit.byId('id_btn_stop').set( 'disabled', true );
-		
-		dijit.byId('id_input_route').set( 'disabled', true );
-		dijit.byId('id_input_route').set( 'intermediateChanges', false );
-		
-   		temp_directions_renderer.setMap( null );
-       	if ( temp_polylines )
-			temp_polylines.forEach( function(e) { e.setMap(null); })
-		temp_polylines = undefined;
-   		temp_directions_renderer = undefined;
-
-   		marker_no_street_view.setPosition( null );
-
-    	map.setOptions({draggableCursor: 'crosshair'});
+    	require(["dojo/dom-style"], function( domStyle) {
     	
-    	temp_directions_service = undefined;
+			if ( timer_animate != undefined ) { 
+				clearTimeout( timer_animate );
+				timer_animate = undefined; 
+			}
+	
+			domStyle.set( "id_text_cancel_ctrl_mode", "display", "" );
+	
+			dijit.byId('id_btn_pause').set( 'disabled', true );
+	    	dijit.byId('id_btn_pause').set( 'label', "Pause" );
+			dijit.byId('id_btn_stop').set( 'disabled', true );
+			
+			dijit.byId('id_input_route').set( 'disabled', true );
+			dijit.byId('id_input_route').set( 'intermediateChanges', false );
+			
+	   		if ( temp_directions_renderer != undefined )
+	   			temp_directions_renderer.setMap( null );
+	       	if ( temp_polylines != undefined )
+				temp_polylines.forEach( function(e) { e.setMap(null); })
+			temp_polylines = undefined;
+	   		temp_directions_renderer = undefined;
+	
+	   		marker_no_street_view.setPosition( null );
+	
+	    	map.setOptions({draggableCursor: 'crosshair'});
+	    	
+	    	temp_directions_service = undefined;
+    	});
 	}
 
     function download_file( text, name, type ) {
@@ -1842,6 +1871,8 @@ define( function( m ) {
 				start_temporary_route( evt.latLng );
 			return;
     	}
+    	
+return;
 
 		require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct ){
        		var display = domStyle.get( "id_left_layout", "display" );
@@ -2068,10 +2099,16 @@ return;
 		curr_route = route_index;	
 		curr_leg = waypoint_index;
 
-    	require(["dojo/dom-style"], function( domStyle ) {
+    	require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct ) {
 			domStyle.set( "id_top_layout", "display", "none" );
 			domStyle.set( "id_left_layout", "display", "none" );
 			dijit.byId('app_layout').resize();
+				if ( map_or_panorama_full_screen ) {
+					domConstruct.place("td_panorama", "td_map_canvas", "after");
+		            document.getElementById("td_map_canvas").style.width = "50%";
+		            document.getElementById("td_panorama").style.width = "50%";
+					map_or_panorama_full_screen = false;
+				}
 		});
 
         document.getElementById("td_map_canvas").style.width = "50%";
@@ -2080,12 +2117,7 @@ return;
    		dijit.byId('id_btn_pause').set( 'disabled', false );
 		dijit.byId('id_btn_stop').set( 'disabled', false );
 
-        var renderer_options = { draggable: false };
-       	directions_renderer[route_index].setOptions( renderer_options );
-        map.setOptions({draggableCursor: 'hand'});
-
         start_driving( route_index );  
-
 	}
 	
 	function update_btns_remove_up_down( route_index, all ) {
