@@ -70,34 +70,40 @@
 	        <div id="id_top_layout" class="edgePanel" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region: 'top'">
 
 				<div id="id_div_top_layout">
-            	<table style="width:100%">
-                	<tr>
-                        <td valign="middle" align="left" id="id_mobile_version">
-                        	<a href="https://rawgit.com/osingla/RouteView/master/RouteViewMobile.html" target="_blank">Mobile&nbsp;Version</a>
-                		</td>
-                        <td valign="middle" align="center" style="width:100%" >
-			                <b>RouteView - Google StreetView Player - Virtual Ride using Google Street View</b>&nbsp;<b id='id_route_info' ></b>
-                		</td>
-                        <td valign="middle" align="right" id='id_link_to_github_project'>
-                        	<a href="https://github.com/osingla/RouteView" target="_blank">Github&nbsp;Project</a>
-                		</td>
-                	</tr>
-                </table>
-                
-                <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_mobile_version',position:['below-centered'],showDelay:750,hideDelay:0">
-					This will launch the mobile version (Android, IOS). 
-                </div>
+	            	<table style="width:100%">
+	                	<tr>
+	                        <td valign="middle" align="left" id="id_mobile_version">
+	                        	<a href="https://rawgit.com/osingla/RouteView/master/RouteViewMobile.html" target="_blank">Mobile&nbsp;Version</a>
+	                		</td>
+	                        <td valign="middle" align="center" style="width:100%" >
+				                <b>RouteView - Google StreetView Player - Virtual Ride using Google Street View</b>&nbsp;<b id='id_route_info' ></b>
+	                		</td>
+	                        <td valign="middle" align="right" id='id_link_to_github_project'>
+	                        	<a href="https://github.com/osingla/RouteView" target="_blank">Github&nbsp;Project</a>
+	                		</td>
+	                	</tr>
+	                </table>
+	                
+	                <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_mobile_version',position:['below-centered'],showDelay:750,hideDelay:0">
+						This will launch the mobile version (Android, IOS). 
+	                </div>
+	
+	                <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_link_to_github_project',position:['below-centered'],showDelay:750,hideDelay:0">
+						This software open-source and hosted on <a href="https://github.com/" target="_blank">Github</a><br><br>
+						Click <a href="https://github.com/osingla/RouteView" target="_blank">here</a> if you want to see the source.
+						<br><br>
+						<hr>
+						<br>
+						Please note that this software is still in <b>Beta</b>.<br>
+						A lot of features are still missing, or not are not yet fully functional.<br><br>
+						I am working on it on my spare time, so please stay tuned ;-) 
+	                </div>
+				</div>
 
-                <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_link_to_github_project',position:['below-centered'],showDelay:750,hideDelay:0">
-					This software open-source and hosted on <a href="https://github.com/" target="_blank">Github</a><br><br>
-					Click <a href="https://github.com/osingla/RouteView" target="_blank">here</a> if you want to see the source.
-					<br><br>
-					<hr>
-					<br>
-					Please note that this software is still in <b>Beta</b>.<br>
-					A lot of features are still missing, or not are not yet fully functional.<br><br>
-					I am working on it on my spare time, so please stay tuned ;-) 
-                </div>
+				<div id="id_div_top_layout_ctrl_mode" style="display:none; margin:auto; width:100%" align="center">
+					<b>
+						In this mode, select 2 points to show the Virtual Street Player. Cancel with CTRL
+					</b>
 				</div>
 
             </div>
@@ -112,7 +118,7 @@
              	 	
 						<td id="id_left_layout" >
 						             	 	
-					        <div class="block" style="border:1px solid; overflow:scroll; height:100%; width:auto">
+					        <div class="block" style="border:1px solid; overflow:scroll; height:100%; width:auto" >
 				
 								<!-- Route #1 -->
 				                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:true" id="id_fieldset_route_0"
@@ -120,7 +126,7 @@
 						                  onClick='require(["RouteView.js"], function( s ) { s.cb_click_fieldset_route(0); })'>
 				                    <legend>
 				                    	Route 1 
-				                        <span id="id_route0_distance_duration" style="display:None">
+				                        <span id="id_route0_distance_duration" style="display:none">
 				                			&nbsp;:&nbsp;
 				                            <span><b id="id_route0_dist_kms"></b>&nbsp;kms</span>
 				                            &nbsp;-&nbsp;
@@ -393,7 +399,7 @@
 						                  onClick='require(["RouteView.js"], function( s ) { s.cb_click_fieldset_route(1); })'>
 				                    <legend>
 				                    	Route 2
-				                        <span id="id_route1_distance_duration" style="display:None">
+				                        <span id="id_route1_distance_duration" style="display:none">
 				                			&nbsp;:&nbsp;
 				                            <span><b id="id_route1_dist_kms"></b>&nbsp;kms</span>
 				                            &nbsp;-&nbsp;
@@ -464,7 +470,7 @@
 						                  onClick='require(["RouteView.js"], function( s ) { s.cb_click_fieldset_route(2); })'>
 				                    <legend>
 				                    	Route 3
-				                        <span id="id_route2_distance_duration" style="display:None">
+				                        <span id="id_route2_distance_duration" style="display:none">
 				                			&nbsp;:&nbsp;
 				                            <span><b id="id_route2_dist_kms"></b>&nbsp;kms</span>
 				                            &nbsp;-&nbsp;
@@ -535,7 +541,7 @@
 						                  onClick='require(["RouteView.js"], function( s ) { s.cb_click_fieldset_route(3); })'>
 				                    <legend>
 				                    	Route 4
-				                        <span id="id_route3_distance_duration" style="display:None">
+				                        <span id="id_route3_distance_duration" style="display:none">
 				                			&nbsp;:&nbsp;
 				                            <span><b id="id_route3_dist_kms"></b>&nbsp;kms</span>
 				                            &nbsp;-&nbsp;
@@ -686,7 +692,7 @@
             
         </div>
 
-		<div id="id_hidden" style="display:None"></div>
+		<div id="id_hidden" style="display:none"></div>
 
         <script>
 		    require(["RouteView.js", "dojo/ready"], function( s, ready ) {

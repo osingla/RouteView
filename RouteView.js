@@ -43,6 +43,7 @@ define( function( m ) {
    	var timer_map_mousemove = undefined;
    	var dlg_panorama_map_mousemove;
    	var ctrl_down = false;
+   	var ctrl_mode = false;
    	
    	var temp_directions_service = undefined;
 	var temp_directions_service_request;
@@ -153,6 +154,8 @@ define( function( m ) {
 		dijit.byId('id_input_route').set( 'maximum', eol );
 		dijit.byId('id_input_route').set( 'discreteValues,', eol );
 		dijit.byId('id_input_route').set( 'value', 0 );
+
+        map.setOptions({draggableCursor: 'hand'});
     }
 
     function find_first_hidden( route_index ) {
@@ -198,7 +201,7 @@ define( function( m ) {
 			}
 			else {
 				for (var n = route; n < MAX_NB_ROUTES; n++)
-					domStyle.set( "id_fieldset_route_"+n, "display", "None" );
+					domStyle.set( "id_fieldset_route_"+n, "display", "none" );
 				for (var n = route+1; n < MAX_NB_ROUTES; n++) {
 					console.log( "--> " + 'id_check_use_route_'+n);
 					dijit.byId('id_check_use_route_'+n).set('checked', false, false);
@@ -583,8 +586,6 @@ define( function( m ) {
 /*
         var renderer_options = { draggable: false };
        	directions_renderer[route_index].setOptions( renderer_options );
-    
-        map.setOptions({draggableCursor: 'hand'});
 */
         
     }
@@ -599,7 +600,7 @@ define( function( m ) {
 
     	require(["dojo/dom-style"], function( domStyle ) {
 			domStyle.set( "id_top_layout", "display", "" );
-			domStyle.set( "id_left_layout", "display", "" );
+			domStyle.set( "id_left_layout", "display", "table-cell" );
     		dijit.byId('app_layout').resize();
     		document.getElementById("td_map_canvas").style.width = "100%";
             document.getElementById("td_panorama").style.width = "0%";
@@ -620,8 +621,7 @@ define( function( m ) {
         var renderer_options = { draggable: true };
        	directions_renderer[route_index].setOptions( renderer_options );
 
-    	map.setOptions({draggableCursor: 'hand'});
-        
+        map.setOptions({draggableCursor: 'crosshair'});
     }
 
     function start( ) {
@@ -653,7 +653,7 @@ define( function( m ) {
 	
 			  		var id_tr = domConstruct.create("tr", { 
 			  			id: "id_tr_"+route_index+"_"+n,
-			  			style: "display:" + ((n < 2) ? "" : "None") 
+			  			style: "display:" + ((n < 2) ? "" : "none") 
 			  		}, "id_table_route"+route_index, "last");
 			  		domConstruct.create("td", { innerHTML:String.fromCharCode(n+65)+"&nbsp;", align:"right", valign:"middle"}, id_tr, "first");
 	
@@ -773,7 +773,7 @@ define( function( m ) {
 				
 			  		var id_tr = domConstruct.create("tr", { 
 			  			id: "id_drive_tr_"+route_index+"_"+n,
-			  			style: "display:" + ((n < 2) ? "" : "None") 
+			  			style: "display:" + ((n < 2) ? "" : "none") 
 			  		}, "id_table_drive_"+route_index, "last");
 			  		
 			  		var id_td = domConstruct.create("td", { align:"right", valign:"middle"}, id_tr, "first");
@@ -958,6 +958,57 @@ define( function( m ) {
 		else
 			return false; 
     }
+
+	function begin_ctrl_mode() {
+
+    	require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct) {
+    	
+			domStyle.set( "id_div_top_layout", "display", "none" );
+			domStyle.set( "id_div_top_layout_ctrl_mode", "display", "" );
+			domStyle.set( "id_left_layout", "display", "none" );
+			dijit.byId('app_layout').resize();
+			domConstruct.place("td_panorama", "id_hidden", "after");
+		    document.getElementById("td_map_canvas").style.width = "100%";
+        	document.getElementById("td_panorama").style.width = "0%";
+	        google.maps.event.trigger( map, 'resize' );
+	        google.maps.event.trigger( panorama, 'resize' );
+			map_or_panorama_full_screen = true;	
+
+//	        map.setOptions({draggableCursor: 'url(icons/map-select-start.png), auto' });
+	        map.setOptions({draggableCursor: 'crosshair'});
+			
+			if (curr_route != -1) {
+				curr_route = -1;	
+				curr_leg = -1;
+			}
+			else {
+				curr_route = 0;	
+				curr_leg = 0;
+				stop_driving_temporary_route( );
+			}
+
+    	});
+	
+	}
+	
+	function end_ctrl_mode( ) {
+	
+    	require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct) {
+    	
+			domStyle.set( "id_div_top_layout", "display", "" );
+			domStyle.set( "id_div_top_layout_ctrl_mode", "display", "none" );
+			domStyle.set( "id_left_layout", "display", "" );
+			dijit.byId('app_layout').resize();
+			domConstruct.place("td_panorama", "td_map_canvas", "after");
+            document.getElementById("td_map_canvas").style.width = "50%";
+            document.getElementById("td_panorama").style.width = "50%";
+	        google.maps.event.trigger( map, 'resize' );
+	        google.maps.event.trigger( panorama, 'resize' );
+			map_or_panorama_full_screen = false;	
+
+    	});
+	
+	}
     
     function initialize( ) {
 
@@ -1001,10 +1052,13 @@ define( function( m ) {
 
             	map_or_panorama_full_screen = false;
 
-            	var id_map_canvas = dom.byId('id_map_canvas');
-        		on( id_map_canvas, "click", function( evt ) {
-       				if ( evt.handled != true )
-       					cb_map_click( );
+//            	var id_map_canvas = dom.byId('id_map_canvas');
+//        		on( id_map_canvas, "click", function( evt ) {
+//       				if ( evt.handled != true )
+//       					cb_map_click( evt );
+//       			});
+        		google.maps.event.addListener( map, "click", function( evt ) {
+        			cb_map_click( evt );
        			});
         		
 				google.maps.event.clearListeners( map, 'rightclick' );
@@ -1096,27 +1150,27 @@ define( function( m ) {
         	    });
         	    
         		on( dijit.byId('id_autocomplete_restrict_type'), "change", function( checked ) {
-           		    domStyle.set( "id_autocomplete_restrict_li", "display", (checked) ? "" : "None" );
+           		    domStyle.set( "id_autocomplete_restrict_li", "display", (checked) ? "" : "none" );
            		    apply_autocomplete_settings( );
            		 });
 
         		on( dijit.byId('id_autocomplete_restrict_country'), "change", function( checked ) {
         		    if ( !checked ) {
-               		    domStyle.set( "id_autocomplete_restrict_country_use_loc_li", "display", "None" );
-               		    domStyle.set( "id_autocomplete_restrict_country1_li", "display", "None" );
+               		    domStyle.set( "id_autocomplete_restrict_country_use_loc_li", "display", "none" );
+               		    domStyle.set( "id_autocomplete_restrict_country1_li", "display", "none" );
         		    }
         		    else {
                		    domStyle.set( "id_autocomplete_restrict_country_use_loc_li", "display", "" );
       	  	       	    var use_loc = dijit.byId('id_autocomplete_restrict_type').get( 'value' );
-               		    domStyle.set( "id_autocomplete_restrict_country1_li", "display", (use_loc) ? "" : "None" );
-               		    domStyle.set( "id_autocomplete_restrict_country2_li", "display", (use_loc) ? "None" : "" );
+               		    domStyle.set( "id_autocomplete_restrict_country1_li", "display", (use_loc) ? "" : "none" );
+               		    domStyle.set( "id_autocomplete_restrict_country2_li", "display", (use_loc) ? "none" : "" );
         		    }
            		    apply_autocomplete_settings( );
                 });
 
         		on( dijit.byId('id_autocomplete_restrict_country_use_loc'), "change", function( checked ) {
-           		    domStyle.set( "id_autocomplete_restrict_country1_li", "display", (checked) ? "" : "None" );
-           		    domStyle.set( "id_autocomplete_restrict_country2_li", "display", (checked) ? "None" : "" );
+           		    domStyle.set( "id_autocomplete_restrict_country1_li", "display", (checked) ? "" : "none" );
+           		    domStyle.set( "id_autocomplete_restrict_country2_li", "display", (checked) ? "none" : "" );
            		    apply_autocomplete_settings( );
         	    });
         	
@@ -1177,8 +1231,6 @@ define( function( m ) {
 	       				autocompletes[route][n] = new google.maps.places.Autocomplete( dom.byId('id_wp_'+route+'_'+n) );
 	       				google.maps.event.clearListeners( autocompletes[route][n], 'place_changed' );
 	       				autocompletes[route][n].addListener('place_changed', function( ) {
-		       				console.log("ZZZZZ");
-	       					console.log(autocompletes);
 	            			var r = get_route_waypoint( autocompletes, this );
 			            	var route_index = r.route_index;
 	            			var waypoint_index = r.waypoint_index;
@@ -1186,7 +1238,6 @@ define( function( m ) {
 	                		console.log( "Place changed: route=" + route_index + " waypoint_index=" + waypoint_index );
 	                		console.log( autocompletes[route_index][waypoint_index] );
 	                		var place = autocompletes[route_index][waypoint_index].getPlace();
-	                		console.log( place );
 	                		if ( cb_route_from_or_to_changed_handle[route_index][waypoint_index] != undefined )
 	                			clearTimeout( cb_route_from_or_to_changed_handle[route_index][waypoint_index] );
 	                		places[route_index][waypoint_index] = place;
@@ -1271,7 +1322,7 @@ define( function( m ) {
 
         		on( window, "resize", function( evt ) {
 	        		if ( is_in_full_screen() )
-						domStyle.set( "id_top_layout", "display", "None" );
+						domStyle.set( "id_top_layout", "display", "none" );
 	        		else
 						domStyle.set( "id_top_layout", "display", "" );
 					dijit.byId('app_layout').resize();
@@ -1279,44 +1330,52 @@ define( function( m ) {
             });
 
 		window.onkeydown = function(evt) {
+		
 			var prev_ctrl_down = ctrl_down;
 			ctrl_down = ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == true));
-//			console.log("Ctrl Down");
+
 			if (ctrl_down && !prev_ctrl_down) {
+
+				console.log("Ctrl Down");
+				if ( map.getCenter() == undefined ) {
+					console.log( "Ignored" );
+					return;
+				} 
+
 			}
+			
 		}
 
 		window.onkeyup = function(evt) {
 		
 			var prev_ctrl_down = ctrl_down;
-//			console.log(evt);
 			var no_cd = ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == false));
 			
-			if (prev_ctrl_down && no_cd) {
-			
-				if (curr_route != -1) {
+			if ( prev_ctrl_down && no_cd ) {
 
-					curr_route = -1;	
-					curr_leg = -1;
-			
-			    	require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct) {
-						domStyle.set( "id_left_layout", "display", "None" );
-						domConstruct.place("td_panorama", "id_hidden", "after");
-						map_or_panorama_full_screen = true;	
-					});
-            		document.getElementById("td_map_canvas").style.width = "100%";
-		            document.getElementById("td_panorama").style.width = "0%";
-			        google.maps.event.trigger( map, 'resize' );
-			        google.maps.event.trigger( panorama, 'resize' );
+				console.log("Ctrl Up");
+	       		var display = domStyle.get( "id_left_layout", "display" );
+				if ( (map.getCenter() == undefined) || (!ctrl_mode && (display == "none")) ) {
+					console.log( "Ignored" );
+					return;
+				} 
+				ctrl_down = false;
+				
+				if ( !ctrl_mode ) {
+				
+					ctrl_mode = true;
+        			begin_ctrl_mode();
+				
 				}
 				else {
 				
-					curr_route = 0;	
-					curr_leg = 0;
-					
-					stop_driving_temporary_route( );
+					ctrl_mode = false;
+        			end_ctrl_mode();
+				
 				}
-
+				
+				return;
+			
 			}
 		}
 
@@ -1515,6 +1574,8 @@ define( function( m ) {
 		dijit.byId('id_input_route').set( 'maximum', eol );
 		dijit.byId('id_input_route').set( 'discreteValues,', eol );
 		dijit.byId('id_input_route').set( 'value', 0 );
+
+        map.setOptions({draggableCursor: 'hand'});
 	}
 
 	function start_temporary_route( latLng ) {
@@ -1588,13 +1649,7 @@ define( function( m ) {
 
    		marker_no_street_view.setPosition( null );
 
-    	require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct) {
-			domStyle.set( "id_left_layout", "display", "" );
-		});
-//      google.maps.event.trigger( map, 'resize' );
-//      google.maps.event.trigger( panorama, 'resize' );
-
-    	map.setOptions({draggableCursor: 'hand'});
+    	map.setOptions({draggableCursor: 'crosshair'});
     	
     	temp_directions_service = undefined;
 	}
@@ -1757,8 +1812,6 @@ define( function( m ) {
     		do_route( route_index );
     	}
     	else if ( (origin != "") && (waypoint1 == "") && (destination == "") ) {
-    		console.log( places[route_index][0] );
-    		console.log( places[route_index][0].geometry );
     		if (places[route_index][0].geometry.location != undefined )
            		map.panTo( places[route_index][0].geometry.location );
 /*
@@ -1780,21 +1833,34 @@ define( function( m ) {
     	}
     }
     
-    function cb_map_click( ) {
+    function cb_map_click( evt ) {
     	
     	console.log( "cb_map_click - ctrl_down=" + ctrl_down );
     	
-		require(["dojo/dom-construct"], function(domConstruct){
-			if ( !map_or_panorama_full_screen ) {
-				domConstruct.place("td_panorama", "id_hidden", "after");
-				map_or_panorama_full_screen = true;	
-			}
-			else {
-				domConstruct.place("td_panorama", "td_map_canvas", "after");
-	            document.getElementById("td_map_canvas").style.width = "50%";
-	            document.getElementById("td_panorama").style.width = "50%";
-				map_or_panorama_full_screen = false;
-			}
+    	if ( ctrl_mode ) {
+    		if ( temp_directions_service == undefined )
+				start_temporary_route( evt.latLng );
+			return;
+    	}
+
+		require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct ){
+       		var display = domStyle.get( "id_left_layout", "display" );
+       		console.log( display );
+           	if ( display != "none" ) {
+           		console.log( "Ignored" );
+           	}
+           	else {
+				if ( !map_or_panorama_full_screen ) {
+					domConstruct.place("td_panorama", "id_hidden", "after");
+					map_or_panorama_full_screen = true;	
+				}
+				else {
+					domConstruct.place("td_panorama", "td_map_canvas", "after");
+		            document.getElementById("td_map_canvas").style.width = "50%";
+		            document.getElementById("td_panorama").style.width = "50%";
+					map_or_panorama_full_screen = false;
+				}
+           	}
 		});
         google.maps.event.trigger( map, 'resize' );
         google.maps.event.trigger( panorama, 'resize' );
@@ -1852,9 +1918,7 @@ define( function( m ) {
 		console.log( evt );    	
     	console.log( "Right click: " + evt.latLng );
 
-    	if ( ctrl_down ) {
-    		if ( temp_directions_service == undefined )
-				start_temporary_route( evt.latLng );
+    	if ( ctrl_mode ) {
 			return;
     	}
 
@@ -1965,7 +2029,7 @@ return;
 		}
 
     	require(["dojo/dom-style"], function( domStyle) {
-    		domStyle.set( 'id_tr_'+route_index+'_'+(first_hidden-1), "display", "None" );
+    		domStyle.set( 'id_tr_'+route_index+'_'+(first_hidden-1), "display", "none" );
     	});
 		
 		do_route( route_index );
@@ -2004,12 +2068,9 @@ return;
 		curr_route = route_index;	
 		curr_leg = waypoint_index;
 
-        document.getElementById("td_map_canvas").style.width = "50%";
-        document.getElementById("td_panorama").style.width = "50%";
-
     	require(["dojo/dom-style"], function( domStyle ) {
-			domStyle.set( "id_top_layout", "display", "None" );
-			domStyle.set( "id_left_layout", "display", "None" );
+			domStyle.set( "id_top_layout", "display", "none" );
+			domStyle.set( "id_left_layout", "display", "none" );
 			dijit.byId('app_layout').resize();
 		});
 
