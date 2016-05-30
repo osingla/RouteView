@@ -4,6 +4,8 @@
 <!-- ---                                                                                      --- -->
 <!-- --- StreetView Player - Virtual Ride, using Google Maps and Street View                  --- -->
 <!-- ---                                                                                      --- -->
+<!-- --- http://routeview.org                                                                 --- -->
+<!-- ---                                                                                      --- -->
 <!-- -------------------------------------------------------------------------------------------- -->
 
 <!DOCTYPE html>
@@ -27,7 +29,6 @@
         </script>
 
  		<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dijit/themes/claro/claro.css" media="screen" >
- 		<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dojox/layout/resources/ExpandoPane.css" media="screen" >
 
 		<script src="https://apis.google.com/js/client.js?onload=load"></script>
 
@@ -46,9 +47,15 @@
 	            "dijit/form/HorizontalRule", 
 	            "dijit/form/Button",
         		"dijit/form/TextBox", 
-        		"dojox/layout/ExpandoPane", 
         		"dijit/Tooltip", 
         		"dijit/Fieldset", 
+        		"dijit/form/DropDownButton",
+        		"dijit/form/CheckBox",
+        		"dijit/form/DataList",
+        		"dijit/form/ComboBox",
+        		"dijit/form/Select",
+        		"dijit/TooltipDialog",
+				"dojox/widget/Standby",
         		"dojo/domReady!"]
         	);
         </script>
@@ -234,26 +241,32 @@
 									                 				onClick='require(["RouteView.js"], function( s ) { s.cb_show_all_routes(); })' id="id_check_show_all_routes" >
 									                         	Show all routes
 							                        		 </button>
+									                		<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_show_all_routes',position:['below-centered'],showDelay:750,hideDelay:0">
+																Only apply when there is more than one route.<br><br>
+																When selected, all routes will be shown on the map.<br>
+																When not selected, only the current route will be shown on the map. Other routes or part of them might still be shown.  
+									                		</div>
 							                       		</div>
+
+									                    <div style="width:100%" align="center">
+									                        <div data-dojo-type="dijit/form/DropDownButton" >
+									                            <span>My Google Maps API key</span>
+									                            <div data-dojo-type="dijit/TooltipDialog">
+																	<input type="text" name="firstname" value=""
+ 																        dojoType="dijit.form.TextBox" trim="true" id="id_google_maps_api_key" maxlength="64" />
+									                            </div>
+									                        </div>
+								                        </div>
 
 									                    <div style="width:100%" align="center">
 									
 									                        <div data-dojo-type="dijit/form/DropDownButton" >
 									                            <span>Set Starting Position</span>
 									                            <div data-dojo-type="dijit/TooltipDialog">
-									                            	<table>
-									                            		<tr>
-															                <td style="text-align:left; vertical-align:middle">
-										                            			<input id="id_is_addr_for_orig" data-dojo-type="dijit/form/CheckBox" />
-																			</td>
-																			<td>
-																				<input type="text" name="firstname" value=""
-        																			   dojoType="dijit.form.TextBox"
-        																				trim="true" id="id_addr_for_orig" maxlength="80"
-        																				propercase="true">
-        																			</td>
-									                            		</tr>
-									                            	</table>
+																	<input type="text" name="firstname" value=""
+																		   dojoType="dijit.form.TextBox"
+																			trim="true" id="id_addr_for_orig" maxlength="80"
+																			propercase="true" />
 									                            </div>
 									                        </div>                        
 									
@@ -291,38 +304,46 @@
 									                            				<hr>
 									                            			</td>
 									                           			</tr>
-									                            		<tr>
-															                <td style="text-align:right; vertical-align:middle">
-									                            				Restrict Country:&nbsp;
-									                            			</td>
-															                <td style="text-align:left; vertical-align:middle">
-										                            			<input id="id_autocomplete_restrict_country" data-dojo-type="dijit/form/CheckBox" />
-																			</td>
-									                            		</tr>
-									                            		<tr id="id_autocomplete_restrict_country_use_loc_li" style="display:none">
-															                <td style="text-align:right; vertical-align:middle">
-									                            				Use current location:&nbsp;
-									                            			</td>
-															                <td style="text-align:left; vertical-align:middle">
-										                            			<input id="id_autocomplete_restrict_country_use_loc" data-dojo-type="dijit/form/CheckBox" checked />
-																			</td>
-									                            		<tr id="id_autocomplete_restrict_country1_li" style="display:none">
+									                            		<tr style="display:">
 															                <td style="text-align:right; vertical-align:middle">
 									                            				Country:&nbsp;
 									                            			</td>
 															                <td style="text-align:left; vertical-align:middle">
-									                                            <select data-dojo-type="dijit/form/ComboBox" data-dojo-props='list:"restrict_countries_list", value:"", readonly:true'  
-									                                            		id="id_autocomplete_restrict_list_country1">
-									                                            </select>                            			
-									                            			</td>
-									                            		</tr>
-									                            		<tr id="id_autocomplete_restrict_country2_li" style="display:none">
-															                <td style="text-align:right; vertical-align:middle">
-									                            				Country:&nbsp;
-									                            			</td>
-															                <td style="text-align:left; vertical-align:middle">
-									                                            <select data-dojo-type="dijit/form/ComboBox" data-dojo-props='list:"restrict_countries_list", value:"", readonly:true'  
-									                                            		id="id_autocomplete_restrict_list_country2">
+									                                            <select id="id_autocomplete_restrict_country" value="">
+					                                                                <option value="">All</option> 
+					                                                                <option disabled>--------------------------------</option>
+					                                                                <optgroup label="North America"> 
+						                                                                <option value="US">USA</option> 
+						                                                                <option value="CA">Canada</option> 
+						                                                                <option value="MX">Mexico</option> 
+					                                                                </optgroup> 
+					                                                                <optgroup label="South America"> 
+						                                                                <option value="CL">Chile</option> 
+						                                                                <option value="BR">Brazil</option> 
+					                                                                </optgroup> 
+					                                                                <optgroup label="Europe"> 
+						                                                                <option value="AD">Andorre</option> 
+						                                                                <option value="AT">Austria</option> 
+						                                                                <option value="BE">Belgium</option> 
+						                                                                <option value="CH">Switzerland</option> 
+						                                                                <option value="CZ">Czech Republic</option> 
+						                                                                <option value="DK">Denmark</option> 
+						                                                                <option value="DE">Germany</option> 
+						                                                                <option value="FI">Finland</option> 
+						                                                                <option value="FR">France</option> 
+						                                                                <option value="GR">Greece</option> 
+						                                                                <option value="HU">Hungury</option> 
+						                                                                <option value="IE">Ireland</option> 
+						                                                                <option value="IT">Italy</option> 
+						                                                                <option value="LU">Luxembourg</option> 
+						                                                                <option value="MC">Monaco</option> 
+						                                                                <option value="NL">Netherlands</option> 
+						                                                                <option value="NO">Norway</option> 
+						                                                                <option value="PL">Poland</option> 
+						                                                                <option value="PT">Portugal</option> 
+						                                                                <option value="SE">Sweden</option> 
+						                                                                <option value="GB">United Kingdom</option> 
+					                                                                </optgroup>
 									                                            </select>                            			
 									                            			</td>
 									                            		</tr>

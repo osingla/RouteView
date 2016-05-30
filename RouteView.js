@@ -228,6 +228,21 @@ define( function( m ) {
 	       		domStyle.set( id, "background", (n == route_index) ? "#80c1ff": "#b3daff");
 	       	}
 	       	
+	       	if ( (selected_route_index != route_index) && !ctrl_mode ) {
+		        var is_show_all_routes = dijit.byId('id_check_show_all_routes').get('checked');
+		        if ( !is_show_all_routes ) {
+	       			if ( route_bounds[route_index] != undefined ) 
+	            		map.fitBounds( route_bounds[route_index] );
+	            }
+	            else {
+	        		var b = new google.maps.LatLngBounds;
+					route_bounds.forEach( function(e) { b.union(e); });
+					if ( (places[route_index][0] != undefined) && (places[route_index][0].geometry != undefined) )
+						b.extend( places[route_index][0].geometry.location );
+	            		map.fitBounds( b );
+	            }
+	       	}
+	       	
 	       	selected_route_index = route_index;
 
     	});
@@ -652,8 +667,11 @@ define( function( m ) {
             ready( function() {
    				load_settings( );
 
-				dojoConfig = { gmaps: { v: '3.22', libraries: 'places,geometry' } };
-				require(["//maps.google.com/maps/api/js?v=3.23&sensor=false&libraries=places"], function( ) {
+				var rq = "//maps.google.com/maps/api/js?v=3.23&sensor=false&libraries=places";
+		    	var google_maps_api_key = localStorage.getItem("id_google_maps_api_key");
+		    	if ( google_maps_api_key && (google_maps_api_key != "") )
+					rq += "&key=" + google_maps_api_key;
+				require([rq], function( ) {
 					require(["v3_epoly.js"], function( ) {
 						require(["RouteView.js", "dojo/domReady!"], function( ) {
 			 				initialize( );
@@ -1128,12 +1146,48 @@ define( function( m ) {
 
         		iso_countries = new Memory({data: _iso_countries});
 
-        		var list_all_countries_store = new Memory({ idProperty: "name", data: [ ] });
+        		var list_all_countries_store = new Memory({ idProperty: "name", data: [ ], type: "separator" });
         		_iso_countries.forEach( function(entry) {
 //	         		console.log( entry.id );
-        		    list_all_countries_store.add( { name: entry.id } );
+					if ( entry.id == "" )
+        		    	list_all_countries_store.add( { name: entry.id, type: "separator" } );
+					else
+        		    	list_all_countries_store.add( { name: entry.id } );
         		});
-        		dijit.byId('id_autocomplete_restrict_list_country2').set( 'store', list_all_countries_store );
+        		
+				var options = ' \
+					<optgroup label="North America"> \
+						<option value="US">USA</option> \
+						<option value="CA">Canada</option> \
+						<option value="MX">Mexico</option> \
+					</optgroup> \
+					<optgroup label="South America"> \
+						<option value="CL">Chile</option> \
+						<option value="BR">Brazil</option> \
+					</optgroup> \
+					<optgroup label="Europe"> \
+						<option value="AD"Andorre</option> \
+						<option value="AT"Austria</option> \
+						<option value="BE">Belgium</option> \
+						<option value="CH">Switzerland</option> \
+						<option value="CZ">Czech Republic</option> \
+						<option value="DK">Denmark</option> \
+						<option value="DE">Germany</option> \
+						<option value="FI">Finland</option> \
+						<option value="FR">France</option> \
+						<option value="GR">Greece</option> \
+						<option value="HU">Hungury</option> \
+						<option value="IE">Ireland</option> \
+						<option value="IT">Italy</option> \
+						<option value="LU">Luxembourg</option> \
+						<option value="MC">Monaco</option> \
+						<option value="NL">Netherlands</option> \
+						<option value="NO">Norway</option> \
+						<option value="PL">Poland</option> \
+						<option value="PT">Portugal</option> \
+						<option value="SE">Sweden</option> \
+						<option value="GB">United Kingdom</option> \
+					</optgroup>';
 
         		Date.prototype.stdTimezoneOffset = function() {
         		    var jan = new Date(this.getFullYear(), 0, 1);
@@ -1156,44 +1210,11 @@ define( function( m ) {
         		console.log( "timeOffset=[" + timeOffset + "]" );
         		console.log( "dst=" + dateObject.dst() );
 
-        		var list_countries_store = new Memory({ idProperty: "name", data: [ ] });
-        		var l = list_countries.get(timeOffset);
-        		l.list.forEach( function(entry) {
-        		    list_countries_store.add( { name: entry } );
-        		    if ( entry == "USA" )
-        		        dijit.byId('id_autocomplete_restrict_list_country1').set( 'value', entry );
-        		});
-        		dijit.byId('id_autocomplete_restrict_list_country1').set( 'store', list_countries_store );
-        		        		
-        		on( dijit.byId('id_is_addr_for_orig'), "change", function( checked ) {
-					dijit.byId( "id_addr_for_orig").set("disabled", !checked );
-        	    });
-        	    
         		on( dijit.byId('id_autocomplete_restrict_type'), "change", function( checked ) {
            		    domStyle.set( "id_autocomplete_restrict_li", "display", (checked) ? "" : "none" );
            		    apply_autocomplete_settings( );
            		 });
 
-        		on( dijit.byId('id_autocomplete_restrict_country'), "change", function( checked ) {
-        		    if ( !checked ) {
-               		    domStyle.set( "id_autocomplete_restrict_country_use_loc_li", "display", "none" );
-               		    domStyle.set( "id_autocomplete_restrict_country1_li", "display", "none" );
-        		    }
-        		    else {
-               		    domStyle.set( "id_autocomplete_restrict_country_use_loc_li", "display", "" );
-      	  	       	    var use_loc = dijit.byId('id_autocomplete_restrict_type').get( 'value' );
-               		    domStyle.set( "id_autocomplete_restrict_country1_li", "display", (use_loc) ? "" : "none" );
-               		    domStyle.set( "id_autocomplete_restrict_country2_li", "display", (use_loc) ? "none" : "" );
-        		    }
-           		    apply_autocomplete_settings( );
-                });
-
-        		on( dijit.byId('id_autocomplete_restrict_country_use_loc'), "change", function( checked ) {
-           		    domStyle.set( "id_autocomplete_restrict_country1_li", "display", (checked) ? "" : "none" );
-           		    domStyle.set( "id_autocomplete_restrict_country2_li", "display", (checked) ? "none" : "" );
-           		    apply_autocomplete_settings( );
-        	    });
-        	
                 require(["dojo/ready", "dojo/aspect", "dijit/registry", "dojo/dom-style"], function(ready, aspect, registry, domStyle) {
                     ready( function() {
                     	aspect.after(dom.byId("id_left_layout"), "resize", function() {
@@ -1242,6 +1263,9 @@ define( function( m ) {
        			}
 */
 
+		    	var autocomplete_restrict_country = dom.byId('id_autocomplete_restrict_country').value;
+  	  	       	var code_country = autocomplete_restrict_country;
+  	  	       	console.log( "code_country = [" + code_country + "]" );
        			autocompletes = [];
        			places = [];
        			for ( var route = 0; route < MAX_NB_ROUTES; route++ ) {
@@ -1249,6 +1273,8 @@ define( function( m ) {
 	       			places[route] = [];
 	       			for ( var n = 0; n < MAX_NB_WAYPOINTS+2 - 1; n++ ) { 
 	       				autocompletes[route][n] = new google.maps.places.Autocomplete( dom.byId('id_wp_'+route+'_'+n) );
+	       				if ( code_country != "" )
+			 	  	    	autocompletes[route][n].setComponentRestrictions( {country: code_country} );
 	       				google.maps.event.clearListeners( autocompletes[route][n], 'place_changed' );
 	       				autocompletes[route][n].addListener('place_changed', function( ) {
 	            			var r = get_route_waypoint( autocompletes, this );
@@ -1272,7 +1298,8 @@ define( function( m ) {
        			}
 
    				got_location = false;
-   				
+
+/*   				
             	var restrict_country = dijit.byId('id_autocomplete_restrict_country').get( 'checked' );
   	       		console.log( "restrict_country = " + restrict_country );
             	if ( restrict_country ) {
@@ -1280,9 +1307,9 @@ define( function( m ) {
       	       		console.log( "country_use_loc = " + country_use_loc );
       	       		var country = "";
       	  	       	if ( country_use_loc )
-      	  	       		country = dijit.byId('id_autocomplete_restrict_list_country1').get( 'value' );
+      	  	       		country = dijit.byId('id_autocomplete_restrict_country1').get( 'value' );
       	  	       	else
-      	  	       		country = dijit.byId('id_autocomplete_restrict_list_country2').get( 'value' );
+      	  	       		country = dijit.byId('id_autocomplete_restrict_country2').get( 'value' );
        				var geocoder = new google.maps.Geocoder();
        				geocoder.geocode( { 'address': country}, function(results, status) {
        					if (status == google.maps.GeocoderStatus.OK) {
@@ -1296,10 +1323,11 @@ define( function( m ) {
        					}
        				});
             	}
+*/
    				
    				decode_url_params();
    				
-				var is_addr_for_orig = dijit.byId('id_is_addr_for_orig').get( 'checked' );
+				var is_addr_for_orig = (dijit.byId('id_addr_for_orig').get( 'value') == "") ? false : true;
 				if (is_addr_for_orig) {
 					dijit.byId('id_wp_0_0').set('value', dijit.byId('id_addr_for_orig').get( 'value'));
 
@@ -1401,11 +1429,7 @@ define( function( m ) {
             	var restrict_type = dijit.byId('id_autocomplete_restrict_type').get( 'checked' );
             	var restrict_value = dijit.byId('id_autocomplete_restrict_cb').get( 'value' );
             	var restrict_country = dijit.byId('id_autocomplete_restrict_country').get( 'checked' );
-  	       		var country = "";
-  	  	       	if ( dijit.byId('id_autocomplete_restrict_country_use_loc').get( 'checked' ) )
-  	  	       		country = dijit.byId('id_autocomplete_restrict_list_country1').get( 'value' );
-  	  	       	else
-  	  	       		country = dijit.byId('id_autocomplete_restrict_list_country2').get( 'value' );
+				var country = dijit.byId('id_autocomplete_restrict_country').get( 'value' );
   	  	       	console.log( "country = [" + country  + "]" );
   	  	       	var code_country = iso_countries.get( country );
   	  	       	console.log( "code_country = [" + code_country.code + "]" );
@@ -1824,7 +1848,7 @@ define( function( m ) {
     		do_route( route_index );
     	}
     	else if ( (origin != "") && (waypoint1 == "") && (destination == "") ) {
-    		if (places[route_index][0].geometry.location != undefined )
+    		if ( (places[route_index][0].geometry != undefined) && (places[route_index][0].geometry.location != undefined) )
            		map.panTo( places[route_index][0].geometry.location );
 /*
 	        var is_show_all_routes = dijit.byId('id_check_show_all_routes').get('checked');
@@ -2188,139 +2212,135 @@ return;
     
     function save_settings( ) {
 
-    	if ( typeof(Storage) == "undefined" ) {
-    		console.log( "No local storage!" );
-    		return;
-    	}
+        require(["dojo/dom"], function( dom) {
 
-		for (var route_index = 0; route_index < MAX_NB_ROUTES; route_index++) {
-	        var no_hwy  = dijit.byId('id_check_no_hwy_'+route_index).get( 'checked' );
-	    	localStorage.setItem( "no_highway_"+route_index, no_hwy );
-	    	console.log( "Route " + route_index + " no_hwy= " + no_hwy );
-		}
+	    	if ( typeof(Storage) == "undefined" ) {
+	    		console.log( "No local storage!" );
+	    		return;
+	    	}
+	
+			for (var route_index = 0; route_index < MAX_NB_ROUTES; route_index++) {
+		        var no_hwy  = dijit.byId('id_check_no_hwy_'+route_index).get( 'checked' );
+		    	localStorage.setItem( "no_highway_"+route_index, no_hwy );
+		    	console.log( "Route " + route_index + " no_hwy= " + no_hwy );
+			}
+	
+			for (var route_index = 0; route_index < MAX_NB_ROUTES; route_index++) {
+		        var no_toll = dijit.byId('id_check_no_toll_'+route_index).get( 'checked' );
+		    	localStorage.setItem( "no_toll_"+route_index, no_hwy );
+		    	console.log( "Route " + route_index + " no_toll= " + no_hwy );
+		    }
+	
+	    	var step = dijit.byId('id_input_meters').get( 'value' );
+	    	localStorage.setItem( "step", step );
+	    	console.log( "step= " + step );
+	    	
+	    	var interval = dijit.byId('id_input_interval').get( 'value' );
+	    	localStorage.setItem( "interval", interval );
+	    	console.log( "interval= " + interval );
+	    	
+	        var google_maps_api_key = dijit.byId('id_google_maps_api_key').get( 'value' );
+	    	localStorage.setItem( "id_google_maps_api_key", google_maps_api_key );
+	    	console.log( "google_maps_api_key= " + google_maps_api_key );
+	    		
+	        var addr_for_orig = dijit.byId('id_addr_for_orig').get( 'value' );
+	    	localStorage.setItem( "id_addr_for_orig", addr_for_orig );
+	    	console.log( "addr_for_orig= " + addr_for_orig );
 
-		for (var route_index = 0; route_index < MAX_NB_ROUTES; route_index++) {
-	        var no_toll = dijit.byId('id_check_no_toll_'+route_index).get( 'checked' );
-	    	localStorage.setItem( "no_toll_"+route_index, no_hwy );
-	    	console.log( "Route " + route_index + " no_toll= " + no_hwy );
-	    }
-
-    	var step = dijit.byId('id_input_meters').get( 'value' );
-    	localStorage.setItem( "step", step );
-    	console.log( "step= " + step );
-    	
-    	var interval = dijit.byId('id_input_interval').get( 'value' );
-    	localStorage.setItem( "interval", interval );
-    	console.log( "interval= " + interval );
-    	
-        var is_addr_for_orig = dijit.byId('id_is_addr_for_orig').get( 'checked' );
-    	localStorage.setItem( "id_is_addr_for_orig", is_addr_for_orig );
-    	console.log( "is_addr_for_orig= " + is_addr_for_orig );
-    		
-        var addr_for_orig = dijit.byId('id_addr_for_orig').get( 'value' );
-    	localStorage.setItem( "id_addr_for_orig", addr_for_orig );
-    	console.log( "addr_for_orig= " + addr_for_orig );
-    		
-	    var autocomplete_restrict_type = dijit.byId('id_autocomplete_restrict_type').get( 'checked' );
-    	localStorage.setItem( "autocomplete_restrict_type", autocomplete_restrict_type );
-    	console.log( "autocomplete_restrict_type= " + autocomplete_restrict_type );
-    		
-	    var autocomplete_restrict_cb = dijit.byId('id_autocomplete_restrict_cb').get( 'value' );
-    	localStorage.setItem( "autocomplete_restrict_cb", autocomplete_restrict_cb );
-    	console.log( "autocomplete_restrict_cb= " + autocomplete_restrict_cb );
-    		
-	    var autocomplete_restrict_country = dijit.byId('id_autocomplete_restrict_country').get( 'checked' );
-    	localStorage.setItem( "autocomplete_restrict_country", autocomplete_restrict_country );
-    	console.log( "autocomplete_restrict_country= " + autocomplete_restrict_country );
-    		
-	    var autocomplete_restrict_country_use_loc = dijit.byId('id_autocomplete_restrict_country_use_loc').get( 'checked' );
-    	localStorage.setItem( "autocomplete_restrict_country_use_loc", autocomplete_restrict_country_use_loc );
-    	console.log( "autocomplete_restrict_country_use_loc= " + autocomplete_restrict_country_use_loc );
-    		
-	    var autocomplete_restrict_list_country1 = dijit.byId('id_autocomplete_restrict_list_country1').get( 'value' );
-    	localStorage.setItem( "autocomplete_restrict_list_country1", autocomplete_restrict_list_country1 );
-    	console.log( "autocomplete_restrict_list_country1= " + autocomplete_restrict_list_country1 );
-    		
-	    var autocomplete_restrict_list_country2 = dijit.byId('id_autocomplete_restrict_list_country2').get( 'value' );
-    	localStorage.setItem( "autocomplete_restrict_list_country2", autocomplete_restrict_list_country2 );
-    	console.log( "autocomplete_restrict_list_country2= " + autocomplete_restrict_list_country2 );
-    	
+/*	    		
+		    var autocomplete_restrict_type = dijit.byId('id_autocomplete_restrict_type').get( 'checked' );
+	    	localStorage.setItem( "autocomplete_restrict_type", autocomplete_restrict_type );
+	    	console.log( "autocomplete_restrict_type= " + autocomplete_restrict_type );
+	    		
+		    var autocomplete_restrict_cb = dijit.byId('id_autocomplete_restrict_cb').get( 'value' );
+	    	localStorage.setItem( "autocomplete_restrict_cb", autocomplete_restrict_cb );
+	    	console.log( "autocomplete_restrict_cb= " + autocomplete_restrict_cb );
+*/
+	    		
+	    	var autocomplete_restrict_country = dom.byId('id_autocomplete_restrict_country').value;
+	    	localStorage.setItem( "autocomplete_restrict_country", autocomplete_restrict_country );
+	    	console.log( "autocomplete_restrict_country= " + autocomplete_restrict_country );
+	    		
+	    	var dlg = dijit.byId('id_configuration_dlg');
+	    	dlg.closeDropDown( false );
+	    	
+    	});
     }
     
     function load_settings( ) {
 
-    	if ( typeof(Storage) == "undefined" ) {
-    		console.log( "No local storage!" );
-    		return;
-    	}
-    	
-		for (var route_index = 0; route_index < MAX_NB_ROUTES; route_index++) {
-	    	var no_hwy = localStorage.getItem("no_highway_"+route_index);
-    		console.log( "Route " + route_index + " - Restored no_hwy= " + no_hwy );
-	    	if ( no_hwy != null )
-    	        dijit.byId('id_check_no_hwy_'+route_index).set( 'checked', parse(no_hwy), false );
-		}
-    	
-		for (var route_index = 0; route_index < MAX_NB_ROUTES; route_index++) {
-	    	var no_toll = localStorage.getItem("no_toll_"+route_index);
-    		console.log( "Route " + route_index + " - Restored no_toll= " + no_toll );
-    		if ( no_toll != null )
-            	dijit.byId('id_check_no_toll_'+route_index).set( 'checked', parse(no_toll), false );
-		}
+        require(["dojo/dom"], function( dom) {
 
-    	var step = localStorage.getItem("step");
-    	console.log( "Restored step= " + step );
-    	if ( step != null )
-            dijit.byId('id_input_meters').set( 'value', parse(step) );
+	    	if ( typeof(Storage) == "undefined" ) {
+	    		console.log( "No local storage!" );
+	    		return;
+	    	}
+	    	
+			for (var route_index = 0; route_index < MAX_NB_ROUTES; route_index++) {
+		    	var no_hwy = localStorage.getItem("no_highway_"+route_index);
+		    	if ( !no_hwy )
+		    		no_hwy = true;
+	    		console.log( "Route " + route_index + " - Restored no_hwy= " + no_hwy );
+		    	if ( no_hwy != null )
+	    	        dijit.byId('id_check_no_hwy_'+route_index).set( 'checked', parse(no_hwy), false );
+			}
+	    	
+			for (var route_index = 0; route_index < MAX_NB_ROUTES; route_index++) {
+		    	var no_toll = localStorage.getItem("no_toll_"+route_index);
+		    	if ( !no_toll )
+		    		no_toll = true;
+	    		console.log( "Route " + route_index + " - Restored no_toll= " + no_toll );
+	    		if ( no_toll != null )
+	            	dijit.byId('id_check_no_toll_'+route_index).set( 'checked', parse(no_toll), false );
+			}
+	
+	    	var step = localStorage.getItem("step");
+	    	if ( !step )
+	    		step = 175;
+	    	console.log( "Restored step= " + step );
+	    	if ( step != null )
+	            dijit.byId('id_input_meters').set( 'value', parse(step) );
+	    	
+	    	var interval = localStorage.getItem("interval");
+	    	if ( !interval )
+	    		interval = 1200;
+	    	console.log( "Restored interval= " + interval );
+	    	if ( interval != null )
+	            dijit.byId('id_input_interval').set( 'value', parse(interval) );
+	    	
+	    	var google_maps_api_key = localStorage.getItem("id_google_maps_api_key");
+	    	if ( !google_maps_api_key )
+	    		google_maps_api_key = "";
+	    	console.log( "Restored google_maps_api_key= " + google_maps_api_key );
+	        dijit.byId('id_google_maps_api_key').set( 'value', google_maps_api_key );
+	    	
+	    	var addr_for_orig = localStorage.getItem("id_addr_for_orig");
+	    	if ( !addr_for_orig )
+	    		addr_for_orig = "";
+	    	console.log( "Restored addr_for_orig= " + addr_for_orig );
+	        dijit.byId('id_addr_for_orig').set( 'value', addr_for_orig );
+	    	
+/*	    	
+	    	var autocomplete_restrict_type = localStorage.getItem("autocomplete_restrict_type");
+	    	console.log( "Restored autocomplete_restrict_type= " + autocomplete_restrict_type );
+	    	if ( autocomplete_restrict_type )
+	            dijit.byId('id_autocomplete_restrict_type').set( 'checked', parse(autocomplete_restrict_type) );
+
+	    	var autocomplete_restrict_cb = localStorage.getItem("autocomplete_restrict_cb");
+	    	console.log( "Restored autocomplete_restrict_cb= " + autocomplete_restrict_cb );
+	    	if ( autocomplete_restrict_cb )
+	            dijit.byId('id_autocomplete_restrict_cb').set( 'value', autocomplete_restrict_cb );
+*/
+	
+	    	var autocomplete_restrict_country = localStorage.getItem("autocomplete_restrict_country");
+	    	if ( !autocomplete_restrict_country )
+	    		autocomplete_restrict_country = "";
+	    	console.log( "Restored autocomplete_restrict_country= " + autocomplete_restrict_country );
+	    	dom.byId('id_autocomplete_restrict_country').value = autocomplete_restrict_country;
+	            
+        });
     	
-    	var interval = localStorage.getItem("interval");
-    	console.log( "Restored interval= " + interval );
-    	if ( interval != null )
-            dijit.byId('id_input_interval').set( 'value', parse(interval) );
-    	
-    	var is_addr_for_orig = localStorage.getItem("id_is_addr_for_orig");
-    	console.log( "Restored is_addr_for_orig= " + is_addr_for_orig );
-    	if ( is_addr_for_orig )
-            dijit.byId('id_is_addr_for_orig').set( 'checked', parse(is_addr_for_orig) );
-    	
-    	var addr_for_orig = localStorage.getItem("id_addr_for_orig");
-    	console.log( "Restored addr_for_orig= " + addr_for_orig );
-    	if ( addr_for_orig ) {
-            dijit.byId('id_addr_for_orig').set( 'value', addr_for_orig );
-			dijit.byId( "id_addr_for_orig").set("disabled", !is_addr_for_orig );
-        }
-    	
-    	var autocomplete_restrict_type = localStorage.getItem("autocomplete_restrict_type");
-    	console.log( "Restored autocomplete_restrict_type= " + autocomplete_restrict_type );
-    	if ( autocomplete_restrict_type )
-            dijit.byId('id_autocomplete_restrict_type').set( 'checked', parse(autocomplete_restrict_type) );
-    	
-    	var autocomplete_restrict_cb = localStorage.getItem("autocomplete_restrict_cb");
-    	console.log( "Restored autocomplete_restrict_cb= " + autocomplete_restrict_cb );
-    	if ( autocomplete_restrict_cb )
-            dijit.byId('id_autocomplete_restrict_cb').set( 'value', autocomplete_restrict_cb );
-    	
-    	var autocomplete_restrict_country = localStorage.getItem("autocomplete_restrict_country");
-    	console.log( "Restored autocomplete_restrict_country= " + autocomplete_restrict_country );
-    	if ( autocomplete_restrict_country )
-            dijit.byId('id_autocomplete_restrict_country').set( 'checked', parse(autocomplete_restrict_country) );
-    	
-    	var autocomplete_restrict_country_use_loc = localStorage.getItem("autocomplete_restrict_country_use_loc");
-    	console.log( "Restored autocomplete_restrict_country_use_loc= " + autocomplete_restrict_country_use_loc );
-    	if ( autocomplete_restrict_country_use_loc )
-            dijit.byId('id_autocomplete_restrict_country_use_loc').set( 'checked', parse(autocomplete_restrict_country_use_loc) );
-    	
-    	var autocomplete_restrict_list_country1 = localStorage.getItem("autocomplete_restrict_list_country1");
-    	console.log( "Restored autocomplete_restrict_list_country1= " + autocomplete_restrict_list_country1 );
-    	if ( autocomplete_restrict_list_country1 )
-            dijit.byId('id_autocomplete_restrict_list_country1').set( 'value', autocomplete_restrict_list_country1 );
-    	
-    	var autocomplete_restrict_list_country2 = localStorage.getItem("autocomplete_restrict_list_country2");
-    	console.log( "Restored autocomplete_restrict_list_country2= " + autocomplete_restrict_list_country2 );
-    	if ( autocomplete_restrict_list_country2 )
-            dijit.byId('id_autocomplete_restrict_list_country2').set( 'value', autocomplete_restrict_list_country2 );
-    	
-    } // load_settings
+    }
     
     function clear_settings( ) {
 
@@ -2330,7 +2350,9 @@ return;
     	}
 
     	localStorage.clear( );
-    	
+
+    	var dlg = dijit.byId('id_configuration_dlg');
+    	dlg.closeDropDown( false );
     }
     
 	require(["dojo/store/Memory"], function( Memory ) {
@@ -2338,6 +2360,7 @@ return;
             {code: 'AL', id: 'Albania'},
             {code: 'DZ', id: 'Algeria'},
             {code: 'AS', id: 'American Samoa'},
+            {code: 'XX', id: ''},
             {code: 'AD', id: 'Andorra'},
             {code: 'AO', id: 'Angola'},
             {code: 'AI', id: 'Anguilla'},
