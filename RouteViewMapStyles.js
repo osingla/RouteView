@@ -10,7 +10,114 @@
 
 define( function( m ) {
 
-	function mapstyle_route_view( map ) {
+	function mapstyle_route_view1( map ) {
+
+		map.set('styles', [
+		{
+	        "featureType": "administrative",
+	        "stylers": [
+	            {
+	                "visibility": "on"
+	            }
+	        ]
+	    },
+	    {
+	        "featureType": "poi",
+	        "stylers": [
+	            {
+	                "visibility": "simplified"
+	            }
+	        ]
+	    },
+	    {
+	        "featureType": "road",
+	        "elementType": "labels",
+	        "stylers": [
+	            {
+	                "visibility": "on"
+	            }
+	        ]
+	    },
+	    {
+	        "featureType": "water",
+	        "stylers": [
+	            {
+	                "visibility": "simplified"
+	            }
+	        ]
+	    },
+	    {
+	        "featureType": "transit",
+	        "stylers": [
+	            {
+	                "visibility": "simplified"
+	            }
+	        ]
+	    },
+	    {
+	        "featureType": "landscape",
+	        "stylers": [
+	            {
+	                "visibility": "simplified"
+	            }
+	        ]
+	    },
+	    {
+	        "featureType": "road.local",
+	        "stylers": [
+	            {
+	                "visibility": "on"
+	            },
+	            {
+	                "lightness": 0
+	            }
+	        ]
+	    },
+	    {
+	        "featureType": "road.highway",
+	        "elementType": "geometry",
+	        "stylers": [
+	            {
+	                "visibility": "on",
+	            }
+	            
+	        ]
+	    },
+	    {
+	        "featureType": "water",
+	        "stylers": [
+	            {
+	                "color": "#84afa3"
+	            },
+	            {
+	                "lightness": 52
+	            }
+	        ]
+	    },
+	    {
+	        "stylers": [
+	            {
+	                "saturation": -17
+	            },
+	            {
+	                "gamma": 0.36
+	            }
+	        ]
+	    },
+	    {
+	        "featureType": "transit.line",
+	        "elementType": "geometry",
+	        "stylers": [
+	            {
+	                "color": "#3f518c"
+	            }
+	        ]
+	    }
+		]);
+
+	}
+	
+	function mapstyle_route_view2( map ) {
 
 		map.set('styles', [
 	    {
@@ -213,113 +320,6 @@ define( function( m ) {
 	}
 
 
-	function mapstyle_retro( map ) {
-
-		map.set('styles', [
-		{
-	        "featureType": "administrative",
-	        "stylers": [
-	            {
-	                "visibility": "on"
-	            }
-	        ]
-	    },
-	    {
-	        "featureType": "poi",
-	        "stylers": [
-	            {
-	                "visibility": "simplified"
-	            }
-	        ]
-	    },
-	    {
-	        "featureType": "road",
-	        "elementType": "labels",
-	        "stylers": [
-	            {
-	                "visibility": "on"
-	            }
-	        ]
-	    },
-	    {
-	        "featureType": "water",
-	        "stylers": [
-	            {
-	                "visibility": "simplified"
-	            }
-	        ]
-	    },
-	    {
-	        "featureType": "transit",
-	        "stylers": [
-	            {
-	                "visibility": "simplified"
-	            }
-	        ]
-	    },
-	    {
-	        "featureType": "landscape",
-	        "stylers": [
-	            {
-	                "visibility": "simplified"
-	            }
-	        ]
-	    },
-	    {
-	        "featureType": "road.local",
-	        "stylers": [
-	            {
-	                "visibility": "on"
-	            },
-	            {
-	                "lightness": 0
-	            }
-	        ]
-	    },
-	    {
-	        "featureType": "road.highway",
-	        "elementType": "geometry",
-	        "stylers": [
-	            {
-	                "visibility": "on",
-	            }
-	            
-	        ]
-	    },
-	    {
-	        "featureType": "water",
-	        "stylers": [
-	            {
-	                "color": "#84afa3"
-	            },
-	            {
-	                "lightness": 52
-	            }
-	        ]
-	    },
-	    {
-	        "stylers": [
-	            {
-	                "saturation": -17
-	            },
-	            {
-	                "gamma": 0.36
-	            }
-	        ]
-	    },
-	    {
-	        "featureType": "transit.line",
-	        "elementType": "geometry",
-	        "stylers": [
-	            {
-	                "color": "#3f518c"
-	            }
-	        ]
-	    }
-		]);
-
-	}
-	
 	function mapstyle_mapbox_clean( map ) {
 	
 		map.set('styles', [
@@ -681,8 +681,8 @@ define( function( m ) {
 
 		set_map_style: 		function( map, which ) {
 			switch ( which ) {
-				case 1 : mapstyle_route_view( map ); break;
-				case 2 : mapstyle_retro( map ); break;
+				case 1 : mapstyle_route_view1( map ); break;
+				case 2 : mapstyle_route_view2( map ); break;
 				case 3 : mapstyle_mapbox_clean( map ); break;
 				case 4 : mapstyle_mapbox_hotel_vivood( map ); break;
 				case 5 : mapstyle_old_map( map ); break;
