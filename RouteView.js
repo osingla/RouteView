@@ -872,113 +872,6 @@ define( function( m ) {
 	  	return true;
 	}
 	
-	function set_map_style( ) {
-
-		map.set('styles', [
-		    {
-		        "featureType": "administrative",
-		        "stylers": [
-		            {
-		                "visibility": "on"
-		            }
-		        ]
-		    },
-		    {
-		        "featureType": "poi",
-		        "stylers": [
-		            {
-		                "visibility": "simplified"
-		            }
-		        ]
-		    },
-		    {
-		        "featureType": "road",
-		        "elementType": "labels",
-		        "stylers": [
-		            {
-		                "visibility": "on"
-		            }
-		        ]
-		    },
-		    {
-		        "featureType": "water",
-		        "stylers": [
-		            {
-		                "visibility": "simplified"
-		            }
-		        ]
-		    },
-		    {
-		        "featureType": "transit",
-		        "stylers": [
-		            {
-		                "visibility": "simplified"
-		            }
-		        ]
-		    },
-		    {
-		        "featureType": "landscape",
-		        "stylers": [
-		            {
-		                "visibility": "simplified"
-		            }
-		        ]
-		    },
-		    {
-		        "featureType": "road.local",
-		        "stylers": [
-		            {
-		                "visibility": "simplified"
-		            },
-		            {
-		                "lightness": 0
-		            }
-		        ]
-		    },
-		    {
-		        "featureType": "road.highway",
-		        "elementType": "geometry",
-		        "stylers": [
-		            {
-		                "visibility": "on",
-		            }
-		            
-		        ]
-		    },
-		    {
-		        "featureType": "water",
-		        "stylers": [
-		            {
-		                "color": "#84afa3"
-		            },
-		            {
-		                "lightness": 52
-		            }
-		        ]
-		    },
-		    {
-		        "stylers": [
-		            {
-		                "saturation": -17
-		            },
-		            {
-		                "gamma": 0.36
-		            }
-		        ]
-		    },
-		    {
-		        "featureType": "transit.line",
-		        "elementType": "geometry",
-		        "stylers": [
-		            {
-		                "color": "#3f518c"
-		            }
-		        ]
-		    }
-		]);
-
-	}
-
 	function blah(e) {
 		console.log( "!!!!!!!!!!!!!!!!!! Full screen" );
 		console.log(e);
@@ -1067,7 +960,11 @@ define( function( m ) {
                 map = new google.maps.Map( document.getElementById('id_map_canvas'), map_options );
 				create_route_dlg();
 
-				set_map_style( );
+			    require(["RouteViewMapStyles.js"], function( s ) { 
+			    	var map_style = dom.byId('id_map_style').value;
+			    	if ( map_style != "" )
+			    		s.set_map_style( map, parseInt( map_style ) ); 
+			    });
 
                 service = new google.maps.places.PlacesService( map );
                 
@@ -2189,6 +2086,10 @@ return;
 	    	localStorage.setItem( "id_addr_for_orig", addr_for_orig );
 	    	console.log( "addr_for_orig= " + addr_for_orig );
 
+	    	var map_style = dom.byId('id_map_style').value;
+	    	localStorage.setItem( "map_style", map_style );
+	    	console.log( "map_style= " + map_style );
+	    		
 	    	var autocomplete_restriction = dom.byId('id_autocomplete_restriction').value;
 	    	localStorage.setItem( "autocomplete_restriction", autocomplete_restriction );
 	    	console.log( "autocomplete_restriction= " + autocomplete_restriction );
@@ -2256,6 +2157,12 @@ return;
 	    	console.log( "Restored addr_for_orig= " + addr_for_orig );
 	        dijit.byId('id_addr_for_orig').set( 'value', addr_for_orig );
 	    	
+	    	var map_style = localStorage.getItem("map_style");
+	    	if ( !map_style )
+	    		map_style = "";
+	    	console.log( "Restored map_style= " + map_style );
+	    	dom.byId('id_map_style').value = map_style;
+	            
 	    	var autocomplete_restriction = localStorage.getItem("autocomplete_restriction");
 	    	if ( !autocomplete_restriction )
 	    		autocomplete_restriction = "";
