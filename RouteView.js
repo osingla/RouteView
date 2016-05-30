@@ -667,6 +667,7 @@ define( function( m ) {
             ready( function() {
    				load_settings( );
 
+				dojoConfig = { gmaps: { v: '3.23', libraries: 'places,geometry' } };
 				var rq = "//maps.google.com/maps/api/js?v=3.23&sensor=false&libraries=places";
 		    	var google_maps_api_key = localStorage.getItem("id_google_maps_api_key");
 		    	if ( google_maps_api_key && (google_maps_api_key != "") )
@@ -1058,9 +1059,9 @@ define( function( m ) {
             ready( function() {
 
 				var map_options = {
-// 					animatedZoom: false,
 					disableDoubleClickZoom: true,
 					fullscreenControl: false,
+					draggable: true,
                    	zoom: 14
                 };
                 map = new google.maps.Map( document.getElementById('id_map_canvas'), map_options );
@@ -1210,11 +1211,6 @@ define( function( m ) {
         		console.log( "timeOffset=[" + timeOffset + "]" );
         		console.log( "dst=" + dateObject.dst() );
 
-        		on( dijit.byId('id_autocomplete_restrict_type'), "change", function( checked ) {
-           		    domStyle.set( "id_autocomplete_restrict_li", "display", (checked) ? "" : "none" );
-           		    apply_autocomplete_settings( );
-           		 });
-
                 require(["dojo/ready", "dojo/aspect", "dijit/registry", "dojo/dom-style"], function(ready, aspect, registry, domStyle) {
                     ready( function() {
                     	aspect.after(dom.byId("id_left_layout"), "resize", function() {
@@ -1263,6 +1259,7 @@ define( function( m ) {
        			}
 */
 
+		    	var autocomplete_restriction = dom.byId('id_autocomplete_restriction').value;
 		    	var autocomplete_restrict_country = dom.byId('id_autocomplete_restrict_country').value;
   	  	       	var code_country = autocomplete_restrict_country;
   	  	       	console.log( "code_country = [" + code_country + "]" );
@@ -1273,6 +1270,8 @@ define( function( m ) {
 	       			places[route] = [];
 	       			for ( var n = 0; n < MAX_NB_WAYPOINTS+2 - 1; n++ ) { 
 	       				autocompletes[route][n] = new google.maps.places.Autocomplete( dom.byId('id_wp_'+route+'_'+n) );
+	       				if ( autocomplete_restriction != "" )
+            	       		autocompletes[route][n].setTypes([ autocomplete_restriction ]);
 	       				if ( code_country != "" )
 			 	  	    	autocompletes[route][n].setComponentRestrictions( {country: code_country} );
 	       				google.maps.event.clearListeners( autocompletes[route][n], 'place_changed' );
@@ -1299,32 +1298,6 @@ define( function( m ) {
 
    				got_location = false;
 
-/*   				
-            	var restrict_country = dijit.byId('id_autocomplete_restrict_country').get( 'checked' );
-  	       		console.log( "restrict_country = " + restrict_country );
-            	if ( restrict_country ) {
-      	       		var country_use_loc = dijit.byId('id_autocomplete_restrict_country_use_loc').get( 'checked' );
-      	       		console.log( "country_use_loc = " + country_use_loc );
-      	       		var country = "";
-      	  	       	if ( country_use_loc )
-      	  	       		country = dijit.byId('id_autocomplete_restrict_country1').get( 'value' );
-      	  	       	else
-      	  	       		country = dijit.byId('id_autocomplete_restrict_country2').get( 'value' );
-       				var geocoder = new google.maps.Geocoder();
-       				geocoder.geocode( { 'address': country}, function(results, status) {
-       					if (status == google.maps.GeocoderStatus.OK) {
-       						console.log( results );
-       						if ( !got_location ) {
-       							console.log( "Got gelocation for country " + country );
-       							map.setCenter( results[0].geometry.location );
-       							map.setOptions({zoom:7});
-       					        panorama.setPosition( results[0].geometry.location );
-       						}
-       					}
-       				});
-            	}
-*/
-   				
    				decode_url_params();
    				
 				var is_addr_for_orig = (dijit.byId('id_addr_for_orig').get( 'value') == "") ? false : true;
@@ -1418,37 +1391,6 @@ define( function( m ) {
 
 	});
             	
-    }
-    
-    function apply_autocomplete_settings( ) {
-    	
-    	require(["dojo/dom-style", "dojo/ready"], function(domStyle, ready) {
-    		
-            ready( function() {
-            	
-            	var restrict_type = dijit.byId('id_autocomplete_restrict_type').get( 'checked' );
-            	var restrict_value = dijit.byId('id_autocomplete_restrict_cb').get( 'value' );
-            	var restrict_country = dijit.byId('id_autocomplete_restrict_country').get( 'checked' );
-				var country = dijit.byId('id_autocomplete_restrict_country').get( 'value' );
-  	  	       	console.log( "country = [" + country  + "]" );
-  	  	       	var code_country = iso_countries.get( country );
-  	  	       	console.log( "code_country = [" + code_country.code + "]" );
-
-           		for ( var n = 0; n < MAX_NB_WAYPOINTS+2 - 1; n++ ) {
-            	    if ( restrict_type )
-            	       	autocompletes[n].setTypes([ restrict_value ]);
-            	    else
-            	       	autocompletes[n].setTypes([]);
-
-            	    if ( restrict_country && ((country != '') && (country != undefined)) )
-        	  	    	autocompletes[n].setComponentRestrictions({country: code_country.code});
-            	    else
-            	    	autocompletes[n].setComponentRestrictions();
-           		}
-  	  	  	       	
-            });
-            	
-       	});
     }
     
 	function move_to_dist( new_pos, go_timer ) {
@@ -2247,15 +2189,9 @@ return;
 	    	localStorage.setItem( "id_addr_for_orig", addr_for_orig );
 	    	console.log( "addr_for_orig= " + addr_for_orig );
 
-/*	    		
-		    var autocomplete_restrict_type = dijit.byId('id_autocomplete_restrict_type').get( 'checked' );
-	    	localStorage.setItem( "autocomplete_restrict_type", autocomplete_restrict_type );
-	    	console.log( "autocomplete_restrict_type= " + autocomplete_restrict_type );
-	    		
-		    var autocomplete_restrict_cb = dijit.byId('id_autocomplete_restrict_cb').get( 'value' );
-	    	localStorage.setItem( "autocomplete_restrict_cb", autocomplete_restrict_cb );
-	    	console.log( "autocomplete_restrict_cb= " + autocomplete_restrict_cb );
-*/
+	    	var autocomplete_restriction = dom.byId('id_autocomplete_restriction').value;
+	    	localStorage.setItem( "autocomplete_restriction", autocomplete_restriction );
+	    	console.log( "autocomplete_restriction= " + autocomplete_restriction );
 	    		
 	    	var autocomplete_restrict_country = dom.byId('id_autocomplete_restrict_country').value;
 	    	localStorage.setItem( "autocomplete_restrict_country", autocomplete_restrict_country );
@@ -2320,18 +2256,12 @@ return;
 	    	console.log( "Restored addr_for_orig= " + addr_for_orig );
 	        dijit.byId('id_addr_for_orig').set( 'value', addr_for_orig );
 	    	
-/*	    	
-	    	var autocomplete_restrict_type = localStorage.getItem("autocomplete_restrict_type");
-	    	console.log( "Restored autocomplete_restrict_type= " + autocomplete_restrict_type );
-	    	if ( autocomplete_restrict_type )
-	            dijit.byId('id_autocomplete_restrict_type').set( 'checked', parse(autocomplete_restrict_type) );
-
-	    	var autocomplete_restrict_cb = localStorage.getItem("autocomplete_restrict_cb");
-	    	console.log( "Restored autocomplete_restrict_cb= " + autocomplete_restrict_cb );
-	    	if ( autocomplete_restrict_cb )
-	            dijit.byId('id_autocomplete_restrict_cb').set( 'value', autocomplete_restrict_cb );
-*/
-	
+	    	var autocomplete_restriction = localStorage.getItem("autocomplete_restriction");
+	    	if ( !autocomplete_restriction )
+	    		autocomplete_restriction = "";
+	    	console.log( "Restored autocomplete_restriction= " + autocomplete_restriction );
+	    	dom.byId('id_autocomplete_restriction').value = autocomplete_restriction;
+	            
 	    	var autocomplete_restrict_country = localStorage.getItem("autocomplete_restrict_country");
 	    	if ( !autocomplete_restrict_country )
 	    		autocomplete_restrict_country = "";

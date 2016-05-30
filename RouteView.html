@@ -273,38 +273,25 @@
 									                        <div data-dojo-type="dijit/form/DropDownButton" data-dojo-props='autoWidth:false'>
 									                            <span>Autocomplete Settings</span>
 									                            <div data-dojo-type="dijit/TooltipDialog">
-												                    <select data-dojo-type="dijit/form/DataList" data-dojo-props='id:"restrict_types_list"'>
-													                    <option>geocode</option>
-									                                    <option>address</option>
-									                                    <option>establishment</option>
-									                                    <option selected>(cities)</option>
-									                                    <option>(regions)</option>
-									                                </select>
 									                            	<table>
 									                            		<tr>
-															                <td style="text-align:right; vertical-align:middle">
-									                            				Restrict Type:&nbsp;
-									                            			</td>
-															                <td style="text-align:left; vertical-align:middle">
-										                            			<input id="id_autocomplete_restrict_type" data-dojo-type="dijit/form/CheckBox" />
-																			</td>
-									                            		</tr>
-									                            		<tr id="id_autocomplete_restrict_li" style="display:none">
 															                <td style="text-align:right; vertical-align:middle">
 									                            				Type Restriction:&nbsp;
 									                            			</td>
 															                <td style="text-align:left; vertical-align:middle">
-									                                            <select data-dojo-type="dijit/form/ComboBox" data-dojo-props='list:"restrict_types_list", value:"geocode", readonly:true' 
-									                                            		id="id_autocomplete_restrict_cb">
-									                                            </select>                            			
-									                            			</td>
+									                                            <select id="id_autocomplete_restriction" value="">
+					                                                                <option value="">None</option> 
+					                                                                <option disabled>--------------------------------</option>
+					                                                                <option value="geocode">geocode</option> 
+					                                                                <option value="address">address</option> 
+					                                                                <option value="establishment">establishment</option> 
+					                                                                <option value="(cities)">(cities)</option> 
+					                                                                <option value="(regions)">(regions)</option> 
+									                                            </select>
+									                                        </td>                            			
+
 									                            		</tr>
 									                            		<tr>
-									                            			<td colspan="2">
-									                            				<hr>
-									                            			</td>
-									                           			</tr>
-									                            		<tr style="display:">
 															                <td style="text-align:right; vertical-align:middle">
 									                            				Country:&nbsp;
 									                            			</td>
