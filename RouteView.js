@@ -1229,10 +1229,10 @@ define( function( m ) {
        			});
             });
 
-		window.onkeydown = function(evt) {
-		
+		window.onkeydown = function( evt ) {
+
 			var prev_ctrl_down = ctrl_down;
-			ctrl_down = ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == true));
+			ctrl_down = ( ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == true)) || (evt.key == "Control") )
 
 			if (ctrl_down && !prev_ctrl_down) {
 
@@ -1249,7 +1249,7 @@ define( function( m ) {
 		window.onkeyup = function(evt) {
 		
 			var prev_ctrl_down = ctrl_down;
-			var no_cd = ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == false));
+			var no_cd = ( ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == false)) || (evt.key == "Control") )
 			
 			if ( prev_ctrl_down && no_cd ) {
 
