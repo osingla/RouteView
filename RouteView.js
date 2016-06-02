@@ -51,6 +51,8 @@ define( function( m ) {
 	var temp_directions_service_request;
  	var temp_directions_renderer = undefined;
 	var temp_polylines = undefined;
+
+   	var alt_down = false;
    	
    	var route_colors = [
    		"#0066cc",
@@ -249,18 +251,6 @@ define( function( m ) {
 	
 	}
     
-    function do_street_view( ) {
-		is_street_view = dijit.byId('id_btn_street_view').get( 'checked' );
-   		if (streetViewLayer == undefined)
-   			streetViewLayer = new google.maps.StreetViewCoverageLayer();
-    	if (is_street_view) {
-			streetViewLayer.setMap(map);
-		}
-		else {
-			streetViewLayer.setMap(null);
-		}
-    }
-    
     function get_route_waypoint( obj, ref ) {
     
 		var index_route = undefined;
@@ -403,8 +393,6 @@ define( function( m ) {
             }
 
         });
-
-		dijit.byId('id_btn_street_view').set( 'disabled', false );
 
         update_btns_remove_up_down( route_index );
     
@@ -1213,6 +1201,7 @@ define( function( m ) {
 			                	}
 			                });
 					    	map.setCenter(results[0].geometry.location);
+							update_btns_remove_up_down( 0 );
 					    } 
 					    else {
 					    	console.log("Geocode was not successful for the following reason: " + status);
@@ -1233,15 +1222,25 @@ define( function( m ) {
 
 			var prev_ctrl_down = ctrl_down;
 			ctrl_down = ( ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == true)) || (evt.key == "Control") )
-
 			if (ctrl_down && !prev_ctrl_down) {
-
 				console.log("Ctrl Down - ctrl_mode=" + ctrl_mode);
 				if ( map.getCenter() == undefined ) {
 					console.log( "Ignored" );
 					return;
 				} 
-
+			}
+			
+			var prev_alt_down = alt_down;
+			alt_down = ( ((evt.keyIdentifier == 'Alt') && (evt.altlKey == true)) || (evt.key == "Alt") )
+			if (alt_down && !prev_alt_down) {
+//				console.log("Alt Down");
+				if ( map.getCenter() == undefined ) {
+					console.log( "Ignored" );
+					return;
+				} 
+				if (streetViewLayer == undefined)
+					streetViewLayer = new google.maps.StreetViewCoverageLayer();
+				streetViewLayer.setMap(map);
 			}
 			
 		}
@@ -1250,7 +1249,6 @@ define( function( m ) {
 		
 			var prev_ctrl_down = ctrl_down;
 			var no_cd = ( ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == false)) || (evt.key == "Control") )
-			
 			if ( prev_ctrl_down && no_cd ) {
 
 				console.log("Ctrl Up - ctrl_mode=" + ctrl_mode);
@@ -1273,7 +1271,16 @@ define( function( m ) {
 				}
 				
 				return;
-			
+			}
+
+			var prev_alt_down = alt_down;
+			var no_cd = ( ((evt.keyIdentifier == 'Alt') && (evt.AltKey == false)) || (evt.key == "Alt") )
+			if ( prev_alt_down && no_cd ) {
+
+//				console.log("Alt Up");
+				alt_down = false;
+				streetViewLayer.setMap(null);
+				
 			}
 		}
 
