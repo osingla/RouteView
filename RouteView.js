@@ -836,26 +836,90 @@ define( function( m ) {
 	
 		var query = location.search.substr(1);
 	  	var result = [];
-		query.split("&").forEach(function(part) {
-	    	var item = part.split("=");
-	    	console.log(item);
-	    	if (item != "") {
-		    	result.push( decodeURIComponent(item[1]) );
-			    console.log( decodeURIComponent(item[1]) );
+
+//		console.log( query );
+//		console.log( query.split("route=").length );
+//		console.log( query.split("route=") );
+
+		var total_nb_waypoints = 0;
+		var nb_routes = 0;
+		query.split("route=").forEach(function(part) {
+			if ( part != "" ) {
+				result[nb_routes] = [];
+				var item = part;
+				console.log( part );
+				part.split("&").forEach(function(part) {
+					var item = part;
+					console.log(item);
+					if (item != "") {
+						result[nb_routes].push( decodeURIComponent(item) );
+						console.log( decodeURIComponent(item) );
+						total_nb_waypoints++;
+					}
+				});	
+				nb_routes++;
 			}
 	  	});	
+	  	if (nb_routes == 0)
+			return false;
 
-	  	console.log(result);
-		var nb_routes = result.length;
+	    dijit.byId("id_pane_standby").show();
+
 		console.log( "nb_routes=" + nb_routes );
+	  	console.log(result);
 		var waypoints = [];
-	  	for (var n = 0; n < nb_routes; n++)
-	  		waypoints[n] = result[n].split(";");
-	  	console.log( waypoints );
-	  	console.log( waypoints.length );
-	  	if (waypoints.length == 0)
-	  		return false;
-	  	
+	  	for (var route_index = 0; route_index < nb_routes; route_index++) {
+			for ( var waypoint_index = 0; waypoint_index < result[route_index].length; waypoint_index++ ) {
+				dijit.byId('id_wp_'+route_index+'_'+waypoint_index).set( 'value', result[route_index][waypoint_index] );
+				show_waypoint( route_index, waypoint_index );
+				if ( waypoint_index >= 1 ) {
+					require(["dojo/dom-style"], function( domStyle) {
+						dijit.byId('id_btn_drive_'+route_index+"_"+waypoint_index).set( 'disabled', false );
+						domStyle.set( 'id_tr_'+route_index+'_'+(waypoint_index), "display", "" );
+						domStyle.set( 'id_drive_tr_'+route_index+"_"+(waypoint_index), "display", "" );
+					});
+				}
+			}
+			update_btns_remove_up_down( route_index );
+		}
+		
+		(function ( total_nb_waypoints ) {
+			console.log( "total_nb_waypoints=" + total_nb_waypoints );
+			var done_nb_waypoints = 0;
+			for (var route_index = 0; route_index < nb_routes; route_index++) {
+				for ( var waypoint_index = 0; waypoint_index < result[route_index].length; waypoint_index++ ) {
+					
+					function look_for_address( place_name, route_index, waypoint_index) {
+						var geocoder = new google.maps.Geocoder();
+						geocoder.geocode( { 'address': place_name}, function(results, status) {
+							if ( status == google.maps.GeocoderStatus.OK ) {
+								console.log( results);
+								service.getDetails({
+									placeId: results[0].place_id
+								}, function ( place, status ) {
+									console.log( " --> " + route_index + " , " + waypoint_index + " --> " + place_name );
+									if ( status == google.maps.places.PlacesServiceStatus.OK ) {
+										places[route_index][waypoint_index] = place;
+										done_nb_waypoints++;
+										console.log( done_nb_waypoints + " / " + total_nb_waypoints );
+										if ( (route_index == 0) && (waypoint_index == 0) )
+											map.setCenter(results[0].geometry.location);
+										if ( done_nb_waypoints == total_nb_waypoints ) 
+											dijit.byId("id_pane_standby").hide();
+									}
+								});
+							} 
+							else {
+								console.log("Geocode was not successful for the following reason: " + status);
+							}
+						});
+					}
+					look_for_address( result[route_index][waypoint_index], route_index, waypoint_index );
+
+				}
+			}
+		})( total_nb_waypoints );
+
 	  	return true;
 	}
 	
@@ -1195,7 +1259,7 @@ define( function( m ) {
 											}, function ( place, status ) {
 												console.log( " --> " + route_index + " , " + waypoint_index );
 												if ( status == google.maps.places.PlacesServiceStatus.OK ) {
-													places[0][0] = place;
+													places[route_index][waypoint_index] = place;
 												}
 											});
 										} 
@@ -1221,30 +1285,32 @@ define( function( m ) {
 
    				got_location = false;
 
-   				decode_url_params();
-   				
-				var is_addr_for_orig = (dijit.byId('id_addr_for_orig').get( 'value') == "") ? false : true;
-				if (is_addr_for_orig) {
-					dijit.byId('id_wp_0_0').set('value', dijit.byId('id_addr_for_orig').get( 'value'));
+   				var decoded_flags = decode_url_params();
 
-					var geocoder = new google.maps.Geocoder();
-					geocoder.geocode( { 'address': dijit.byId('id_addr_for_orig').get( 'value')}, function(results, status) {
-						if ( status == google.maps.GeocoderStatus.OK ) {
-	  						console.log( results);
-			                service.getDetails({
-				              	placeId: results[0].place_id
-			                }, function ( place, status ) {
-			                	if ( status == google.maps.places.PlacesServiceStatus.OK ) {
-			                		places[0][0] = place;
-			                	}
-			                });
-					    	map.setCenter(results[0].geometry.location);
-							update_btns_remove_up_down( 0 );
-					    } 
-					    else {
-					    	console.log("Geocode was not successful for the following reason: " + status);
-					    }
-				    });
+				if ( !decoded_flags ) {
+					var is_addr_for_orig = (dijit.byId('id_addr_for_orig').get( 'value') == "") ? false : true;
+					if (is_addr_for_orig) {
+						dijit.byId('id_wp_0_0').set('value', dijit.byId('id_addr_for_orig').get( 'value'));
+
+						var geocoder = new google.maps.Geocoder();
+						geocoder.geocode( { 'address': dijit.byId('id_addr_for_orig').get( 'value')}, function(results, status) {
+							if ( status == google.maps.GeocoderStatus.OK ) {
+								console.log( results);
+								service.getDetails({
+									placeId: results[0].place_id
+								}, function ( place, status ) {
+									if ( status == google.maps.places.PlacesServiceStatus.OK ) {
+										places[0][0] = place;
+									}
+								});
+								map.setCenter(results[0].geometry.location);
+								update_btns_remove_up_down( 0 );
+							} 
+							else {
+								console.log("Geocode was not successful for the following reason: " + status);
+							}
+						});
+					}
 				}
 
         		on( window, "resize", function( evt ) {
@@ -1604,7 +1670,7 @@ define( function( m ) {
         			break;
 				if (route_index > 0)
 					url += "&"; 
-				url += "route"+(route_index+1)+"="; 
+				url += "route="; 
         		nb_routes++;
 				nb_wp[route_index] = 0;
 	            for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
@@ -1612,7 +1678,7 @@ define( function( m ) {
 	            	if ( display != "none" ) {
 	            		console.log( n + " ==> " + places[route_index][n].name + " : " + places[route_index][n].geometry.location.lat() + " , " + places[route_index][n].geometry.location.lng() );
 						if (n > 0)
-							url += encodeURIComponent(";"); 
+							url += "&"; 
 						var v = dijit.byId('id_wp_'+route_index+'_'+n).get( 'value');
 		    	        url += encodeURIComponent(v);
 	            	}
@@ -1825,9 +1891,14 @@ return;
     }
     
     function show_waypoint( route_index, index ) {
+
+		if ( route_index >= 1 ) {
+			dijit.byId('id_check_use_route_'+(route_index)).set( 'checked', true );
+			cb_click_use_route( route_index );
+		}
+
     	require(["dojo/dom-style"], function( domStyle) {
-    		var id = 'id_tr_' + route_index + '_' + index;
-    		domStyle.set( id, "display", "" );
+    		domStyle.set( 'id_tr_' + route_index + '_' + index, "display", "" );
     	});
     }
     
@@ -2094,16 +2165,16 @@ return;
 	
 		console.log(1);
 		
-  var copyTextarea = document.querySelector('.js-copytextarea');
-  copyTextarea.select();
+		var copyTextarea = document.querySelector('.js-copytextarea');
+		copyTextarea.select();
 
-  try {
-    var successful = document.execCommand('copy');
-    var msg = successful ? 'successful' : 'unsuccessful';
-    console.log('Copying text command was ' + msg);
-  } catch (err) {
-    console.log('Oops, unable to copy');
-  }
+		try {
+			var successful = document.execCommand('copy');
+			var msg = successful ? 'successful' : 'unsuccessful';
+			console.log('Copying text command was ' + msg);
+		} catch (err) {
+			console.log('Oops, unable to copy');
+		}
 		
 	}
 
