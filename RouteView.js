@@ -661,7 +661,7 @@ define( function( m ) {
 					rq += "&key=" + google_maps_api_key;
 				require([rq], function( ) {
 					require(["v3_epoly.js"], function( ) {
-						require(["RouteView.js", "FileSaver.js", "dojo/domReady!"], function( ) {
+						require(["RouteView.js", "dojo/domReady!"], function( ) {
 			 				initialize( );
 						});
 					});
