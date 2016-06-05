@@ -940,6 +940,13 @@ define( function( m ) {
 
 				var url = location.host + location.pathname;
 				console.log( "url= [" + url + "]" );
+				if ( url == "rawgit.com/osingla/RouteView/master/RouteView.html" ) {
+					console.log( "Switching to http://streetviewplayer.org/VirtualRide" );
+					var xmlhttp = new XMLHttpRequest();
+					xmlhttp.open("GET", "http://streetviewplayer.org/VirtualRide/", false);
+					xmlhttp.send();
+					return xmlhttp.responseText;
+   				}
 
 				var map_options = {
 					disableDoubleClickZoom: true,
