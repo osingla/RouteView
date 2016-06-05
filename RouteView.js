@@ -332,7 +332,7 @@ define( function( m ) {
             var route_index = directions_renderer.indexOf( this );
             console.log("directions_changed: route_index=" + route_index);
             var new_dir = directions_renderer[route_index].getDirections();
-            console.log( new_dir );
+//          console.log( new_dir );
             var index_waypoint = undefined;
             if (new_dir.request.Xc != undefined)
 				index_waypoint = new_dir.request.Xc;
@@ -421,9 +421,8 @@ define( function( m ) {
 
 		    dijit.byId("id_pane_standby").hide();
 
-			console.log( response );
+//			console.log( response );
 			var route_index = directions_service_request.indexOf( response.request );
-			console.log( route_index );
 
             var legs = response.routes[0].legs;
             var leg = legs[0];
@@ -837,10 +836,6 @@ define( function( m ) {
 		var query = location.search.substr(1);
 	  	var result = [];
 
-//		console.log( query );
-//		console.log( query.split("route=").length );
-//		console.log( query.split("route=") );
-
 		var total_nb_waypoints = 0;
 		var nb_routes = 0;
 		query.split("route=").forEach(function(part) {
@@ -893,19 +888,21 @@ define( function( m ) {
 						var geocoder = new google.maps.Geocoder();
 						geocoder.geocode( { 'address': place_name}, function(results, status) {
 							if ( status == google.maps.GeocoderStatus.OK ) {
-								console.log( results);
+//								console.log( results);
 								service.getDetails({
 									placeId: results[0].place_id
 								}, function ( place, status ) {
-									console.log( " --> " + route_index + " , " + waypoint_index + " --> " + place_name );
 									if ( status == google.maps.places.PlacesServiceStatus.OK ) {
+										console.log( done_nb_waypoints + " / " + total_nb_waypoints + route_index + " , " + waypoint_index + " --> " + place_name );
 										places[route_index][waypoint_index] = place;
 										done_nb_waypoints++;
-										console.log( done_nb_waypoints + " / " + total_nb_waypoints );
 										if ( (route_index == 0) && (waypoint_index == 0) )
 											map.setCenter(results[0].geometry.location);
-										if ( done_nb_waypoints == total_nb_waypoints ) 
+										if ( done_nb_waypoints == total_nb_waypoints ) {
+											for (var r = 0; r < nb_routes; r++)
+												do_route( r );
 											dijit.byId("id_pane_standby").hide();
+										}
 									}
 								});
 							} 
