@@ -400,7 +400,6 @@ define( function( m ) {
 
 		dijit.byId('id_btn_save_gpx').set( 'disabled', false );
 		dijit.byId('id_btn_create_long_url').set( 'disabled', false );
-		dijit.byId('id_btn_create_short_url').set( 'disabled', false );
         
         directions_service_request[route_index] = {
             origin: start_location,
@@ -662,7 +661,7 @@ define( function( m ) {
 					rq += "&key=" + google_maps_api_key;
 				require([rq], function( ) {
 					require(["v3_epoly.js"], function( ) {
-						require(["RouteView.js", "dojo/domReady!"], function( ) {
+						require(["RouteView.js", "FileSaver.js", "dojo/domReady!"], function( ) {
 			 				initialize( );
 						});
 					});
@@ -939,6 +938,9 @@ define( function( m ) {
     		
             ready( function() {
 
+				var url = location.host + location.pathname;
+				console.log( "url= [" + url + "]" );
+
 				var map_options = {
 					disableDoubleClickZoom: true,
 					fullscreenControl: false,
@@ -1104,10 +1106,10 @@ define( function( m ) {
                         });
                     });
                 });
-                
-        /*
+
+/*
                 require(["dojo/dnd/Moveable", "dojo/dom", "dojo/on", "dojo/domReady!"], function(Moveable, dom, on){
-                	var dnd = new Moveable( dom.byId("id_mark1") );
+                	var dnd = new Moveable( dom.byId("id_tr_0_0"), {hint: "avatar"} );
                 	on( dnd, "MoveStart", function (e) {
                         console.log( "Move started" );
                 		console.log(e);
@@ -1116,8 +1118,16 @@ define( function( m ) {
                         console.log( "First Move" );
                 		console.log(e);
                     });
+                	on( dnd, "MoveStop", function (e) {
+                        console.log( "Move stopped" );
+                		console.log(e);
+                    });
+                	on( dnd, "Drop", function (e) {
+                        console.log( "Move stopped" );
+                		console.log(e);
+                    });
            		});
-        */
+*/
 
 				for (var r = 0; r < MAX_NB_ROUTES; r++) {
 					cb_route_from_or_to_changed_handle[r] = [];
@@ -1161,6 +1171,7 @@ define( function( m ) {
 			 	  	    	autocompletes[route][n].setComponentRestrictions( {country: code_country} );
 	       				google.maps.event.clearListeners( autocompletes[route][n], 'place_changed' );
 	       				autocompletes[route][n].addListener('place_changed', function( ) {
+							console.log( this );
 	            			var r = get_route_waypoint( autocompletes, this );
 			            	var route_index = r.route_index;
 	            			var waypoint_index = r.waypoint_index;
@@ -1168,6 +1179,29 @@ define( function( m ) {
 	                		console.log( "Place changed: route=" + route_index + " waypoint_index=" + waypoint_index );
 	                		console.log( autocompletes[route_index][waypoint_index] );
 	                		var place = autocompletes[route_index][waypoint_index].getPlace();
+	                		console.log( place );
+	                		if ( place.geometry == undefined ) {
+								function look_for_address( place_name, route_index, waypoint_index) {
+									var geocoder = new google.maps.Geocoder();
+									geocoder.geocode( { 'address': place_name}, function(results, status) {
+										if ( status == google.maps.GeocoderStatus.OK ) {
+											console.log( results);
+											service.getDetails({
+												placeId: results[0].place_id
+											}, function ( place, status ) {
+												console.log( " --> " + route_index + " , " + waypoint_index );
+												if ( status == google.maps.places.PlacesServiceStatus.OK ) {
+													places[0][0] = place;
+												}
+											});
+										} 
+										else {
+											console.log("Geocode was not successful for the following reason: " + status);
+										}
+									});
+								}
+								look_for_address( place.name, route_index, waypoint_index );
+							}
 	                		if ( cb_route_from_or_to_changed_handle[route_index][waypoint_index] != undefined )
 	                			clearTimeout( cb_route_from_or_to_changed_handle[route_index][waypoint_index] );
 	                		places[route_index][waypoint_index] = place;
@@ -1216,73 +1250,80 @@ define( function( m ) {
 						domStyle.set( "id_top_layout", "display", "" );
 					dijit.byId('app_layout').resize();
        			});
+
+				window.onkeydown = function( evt ) {
+
+					var prev_ctrl_down = ctrl_down;
+					ctrl_down = ( ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == true)) || (evt.key == "Control") )
+					if (ctrl_down && !prev_ctrl_down) {
+						console.log("Ctrl Down - ctrl_mode=" + ctrl_mode);
+						if ( map.getCenter() == undefined ) {
+							console.log( "Ignored" );
+							return;
+						} 
+					}
+					
+					var prev_alt_down = alt_down;
+					alt_down = ( ((evt.keyIdentifier == 'Alt') && (evt.altlKey == true)) || (evt.key == "Alt") )
+					if (alt_down && !prev_alt_down) {
+		//				console.log("Alt Down");
+						if ( map.getCenter() == undefined ) {
+							console.log( "Ignored" );
+							return;
+						} 
+						if (streetViewLayer == undefined)
+							streetViewLayer = new google.maps.StreetViewCoverageLayer();
+						streetViewLayer.setMap(map);
+					}
+					
+				}
+
+				window.onkeyup = function(evt) {
+				
+					var prev_ctrl_down = ctrl_down;
+					var no_cd = ( ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == false)) || (evt.key == "Control") )
+					if ( prev_ctrl_down && no_cd ) {
+
+						console.log("Ctrl Up - ctrl_mode=" + ctrl_mode);
+						var display = domStyle.get( "id_left_layout", "display" );
+						if ( (map.getCenter() == undefined) || (!ctrl_mode && (display == "none")) ) {
+							console.log( "Ignored" );
+							return;
+						} 
+						ctrl_down = false;
+						
+						if ( !ctrl_mode ) {
+							ctrl_mode = true;
+							begin_ctrl_mode();
+						}
+						else {
+							if ( (timer_animate == undefined) && (temp_directions_renderer == undefined) ) {
+								ctrl_mode = false;
+								end_ctrl_mode();
+							}
+						}
+						
+						return;
+					}
+
+					var prev_alt_down = alt_down;
+					var no_cd = ( ((evt.keyIdentifier == 'Alt') && (evt.AltKey == false)) || (evt.key == "Alt") )
+					if ( prev_alt_down && no_cd ) {
+
+		//				console.log("Alt Up");
+						alt_down = false;
+						streetViewLayer.setMap(null);
+						
+					}
+				}
+				
+				var is_file_api = (window.File && window.FileReader && window.FileList && window.Blob) ? true : false;
+				console.log( "is_file_api = " + is_file_api );
+				if ( is_file_api ) {
+					document.getElementById( 'id_btn_load_file').addEventListener('change', load_file_select, false );
+				}
+
             });
-
-		window.onkeydown = function( evt ) {
-
-			var prev_ctrl_down = ctrl_down;
-			ctrl_down = ( ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == true)) || (evt.key == "Control") )
-			if (ctrl_down && !prev_ctrl_down) {
-				console.log("Ctrl Down - ctrl_mode=" + ctrl_mode);
-				if ( map.getCenter() == undefined ) {
-					console.log( "Ignored" );
-					return;
-				} 
-			}
-			
-			var prev_alt_down = alt_down;
-			alt_down = ( ((evt.keyIdentifier == 'Alt') && (evt.altlKey == true)) || (evt.key == "Alt") )
-			if (alt_down && !prev_alt_down) {
-//				console.log("Alt Down");
-				if ( map.getCenter() == undefined ) {
-					console.log( "Ignored" );
-					return;
-				} 
-				if (streetViewLayer == undefined)
-					streetViewLayer = new google.maps.StreetViewCoverageLayer();
-				streetViewLayer.setMap(map);
-			}
-			
-		}
-
-		window.onkeyup = function(evt) {
-		
-			var prev_ctrl_down = ctrl_down;
-			var no_cd = ( ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == false)) || (evt.key == "Control") )
-			if ( prev_ctrl_down && no_cd ) {
-
-				console.log("Ctrl Up - ctrl_mode=" + ctrl_mode);
-	       		var display = domStyle.get( "id_left_layout", "display" );
-				if ( (map.getCenter() == undefined) || (!ctrl_mode && (display == "none")) ) {
-					console.log( "Ignored" );
-					return;
-				} 
-				ctrl_down = false;
-				
-				if ( !ctrl_mode ) {
-					ctrl_mode = true;
-        			begin_ctrl_mode();
-				}
-				else {
-					if ( (timer_animate == undefined) && (temp_directions_renderer == undefined) ) {
-						ctrl_mode = false;
-	        			end_ctrl_mode();
-	        		}
-				}
-				
-				return;
-			}
-
-			var prev_alt_down = alt_down;
-			var no_cd = ( ((evt.keyIdentifier == 'Alt') && (evt.AltKey == false)) || (evt.key == "Alt") )
-			if ( prev_alt_down && no_cd ) {
-
-//				console.log("Alt Up");
-				alt_down = false;
-				streetViewLayer.setMap(null);
-				
-			}
-		}
 
 /*		
     	window.onerror = function(message, file, lineNumber) {
@@ -1615,7 +1656,17 @@ define( function( m ) {
 	            for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
 	        		var display = domStyle.get( 'id_tr_'+route_index+'_' + n, "display" );
 	            	if ( display != "none" ) {
-	            		console.log( n + " ==> " + places[route_index][n].name + " : " + places[route_index][n].geometry.location.lat() + " , " + places[route_index][n].geometry.location.lng() );
+						if ( places[route_index][n].geometry == undefined ) {
+							console.log( route_index + " , " + n + " ==> " + places[route_index][n].name + " ? " );
+						}
+						else {
+							if ( places[route_index][n].geometry.location == undefined ) {
+								console.log( route_index + " , " + n + " ==> " + places[route_index][n].name + " ? " + places[route_index][n].geometry );
+							}
+							else {
+								console.log( route_index + " , " + n + " ==> " + places[route_index][n].name + " : " + places[route_index][n].geometry.location.lat() + " , " + places[route_index][n].geometry.location.lng() );
+							}
+						}
 	            		nb_wp[route_index]++;
 	            	}
 	            }
@@ -2199,6 +2250,17 @@ return;
     	dlg.closeDropDown( false );
     }
     
+    function load_file_select( evt ) {
+		
+		var files = evt.target.files; 
+		console.log( files );
+	}
+
+	function save_ride( ) {
+		console.log( "Save ride" );
+		
+	}
+    
 	require(["dojo/store/Memory"], function( Memory ) {
 		_iso_countries = [
             {code: 'AL', id: 'Albania'},
@@ -2462,6 +2524,8 @@ return;
 		
 		save_settings: 		function( ) { save_settings(); },
 		clear_settings: 	function( ) { clear_settings(); },
+		
+		save_ride:	function() { save_ride(); }
 		
     };
  
