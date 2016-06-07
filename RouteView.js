@@ -212,7 +212,7 @@ define( function( m ) {
 				for (var n = route; n < MAX_NB_ROUTES; n++)
 					domStyle.set( "id_fieldset_route_"+n, "display", "none" );
 				for (var n = route+1; n < MAX_NB_ROUTES; n++) {
-					console.log( "--> " + 'id_check_use_route_'+n);
+//					console.log( "--> " + 'id_check_use_route_'+n);
 					dijit.byId('id_check_use_route_'+n).set('checked', false, false);
 				}
 			}
@@ -353,10 +353,10 @@ define( function( m ) {
 	              	placeId: place_id
                 }, function ( place, status ) {
                 	if ( status == google.maps.places.PlacesServiceStatus.OK ) {
-		                console.log( old_nb_waypoints );
-                		console.log( new_nb_waypoints );
-		                console.log( index_waypoint );
-                	    console.log( place.formatted_address );
+//		                console.log( old_nb_waypoints );
+//                		console.log( new_nb_waypoints );
+//		                console.log( index_waypoint );
+//                	    console.log( place.formatted_address );
                 	    if (new_nb_waypoints == old_nb_waypoints) {
                 	    	change_waypoint( route_index, index_waypoint, place.formatted_address );
                 	    }
@@ -1200,25 +1200,6 @@ define( function( m ) {
 						cb_route_from_or_to_changed_handle[r][n] = undefined;
 				}
 
-/*
-       			for ( var route = 0; route < MAX_NB_ROUTES; route++ ) {
-	        		for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) { 
-	            		on( dom.byId('id_wp_'+route+"_"+n), "change", function( evt ) {
-		            		console.log( evt.target );
-	            			var id = dijit.byId(evt.target.id);
-	            			console.log(id);
-	            			var route_index = id.get('route_index');
-	            			var waypoint_index = id.get('waypoint_index');
-	                		console.log( "Change: route:" + route_index + " waypoint:" + waypoint_index );
-	                		if ( cb_route_from_or_to_changed_handle[route_index][waypoint_index] != undefined )
-	                			clearTimeout( cb_route_from_or_to_changed_handle[route_index][waypoint_index] );
-	                		cb_route_from_or_to_changed_handle[route_index][waypoint_index] = setTimeout( 
-			            		function() { cb_route_from_or_to_changed(route_index, waypoint_index); }, interval, 250 );
-	           			});
-	        		}
-       			}
-*/
-
 		    	var autocomplete_restriction = dom.byId('id_autocomplete_restriction').value;
 		    	var autocomplete_restrict_country = dom.byId('id_autocomplete_restrict_country').value;
   	  	       	var code_country = autocomplete_restrict_country;
@@ -1292,7 +1273,7 @@ define( function( m ) {
 						var geocoder = new google.maps.Geocoder();
 						geocoder.geocode( { 'address': dijit.byId('id_addr_for_orig').get( 'value')}, function(results, status) {
 							if ( status == google.maps.GeocoderStatus.OK ) {
-								console.log( results);
+//								console.log( results);
 								service.getDetails({
 									placeId: results[0].place_id
 								}, function ( place, status ) {
@@ -1601,7 +1582,7 @@ define( function( m ) {
       	temp_directions_service.route( temp_directions_service_request, 
 			(function(temp_directions_renderer) { return function(response, status) {
 				if ( status == google.maps.DirectionsStatus.OK ) {
-					console.log( response );
+//					console.log( response );
 		        	temp_directions_renderer.setMap( map );
 	    	    	temp_directions_renderer.setDirections( response );
 				}
@@ -1712,6 +1693,7 @@ define( function( m ) {
 
 		var nb_routes = 0;
 		var nb_wp = [];
+		console.log( places );
     	require(["dojo/dom-style"], function( domStyle) {
     		for (var route_index = 0; route_index < MAX_NB_ROUTES; route_index++) {
         		var display = domStyle.get( 'id_fieldset_route_'+route_index, "display" );
@@ -1720,6 +1702,7 @@ define( function( m ) {
         			break;
         		nb_routes++;
 				nb_wp[route_index] = 0;
+				console.log( places[route_index] );
 	            for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
 	        		var display = domStyle.get( 'id_tr_'+route_index+'_' + n, "display" );
 	            	if ( display != "none" ) {
@@ -1922,8 +1905,8 @@ return;
     
     function cb_map_rightclick( evt ) {
 
-		console.log( evt );    	
-    	console.log( "Right click: " + evt.latLng );
+//		console.log( evt );    	
+//    	console.log( "Right click: " + evt.latLng );
 
     	if ( ctrl_mode ) {
 			return;
@@ -1997,10 +1980,10 @@ return;
 
 	function cb_click_btn_add( route_index, index ) {
 		
-		console.log( "*** Add: route_index=" + route_index + " index=" + index );
+//		console.log( "*** Add: route_index=" + route_index + " index=" + index );
 
         var first_hidden = find_first_hidden( route_index );
-    	console.log( "first_hidden=" + first_hidden );
+//    	console.log( "first_hidden=" + first_hidden );
 
     	for ( var n = first_hidden - 1; n >= index; n-- ) {
 			var wp = dijit.byId('id_wp_'+route_index+'_'+(n)).get( 'value' );
