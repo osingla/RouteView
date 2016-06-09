@@ -54,6 +54,8 @@ define( function( m ) {
 
    	var alt_down = false;
    	
+	var tooltip_dlg = undefined;				// Tooltip dialog used to show the JPEG thumbnail
+   	
    	var route_colors = [
    		"#0066cc",
    		"#00cc00",
@@ -371,7 +373,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 					path: path,
 					visible: true,
 					strokeOpacity: 0,
-					zIndex: 1000
+					zIndex: 1000,
 				}); 
 //				console.log( eventLine );
 //				console.log( path.length );
@@ -396,12 +398,52 @@ function calculateDistance(lat1, long1, lat2, long2)
 						if( found != undefined ) {
 							console.log( "---> " + found + " -- " + dist0 );
 
-        document.getElementById("marker_tooltip").style.display = "";
-        document.getElementById("marker_tooltip").innerHTML = "ABC";
-        var x_pos = 100;
-        var y_pos = 100;
-        document.getElementById("marker_tooltip").style.left = x_pos+'px';
-		document.getElementById("marker_tooltip").style.top = y_pos+'px';
+						require(["dijit/TooltipDialog", "dojo/ready"], function( TooltipDialog, ready) {
+							ready( function ( ) {
+								if ( tooltip_dlg == undefined ) {
+									tooltip_dlg = new TooltipDialog({
+										id: 'id_tooltip_dlg',
+										style: 'width:320px; height:240px',
+										title: 'hello'
+									});
+								}
+							});
+						});
+
+						require(["dijit/popup", "dojo/dom", "dijit/registry", "dojo/dom-style", "dojo/ready"], function( popup, dom, registry, domStyle, ready) {
+
+							ready( function ( ) {
+							
+								console.log( "popup.open" );
+								popup.open({
+									popup: tooltip_dlg,
+									x: event.clientX,
+									y: event.clientY,
+									orient: ["above", "above-alt", "above-centered"],
+									onClose: function(){
+										console.log( "closing..." );
+										require(["dojo/ready"], function( ready) {
+											ready( function ( ) {
+												var mode = "JPEG";
+												dojo.xhrGet({
+													url: "/files-browsing/closed-popup?mode=" + mode,
+													timeout: 5000,
+													handleAs: "xml",
+													preventCache: true,
+													load: function( xml, ioArgs ) {
+										//				alert( ioArgs.xhr.responseText );
+													},
+													error: function( error ) {
+														console.log( error );
+													}
+												});
+											});
+										});
+									},
+								});
+							});
+						});
+
 
 						}
 						console.log( eventLine.Contains( event.latLng ) );
@@ -756,7 +798,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 	
 			  		var id_tr = domConstruct.create("tr", { 
 			  			id: "id_tr_"+route_index+"_"+n,
-			  			style: "display:" + ((n < 2) ? "" : "none; border: '1px solid red'") 
+			  			style: "display:" + ((n < 2) ? "" : "none") 
 			  		}, "id_table_route"+route_index, "last");
 			  		domConstruct.create("td", { innerHTML:String.fromCharCode(n+65)+"&nbsp;", align:"right", valign:"middle"}, id_tr, "first");
 	
@@ -942,15 +984,16 @@ function calculateDistance(lat1, long1, lat2, long2)
 		var waypoints = [];
 	  	for (var route_index = 0; route_index < nb_routes; route_index++) {
 			for ( var waypoint_index = 0; waypoint_index < result[route_index].length; waypoint_index++ ) {
-				dijit.byId('id_wp_'+route_index+'_'+waypoint_index).set( 'value', result[route_index][waypoint_index] );
-				show_waypoint( route_index, waypoint_index );
-				if ( waypoint_index >= 1 ) {
-					require(["dojo/dom-style"], function( domStyle) {
+				require(["dojo/dom-style"], function( domStyle) {
+					dijit.byId('id_wp_'+route_index+'_'+waypoint_index).set( 'value', result[route_index][waypoint_index] );
+					domStyle.set( 'id_wp_'+route_index+'_'+waypoint_index, { color: "red" } );
+					show_waypoint( route_index, waypoint_index );
+					if ( waypoint_index >= 1 ) {
 						dijit.byId('id_btn_drive_'+route_index+"_"+waypoint_index).set( 'disabled', false );
 						domStyle.set( 'id_tr_'+route_index+'_'+(waypoint_index), "display", "" );
 						domStyle.set( 'id_drive_tr_'+route_index+"_"+(waypoint_index), "display", "" );
-					});
-				}
+					}
+				});
 			}
 			update_btns_remove_up_down( route_index );
 		}
@@ -958,6 +1001,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 		(function ( total_nb_waypoints ) {
 			console.log( "total_nb_waypoints=" + total_nb_waypoints );
 			var done_nb_waypoints = 0;
+			var set_ti = 250;
 			for (var route_index = 0; route_index < nb_routes; route_index++) {
 				for ( var waypoint_index = 0; waypoint_index < result[route_index].length; waypoint_index++ ) {
 					
@@ -972,6 +1016,9 @@ function calculateDistance(lat1, long1, lat2, long2)
 									if ( status == google.maps.places.PlacesServiceStatus.OK ) {
 										console.log( done_nb_waypoints + " / " + total_nb_waypoints + route_index + " , " + waypoint_index + " --> " + place_name );
 										places[route_index][waypoint_index] = place;
+										require(["dojo/dom-style"], function( domStyle) {
+											domStyle.set( 'id_wp_'+route_index+'_'+waypoint_index, { color: "black" } );
+										});
 										done_nb_waypoints++;
 										if ( (route_index == 0) && (waypoint_index == 0) )
 											map.setCenter(results[0].geometry.location);
@@ -988,8 +1035,10 @@ function calculateDistance(lat1, long1, lat2, long2)
 							}
 						});
 					}
-					look_for_address( result[route_index][waypoint_index], route_index, waypoint_index );
-
+					(function ( result, route_index, waypoint_index ) {
+						setTimeout( function() { look_for_address( result, route_index, waypoint_index ); }, set_ti );
+					})( result[route_index][waypoint_index], route_index, waypoint_index );
+					set_ti += 750;
 				}
 			}
 		})( total_nb_waypoints );
