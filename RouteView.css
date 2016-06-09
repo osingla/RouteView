@@ -192,3 +192,12 @@ html, body {
 .gm-style-mtc {
   display: none;
 }
+
+#marker_tooltip {
+  display: xnone;
+  position:absolute;
+  width: 300px;
+  height: 200px;
+  background-color: #ccc;
+  margin: 15px;
+}

@@ -114,7 +114,7 @@ define( function( m ) {
 
 		var polyline = (route_index == -1) ? temp_polylines[0] : polylines[route_index][curr_leg];
         
-        var p = polyline.GetPointAtDistance(d);
+        var p = polyline.GetPointAtDistance( d );
         if ( !map.getBounds().contains( p ) )
            	map.panTo( p );
 
@@ -125,9 +125,9 @@ define( function( m ) {
 		    }
 		    else {
         		marker_no_street_view.setPosition( null );
-		        var iad = polyline.GetIndexAtDistance(d);
+		        var iad = polyline.GetIndexAtDistance( d );
 		        prev_bearing = bearing;
-        		var bearing = polyline.Bearing(iad);
+        		var bearing = polyline.Bearing( iad );
 //				console.log( d + " / " + eol + " --> " + bearing);
 				if (bearing == undefined)
 					bearing = prev_bearing;
@@ -266,6 +266,37 @@ define( function( m ) {
 		return {route_index: index_route, waypoint_index: index_waypoint};
     }
     
+function calculateDistance(lat1, long1, lat2, long2)
+  {    
+
+      //radians
+      lat1 = (lat1 * 2.0 * Math.PI) / 60.0 / 360.0;      
+      long1 = (long1 * 2.0 * Math.PI) / 60.0 / 360.0;    
+      lat2 = (lat2 * 2.0 * Math.PI) / 60.0 / 360.0;   
+      long2 = (long2 * 2.0 * Math.PI) / 60.0 / 360.0;       
+
+
+      // use to different earth axis length    
+      var a = 6378137.0;        // Earth Major Axis (WGS84)    
+      var b = 6356752.3142;     // Minor Axis    
+      var f = (a-b) / a;        // "Flattening"    
+      var e = 2.0*f - f*f;      // "Eccentricity"      
+
+      var beta = (a / Math.sqrt( 1.0 - e * Math.sin( lat1 ) * Math.sin( lat1 )));    
+      var cos = Math.cos( lat1 );    
+      var x = beta * cos * Math.cos( long1 );    
+      var y = beta * cos * Math.sin( long1 );    
+      var z = beta * ( 1 - e ) * Math.sin( lat1 );      
+
+      beta = ( a / Math.sqrt( 1.0 -  e * Math.sin( lat2 ) * Math.sin( lat2 )));    
+      cos = Math.cos( lat2 );   
+      x -= (beta * cos * Math.cos( long2 ));    
+      y -= (beta * cos * Math.sin( long2 ));    
+      z -= (beta * (1 - e) * Math.sin( lat2 ));       
+
+      return (Math.sqrt( (x*x) + (y*y) + (z*z) )/1000);  
+    }
+
     function do_route( route_index ) {
 
 	    dijit.byId("id_pane_standby").show();
@@ -329,10 +360,55 @@ define( function( m ) {
         var old_nb_waypoints = way_points.length + 2;
 		google.maps.event.clearListeners( directions_renderer[route_index], 'directions_changed' );
         directions_renderer[route_index].addListener('directions_changed', function() {
+			
             var route_index = directions_renderer.indexOf( this );
             console.log("directions_changed: route_index=" + route_index);
             var new_dir = directions_renderer[route_index].getDirections();
 //          console.log( new_dir );
+
+				var path = new_dir.routes[0].overview_path;
+				var eventLine = new google.maps.Polyline({
+					path: path,
+					visible: true,
+					strokeOpacity: 0,
+					zIndex: 1000
+				}); 
+//				console.log( eventLine );
+//				console.log( path.length );
+				eventLine.setMap( map );
+
+/*
+				(function (eventLine, path ) {
+					google.maps.event.addListener(eventLine, 'mouseover', function( event ) {
+						console.log( event.latLng );
+						var found = undefined;
+						var dist0 = 0;
+						path.forEach( function( e, index ) {
+//							console.log( e );
+//							console.log( event.latLng.lat() + " - " + e.lat() + " - " + event.latLng.lng() + " - " + e.lng() );
+							var dist = calculateDistance( event.latLng.lat(), event.latLng.lng(), e.lat(), e.lng() );
+							if ( (found == undefined) || (dist < dist0) ) {
+//								console.log( index  + " " + dist );
+								found = index;
+								dist0 = dist;
+							}
+						} );
+						if( found != undefined ) {
+							console.log( "---> " + found + " -- " + dist0 );
+
+        document.getElementById("marker_tooltip").style.display = "";
+        document.getElementById("marker_tooltip").innerHTML = "ABC";
+        var x_pos = 100;
+        var y_pos = 100;
+        document.getElementById("marker_tooltip").style.left = x_pos+'px';
+		document.getElementById("marker_tooltip").style.top = y_pos+'px';
+
+						}
+						console.log( eventLine.Contains( event.latLng ) );
+					});
+				})(eventLine, path);
+*/
+    
             var index_waypoint = undefined;
             if (new_dir.request.Xc != undefined)
 				index_waypoint = new_dir.request.Xc;
@@ -605,6 +681,11 @@ define( function( m ) {
 
     function do_stop( ) {
 
+		if ( timer_animate != undefined ) {
+			clearTimeout( timer_animate );
+			timer_animate = undefined;
+		}
+
     	require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct ) {
 			domStyle.set( "id_top_layout", "display", "" );
 			domStyle.set( "id_left_layout", "display", (ctrl_mode) ? "none" : "table-cell" );
@@ -627,11 +708,6 @@ define( function( m ) {
 		if ( curr_route == -1 ) {
 			stop_driving_temporary_route( );
 			return;
-		}
-
-		if ( timer_animate != undefined ) {
-			clearTimeout( timer_animate );
-			timer_animate = undefined;
 		}
 
 		dijit.byId('id_btn_pause').set( 'disabled', true );
@@ -672,7 +748,7 @@ define( function( m ) {
 
 	function create_route_dlg() {
 	
-		require(["dojo/dom-construct", "dijit/form/TextBox", "dijit/form/Button", "dijit/Tooltip"], function(domConstruct, TextBox, Button, Tooltip) {
+		require(["dojo/dom-construct", "dijit/form/TextBox", "dijit/form/Button", "dijit/Tooltip", "dojo/dom-style"], function(domConstruct, TextBox, Button, Tooltip, domStyle) {
 			
 			for (var route_index = 0; route_index < MAX_NB_ROUTES; route_index++) {
 			
@@ -680,7 +756,7 @@ define( function( m ) {
 	
 			  		var id_tr = domConstruct.create("tr", { 
 			  			id: "id_tr_"+route_index+"_"+n,
-			  			style: "display:" + ((n < 2) ? "" : "none") 
+			  			style: "display:" + ((n < 2) ? "" : "none; border: '1px solid red'") 
 			  		}, "id_table_route"+route_index, "last");
 			  		domConstruct.create("td", { innerHTML:String.fromCharCode(n+65)+"&nbsp;", align:"right", valign:"middle"}, id_tr, "first");
 	
@@ -691,6 +767,7 @@ define( function( m ) {
 			  			style: "width:22em", 
 			  			trim: true,
 			  			intermediateChanges: false,
+						onKeyPress: function() { domStyle.set( this.id, { color: "red" } ); },
 			  			['route_index']: route_index,
 			  			['waypoint_index']: n 
 			  		}, id_td2, "last");
@@ -1217,7 +1294,7 @@ define( function( m ) {
 			 	  	    	autocompletes[route][n].setComponentRestrictions( {country: code_country} );
 	       				google.maps.event.clearListeners( autocompletes[route][n], 'place_changed' );
 	       				autocompletes[route][n].addListener('place_changed', function( ) {
-							console.log( this );
+//							console.log( this );
 	            			var r = get_route_waypoint( autocompletes, this );
 			            	var route_index = r.route_index;
 	            			var waypoint_index = r.waypoint_index;
@@ -1238,6 +1315,9 @@ define( function( m ) {
 												console.log( " --> " + route_index + " , " + waypoint_index );
 												if ( status == google.maps.places.PlacesServiceStatus.OK ) {
 													places[route_index][waypoint_index] = place;
+													require(["dojo/dom-style"], function( domStyle) {
+														domStyle.set( "id_wp_"+route_index+"_"+waypoint_index, { color: "black" } );
+													});
 												}
 											});
 										} 
@@ -1247,6 +1327,11 @@ define( function( m ) {
 									});
 								}
 								look_for_address( place.name, route_index, waypoint_index );
+							}
+							else {
+								require(["dojo/dom-style"], function( domStyle) {
+									domStyle.set( "id_wp_"+route_index+"_"+waypoint_index, { color: "black" } );
+								});
 							}
 	                		if ( cb_route_from_or_to_changed_handle[route_index][waypoint_index] != undefined )
 	                			clearTimeout( cb_route_from_or_to_changed_handle[route_index][waypoint_index] );
