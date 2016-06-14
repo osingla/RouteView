@@ -355,7 +355,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 	          	opacity: 1.0,
             },
             polylineOptions: {
-            	strokeColor: route_colors[route_index]
+            	strokeColor: route_colors[route_index],
+            	strokeWeight: 6
             }
         });
 
@@ -574,7 +575,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 	            polylines[route_index][i] = new google.maps.Polyline({
 	                path: [],
 	                strokeColor: '#FFFF00',
-	                strokeWeight: 3
+	                strokeWeight: 5
 	            });
 	
                 dist_meters += legs[i].distance.value;
@@ -1623,7 +1624,7 @@ function calculateDistance(lat1, long1, lat2, long2)
             temp_polylines[i] = new google.maps.Polyline({
                 path: [],
                 strokeColor: '#FFFF00',
-                strokeWeight: 3
+                strokeWeight: 5
             });
             
             var steps = legs[i].steps;
