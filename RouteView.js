@@ -2155,9 +2155,15 @@ return;
 
     	require(["dojo/dom-style"], function( domStyle) {
     		domStyle.set( 'id_tr_'+route_index+'_'+(first_hidden-1), "display", "none" );
+    		domStyle.set( 'id_drive_tr_'+route_index+"_"+(first_hidden-1), "display", "none" );
+    	});
+    	
+    	require(["dojo/dom-style"], function( domStyle) {
+    		domStyle.set( 'id_tr_'+route_index+'_'+(first_hidden-1), "display", "none" );
     	});
 		
 		do_route( route_index );
+		update_btns_remove_up_down( route_index );		
 	}
 
 	function cb_click_btn_up( route_index, index ) {
