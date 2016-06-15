@@ -25,6 +25,7 @@ define( function( m ) {
     var eol;
     var step;               			// meters
     var interval;           			// milliseconds
+    var route_tickness;					// pixels
     var prev_bearing;
     var curr_dist;
 	var cb_move_to_dist = undefined;
@@ -70,7 +71,7 @@ define( function( m ) {
   
 	function show_route_distance_duration( route_index, dist_meters, duration_secs ) {
 
-        console.log( "dist_meters=" + dist_meters + " duration_secs=" + duration_secs );
+//      console.log( "dist_meters=" + dist_meters + " duration_secs=" + duration_secs );
 
         document.getElementById("id_route"+route_index+"_dist_kms").innerHTML = Math.round( dist_meters / 1000 );
         document.getElementById("id_route"+route_index+"_dist_miles").innerHTML = Math.round( dist_meters * 0.000621371 );
@@ -137,10 +138,11 @@ define( function( m ) {
         			timer_animate = setTimeout( function() { panorama.setPov( { heading: bearing, pitch: 1 } ); }, 5 );
         		panorama.setPosition( p );
 		    }
-	        if ( step > 0 )
+	        if ( step > 0 ) {
             	timer_animate = setTimeout( (function(route_index) { return function() {
             		cb_animate( route_index, d+step );
 				}})(route_index), interval );
+			}
 			dijit.byId('id_input_route').set( 'value', d, false );
 		}})(route_index));
 
@@ -156,7 +158,7 @@ define( function( m ) {
 
 		map.fitBounds( legs_bounds[route_index][curr_leg] );
 
-       	timer_animate = setTimeout( function(route_index) { cb_animate(route_index, 50); }, 250, route_index );
+       	timer_animate = setTimeout( function(route_index) { cb_animate(route_index, 50); }, 5, route_index );
 
         // Update route slider
 		dijit.byId('id_input_route').set( 'maximum', eol );
@@ -313,14 +315,17 @@ function calculateDistance(lat1, long1, lat2, long2)
 
         var no_hwy  = dijit.byId('id_check_no_hwy_'+route_index).get( 'checked' );
         var no_toll = dijit.byId('id_check_no_toll_'+route_index).get( 'checked' );
-        console.log( "no_hwy=" + no_hwy + " no_toll=" + no_toll );
+//      console.log( "no_hwy=" + no_hwy + " no_toll=" + no_toll );
         
     	step     = dijit.byId('id_input_meters').get( 'value' );
     	interval = dijit.byId('id_input_interval').get( 'value' );
-        console.log( "step=" + step + " interval=" + interval );
+//      console.log( "step=" + step + " interval=" + interval );
+
+    	route_tickness = dijit.byId('id_input_route_tickness').get( 'value' );
+//  	console.log( "route_tickness=" + route_tickness );
 
         var first_hidden = find_first_hidden( route_index );
-    	console.log( "first_hidden=" + first_hidden );
+//    	console.log( "first_hidden=" + first_hidden );
         
         var start_location = dijit.byId('id_wp_'+route_index+'_0').get( 'value' );
         console.log( "from = " + start_location );
@@ -356,7 +361,7 @@ function calculateDistance(lat1, long1, lat2, long2)
             },
             polylineOptions: {
             	strokeColor: route_colors[route_index],
-            	strokeWeight: 6
+            	strokeWeight: route_tickness
             }
         });
 
@@ -548,8 +553,8 @@ function calculateDistance(lat1, long1, lat2, long2)
             var distance = leg.distance.text;
             var meters = leg.distance.value;
             var duration = leg.duration.text;
-            console.log( "distance = " + distance );
-            console.log( "duration = " + duration );
+//          console.log( "distance = " + distance );
+//          console.log( "duration = " + duration );
 
         	directions_renderer[route_index].setMap( map );
         	directions_renderer[route_index].setDirections( response );
@@ -574,8 +579,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 				legs_bounds[route_index][i] = new google.maps.LatLngBounds();
 	            polylines[route_index][i] = new google.maps.Polyline({
 	                path: [],
-	                strokeColor: '#FFFF00',
-	                strokeWeight: 5
+	                strokeColor: '#FF8000',
+	                strokeWeight: 3
 	            });
 	
                 dist_meters += legs[i].distance.value;
@@ -1579,11 +1584,20 @@ function calculateDistance(lat1, long1, lat2, long2)
         document.getElementById("id_feet").innerHTML = Math.floor(step * 3.2808);
     }
 
-    function cb_interval_changed( new_interval ) {
+    function cb_interval_changed( ) {
     	interval = dijit.byId('id_input_interval').get( 'value' );
         document.getElementById("id_interval").innerHTML = interval;
     }
     
+	function cb_route_tickness_changed( ) {
+    	route_tickness = dijit.byId('id_input_route_tickness').get( 'value' );
+        document.getElementById("id_route_tickness").innerHTML = route_tickness;
+		directions_renderer.forEach( function( e ) {
+            var route_index = directions_renderer.indexOf( e );
+	       	e.setOptions( { polylineOptions: { strokeColor: route_colors[route_index], strokeWeight: route_tickness } } ); 
+	       	e.setMap( map );
+		})
+	}
 
     function cb_click_no_hwy( route_index ) {
 
@@ -2223,7 +2237,7 @@ return;
 	function update_btns_remove_up_down( route_index, all ) {
 		
         var first_hidden = find_first_hidden( route_index );
-    	console.log( "first_hidden=" + first_hidden );
+//    	console.log( "first_hidden=" + first_hidden );
 
 		var origin = dijit.byId('id_wp_'+route_index+'_0').get( 'value' );
    		dijit.byId('id_btn_add_'+route_index+'_0').set( 'disabled', (first_hidden < (MAX_NB_WAYPOINTS+2)) ? false : true );
@@ -2332,6 +2346,10 @@ return;
 	    	localStorage.setItem( "interval", interval );
 	    	console.log( "interval= " + interval );
 	    	
+	    	var route_tickness = dijit.byId('id_input_route_tickness').get( 'value' );
+	    	localStorage.setItem( "route_tickness", route_tickness );
+	    	console.log( "route_tickness= " + route_tickness );
+	    	
 	        var google_maps_api_key = dijit.byId('id_google_maps_api_key').get( 'value' );
 	    	localStorage.setItem( "id_google_maps_api_key", google_maps_api_key );
 	    	console.log( "google_maps_api_key= " + google_maps_api_key );
@@ -2398,6 +2416,13 @@ return;
 	    	console.log( "Restored interval= " + interval );
 	    	if ( interval != null )
 	            dijit.byId('id_input_interval').set( 'value', parse(interval) );
+	    	
+	    	var route_tickness = localStorage.getItem("route_tickness");
+	    	if ( !route_tickness )
+	    		route_tickness = 6;
+	    	console.log( "Restored route_tickness= " + route_tickness );
+	    	if ( route_tickness != null )
+	            dijit.byId('id_input_route_tickness').set( 'value', parse(route_tickness) );
 	    	
 	    	var google_maps_api_key = localStorage.getItem("id_google_maps_api_key");
 	    	if ( !google_maps_api_key )
@@ -2710,6 +2735,7 @@ return;
 
 		cb_step_changed:     function( ) { cb_step_changed(); },
 		cb_interval_changed: function( ) { cb_interval_changed(); },
+		cb_route_tickness_changed: function( ) { cb_route_tickness_changed(); },
 		
 		cb_click_no_hwy:  function( route_index ) { cb_click_no_hwy( route_index ); },
 		cb_click_no_toll: function( route_index ) { cb_click_no_toll( route_index ); },

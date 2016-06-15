@@ -273,6 +273,22 @@
 							                       		</div>
 
 									                    <div style="width:100%" align="center">
+									                        <span>Route Tickness : <span></span><b id="id_route_tickness">6</b> pixels</span></span><br>
+									                        <div id="id_input_route_tickness"
+									                            style="width:400px;"
+									                            name="horizontalSlider"
+									                            data-dojo-type="dijit/form/HorizontalSlider"
+									                            data-dojo-props="value:6,
+									                            minimum: 3,
+									                            maximum:10,
+									                            discreteValues:8,
+									                            intermediateChanges:true,
+									                            showButtons:true"
+										                        onChange='require(["RouteView.js"], function( s ) { s.cb_route_tickness_changed(); })'>
+									                        </div>
+									                    </div>
+									
+									                    <div style="width:100%" align="center">
 
 															<table>
 															
