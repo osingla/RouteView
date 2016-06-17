@@ -5,6 +5,7 @@
 <!-- --- StreetView Player - Virtual Ride, using Google Maps and Street View                  --- -->
 <!-- ---                                                                                      --- -->
 <!-- --- http://routeview.org                                                                 --- -->
+<!-- --- http://StreetViewPlayer.org                                                          --- -->
 <!-- ---                                                                                      --- -->
 <!-- -------------------------------------------------------------------------------------------- -->
 
@@ -748,8 +749,10 @@
                                             maximum:0,
                                             discreteValues:0,
                                             intermediateChanges:false,
-                                            showButtons:true"
-	                                        onChange='require(["RouteView.js"], function( s ) { s.cb_route_input(); })'>
+                                            showButtons:false"
+	                                        onChange='require(["RouteView.js"], function( s ) { s.cb_route_input(); })'
+	                                        onMouseEnter='require(["RouteView.js"], function( s ) { s.cb_route_input_mouse_enter(); })'
+	                                        onMouseLeave='require(["RouteView.js"], function( s ) { s.cb_route_input_mouse_leave(); })'>
                                         </div>					
 
             	                        <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_input_route',position:['above-centered'],showDelay:750,hideDelay:0">

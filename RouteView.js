@@ -5,6 +5,7 @@
 /* *** StreetView Player - Virtual Ride, using Google Maps and Street View                   *** */
 /* ***                                                                                       *** */ 
 /* *** http://routeview.org                                                                  *** */ 
+/* *** http://StreetViewPlayer.org                                                           *** */ 
 /* ***                                                                                       *** */ 
 /* ********************************************************************************************* */
 
@@ -135,7 +136,7 @@ define( function( m ) {
 				if (bearing == undefined)
 					bearing = prev_bearing;
 				if (bearing != undefined)
-        			timer_animate = setTimeout( function() { panorama.setPov( { heading: bearing, pitch: 1 } ); }, 5 );
+        			setTimeout( function() { panorama.setPov( { heading: bearing, pitch: 1 } ); }, 5 );
         		panorama.setPosition( p );
 		    }
 	        if ( step > 0 ) {
@@ -1199,6 +1200,12 @@ function calculateDistance(lat1, long1, lat2, long2)
        					cb_panorama_click( );
        			});
 
+            	var id_input_route = dom.byId('id_input_route');
+        		on( id_input_route, "mouseover", function( evt ) {
+//       				if ( evt.handled != true )
+//       					console.log( evt.offsetX + " , " + evt.offsetY );
+       			});
+
         		_list_countries = [
         		    {id: 0,    list:['Algeria','Burkina Faso','Faeroe Islands','Ghana','Guinea Republic','Iceland','Ireland','Ivory Coast','Liberia','Mali','Morocco','Sao Tome and Principe','Senegal','Sierra Leone','Saint Helena','Gambia','Togo','United Kingdom']},
         		    {id: 1,    list:['Albania','Andorra','Angola','Australia','Austria','Belgium','Benin','Bosnia','Cameroon','Central Africa Republic','Chad','Congo','Croatia','Czech Republic','Congo, Democratic Republic','Denmark','Equatorial Guinea','France','Gabon','Germany','Gibraltar','Guam','Hungary','Italy','Liechtenstein','Luxembourg','Macedonia (Fyrom)','Malta','Mariana Islands','Marshall Islands','Micronesia','Monaco','Netherlands','Niger','Nigeria','Norway','Papua New Guinea','Poland','Portugal','San Marino','Serbia','Slovakia','Slovenia','Spain','Sweden','Switzerland','Tunisia']},
@@ -1357,7 +1364,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 	                		console.log( "Place changed: route=" + route_index + " waypoint_index=" + waypoint_index );
 	                		console.log( autocompletes[route_index][waypoint_index] );
 	                		var place = autocompletes[route_index][waypoint_index].getPlace();
-	                		console.log( place );
+//	                		console.log( place );
 	                		if ( place.geometry == undefined ) {
 								function look_for_address( place_name, route_index, waypoint_index) {
 									var geocoder = new google.maps.Geocoder();
@@ -1500,7 +1507,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 
 		//				console.log("Alt Up");
 						alt_down = false;
-						streetViewLayer.setMap(null);
+						if ( streetViewLayer != undefined )
+							streetViewLayer.setMap( null );
 						
 					}
 				}
@@ -1567,6 +1575,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 	}
 
     function cb_route_input( ) {
+
 		var new_pos = dijit.byId('id_input_route').get( 'value' );
 		new_pos = Math.round( new_pos );
 		if ( cb_move_to_dist != undefined ) {
@@ -1575,8 +1584,91 @@ function calculateDistance(lat1, long1, lat2, long2)
 		}
 		if ( new_pos == 0 )
 			new_pos = 50;
-		cb_move_to_dist = setTimeout( 'require(["RouteView.js"], function( s ) { s.move_to_dist('+new_pos+', false); })', 25 );
+		cb_move_to_dist = setTimeout( 'require(["RouteView.js"], function( s ) { s.move_to_dist('+new_pos+', false); })', 125 );
     }
+
+    function cb_route_input_mouse_enter( ) {
+return;
+	
+		if ( (selected_route_index == undefined) || (polylines[selected_route_index] == undefined) )
+			return;
+		
+		console.log( "Enter" );
+
+		var eol = 0;
+		polylines[selected_route_index].forEach( function(e) { 
+			console.log( e ); 
+			var d = e.Distance();
+			eol += eol;
+		});
+		console.log( eol );
+
+		dijit.byId('id_input_route').set( 'maximum', eol );
+		dijit.byId('id_input_route').set( 'discreteValues,', eol );
+		dijit.byId('id_input_route').set( 'value', 0 );
+
+    	require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct ) {
+			domStyle.set( "id_top_layout", "display", "none" );
+			domStyle.set( "id_left_layout", "display", "none" );
+			dijit.byId('app_layout').resize();
+				if ( map_or_panorama_full_screen ) {
+					domConstruct.place("td_panorama", "td_map_canvas", "after");
+		            document.getElementById("td_map_canvas").style.width = "50%";
+		            document.getElementById("td_panorama").style.width = "50%";
+					map_or_panorama_full_screen = false;
+				}
+			document.getElementById("td_map_canvas").style.width = "50%";
+			document.getElementById("td_panorama").style.width = "50%";
+		});
+		
+	}
+
+    function cb_route_input_mouse_leave( ) {
+return;
+		
+		if ( (selected_route_index == undefined) || (polylines[selected_route_index] == undefined) )
+			return;
+		
+		console.log( "Leave" );
+
+    	require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct ) {
+			domStyle.set( "id_top_layout", "display", "" );
+			domStyle.set( "id_left_layout", "display", (ctrl_mode) ? "none" : "table-cell" );
+    		document.getElementById("td_map_canvas").style.width = "100%";
+            document.getElementById("td_panorama").style.width = "0%";
+			if ( !map_or_panorama_full_screen ) {
+				domConstruct.place("td_panorama", "id_hidden", "after");
+				map_or_panorama_full_screen = true;	
+			}
+			else {
+				domConstruct.place("td_map_canvas", "td_panorama", "before");
+				domConstruct.place("td_panorama", "td_map_canvas", "after");
+				map_or_panorama_full_screen = false;
+			}
+    		dijit.byId('app_layout').resize();
+	        google.maps.event.trigger( map, 'resize' );
+		});
+    	
+	}
+
+    function cb_route_input_mouse_over( evt ) {
+
+		if ( (selected_route_index == undefined) || (polylines[selected_route_index] == undefined) )
+			return;
+	
+		console.log( evt );
+
+		require(["dojo/on"], function(on){
+			on.emit( dijit.byId("id_input_route"), "change", {
+				bubbles: true,
+				cancelable: true
+			});
+		});
+	
+		var new_pos = dijit.byId('id_input_route').get( 'value' );
+		new_pos = Math.round( new_pos );
+		console.log( new_pos );
+	}
 
     function cb_step_changed( ) {
     	step = dijit.byId('id_input_meters').get( 'value' );
@@ -2223,10 +2315,9 @@ return;
 		            document.getElementById("td_panorama").style.width = "50%";
 					map_or_panorama_full_screen = false;
 				}
+			document.getElementById("td_map_canvas").style.width = "50%";
+			document.getElementById("td_panorama").style.width = "50%";
 		});
-
-        document.getElementById("td_map_canvas").style.width = "50%";
-        document.getElementById("td_panorama").style.width = "50%";
 
    		dijit.byId('id_btn_pause').set( 'disabled', false );
 		dijit.byId('id_btn_stop').set( 'disabled', false );
@@ -2731,7 +2822,10 @@ return;
 		
 		move_to_dist: function( new_pos ) { move_to_dist( new_pos ); },
 
-		cb_route_input: function( ) { cb_route_input( ); },
+		cb_route_input: 			function( ) { cb_route_input( ); },
+		cb_route_input_mouse_enter: function( ) { cb_route_input_mouse_enter( ); },
+		cb_route_input_mouse_leave: function( ) { cb_route_input_mouse_leave( ); },
+		cb_route_input_mouse_over: 	function( ) { cb_route_input_mouse_over( ); },
 
 		cb_step_changed:     function( ) { cb_step_changed(); },
 		cb_interval_changed: function( ) { cb_interval_changed(); },
