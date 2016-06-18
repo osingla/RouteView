@@ -22,6 +22,7 @@ define( function( m ) {
     var panorama_full_screen;
     var curr_route;
     var curr_leg;
+	var timer_show_pano_on_mousemove = undefined;
     var timer_animate = undefined;
     var eol;
     var step;               			// meters
@@ -338,8 +339,8 @@ function calculateDistance(lat1, long1, lat2, long2)
             console.log( "n=" + n + " => [" + waypt + "]" );
             if ( waypt != "" ) {
                 way_points.push({
-                    location:waypt,
-                    stopover:true
+                    location: waypt,
+                    stopover: true
                 });
             }
         }
@@ -365,6 +366,20 @@ function calculateDistance(lat1, long1, lat2, long2)
             	strokeWeight: route_tickness
             }
         });
+
+    	var initial_info_use_icon = localStorage.getItem("initial_info_use_icon");
+    	if ( !initial_info_use_icon ) {
+			do_show_message( false, "Information", 
+				"<div align='center'>" +
+				"  You can play the route between<br><br>" +
+				start_location + "<br>" +
+				"and<br>" +
+				end_location + "<br><br>" +
+				"  by using the icon<br><br>" +
+				"  <img src='icons/btn-drive.png' style='width:16px;height:16px;'>" +
+				"</div>" );
+			localStorage.setItem( "initial_info_use_icon", "true" );
+		}
 
         var old_nb_waypoints = way_points.length + 2;
 		google.maps.event.clearListeners( directions_renderer[route_index], 'directions_changed' );
@@ -1200,10 +1215,80 @@ function calculateDistance(lat1, long1, lat2, long2)
        					cb_panorama_click( );
        			});
 
+				function cb_show_pano_on_mousemove( evt ) {
+					
+					timer_show_pano_on_mousemove = undefined;
+					
+					var eol = 0;
+					polylines[selected_route_index].forEach( function(e) { 
+						var d = e.Distance();
+						eol += d;
+					});
+
+					var width = document.getElementById('id_td_input_route').offsetWidth;
+					var perc = (evt.offsetX / width) 
+					var target_eol = eol * perc;
+
+					var route_index = selected_route_index;
+
+					if ( target_eol < 0 )
+						target_eol = 0;
+					if ( target_eol > eol )
+						target_eol = eol;
+			
+// 					console.log( route_index + " : " + evt.offsetX + " , " + evt.offsetY + " - " + eol + " - " + target_eol );
+
+					var leg = 0;
+					var polyline;
+					for (var l = 0; l < MAX_NB_WAYPOINTS; l++ ) {
+						leg = l;
+						polyline = polylines[route_index][leg];
+						if ( target_eol <= polyline.Distance() )
+							break;
+						target_eol -= polyline.Distance();
+					}
+
+					var p = polyline.GetPointAtDistance( target_eol );
+					if ( !map.getBounds().contains( p ) )
+						map.panTo( p );
+
+					street_view_check[route_index].getPanoramaByLocation(p, 50, (function(route_index) { return function(result, status) {
+						if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
+							console.log( "No street view available" );        
+							marker_no_street_view.setPosition( p );
+						}
+						else {
+							marker_no_street_view.setPosition( null );
+							panorama.setPosition( p );
+							var prev_bearing = bearing;
+							var bearing = polyline.Bearing( polyline.GetIndexAtDistance( target_eol ) );
+							if (bearing == undefined)
+								bearing = prev_bearing;
+							panorama.setPov({
+								heading: bearing,
+								pitch: 1
+							});
+						}
+					}})(route_index));
+
+				}
+
             	var id_input_route = dom.byId('id_input_route');
-        		on( id_input_route, "mouseover", function( evt ) {
-//       				if ( evt.handled != true )
-//       					console.log( evt.offsetX + " , " + evt.offsetY );
+        		on( id_input_route, "mousemove", function( evt ) {
+
+     				if ( (evt.handled == true) || (timer_animate != undefined) || (polylines[selected_route_index] == undefined) )
+						return;
+
+					if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" )
+						return;
+		
+					if ( timer_show_pano_on_mousemove != undefined )
+						clearTimeout( timer_show_pano_on_mousemove );
+
+					timer_show_pano_on_mousemove = setTimeout( (function(evt) { return function() {
+						cb_show_pano_on_mousemove( evt );
+					}})(evt), 90 );
+
        			});
 
         		_list_countries = [
@@ -1588,16 +1673,23 @@ function calculateDistance(lat1, long1, lat2, long2)
     }
 
     function cb_route_input_mouse_enter( ) {
-return;
 	
-		if ( (selected_route_index == undefined) || (polylines[selected_route_index] == undefined) )
+		if ( (selected_route_index == undefined) || (polylines[selected_route_index] == undefined) || (timer_animate != undefined) )
+			return;
+		
+        if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" )
 			return;
 		
 		console.log( "Enter" );
 
+/*
+    	require(["dojo/dom-style"], function( domStyle) {
+       		domStyle.set( "id_input_route", "cursor", "crosshair" );
+		});
+*/
+
 		var eol = 0;
 		polylines[selected_route_index].forEach( function(e) { 
-			console.log( e ); 
 			var d = e.Distance();
 			eol += eol;
 		});
@@ -1624,9 +1716,11 @@ return;
 	}
 
     function cb_route_input_mouse_leave( ) {
-return;
 		
-		if ( (selected_route_index == undefined) || (polylines[selected_route_index] == undefined) )
+		if ( (selected_route_index == undefined) || (polylines[selected_route_index] == undefined) || (timer_animate != undefined) )
+			return;
+		
+        if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" )
 			return;
 		
 		console.log( "Leave" );
@@ -1653,11 +1747,12 @@ return;
 
     function cb_route_input_mouse_over( evt ) {
 
-		if ( (selected_route_index == undefined) || (polylines[selected_route_index] == undefined) )
+		if ( (selected_route_index == undefined) || (polylines[selected_route_index] == undefined) || (timer_animate != undefined) )
 			return;
 	
-		console.log( evt );
-
+        if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" )
+			return;
+		
 		require(["dojo/on"], function(on){
 			on.emit( dijit.byId("id_input_route"), "change", {
 				bubbles: true,
