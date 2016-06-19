@@ -47,6 +47,7 @@ define( function( m ) {
    	var selected_route_index = 0;
    	var timer_map_mousemove = undefined;
    	var dlg_panorama_map_mousemove;
+   	var is_dirty = false;
 
    	var ctrl_down = false;
    	var ctrl_mode = false;
@@ -390,16 +391,17 @@ function calculateDistance(lat1, long1, lat2, long2)
             var new_dir = directions_renderer[route_index].getDirections();
 //          console.log( new_dir );
 
-				var path = new_dir.routes[0].overview_path;
-				var eventLine = new google.maps.Polyline({
-					path: path,
-					visible: true,
-					strokeOpacity: 0,
-					zIndex: 1000,
-				}); 
-//				console.log( eventLine );
-//				console.log( path.length );
-				eventLine.setMap( map );
+			is_dirty = true;
+			var path = new_dir.routes[0].overview_path;
+			var eventLine = new google.maps.Polyline({
+				path: path,
+				visible: true,
+				strokeOpacity: 0,
+				zIndex: 1000,
+			}); 
+//			console.log( eventLine );
+//			console.log( path.length );
+			eventLine.setMap( map );
 
 /*
 				(function (eventLine, path ) {
@@ -1037,6 +1039,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 								}, function ( place, status ) {
 									if ( status == google.maps.places.PlacesServiceStatus.OK ) {
 										console.log( done_nb_waypoints + " / " + total_nb_waypoints + route_index + " , " + waypoint_index + " --> " + place_name );
+										is_dirty = true;
 										places[route_index][waypoint_index] = place;
 										require(["dojo/dom-style"], function( domStyle) {
 											domStyle.set( 'id_wp_'+route_index+'_'+waypoint_index, { color: "black" } );
@@ -1608,16 +1611,22 @@ function calculateDistance(lat1, long1, lat2, long2)
             });
 
 /*		
-    	window.onerror = function(message, file, lineNumber) {
-			console.log(message);
-			console.log(file);
-			console.log(lineNumber);
-			return false; 
-		};
+			window.onerror = function(message, file, lineNumber) {
+				console.log(message);
+				console.log(file);
+				console.log(lineNumber);
+				return false; 
+			};
 */
 
-	});
+		});
             	
+		window.onbeforeunload = function() {
+			if ( is_dirty )
+				return "Route not saved";
+			return null;
+		}
+
     }
     
 	function move_to_dist( new_pos, go_timer ) {
@@ -2498,6 +2507,7 @@ return;
 			var successful = document.execCommand('copy');
 			var msg = successful ? 'successful' : 'unsuccessful';
 			console.log('Copying text command was ' + msg);
+			is_dirty = false;
 		} catch (err) {
 			console.log('Oops, unable to copy');
 		}
