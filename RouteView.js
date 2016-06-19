@@ -2078,8 +2078,10 @@ function calculateDistance(lat1, long1, lat2, long2)
 	        for ( n = 0; n < nb_wp[route_index]; n++ ) {
 	        	if ( src == "" )
 	        		src = places[route_index][n].name;
+	        	if ( places[route_index][n] == undefined )
+					break;
 	        	dst = places[route_index][n].name;
-	        	if ((route_index > 0) && (n == 0) && (places[route_index-1][nb_wp[route_index]-1].name == places[route_index][n].name))
+	        	if ((route_index > 0) && (n == 0) && (places[route_index-1][nb_wp[route_index]-1].name == dst))
 	        		continue;
 	        	gpx += '<wpt ' + crlf;
 	        	gpx += '  lat="' + places[route_index][n].geometry.location.lat() + '" lon="' + places[route_index][n].geometry.location.lng() + '">' + crlf;
