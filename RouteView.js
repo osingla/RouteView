@@ -2036,7 +2036,7 @@ function calculateDistance(lat1, long1, lat2, long2)
     	require(["dojo/dom-style"], function( domStyle) {
     		for (var route_index = 0; route_index < MAX_NB_ROUTES; route_index++) {
         		var display = domStyle.get( 'id_fieldset_route_'+route_index, "display" );
-        		console.log(display);
+//        		console.log(display);
         		if (display == "none")
         			break;
         		nb_routes++;
@@ -2081,7 +2081,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 	        	if ( places[route_index][n] == undefined )
 					break;
 	        	dst = places[route_index][n].name;
-	        	if ((route_index > 0) && (n == 0) && (places[route_index-1][nb_wp[route_index]-1].name == dst))
+	        	if ((route_index > 0) && (n == 0) && (places[route_index-1][nb_wp[route_index-1]-1].name == dst))
 	        		continue;
 	        	gpx += '<wpt ' + crlf;
 	        	gpx += '  lat="' + places[route_index][n].geometry.location.lat() + '" lon="' + places[route_index][n].geometry.location.lng() + '">' + crlf;
