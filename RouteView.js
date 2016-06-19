@@ -1226,7 +1226,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 					});
 
 					var width = document.getElementById('id_td_input_route').offsetWidth;
-					var perc = (evt.offsetX / width) 
+					var perc = (evt.clientX / width) 
 					var target_eol = eol * perc;
 
 					var route_index = selected_route_index;
@@ -1243,8 +1243,9 @@ function calculateDistance(lat1, long1, lat2, long2)
 					for (var l = 0; l < MAX_NB_WAYPOINTS; l++ ) {
 						leg = l;
 						polyline = polylines[route_index][leg];
-						if ( target_eol <= polyline.Distance() )
+						if ( target_eol <= polyline.Distance() ) {
 							break;
+						}
 						target_eol -= polyline.Distance();
 					}
 
@@ -1252,7 +1253,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 					if ( !map.getBounds().contains( p ) )
 						map.panTo( p );
 
-					street_view_check[route_index].getPanoramaByLocation(p, 50, (function(route_index) { return function(result, status) {
+					street_view_check[route_index].getPanoramaByLocation(p, 50, (function(route_index, polyline, target_eol) { return function(result, status) {
 						if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
 							console.log( "No street view available" );        
 							marker_no_street_view.setPosition( p );
@@ -1269,7 +1270,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 								pitch: 1
 							});
 						}
-					}})(route_index));
+					}})(route_index, polyline, target_eol));
 
 				}
 
@@ -1688,12 +1689,14 @@ function calculateDistance(lat1, long1, lat2, long2)
 		});
 */
 
+//		console.log( selected_route_index );
+//		console.log( polylines[selected_route_index] );
 		var eol = 0;
 		polylines[selected_route_index].forEach( function(e) { 
 			var d = e.Distance();
-			eol += eol;
+			eol += d;
 		});
-		console.log( eol );
+//		console.log( eol );
 
 		dijit.byId('id_input_route').set( 'maximum', eol );
 		dijit.byId('id_input_route').set( 'discreteValues,', eol );
