@@ -48,6 +48,7 @@ define( function( m ) {
    	var timer_map_mousemove = undefined;
    	var dlg_panorama_map_mousemove;
    	var is_dirty = false;
+   	var is_ff = false;
 
    	var ctrl_down = false;
    	var ctrl_mode = false;
@@ -57,6 +58,8 @@ define( function( m ) {
 	var temp_polylines = undefined;
 
    	var alt_down = false;
+   	
+   	var browse_images = false;
    	
 	var tooltip_dlg = undefined;				// Tooltip dialog used to show the JPEG thumbnail
    	
@@ -166,7 +169,7 @@ define( function( m ) {
         // Update route slider
 		dijit.byId('id_input_route').set( 'maximum', eol );
 		dijit.byId('id_input_route').set( 'discreteValues,', eol );
-		dijit.byId('id_input_route').set( 'value', 0 );
+		dijit.byId('id_input_route').set( 'value', 0, false );
 
         map.setOptions({draggableCursor: 'hand'});
 
@@ -1150,6 +1153,16 @@ function calculateDistance(lat1, long1, lat2, long2)
     		
             ready( function() {
 
+				is_ff = false;
+				require(["dojo/sniff"], function( has ){
+					console.log( "has(ie) = " + has("ie") );
+					if ( has("ff") )
+						is_ff = true;
+					if ( has("ie") <= 8 ) {
+						do_show_message( false, "Error!", "Sorry IE is not supported!\n\nPlease use either Chrome, Firefox or Edge" );
+					}
+				});
+
 				var url = location.host + location.pathname;
 				console.log( "url= [" + url + "]" );
 				if ( url == "rawgit.com/osingla/RouteView/master/RouteView.html" ) {
@@ -1219,9 +1232,14 @@ function calculateDistance(lat1, long1, lat2, long2)
        			});
 
 				function cb_show_pano_on_mousemove( evt ) {
-					
+
+/*
+					console.log( evt.target["role"] );
+					if ( evt.target.indexOf( "topDecoration" ) == -1 )
+						return;
+*/					
 					timer_show_pano_on_mousemove = undefined;
-					
+
 					var eol = 0;
 					polylines[selected_route_index].forEach( function(e) { 
 						var d = e.Distance();
@@ -1229,8 +1247,13 @@ function calculateDistance(lat1, long1, lat2, long2)
 					});
 
 					var width = document.getElementById('id_td_input_route').offsetWidth;
-					var perc = (evt.clientX / width) 
+					var dx = (is_ff) ? evt.layerX : evt.offsetX;
+					var perc = (dx / width) 
 					var target_eol = eol * perc;
+					dijit.byId('id_input_route').set( 'maximum', eol );
+					dijit.byId('id_input_route').set( 'discreteValues,', eol );
+//					dijit.byId('id_input_route').set( 'value', target_eol, false );
+//					console.log( dx + " , " + perc + " - " + evt.offsetX + " , " + evt.layerX + " - " + width + " - " + target_eol + " / " + eol );
 
 					var route_index = selected_route_index;
 
@@ -1256,6 +1279,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 					if ( !map.getBounds().contains( p ) )
 						map.panTo( p );
 
+//					console.log( target_eol );
 					street_view_check[route_index].getPanoramaByLocation(p, 50, (function(route_index, polyline, target_eol) { return function(result, status) {
 						if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
 							console.log( "No street view available" );        
@@ -1621,6 +1645,22 @@ function calculateDistance(lat1, long1, lat2, long2)
 
 		});
             	
+		window.onblur = function() {
+
+			if ( alt_down ) {
+				console.log( "Cancel alt mode" );
+				alt_down = false;
+				if ( streetViewLayer != undefined )
+					streetViewLayer.setMap( null );
+			}
+
+			if ( browse_images ) {
+				console.log( "Cancel browse mode" );
+				cb_route_input_mouse_leave( );
+			}
+
+		}
+
 		window.onbeforeunload = function() {
 			if ( is_dirty )
 				return "Route not saved";
@@ -1630,6 +1670,10 @@ function calculateDistance(lat1, long1, lat2, long2)
     }
     
 	function move_to_dist( new_pos, go_timer ) {
+
+		var slider_disabled = dijit.byId('id_input_route').get( 'disabled' );
+		if ( slider_disabled )
+			return;
 
 		var route_index = curr_route;
 
@@ -1671,6 +1715,10 @@ function calculateDistance(lat1, long1, lat2, long2)
 
     function cb_route_input( ) {
 
+		var slider_disabled = dijit.byId('id_input_route').get( 'disabled' );
+		if ( slider_disabled )
+			return;
+
 		var new_pos = dijit.byId('id_input_route').get( 'value' );
 		new_pos = Math.round( new_pos );
 		if ( cb_move_to_dist != undefined ) {
@@ -1691,6 +1739,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 			return;
 		
 		console.log( "Enter" );
+		browse_images = true;
 
 /*
     	require(["dojo/dom-style"], function( domStyle) {
@@ -1736,6 +1785,14 @@ function calculateDistance(lat1, long1, lat2, long2)
 			return;
 		
 		console.log( "Leave" );
+		if ( !browse_images )
+			return;
+		browse_images = false;
+
+		if ( timer_show_pano_on_mousemove != undefined ) {
+			clearTimeout( timer_show_pano_on_mousemove );
+			timer_show_pano_on_mousemove = undefined;
+		}
 
     	require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct ) {
 			domStyle.set( "id_top_layout", "display", "" );
@@ -2056,6 +2113,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 	            	if ( display != "none" ) {
 						if ( places[route_index][n].geometry == undefined ) {
 							console.log( route_index + " , " + n + " ==> " + places[route_index][n].name + " ? " );
+							domStyle.set( 'id_wp_'+route_index+'_'+n, { color: "red" } );
 						}
 						else {
 							if ( places[route_index][n].geometry.location == undefined ) {
