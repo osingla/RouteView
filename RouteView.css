@@ -84,16 +84,16 @@ html, body {
 .dijitButtonDisabled .icon_btn_add {
   background-image: url('icons/btn-plus-disabled.png');
   background-repeat: no-repeat;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   text-align: center;
 }
 
 .icon_btn_add {
   background-image: url('icons/btn-plus.png');
   background-repeat: no-repeat;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   text-align: center;
   margin: 0;
   padding: 0;
@@ -104,16 +104,16 @@ html, body {
 .dijitButtonDisabled .icon_btn_remove {
   background-image: url('icons/btn-remove-disabled.png');
   background-repeat: no-repeat;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   text-align: center;
 }
 
 .icon_btn_remove {
   background-image: url('icons/btn-remove.png');
   background-repeat: no-repeat;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   text-align: center;
   margin: 0;
   padding: 0;
@@ -124,16 +124,16 @@ html, body {
 .dijitButtonDisabled .icon_btn_up {
   background-image: url('icons/btn-up-disabled.png');
   background-repeat: no-repeat;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   text-align: center;
 }
 
 .icon_btn_up {
   background-image: url('icons/btn-up.png');
   background-repeat: no-repeat;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   text-align: center;
   margin: 0;
   padding: 0;
@@ -144,16 +144,16 @@ html, body {
 .dijitButtonDisabled .icon_btn_down {
   background-image: url('icons/btn-down-disabled.png');
   background-repeat: no-repeat;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   text-align: center;
 }
 
 .icon_btn_down {
   background-image: url('icons/btn-down.png');
   background-repeat: no-repeat;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   text-align: center;
   margin: 0;
   padding: 0;

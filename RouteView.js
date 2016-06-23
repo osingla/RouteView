@@ -406,77 +406,37 @@ function calculateDistance(lat1, long1, lat2, long2)
 //			console.log( path.length );
 			eventLine.setMap( map );
 
-/*
-				(function (eventLine, path ) {
+			if ( false ) {
+				(function (eventLine, path, directions_renderer ) {
 					google.maps.event.addListener(eventLine, 'mouseover', function( event ) {
-						console.log( event.latLng );
+						console.log( "over" );
+						cb_route_input_mouse_enter( );
+					});
+					google.maps.event.addListener(eventLine, 'mousemove', function( event ) {
+//						console.log( event.latLng );
 						var found = undefined;
 						var dist0 = 0;
+						var nb = 0;
 						path.forEach( function( e, index ) {
-//							console.log( e );
-//							console.log( event.latLng.lat() + " - " + e.lat() + " - " + event.latLng.lng() + " - " + e.lng() );
+							nb++;
 							var dist = calculateDistance( event.latLng.lat(), event.latLng.lng(), e.lat(), e.lng() );
 							if ( (found == undefined) || (dist < dist0) ) {
 //								console.log( index  + " " + dist );
 								found = index;
 								dist0 = dist;
 							}
-						} );
+						});
 						if( found != undefined ) {
-							console.log( "---> " + found + " -- " + dist0 );
-
-						require(["dijit/TooltipDialog", "dojo/ready"], function( TooltipDialog, ready) {
-							ready( function ( ) {
-								if ( tooltip_dlg == undefined ) {
-									tooltip_dlg = new TooltipDialog({
-										id: 'id_tooltip_dlg',
-										style: 'width:320px; height:240px',
-										title: 'hello'
-									});
-								}
-							});
-						});
-
-						require(["dijit/popup", "dojo/dom", "dijit/registry", "dojo/dom-style", "dojo/ready"], function( popup, dom, registry, domStyle, ready) {
-
-							ready( function ( ) {
-							
-								console.log( "popup.open" );
-								popup.open({
-									popup: tooltip_dlg,
-									x: event.clientX,
-									y: event.clientY,
-									orient: ["above", "above-alt", "above-centered"],
-									onClose: function(){
-										console.log( "closing..." );
-										require(["dojo/ready"], function( ready) {
-											ready( function ( ) {
-												var mode = "JPEG";
-												dojo.xhrGet({
-													url: "/files-browsing/closed-popup?mode=" + mode,
-													timeout: 5000,
-													handleAs: "xml",
-													preventCache: true,
-													load: function( xml, ioArgs ) {
-										//				alert( ioArgs.xhr.responseText );
-													},
-													error: function( error ) {
-														console.log( error );
-													}
-												});
-											});
-										});
-									},
-								});
-							});
-						});
-
-
+							console.log( "---> " + found + " -- " + dist0 + " -- " + nb );
 						}
-						console.log( eventLine.Contains( event.latLng ) );
+//						console.log( eventLine.Contains( event.latLng ) );
 					});
-				})(eventLine, path);
-*/
+					google.maps.event.addListener(eventLine, 'mouseout', function( event ) {
+						console.log( "out" );
+						cb_route_input_mouse_leave( );
+					});
+				})(eventLine, path, directions_renderer[route_index]);
+			}
     
             var index_waypoint = undefined;
             if (new_dir.request.Xc != undefined)
