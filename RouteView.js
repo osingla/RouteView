@@ -59,7 +59,7 @@ define( function( m ) {
 
    	var alt_down = false;
    	
-   	var browse_images = false;
+   	var browse_images_mode = false;
    	
 	var tooltip_dlg = undefined;				// Tooltip dialog used to show the JPEG thumbnail
    	
@@ -1181,85 +1181,11 @@ function calculateDistance(lat1, long1, lat2, long2)
         			cb_map_rightclick( evt );
        			});
         		
-				google.maps.event.addListener(map, 'mousemove', function (event) {
-					cb_map_mousemove( event);
-				});
-
             	var id_panorama = dom.byId('id_panorama');
         		on( id_panorama, "click", function( evt ) {
        				if ( evt.handled != true )
        					cb_panorama_click( );
        			});
-
-				function cb_show_pano_on_mousemove( evt ) {
-
-/*
-					console.log( evt.target["role"] );
-					if ( evt.target.indexOf( "topDecoration" ) == -1 )
-						return;
-*/					
-					timer_show_pano_on_mousemove = undefined;
-
-					var eol = 0;
-					polylines[selected_route_index].forEach( function(e) { 
-						var d = e.Distance();
-						eol += d;
-					});
-
-					var width = document.getElementById('id_td_input_route').offsetWidth;
-					var dx = (is_ff) ? evt.layerX : evt.offsetX;
-					var perc = (dx / width) 
-					var target_eol = eol * perc;
-					dijit.byId('id_input_route').set( 'maximum', eol );
-					dijit.byId('id_input_route').set( 'discreteValues,', eol );
-//					dijit.byId('id_input_route').set( 'value', target_eol, false );
-//					console.log( dx + " , " + perc + " - " + evt.offsetX + " , " + evt.layerX + " - " + width + " - " + target_eol + " / " + eol );
-
-					var route_index = selected_route_index;
-
-					if ( target_eol < 0 )
-						target_eol = 0;
-					if ( target_eol > eol )
-						target_eol = eol;
-			
-// 					console.log( route_index + " : " + evt.offsetX + " , " + evt.offsetY + " - " + eol + " - " + target_eol );
-
-					var leg = 0;
-					var polyline;
-					for (var l = 0; l < MAX_NB_WAYPOINTS; l++ ) {
-						leg = l;
-						polyline = polylines[route_index][leg];
-						if ( target_eol <= polyline.Distance() ) {
-							break;
-						}
-						target_eol -= polyline.Distance();
-					}
-
-					var p = polyline.GetPointAtDistance( target_eol );
-					if ( !map.getBounds().contains( p ) )
-						map.panTo( p );
-
-//					console.log( target_eol );
-					street_view_check[route_index].getPanoramaByLocation(p, 50, (function(route_index, polyline, target_eol) { return function(result, status) {
-						if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
-							console.log( "No street view available" );        
-							marker_no_street_view.setPosition( p );
-						}
-						else {
-							marker_no_street_view.setPosition( null );
-							panorama.setPosition( p );
-							var prev_bearing = bearing;
-							var bearing = polyline.Bearing( polyline.GetIndexAtDistance( target_eol ) );
-							if (bearing == undefined)
-								bearing = prev_bearing;
-							panorama.setPov({
-								heading: bearing,
-								pitch: 1
-							});
-						}
-					}})(route_index, polyline, target_eol));
-
-				}
 
             	var id_input_route = dom.byId('id_input_route');
         		on( id_input_route, "mousemove", function( evt ) {
@@ -1614,7 +1540,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 					streetViewLayer.setMap( null );
 			}
 
-			if ( browse_images ) {
+			if ( browse_images_mode ) {
 				console.log( "Cancel browse mode" );
 				cb_route_input_mouse_leave( );
 			}
@@ -1699,7 +1625,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 			return;
 		
 		console.log( "Enter" );
-		browse_images = true;
+		browse_images_mode = true;
 
 /*
     	require(["dojo/dom-style"], function( domStyle) {
@@ -1745,9 +1671,9 @@ function calculateDistance(lat1, long1, lat2, long2)
 			return;
 		
 		console.log( "Leave" );
-		if ( !browse_images )
+		if ( !browse_images_mode )
 			return;
-		browse_images = false;
+		browse_images_mode = false;
 
 		if ( timer_show_pano_on_mousemove != undefined ) {
 			clearTimeout( timer_show_pano_on_mousemove );
@@ -1792,6 +1718,115 @@ function calculateDistance(lat1, long1, lat2, long2)
 		var new_pos = dijit.byId('id_input_route').get( 'value' );
 		new_pos = Math.round( new_pos );
 		console.log( new_pos );
+	}
+
+	function browse_images( route_index ) {
+		
+		cb_route_input_mouse_enter( );
+		browse_images_mode = true;
+		
+   		map.fitBounds( route_bounds[route_index] );
+
+		directions_renderer.forEach( function( e ) {
+		   	e.setOptions( { draggable: false } ); })
+
+        var new_dir = directions_renderer[route_index].getDirections();
+
+		is_dirty = true;
+		var path = new_dir.routes[0].overview_path;
+
+		(function (path ) {
+			google.maps.event.addListener(map, 'mousemove', function (event) {
+
+				var prev_closest_lat_lng = undefined;
+				var closest_lat_lng = undefined;
+				var index_found = undefined;
+				var dist0 = 0;
+				var nb = 0;
+				var prev_ee;
+				var ee;
+				path.forEach( function( e, index ) {
+					nb++;
+					var dist = calculateDistance( event.latLng.lat(), event.latLng.lng(), e.lat(), e.lng() );
+					if ( (closest_lat_lng == undefined) || (dist < dist0) ) {
+						index_found = index;
+						dist0 = dist;
+						if ( prev_ee == undefined )
+							prev_ee = e;
+						prev_closest_lat_lng = {lat: prev_ee.lat(), lng: prev_ee.lng()};
+						closest_lat_lng = {lat: e.lat(), lng: e.lng()};
+						ee = e;
+						prev_ee = e;
+					}
+				});
+				
+				if ( index_found != undefined ) {
+					
+					if ( timer_show_pano_on_mousemove != undefined ) {
+						clearTimeout( timer_show_pano_on_mousemove );
+						timer_show_pano_on_mousemove = undefined;
+					}
+
+					(function ( prev_closest_lat_lng, closest_lat_lng, index_found ) {
+
+						timer_show_pano_on_mousemove = setTimeout( function() { 
+
+							function radians( n ) {
+								return n * (Math.PI / 180);
+							}
+							
+							function degrees( n ) {
+								return n * (180 / Math.PI);
+							}
+
+							function getBearing( startLat, startLong, endLat, endLong) {
+								startLat = radians(startLat);
+								startLong = radians(startLong);
+								endLat = radians(endLat);
+								endLong = radians(endLong);
+
+								var dLong = endLong - startLong;
+
+								var dPhi = Math.log(Math.tan(endLat/2.0+Math.PI/4.0)/Math.tan(startLat/2.0+Math.PI/4.0));
+								if (Math.abs(dLong) > Math.PI){
+									if (dLong > 0.0)
+										dLong = -(2.0 * Math.PI - dLong);
+									else
+										dLong = (2.0 * Math.PI + dLong);
+								}
+
+								return (degrees(Math.atan2(dLong, dPhi)) + 360.0) % 360.0;
+							}
+						
+							var route_index = selected_route_index;
+
+							street_view_check[route_index].getPanorama( {location: closest_lat_lng, radius: 50}, function(data, status) {
+								if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
+									console.log( "No street view available" );        
+									marker_no_street_view.setPosition( data.location.pano );
+								}
+								else {
+									marker_no_street_view.setPosition( null );
+									panorama.setPano( data.location.pano );
+									var prev_bearing = bearing;
+									var bearing = getBearing( prev_closest_lat_lng.lat, prev_closest_lat_lng.lng, closest_lat_lng.lat, closest_lat_lng.lng );
+									if (bearing == undefined)
+										bearing = prev_bearing;
+									panorama.setPov({
+										heading: bearing,
+										pitch: 1
+									})
+								}
+							});
+
+						}, 50);
+					})( prev_closest_lat_lng, closest_lat_lng, index_found );
+
+				}
+
+			});
+		})(path);
+
 	}
 
     function cb_step_changed( ) {
@@ -2193,6 +2228,11 @@ function calculateDistance(lat1, long1, lat2, long2)
 				start_temporary_route( evt.latLng );
 			return;
     	}
+
+		if ( browse_images_mode ) {
+			console.log( "Cancel browse mode" );
+			cb_route_input_mouse_leave( );
+		}
     	
 return;
 
@@ -2276,7 +2316,7 @@ return;
 //		console.log( evt );    	
 //    	console.log( "Right click: " + evt.latLng );
 
-    	if ( ctrl_mode ) {
+    	if ( ctrl_mode || browse_images_mode ) {
 			return;
     	}
 
@@ -2484,10 +2524,14 @@ return;
 	   		if ( (wp0 == '') || (wp1 == '') ) {
 		   		dijit.byId('id_btn_drive_'+route_index+"_"+n).set( 'disabled', true );
 				dijit.byId('id_tooltip_btn_drive_'+route_index+"_"+n).set( 'showDelay', 999999 );
+				if ( n == 1 )
+					dijit.byId('id_btn_browse_images_'+route_index).set( 'disabled', true );
 	   		}
 	   		else {
 		   		dijit.byId('id_btn_drive_'+route_index+"_"+n).set( 'disabled', false );
 				dijit.byId('id_tooltip_btn_drive_'+route_index+"_"+n).set( 'showDelay', 650 );
+				if ( n == 1 )
+					dijit.byId('id_btn_browse_images_'+route_index).set( 'disabled', false );
 	   		}
 		}
 		
@@ -2949,6 +2993,8 @@ return;
 		do_create_short_url: function ( ) { do_create_short_url(); },
 		
 		move_to_dist: function( new_pos ) { move_to_dist( new_pos ); },
+
+		browse_images: function( route_index ) { browse_images( route_index ); },
 
 		cb_route_input: 			function( ) { cb_route_input( ); },
 		cb_route_input_mouse_enter: function( ) { cb_route_input_mouse_enter( ); },
