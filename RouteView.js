@@ -175,6 +175,8 @@ define( function( m ) {
 
 		directions_renderer.forEach( function( e ) {
 	       	e.setOptions( { draggable: false } ); })
+
+		panorama.setVisible( true );
     }
 
     function find_first_hidden( route_index ) {
@@ -701,6 +703,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 	        google.maps.event.trigger( map, 'resize' );
 		});
     	
+		panorama.setVisible( false );
+
 		var route_index = curr_route;
 		if ( curr_route == -1 ) {
 			stop_driving_temporary_route( );
@@ -1067,6 +1071,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 			directions_renderer.forEach( function( e ) {
 		       	e.setOptions( { draggable: false } ); })
 
+			panorama.setVisible( true );
+
 			curr_route = -1;	
 			curr_leg = -1;
 
@@ -1076,6 +1082,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 	
 	function end_ctrl_mode( ) {
 	
+		panorama.setVisible( false );
+
     	require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct) {
     	
 			domStyle.set( "id_div_top_layout", "display", "" );
@@ -1636,7 +1644,11 @@ function calculateDistance(lat1, long1, lat2, long2)
 		marker_no_street_view.setPosition( null );
 
 		directions_renderer.forEach( function( e ) {
-		   	e.setOptions( { draggable: false } ); })
+		   	e.setOptions( { draggable: true } ); })
+
+		google.maps.event.clearListeners( map, 'mousemove' );
+		
+		panorama.setVisible( false );
 
     	require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct ) {
 			domStyle.set( "id_top_layout", "display", "" );
@@ -1693,8 +1705,10 @@ function calculateDistance(lat1, long1, lat2, long2)
 		is_dirty = true;
 		var path = new_dir.routes[0].overview_path;
 
+		panorama.setVisible( true );
+
 		(function (path ) {
-			google.maps.event.addListener(map, 'mousemove', function (event) {
+			google.maps.event.addListener( map, 'mousemove', function (event) {
 
 				var prev_closest_lat_lng = undefined;
 				var closest_lat_lng = undefined;
@@ -1900,6 +1914,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 		});
 
 		map.setOptions({draggableCursor: 'crosshair'});
+
+ 		panorama.setVisible( true );
 
         temp_directions_service = new google.maps.DirectionsService( );
 
@@ -2187,31 +2203,9 @@ function calculateDistance(lat1, long1, lat2, long2)
 		if ( browse_images_mode ) {
 			console.log( "Cancel browse mode" );
 			cb_route_input_mouse_leave( );
+			return;
 		}
     	
-return;
-
-		require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct ){
-       		var display = domStyle.get( "id_left_layout", "display" );
-       		console.log( display );
-           	if ( display != "none" ) {
-           		console.log( "Ignored" );
-           	}
-           	else {
-				if ( !map_or_panorama_full_screen ) {
-					domConstruct.place("td_panorama", "id_hidden", "after");
-					map_or_panorama_full_screen = true;	
-				}
-				else {
-					domConstruct.place("td_panorama", "td_map_canvas", "after");
-		            document.getElementById("td_map_canvas").style.width = "50%";
-		            document.getElementById("td_panorama").style.width = "50%";
-					map_or_panorama_full_screen = false;
-				}
-           	}
-		});
-        google.maps.event.trigger( map, 'resize' );
-        google.maps.event.trigger( panorama, 'resize' );
     }
 
     function cb_panorama_click( ) {
