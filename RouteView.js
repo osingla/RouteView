@@ -2479,14 +2479,18 @@ return;
 	   		if ( (wp0 == '') || (wp1 == '') ) {
 		   		dijit.byId('id_btn_drive_'+route_index+"_"+n).set( 'disabled', true );
 				dijit.byId('id_tooltip_btn_drive_'+route_index+"_"+n).set( 'showDelay', 999999 );
-				if ( n == 1 )
+				if ( n == 1 ) {
 					dijit.byId('id_btn_browse_images_'+route_index).set( 'disabled', true );
+					dijit.byId('id_btn_browse_images_'+route_index).set( 'showDelay', 999999 );
+				}
 	   		}
 	   		else {
 		   		dijit.byId('id_btn_drive_'+route_index+"_"+n).set( 'disabled', false );
 				dijit.byId('id_tooltip_btn_drive_'+route_index+"_"+n).set( 'showDelay', 650 );
-				if ( n == 1 )
+				if ( n == 1 ) {
 					dijit.byId('id_btn_browse_images_'+route_index).set( 'disabled', false );
+					dijit.byId('id_tooltip_btn_browse_images_'+route_index).set( 'showDelay', 650 );
+				}
 	   		}
 		}
 		
