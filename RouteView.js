@@ -406,38 +406,6 @@ function calculateDistance(lat1, long1, lat2, long2)
 //			console.log( path.length );
 			eventLine.setMap( map );
 
-			if ( false ) {
-				(function (eventLine, path, directions_renderer ) {
-					google.maps.event.addListener(eventLine, 'mouseover', function( event ) {
-						console.log( "over" );
-						cb_route_input_mouse_enter( );
-					});
-					google.maps.event.addListener(eventLine, 'mousemove', function( event ) {
-//						console.log( event.latLng );
-						var found = undefined;
-						var dist0 = 0;
-						var nb = 0;
-						path.forEach( function( e, index ) {
-							nb++;
-							var dist = calculateDistance( event.latLng.lat(), event.latLng.lng(), e.lat(), e.lng() );
-							if ( (found == undefined) || (dist < dist0) ) {
-//								console.log( index  + " " + dist );
-								found = index;
-								dist0 = dist;
-							}
-						});
-						if( found != undefined ) {
-							console.log( "---> " + found + " -- " + dist0 + " -- " + nb );
-						}
-//						console.log( eventLine.Contains( event.latLng ) );
-					});
-					google.maps.event.addListener(eventLine, 'mouseout', function( event ) {
-						console.log( "out" );
-						cb_route_input_mouse_leave( );
-					});
-				})(eventLine, path, directions_renderer[route_index]);
-			}
-    
             var index_waypoint = undefined;
             if (new_dir.request.Xc != undefined)
 				index_waypoint = new_dir.request.Xc;
@@ -925,7 +893,29 @@ function calculateDistance(lat1, long1, lat2, long2)
 						id: "id_tooltip_btn_drive_"+route_index+"_"+n,
 	 			        connectId: ["id_btn_drive_"+route_index+'_'+n],
 	 			        position:['below-centered'],
-	 			        label: "Virtual Ride!<br>Play the route using StreetView",
+	 			        label: "Virtual Ride!<br><br>Play the route using StreetView<br><br>" +
+							"Note: This is different from showing images along the ride using <img src=\"icons/btn-browse.png\" style=\"width:16px; height:16px; vertical-align:middle\" />.<br><br>" +
+							"<table>" +
+							"	<tr>" +
+							"		<td valign=\"middle\" >" +
+							"			<img src=\"icons/btn-drive.png\" style=\"width:16px; height:16px; vertical-align:middle\" />" +
+							"		</td>" +
+							"		<td>" +
+							"			This allows to <b><i>play</b></i> a leg of the route. Each image will stay for a specifc time (default is 1,200 msec), <br>" +
+							"			and each new image is separated from the previous one by 175 meters." +
+							"		</td>" +
+							"	</tr>" +
+							"	<tr>" +
+							"	</tr>" +
+							"	<tr>" +
+							"		<td valign=\"middle\" >" +
+							"			<img src=\"icons/btn-browse.png\" style=\"width:16px; height:16px; vertical-align:middle\"/>" +
+							"		</td>" +
+							"		<td>" +
+							"			This allows to <b><i>show</b></i> an image along the route depending where the mouse cursor is." +
+							"		</td>" +
+							"	</tr>" +
+							"</table>",
 	 			        showDelay:9999999,
 	 			        hideDelay:0
 			  		});
@@ -1185,24 +1175,6 @@ function calculateDistance(lat1, long1, lat2, long2)
         		on( id_panorama, "click", function( evt ) {
        				if ( evt.handled != true )
        					cb_panorama_click( );
-       			});
-
-            	var id_input_route = dom.byId('id_input_route');
-        		on( id_input_route, "mousemove", function( evt ) {
-
-     				if ( (evt.handled == true) || (timer_animate != undefined) || (polylines[selected_route_index] == undefined) )
-						return;
-
-					if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" )
-						return;
-		
-					if ( timer_show_pano_on_mousemove != undefined )
-						clearTimeout( timer_show_pano_on_mousemove );
-
-					timer_show_pano_on_mousemove = setTimeout( (function(evt) { return function() {
-						cb_show_pano_on_mousemove( evt );
-					}})(evt), 90 );
-
        			});
 
         		_list_countries = [
@@ -1627,25 +1599,6 @@ function calculateDistance(lat1, long1, lat2, long2)
 		console.log( "Enter" );
 		browse_images_mode = true;
 
-/*
-    	require(["dojo/dom-style"], function( domStyle) {
-       		domStyle.set( "id_input_route", "cursor", "crosshair" );
-		});
-*/
-
-//		console.log( selected_route_index );
-//		console.log( polylines[selected_route_index] );
-		var eol = 0;
-		polylines[selected_route_index].forEach( function(e) { 
-			var d = e.Distance();
-			eol += d;
-		});
-//		console.log( eol );
-
-		dijit.byId('id_input_route').set( 'maximum', eol );
-		dijit.byId('id_input_route').set( 'discreteValues,', eol );
-		dijit.byId('id_input_route').set( 'value', 0 );
-
     	require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct ) {
 			domStyle.set( "id_top_layout", "display", "none" );
 			domStyle.set( "id_left_layout", "display", "none" );
@@ -1679,6 +1632,11 @@ function calculateDistance(lat1, long1, lat2, long2)
 			clearTimeout( timer_show_pano_on_mousemove );
 			timer_show_pano_on_mousemove = undefined;
 		}
+
+		marker_no_street_view.setPosition( null );
+
+		directions_renderer.forEach( function( e ) {
+		   	e.setOptions( { draggable: false } ); })
 
     	require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct ) {
 			domStyle.set( "id_top_layout", "display", "" );
@@ -1802,8 +1760,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 
 							street_view_check[route_index].getPanorama( {location: closest_lat_lng, radius: 50}, function(data, status) {
 								if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
-									console.log( "No street view available" );        
-									marker_no_street_view.setPosition( data.location.pano );
+//									console.log( "No street view available" ); 
+									marker_no_street_view.setPosition( closest_lat_lng );
 								}
 								else {
 									marker_no_street_view.setPosition( null );
@@ -1812,10 +1770,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 									var bearing = getBearing( prev_closest_lat_lng.lat, prev_closest_lat_lng.lng, closest_lat_lng.lat, closest_lat_lng.lng );
 									if (bearing == undefined)
 										bearing = prev_bearing;
-									panorama.setPov({
-										heading: bearing,
-										pitch: 1
-									})
+									setTimeout( function() { panorama.setPov( { heading: bearing, pitch: 1 } ); }, 25 );
 								}
 							});
 
