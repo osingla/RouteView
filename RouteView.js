@@ -171,10 +171,10 @@ define( function( m ) {
 		dijit.byId('id_input_route').set( 'discreteValues,', eol );
 		dijit.byId('id_input_route').set( 'value', 0, false );
 
-        map.setOptions({draggableCursor: 'hand'});
+        map.setOptions( {draggableCursor:'hand'} );
 
 		directions_renderer.forEach( function( e ) {
-	       	e.setOptions( { draggable: false } ); })
+	       	e.setOptions( { zIndex:99, draggable:false } ); })
 
 		panorama.setVisible( true );
     }
@@ -721,7 +721,7 @@ function calculateDistance(lat1, long1, lat2, long2)
         map.setOptions({draggableCursor: 'crosshair'});
 
 		directions_renderer.forEach( function( e ) {
-	       	e.setOptions( { draggable: true } ); })
+	       	e.setOptions( { zIndex:99, draggable: true } ); })
     }
 
     function start( ) {
@@ -1069,7 +1069,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 	        map.setOptions({draggableCursor: 'crosshair'});
 
 			directions_renderer.forEach( function( e ) {
-		       	e.setOptions( { draggable: false } ); })
+		       	e.setOptions( { zIndex:99, draggable:false } ); })
 
 			panorama.setVisible( true );
 
@@ -1098,7 +1098,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 			map_or_panorama_full_screen = false;	
 
     		directions_renderer.forEach( function( e ) {
-		       	e.setOptions( { draggable: true } ); })
+		       	e.setOptions( { zIndex:99, draggable: true } ); })
 
     	});
 	
@@ -1644,7 +1644,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 		marker_no_street_view.setPosition( null );
 
 		directions_renderer.forEach( function( e ) {
-		   	e.setOptions( { draggable: true } ); })
+		   	e.setOptions( { zIndex:99, draggable:true } ); })
 
 		google.maps.event.clearListeners( map, 'mousemove' );
 		
@@ -1670,26 +1670,6 @@ function calculateDistance(lat1, long1, lat2, long2)
     	
 	}
 
-    function cb_route_input_mouse_over( evt ) {
-
-		if ( (selected_route_index == undefined) || (polylines[selected_route_index] == undefined) || (timer_animate != undefined) )
-			return;
-	
-        if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" )
-			return;
-		
-		require(["dojo/on"], function(on){
-			on.emit( dijit.byId("id_input_route"), "change", {
-				bubbles: true,
-				cancelable: true
-			});
-		});
-	
-		var new_pos = dijit.byId('id_input_route').get( 'value' );
-		new_pos = Math.round( new_pos );
-		console.log( new_pos );
-	}
-
 	function browse_images( route_index ) {
 		
 		cb_route_input_mouse_enter( );
@@ -1698,7 +1678,7 @@ function calculateDistance(lat1, long1, lat2, long2)
    		map.fitBounds( route_bounds[route_index] );
 
 		directions_renderer.forEach( function( e ) {
-		   	e.setOptions( { draggable: false } ); })
+		   	e.setOptions( { zIndex:99, draggable:false } ); })
 
         var new_dir = directions_renderer[route_index].getDirections();
 
@@ -1936,7 +1916,7 @@ function calculateDistance(lat1, long1, lat2, long2)
             var new_dir = temp_directions_renderer.getDirections();
             console.log( new_dir );
             if ( new_dir.geocoded_waypoints[0].place_id != new_dir.geocoded_waypoints[1].place_id ) {
-		       	temp_directions_renderer.setOptions( { draggable: false } );
+		       	temp_directions_renderer.setOptions( { zIndex:99, draggable:false } );
             	start_driving_temporary_route( new_dir.routes[0] );
             }
         });
@@ -2950,9 +2930,6 @@ return;
 		browse_images: function( route_index ) { browse_images( route_index ); },
 
 		cb_route_input: 			function( ) { cb_route_input( ); },
-		cb_route_input_mouse_enter: function( ) { cb_route_input_mouse_enter( ); },
-		cb_route_input_mouse_leave: function( ) { cb_route_input_mouse_leave( ); },
-		cb_route_input_mouse_over: 	function( ) { cb_route_input_mouse_over( ); },
 
 		cb_step_changed:     function( ) { cb_step_changed(); },
 		cb_interval_changed: function( ) { cb_interval_changed(); },
