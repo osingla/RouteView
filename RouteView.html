@@ -232,6 +232,53 @@
 				                    		</td>
 				                    		
 				                            <td align="center" valign="middle">
+				                        		<div data-dojo-type="dijit/form/DropDownButton" data-dojo-props='autoWidth:false' id="id_places_dlg" style="font-size: 85%" xdisabled>
+				                            		<span>Places</span>
+						                            <div data-dojo-type="dijit/TooltipDialog">
+														<table style="width:100%">
+															<tr>
+												                <td style="text-align:right; vertical-align:middle">
+																	Place:&nbsp;
+																</td>
+																<td>
+																	<select data-dojo-type="dijit/form/ComboBox" id="id_place" name="id_place" maxlength="80">
+																		<option selected>Gas Stations</option>
+																		<option>McDonald's</option>
+																		<option>Wendy's</option>
+																		<option>Subway Restaurant</option>
+																		<option>Bojangles</option>
+																		<option>Sheetz</option>
+																		<option>Pilot Flying J</option>
+																		<option>TA Petro</option>
+																		<option>Harley Davidson Dealerships</option>
+																	</select>
+																</td>
+															</tr>
+															<tr>
+																<td colspan="2">
+																	<hr>
+																</td>
+															</tr>
+															<tr>
+																<td valign="middle" align="center" >
+																	<button dojoType="dijit.form.Button" type="button" id="id_btn_clear_place" 
+																			onclick='require(["RouteView.js"], function( s ) { s.clear_place(); })'>
+																		Clear
+																	</button>
+																</td>
+																<td valign="middle" align="center" >
+																	<button dojoType="dijit.form.Button" type="button" id="id_btn_show_place" 
+																			onclick='require(["RouteView.js"], function( s ) { s.show_place(); })'>
+																		Show
+																	</button>
+																</td>
+															</tr>
+														</table>
+													</div>
+												</div>
+											</td>
+														
+				                            <td align="center" valign="middle">
 				                        		<div data-dojo-type="dijit/form/DropDownButton" data-dojo-props='autoWidth:false' id="id_files_dlg" style="font-size: 85%; display:none" disabled>
 				                            		<span>Files</span>
 						                            <div data-dojo-type="dijit/TooltipDialog">

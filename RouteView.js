@@ -1,4 +1,3 @@
-/* ********************************************************************************************* */
 /* ***                                                                                       *** */ 
 /* *** RouteView - Olivier Singla                                                            *** */
 /* ***                                                                                       *** */ 
@@ -49,6 +48,8 @@ define( function( m ) {
    	var dlg_panorama_map_mousemove;
    	var is_dirty = false;
    	var is_ff = false;
+
+	var search_places = [];
 
    	var ctrl_down = false;
    	var ctrl_mode = false;
@@ -731,7 +732,7 @@ function calculateDistance(lat1, long1, lat2, long2)
    				load_settings( );
 
 				dojoConfig = { gmaps: { v: '3.23', libraries: 'places,geometry' } };
-				var rq = "//maps.google.com/maps/api/js?v=3.23&sensor=false&libraries=places";
+				var rq = "//maps.google.com/maps/api/js?v=3.24&sensor=false&libraries=places";
 		    	var google_maps_api_key = localStorage.getItem("id_google_maps_api_key");
 		    	if ( google_maps_api_key && (google_maps_api_key != "") )
 					rq += "&key=" + google_maps_api_key;
@@ -929,6 +930,73 @@ function calculateDistance(lat1, long1, lat2, long2)
 			}
 			
 		});
+	}
+	
+	function clear_place( ) {
+
+		console.log( search_places.length );
+		search_places.forEach( function(e) {
+//			console.log( e );
+			e.setMap( null );
+			delete e;
+		})
+		search_places = [];
+		console.log( search_places.length );
+		
+    	var dlg = dijit.byId('id_places_dlg');
+    	dlg.closeDropDown( false );
+	}
+	
+	function show_place( ) {
+
+		clear_place( );
+
+		var place_val = dijit.byId("id_place").get("value");
+		console.log( place_val );
+		var infowindow = new google.maps.InfoWindow();
+		
+		function createMarker( place ) {
+			var placeLoc = place.geometry.location;
+			var marker = new google.maps.Marker({
+				map: map,
+				position: place.geometry.location,
+				icon: "icons/marker_flag.png"
+			});
+			search_places.push( marker );
+
+			google.maps.event.addListener(marker, 'click', function() {
+				infowindow.setContent( place.name + "<br>" + place.vicinity );
+			console.log( place );
+				infowindow.open(map, this);
+			});
+		}
+      
+      	function callback(results, status) {
+			if (status === google.maps.places.PlacesServiceStatus.OK) {
+				for (var i = 0; i < results.length; i++) {
+					createMarker(results[i]);
+				}
+			}
+		}
+
+		var radius = undefined;
+		var bounds = map.getBounds();
+		var center = map.getCenter();
+		if ( bounds && center ) {
+			var ne = bounds.getNorthEast();
+			var radius = google.maps.geometry.spherical.computeDistanceBetween(center, ne);
+		}
+
+		var service = new google.maps.places.PlacesService(map);
+        service.nearbySearch({
+          location: map.getCenter(),
+          radius: radius,
+          name: [place_val]
+        }, callback);
+		
+    	var dlg = dijit.byId('id_places_dlg');
+    	dlg.closeDropDown( false );
+		
 	}
 
 	function decode_url_params() {
@@ -2920,6 +2988,9 @@ return;
         do_street_view: function( ) { do_street_view(); },
 		do_pause: function( ) { do_pause(); },
 		do_stop:  function( ) { do_stop(); },
+
+		clear_place:  function( ) { clear_place(); },
+		show_place:   function( ) { show_place(); },
 
 		do_save_gpx: function( ) { do_save_gpx(); },
 		do_create_long_url: function ( ) { do_create_long_url(); },
