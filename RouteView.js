@@ -1,3 +1,4 @@
+/* ********************************************************************************************* */
 /* ***                                                                                       *** */ 
 /* *** RouteView - Olivier Singla                                                            *** */
 /* ***                                                                                       *** */ 
@@ -2125,8 +2126,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 	            for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
 	        		var display = domStyle.get( 'id_tr_'+route_index+'_' + n, "display" );
 	            	if ( display != "none" ) {
-						if ( places[route_index][n].geometry == undefined ) {
-							console.log( route_index + " , " + n + " ==> " + places[route_index][n].name + " ? " );
+						if ( (places[route_index][n] == undefined) || (places[route_index][n].geometry == undefined) ) {
+//							console.log( route_index + " , " + n + " ==> " + places[route_index][n].name + " ? " );
 							domStyle.set( 'id_wp_'+route_index+'_'+n, { color: "red" } );
 						}
 						else {
@@ -2683,7 +2684,7 @@ return;
 	    	
 	    	var route_tickness = localStorage.getItem("route_tickness");
 	    	if ( !route_tickness )
-	    		route_tickness = 6;
+	    		route_tickness = 4;
 	    	console.log( "Restored route_tickness= " + route_tickness );
 	    	if ( route_tickness != null )
 	            dijit.byId('id_input_route_tickness').set( 'value', parse(route_tickness) );
@@ -3000,7 +3001,7 @@ return;
 
 		browse_images: function( route_index ) { browse_images( route_index ); },
 
-		cb_route_input: 			function( ) { cb_route_input( ); },
+		cb_route_input: function( ) { cb_route_input( ); },
 
 		cb_step_changed:     function( ) { cb_step_changed(); },
 		cb_interval_changed: function( ) { cb_interval_changed(); },
