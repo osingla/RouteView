@@ -591,6 +591,62 @@ function calculateDistance(lat1, long1, lat2, long2)
 
     }
 
+    function do_show_commands_message( ) {
+    	
+    	require(["dijit/Dialog", "dojo/domReady!"], function(Dialog){
+
+    		var message = 
+    			"<div align='center'>" +
+    			"  <table>" +
+				"    <tr>" +
+				"      <td>" +
+				"        <b>S</b> : " + 
+				"      </td>" +
+				"      <td>" +
+				"        Show StreetView" +
+				"      </td>" +
+				"    </tr>" +
+				"    <tr>" +
+				"      <td>" +
+				"        <b>P</b> : " + 
+				"      </td>" +
+				"      <td>" +
+				"        "+((!ctrl_mode)?"Start" : "Cancel")+" Route Preview Mode" +
+				"      </td>" +
+				"    </tr>" +
+				"    <tr>" +
+				"      <td colspan=2>" +
+				"        <hr>" +
+				"      </td>" +
+				"    </tr>" +
+				"    <tr>" +
+				"      <td>" +
+				"        <b>ESC</b> : " + 
+				"      </td>" +
+				"      <td>" +
+				"        Cancel" +
+				"      </td>" +
+				"    </tr>" +
+    			"  </table>" +
+    			"</div>";
+    		
+    		dlg_commands = new Dialog({
+    	        title: "Commands",
+    	        closable: false,
+    	        duration:250,
+    	        content: message,
+    	        style: "min-width: 250px"
+    	    });
+    		
+    		dlg_commands.show();
+    	});
+    }
+
+    function do_hide_commands_message( ) {
+		
+   		dlg_commands.hide();
+	}
+    
     function do_show_message( is_error, title, message ) {
     	
     	require(["dijit/Dialog", "dojo/domReady!"], function(Dialog){
@@ -1523,6 +1579,49 @@ function calculateDistance(lat1, long1, lat2, long2)
 
 				window.onkeydown = function( evt ) {
 
+					if (map.getCenter() == undefined)
+						return;
+					if (timer_animate != undefined)
+						return;
+
+					var prev_ctrl_down = ctrl_down;
+					var is_ctrl_down = ( ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == true)) || (evt.key == "Control") )
+					console.log("is_ctrl_down="+is_ctrl_down+" - ctrl_down="+ ctrl_down);
+					if (is_ctrl_down && prev_ctrl_down) {
+						ctrl_down = false;
+						do_hide_commands_message();
+						return;
+					}
+					if (is_ctrl_down) {
+						ctrl_down = is_ctrl_down;
+						do_show_commands_message();
+					}
+					if (prev_ctrl_down ) {
+						console.log( evt.keyIdentifier + " - " + evt.ctrlKey + " - " + evt.key);
+						if (evt.keyIdentifier != "Control") {
+							ctrl_down = false;
+							do_hide_commands_message();
+							if ((evt.key == "S") || (evt.key == "s")) {
+								if (streetViewLayer == undefined)
+									streetViewLayer = new google.maps.StreetViewCoverageLayer();
+								if( streetViewLayer.getMap() == undefined )
+									streetViewLayer.setMap(map);
+								return;
+							}
+							if ((evt.key == "P") || (evt.key == "p")) {
+								if ( !ctrl_mode ) {
+									ctrl_mode = true;
+									begin_ctrl_mode();
+								}
+								else if ( (timer_animate == undefined) && (temp_directions_renderer == undefined) ) {
+									ctrl_mode = false;
+									end_ctrl_mode();
+								}
+							}
+						}
+					}
+					return;
+
 					var prev_ctrl_down = ctrl_down;
 					ctrl_down = ( ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == true)) || (evt.key == "Control") )
 					if (ctrl_down && !prev_ctrl_down) {
@@ -1530,7 +1629,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 						if ( map.getCenter() == undefined ) {
 							console.log( "Ignored" );
 							return;
-						} 
+						}
 					}
 					
 					var prev_alt_down = alt_down;
@@ -1550,6 +1649,26 @@ function calculateDistance(lat1, long1, lat2, long2)
 
 				window.onkeyup = function(evt) {
 				
+					if ( map.getCenter() == undefined )
+						return;
+
+					console.log( evt.keyIdentifier + " - " + evt.ctrlKey + " - " + evt.key);
+					if (!evt.ctrlKey && ((evt.key =='s') || (evt.key =='S'))) {
+						if ( streetViewLayer != undefined )
+							streetViewLayer.setMap( null );
+						return;
+					}
+return;
+				
+					var prev_ctrl_down = ctrl_down;
+					var no_cd = ( ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == false)) || (evt.key == "Control") )
+					console.log("prev_ctrl_down="+prev_ctrl_down+" - no_cd="+no_cd);
+					if (no_cd) {
+						ctrl_mode = false;
+						do_hide_commands_message();
+					}
+					return;
+
 					var prev_ctrl_down = ctrl_down;
 					var no_cd = ( ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == false)) || (evt.key == "Control") )
 					if ( prev_ctrl_down && no_cd ) {
