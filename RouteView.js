@@ -139,7 +139,7 @@ define( function( m ) {
 		        var iad = polyline.GetIndexAtDistance( d );
 		        prev_bearing = bearing;
         		var bearing = polyline.Bearing( iad );
-//				console.log( d + " / " + eol + " --> " + bearing);
+	//			console.log( d + " / " + eol + " --> " + bearing);
 				if (bearing == undefined)
 					bearing = prev_bearing;
 				if (bearing != undefined)
@@ -160,7 +160,6 @@ define( function( m ) {
         
         if ( timer_animate ) 
             clearTimeout( timer_animate );
-            
         eol = polylines[route_index][curr_leg].Distance();
         map.setCenter( polylines[route_index][curr_leg].getPath().getAt(0) );
 
@@ -669,7 +668,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 		        google.maps.event.trigger( map, 'resize' );
 			});
         	dijit.byId('id_btn_pause').set( 'label', "Continue" );
-            console.log( "curr_dist=" + curr_dist );
+//          console.log( "curr_dist=" + curr_dist );
         }
         else if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" ) {
         	dijit.byId('id_btn_pause').set( 'label', "Pause" );
@@ -1004,6 +1003,9 @@ function calculateDistance(lat1, long1, lat2, long2)
 	
 		var query = location.search.substr(1);
 	  	var result = [];
+	  	
+	  	var play_route = undefined;
+	  	var play_waypoint = undefined;
 
 		var total_nb_waypoints = 0;
 		var nb_routes = 0;
@@ -1016,9 +1018,20 @@ function calculateDistance(lat1, long1, lat2, long2)
 					var item = part;
 					console.log(item);
 					if (item != "") {
-						result[nb_routes].push( decodeURIComponent(item) );
-						console.log( decodeURIComponent(item) );
-						total_nb_waypoints++;
+						if ( item.slice(0,5) == "play=" ) {
+							var p = item.slice(5);
+							var q = p.split(",");
+							if ( q.length == 2 ) {
+								play_route    = parseInt( q[0] );
+								play_waypoint = parseInt( q[1] );
+								console.log("play_route=" + play_route + " - play_waypoint=" + play_waypoint);
+							}
+						}
+						else {
+							result[nb_routes].push( decodeURIComponent(item) );
+							console.log( decodeURIComponent(item) );
+							total_nb_waypoints++;
+						}
 					}
 				});	
 				nb_routes++;
@@ -1077,6 +1090,20 @@ function calculateDistance(lat1, long1, lat2, long2)
 											for (var r = 0; r < nb_routes; r++)
 												do_route( r );
 											dijit.byId("id_pane_standby").hide();
+											if ( (play_route != undefined) && (play_waypoint != undefined)) {
+												console.log( "play_route="+play_route+" - play_waypoint="+play_waypoint);
+												curr_route = play_route;	
+												curr_leg = play_waypoint;
+												(function ( play_route, play_waypoint ) {
+													function play_route_at_startup() {
+														if ( (polylines[play_route] == undefined) || (polylines[play_route][play_waypoint] == undefined))
+															setTimeout( function() { play_route_at_startup(); }, 250 );
+														else
+															cb_click_btn_drive( play_route, play_waypoint );
+													}
+													setTimeout( function() { play_route_at_startup(); }, 250 );
+												})( play_route, play_waypoint );
+											}
 										}
 									}
 								});
@@ -2460,7 +2487,7 @@ return;
 		dijit.byId('id_wp_'+route_index+'_'+(index)).set( 'value', wp_b );
 		dijit.byId('id_wp_'+route_index+'_'+(index+1)).set( 'value', wp_a );
 		
-		do_route( route_index );
+		8( route_index );
 	}
 	
 	function cb_click_btn_drive( route_index, waypoint_index ) {
