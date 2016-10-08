@@ -1667,7 +1667,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 						var node = dom.byId("id_input_route");
 						var includeScroll = false;
 						var output = domGeom.position(node, includeScroll);
-						var perc = ((evt.x - output.x) / output.w) * 100;
+						var x = (is_ff) ? evt.clientX : evt.x;
+						var perc = ((x - output.x) / output.w) * 100;
 						var new_curr_dist = (eol * perc) / 100;
 						console.log( perc + " / " + eol + " -> " + new_curr_dist );
 						if ( timer_animate != undefined ) 
@@ -1696,10 +1697,11 @@ function calculateDistance(lat1, long1, lat2, long2)
 					var node = dom.byId("id_input_route");
 					var includeScroll = false;
 					var output = domGeom.position(node, includeScroll);
-					var perc = ((evt.x - output.x) / output.w) * 100;
+
+					var x = (is_ff) ? evt.clientX : evt.x;
+					var perc = ((x - output.x) / output.w) * 100;
 					var new_curr_dist = (eol * perc) / 100;
-//					console.log( perc + " / " + eol + " -> " + new_curr_dist );
-					
+					console.log( perc + " / " + eol + " -> " + new_curr_dist );
 					var polyline = (curr_route == -1) ? temp_polylines[0] : polylines[curr_route][curr_leg];
 					
 					var p = polyline.GetPointAtDistance( new_curr_dist );
@@ -1769,29 +1771,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 							}
 						}
 					}
-					return;
 
-					var prev_ctrl_down = ctrl_down;
-					ctrl_down = ( ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == true)) || (evt.key == "Control") )
-					if (ctrl_down && !prev_ctrl_down) {
-						console.log("Ctrl Down - ctrl_mode=" + ctrl_mode);
-						if ( map.getCenter() == undefined ) {
-							console.log( "Ignored" );
-							return;
-						}
-					}
-					
-					var prev_alt_down = alt_down;
-					alt_down = ( ((evt.keyIdentifier == 'Alt') && (evt.altlKey == true)) || (evt.key == "Alt") )
-					if (alt_down && !prev_alt_down) {
-		//				console.log("Alt Down");
-						if ( map.getCenter() == undefined ) {
-							console.log( "Ignored" );
-							return;
-						} 
-						streetViewLayer.setMap( map );
-					}
-					
 				}
 
 				window.onkeyup = function(evt) {
