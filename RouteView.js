@@ -45,9 +45,11 @@ define( function( m ) {
 	var cb_route_from_or_to_changed_handle = [];
 	var places = [];
 	var got_location;
-   	var streetViewLayer = undefined;
+   	var streetViewLayer;
    	var street_view_check = [];
    	var marker_no_street_view;
+   	var marker_pos_using_slider;
+   	var marker_pos_using_slider_no_pano;
    	var selected_route_index = 0;
    	var timer_map_mousemove = undefined;
    	var dlg_panorama_map_mousemove;
@@ -173,12 +175,7 @@ define( function( m ) {
 
     function start_driving( route_index ) {
         
-		if (streetViewLayer != undefined) {
-			if ( streetViewLayer.getMap() != null )
-				streetViewLayer.setMap( null );
-			else
-				streetViewLayer.setMap( map );
-		}
+		streetViewLayer.setMap( null );
 
 		if ( timer_set_bearing != undefined ) { 
 			clearTimeout( timer_set_bearing );
@@ -1384,6 +1381,20 @@ function calculateDistance(lat1, long1, lat2, long2)
 					icon: "http://www.google.com/mapfiles/arrow.png"
 				});
 
+				marker_pos_using_slider = new google.maps.Marker({
+					map: map,
+					title: 'Position along the route using the slider',
+					icon: "icons/marker_pos_using_slider.png"
+				});
+
+				marker_pos_using_slider_no_pano = new google.maps.Marker({
+					map: map,
+					title: 'Position along the route using the slider',
+					icon: "icons/marker_pos_using_slider_no_pano.png"
+				});
+
+				streetViewLayer = new google.maps.StreetViewCoverageLayer();
+
                 var panorama_options = {
                     pov: {
                         heading: 34,
@@ -1666,11 +1677,53 @@ function calculateDistance(lat1, long1, lat2, long2)
 							timer_set_bearing = undefined;
 						} 
 						(function (route_index, curr_dist ) {
+							marker_pos_using_slider.setMap( null );
+							marker_pos_using_slider_no_pano.setMap( null );
 							timer_animate = setTimeout( function() { cb_animate(route_index, curr_dist); }, 50 );
 						})(curr_route, new_curr_dist);
 					});
 
        			});
+
+				on( dijit.byId("id_input_route"), "mousemove", function( evt ) {
+					
+					if ( (selected_route_index == undefined) || (polylines[selected_route_index] == undefined) || (timer_animate == undefined) )
+						return;
+					
+					if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" )
+						return;
+					
+					var node = dom.byId("id_input_route");
+					var includeScroll = false;
+					var output = domGeom.position(node, includeScroll);
+					var perc = ((evt.x - output.x) / output.w) * 100;
+					var new_curr_dist = (eol * perc) / 100;
+//					console.log( perc + " / " + eol + " -> " + new_curr_dist );
+					
+					var polyline = (curr_route == -1) ? temp_polylines[0] : polylines[curr_route][curr_leg];
+					
+					var p = polyline.GetPointAtDistance( new_curr_dist );
+					if ( !map.getBounds().contains( p ) )
+						map.panTo( p );
+
+					street_view_check[(curr_route == -1) ? 0 : curr_route].getPanoramaByLocation(p, 50, (function() { return function(result, status) {
+						if (status == google.maps.StreetViewStatus.ZERO_RESULTS ) {
+							if ( marker_pos_using_slider.getMap() != undefined )
+								marker_pos_using_slider.setMap( null );
+							marker_pos_using_slider_no_pano.setPosition( p );
+							if ( marker_pos_using_slider_no_pano.getMap() == undefined )
+								marker_pos_using_slider_no_pano.setMap( map );
+						}
+						else {
+							if ( marker_pos_using_slider_no_pano.getMap() != undefined )
+								marker_pos_using_slider_no_pano.setMap( null );
+							marker_pos_using_slider.setPosition( p );
+							if ( marker_pos_using_slider.getMap() == undefined )
+								marker_pos_using_slider.setMap( map );
+						}
+					}})());
+
+				});
 
         		on( window, "resize", function( evt ) {
 	        		if ( is_in_full_screen() )
@@ -1736,9 +1789,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 							console.log( "Ignored" );
 							return;
 						} 
-						if (streetViewLayer == undefined)
-							streetViewLayer = new google.maps.StreetViewCoverageLayer();
-						streetViewLayer.setMap(map);
+						streetViewLayer.setMap( map );
 					}
 					
 				}
@@ -1751,21 +1802,14 @@ function calculateDistance(lat1, long1, lat2, long2)
 //					console.log( evt.keyIdentifier + " == " + evt.ctrlKey + " == " + evt.key + " == " + ctrl_down_closing);
 					if ( ctrl_down_closing ) {
 						if (!evt.ctrlKey && ((evt.key =='s') || (evt.key =='S'))) {
-							if (streetViewLayer == undefined)
-								streetViewLayer = new google.maps.StreetViewCoverageLayer();
-							if ( streetViewLayer.getMap() != null )
+							if ( streetViewLayer.getMap() != undefined )
 								streetViewLayer.setMap( null );
 							else
 								streetViewLayer.setMap( map );
 							ctrl_down_closing = false;
 						}
 						else if ((evt.key == "P") || (evt.key == "p")) {
-							if (streetViewLayer != undefined) {
-								if ( streetViewLayer.getMap() != null )
-									streetViewLayer.setMap( null );
-								else
-									streetViewLayer.setMap( map );
-							}
+							streetViewLayer.setMap( null );
 							if ( !ctrl_mode ) {
 								ctrl_mode = true;
 								begin_ctrl_mode();
@@ -1804,8 +1848,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 			if ( alt_down ) {
 				console.log( "Cancel alt mode" );
 				alt_down = false;
-				if ( streetViewLayer != undefined )
-					streetViewLayer.setMap( null );
+				streetViewLayer.setMap( null );
 			}
 
 			if ( browse_images_mode ) {
@@ -1891,13 +1934,15 @@ function calculateDistance(lat1, long1, lat2, long2)
 
     function cb_route_input_mouse_enter( ) {
 	
-		if ( (selected_route_index == undefined) || (polylines[selected_route_index] == undefined) || (timer_animate != undefined) )
+		if ( (selected_route_index == undefined) || (polylines[selected_route_index] == undefined) || (timer_animate == undefined) )
 			return;
 		
         if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" )
 			return;
 		
-		console.log( "Enter" );
+//		console.log( "Enter" );
+	
+	/*
 		browse_images_mode = true;
 
     	require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct ) {
@@ -1913,18 +1958,24 @@ function calculateDistance(lat1, long1, lat2, long2)
 			document.getElementById("td_map_canvas").style.width = "50%";
 			document.getElementById("td_panorama").style.width = "50%";
 		});
+*/
 		
 	}
 
     function cb_route_input_mouse_leave( ) {
 		
-		if ( (selected_route_index == undefined) || (polylines[selected_route_index] == undefined) || (timer_animate != undefined) )
+		if ( (selected_route_index == undefined) || (polylines[selected_route_index] == undefined) || (timer_animate == undefined) )
 			return;
 		
         if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" )
 			return;
 		
-		console.log( "Leave" );
+//		console.log( "Leave" );
+
+		marker_pos_using_slider.setMap( null );
+		marker_pos_using_slider_no_pano.setMap( null );
+
+/*
 		if ( !browse_images_mode )
 			return;
 		browse_images_mode = false;
@@ -1960,6 +2011,7 @@ function calculateDistance(lat1, long1, lat2, long2)
     		dijit.byId('app_layout').resize();
 	        google.maps.event.trigger( map, 'resize' );
 		});
+*/
     	
 	}
 
@@ -3240,6 +3292,8 @@ return;
 		browse_images: function( route_index ) { browse_images( route_index ); },
 
 		cb_route_input: function( ) { cb_route_input( ); },
+		cb_route_input_mouse_enter: function( ) { cb_route_input_mouse_enter( ); },
+		cb_route_input_mouse_leave: function( ) { cb_route_input_mouse_leave( ); },
 
 		cb_step_changed:     function( ) { cb_step_changed(); },
 		cb_interval_changed: function( ) { cb_interval_changed(); },

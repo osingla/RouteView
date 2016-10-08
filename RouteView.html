@@ -953,7 +953,10 @@
                                             intermediateChanges:false,
                                             clickSelect:true,
                                             showButtons:false"
-	                                        onChange='require(["RouteView.js"], function( s ) { s.cb_route_input(); })' >
+	                                        onChange='require(["RouteView.js"], function( s ) { s.cb_route_input(); })' 
+	                                        onMouseEnter='require(["RouteView.js"], function( s ) { s.cb_route_input_mouse_enter(); })' 
+	                                        onMouseLeave='require(["RouteView.js"], function( s ) { s.cb_route_input_mouse_leave(); })'
+	                                        onBlur='require(["RouteView.js"], function( s ) { s.cb_route_input_mouse_leave(); })' >
                                         </div>					
 
             	                        <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_input_route',position:['above-centered'],showDelay:750,hideDelay:0">
