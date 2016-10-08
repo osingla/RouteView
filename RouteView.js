@@ -57,6 +57,7 @@ define( function( m ) {
 	var search_places = [];
 
    	var ctrl_down = false;
+   	var ctrl_down_closing = false;
    	var ctrl_mode = false;
    	var temp_directions_service = undefined;
 	var temp_directions_service_request;
@@ -172,6 +173,13 @@ define( function( m ) {
 
     function start_driving( route_index ) {
         
+		if (streetViewLayer != undefined) {
+			if ( streetViewLayer.getMap() != null )
+				streetViewLayer.setMap( null );
+			else
+				streetViewLayer.setMap( map );
+		}
+
 		if ( timer_set_bearing != undefined ) { 
 			clearTimeout( timer_set_bearing );
 			timer_set_bearing = undefined;
@@ -1681,9 +1689,10 @@ function calculateDistance(lat1, long1, lat2, long2)
 
 					var prev_ctrl_down = ctrl_down;
 					var is_ctrl_down = ( ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == true)) || (evt.key == "Control") )
-					console.log("is_ctrl_down="+is_ctrl_down+" - ctrl_down="+ ctrl_down);
+//					console.log("is_ctrl_down="+is_ctrl_down+" - ctrl_down="+ ctrl_down);
 					if (is_ctrl_down && prev_ctrl_down) {
 						ctrl_down = false;
+						ctrl_down_closing = false;
 						do_hide_commands_message();
 						domStyle.set( "id_show_help", "display", "none" );
 						domStyle.set( "id_control_route", "display", "" );
@@ -1696,28 +1705,14 @@ function calculateDistance(lat1, long1, lat2, long2)
 						domStyle.set( "id_control_route", "display", "none" );
 					}
 					if (prev_ctrl_down ) {
-						console.log( evt.keyIdentifier + " - " + evt.ctrlKey + " - " + evt.key);
+//						console.log( evt.keyIdentifier + " - " + evt.ctrlKey + " - " + evt.key);
 						if (evt.keyIdentifier != "Control") {
-							ctrl_down = false;
-							do_hide_commands_message();
-							domStyle.set( "id_show_help", "display", "none" );
-							domStyle.set( "id_control_route", "display", "" );
-							if ((evt.key == "S") || (evt.key == "s")) {
-								if (streetViewLayer == undefined)
-									streetViewLayer = new google.maps.StreetViewCoverageLayer();
-								if( streetViewLayer.getMap() == undefined )
-									streetViewLayer.setMap(map);
-								return;
-							}
-							if ((evt.key == "P") || (evt.key == "p")) {
-								if ( !ctrl_mode ) {
-									ctrl_mode = true;
-									begin_ctrl_mode();
-								}
-								else if ( (timer_animate == undefined) && (temp_directions_renderer == undefined) ) {
-									ctrl_mode = false;
-									end_ctrl_mode();
-								}
+							if ((evt.key == "S") || (evt.key == "s") || (evt.key == "P") || (evt.key == "p") || (evt.key == "Escape")) {
+								ctrl_down = false;
+								ctrl_down_closing = (evt.key != "Escape");
+								do_hide_commands_message();
+								domStyle.set( "id_show_help", "display", "none" );
+								domStyle.set( "id_control_route", "display", "" );
 							}
 						}
 					}
@@ -1753,59 +1748,36 @@ function calculateDistance(lat1, long1, lat2, long2)
 					if ( map.getCenter() == undefined )
 						return;
 
-					console.log( evt.keyIdentifier + " - " + evt.ctrlKey + " - " + evt.key);
-					if (!evt.ctrlKey && ((evt.key =='s') || (evt.key =='S'))) {
-						if ( streetViewLayer != undefined )
-							streetViewLayer.setMap( null );
-						return;
-					}
-return;
-				
-					var prev_ctrl_down = ctrl_down;
-					var no_cd = ( ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == false)) || (evt.key == "Control") )
-					console.log("prev_ctrl_down="+prev_ctrl_down+" - no_cd="+no_cd);
-					if (no_cd) {
-						ctrl_mode = false;
-						do_hide_commands_message();
-					}
-					return;
-
-					var prev_ctrl_down = ctrl_down;
-					var no_cd = ( ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == false)) || (evt.key == "Control") )
-					if ( prev_ctrl_down && no_cd ) {
-
-						console.log("Ctrl Up - ctrl_mode=" + ctrl_mode);
-						var display = domStyle.get( "id_left_layout", "display" );
-						if ( (map.getCenter() == undefined) || (!ctrl_mode && (display == "none")) ) {
-							console.log( "Ignored" );
-							return;
-						} 
-						ctrl_down = false;
-						
-						if ( !ctrl_mode ) {
-							ctrl_mode = true;
-							begin_ctrl_mode();
+//					console.log( evt.keyIdentifier + " == " + evt.ctrlKey + " == " + evt.key + " == " + ctrl_down_closing);
+					if ( ctrl_down_closing ) {
+						if (!evt.ctrlKey && ((evt.key =='s') || (evt.key =='S'))) {
+							if (streetViewLayer == undefined)
+								streetViewLayer = new google.maps.StreetViewCoverageLayer();
+							if ( streetViewLayer.getMap() != null )
+								streetViewLayer.setMap( null );
+							else
+								streetViewLayer.setMap( map );
+							ctrl_down_closing = false;
 						}
-						else {
-							if ( (timer_animate == undefined) && (temp_directions_renderer == undefined) ) {
+						else if ((evt.key == "P") || (evt.key == "p")) {
+							if (streetViewLayer != undefined) {
+								if ( streetViewLayer.getMap() != null )
+									streetViewLayer.setMap( null );
+								else
+									streetViewLayer.setMap( map );
+							}
+							if ( !ctrl_mode ) {
+								ctrl_mode = true;
+								begin_ctrl_mode();
+							}
+							else if ( (timer_animate == undefined) && (temp_directions_renderer == undefined) ) {
 								ctrl_mode = false;
 								end_ctrl_mode();
 							}
+							ctrl_down_closing = false;
 						}
-						
-						return;
 					}
-
-					var prev_alt_down = alt_down;
-					var no_cd = ( ((evt.keyIdentifier == 'Alt') && (evt.AltKey == false)) || (evt.key == "Alt") )
-					if ( prev_alt_down && no_cd ) {
-
-		//				console.log("Alt Up");
-						alt_down = false;
-						if ( streetViewLayer != undefined )
-							streetViewLayer.setMap( null );
-						
-					}
+				
 				}
 				
 				var is_file_api = (window.File && window.FileReader && window.FileList && window.Blob) ? true : false;
