@@ -13,6 +13,9 @@ define( function( m ) {
 
 	var MAX_NB_ROUTES = 4;
 	var MAX_NB_WAYPOINTS = 8;
+//	var MAX_NB_WAYPOINTS = 3;
+
+	var total_max_nb_waypoints = (MAX_NB_ROUTES * (MAX_NB_WAYPOINTS+2));
 
 	var autocompletes = [];
     var map;
@@ -24,6 +27,7 @@ define( function( m ) {
     var curr_leg;
 	var timer_show_pano_on_mousemove = undefined;
     var timer_animate = undefined;
+	var timer_set_bearing = undefined;
     var eol;
     var step;               			// meters
     var interval;           			// milliseconds
@@ -111,12 +115,16 @@ define( function( m ) {
         if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" )
         	return;
 
-        curr_dist = d;
-        if ( d > eol ) {
+		curr_dist = d;
+        if ( curr_dist > eol ) {
             console.log( "Route " + route_index + " is done" );
 			if ( timer_animate != undefined ) { 
 				clearTimeout( timer_animate );
 				timer_animate = undefined;
+			} 
+			if ( timer_set_bearing != undefined ) { 
+				clearTimeout( timer_set_bearing );
+				timer_set_bearing = undefined;
 			} 
 			if (route_index == -1)
 				stop_driving_temporary_route( );
@@ -125,7 +133,7 @@ define( function( m ) {
 
 		var polyline = (route_index == -1) ? temp_polylines[0] : polylines[route_index][curr_leg];
         
-        var p = polyline.GetPointAtDistance( d );
+        var p = polyline.GetPointAtDistance( curr_dist );
         if ( !map.getBounds().contains( p ) )
            	map.panTo( p );
 
@@ -136,28 +144,38 @@ define( function( m ) {
 		    }
 		    else {
         		marker_no_street_view.setPosition( null );
-		        var iad = polyline.GetIndexAtDistance( d );
+		        var iad = polyline.GetIndexAtDistance( curr_dist );
 		        prev_bearing = bearing;
         		var bearing = polyline.Bearing( iad );
-	//			console.log( d + " / " + eol + " --> " + bearing);
+	//			console.log( curr_dist + " / " + eol + " --> " + bearing);
 				if (bearing == undefined)
 					bearing = prev_bearing;
-				if (bearing != undefined)
-        			setTimeout( function() { panorama.setPov( { heading: bearing, pitch: 1 } ); }, 5 );
+				if (bearing != undefined) {
+					if ( timer_set_bearing != undefined ) { 
+						clearTimeout( timer_set_bearing );
+						timer_set_bearing = undefined;
+					} 
+        			timer_set_bearing = setTimeout( function() { 
+						panorama.setPov( { heading: bearing, pitch: 1 } ); timer_set_bearing = undefined; }, 5 );
+        		}
         		panorama.setPosition( p );
 		    }
 	        if ( step > 0 ) {
             	timer_animate = setTimeout( (function(route_index) { return function() {
-            		cb_animate( route_index, d+step );
+            		cb_animate( route_index, curr_dist+step );
 				}})(route_index), interval );
 			}
-			dijit.byId('id_input_route').set( 'value', d, false );
+			dijit.byId('id_input_route').set( 'value', curr_dist, false );
 		}})(route_index));
 
     }
 
     function start_driving( route_index ) {
         
+		if ( timer_set_bearing != undefined ) { 
+			clearTimeout( timer_set_bearing );
+			timer_set_bearing = undefined;
+		} 
         if ( timer_animate ) 
             clearTimeout( timer_animate );
         eol = polylines[route_index][curr_leg].Distance();
@@ -197,6 +215,53 @@ define( function( m ) {
     	
     	return first_hidden;
     }
+    
+    function find_total_nb_waypoints( ) {
+
+		var total_nb_waypoints = 0;
+		var stop = false;
+    	require(["dojo/dom-style"], function( domStyle) {
+			for ( var r = 0; r < MAX_NB_ROUTES; r++ ) {
+				for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
+					var id = 'id_tr_' + r + '_' + n;
+					var display = domStyle.get( id, "display" );
+					if ( display == "none" ) {
+						stop = true;
+						break;
+					}
+					total_nb_waypoints++;
+				}
+				if ( stop )
+					break;
+			}
+ 		});
+
+		return total_nb_waypoints;
+	}
+
+    function find_all_nb_waypoints( ) {
+
+		var total = [];
+		for ( var r = 0; r < MAX_NB_ROUTES; r++ )
+			total[r] = 0;
+
+    	require(["dojo/dom-style"], function( domStyle) {
+			for ( var r = 0; r < MAX_NB_ROUTES; r++ ) {
+				var display = domStyle.get( "id_fieldset_route_"+r, "display" );
+				if ( display == "none" )
+					break;
+				for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
+					var id = 'id_tr_' + r + '_' + n;
+					var display = domStyle.get( id, "display" );
+					if ( display == "none" )
+						break;
+					total[r]++;
+				}
+			}
+ 		});
+
+		return total;
+	}
 
 	function cb_show_all_routes( ) {
 	
@@ -709,6 +774,10 @@ function calculateDistance(lat1, long1, lat2, long2)
 
         console.log( dijit.byId('id_btn_pause').get( 'label' ) );
         if ( dijit.byId('id_btn_pause').get( 'label' ) == "Pause" ) {
+			if ( timer_set_bearing != undefined ) { 
+				clearTimeout( timer_set_bearing );
+				timer_set_bearing = undefined;
+			} 
 			if ( timer_animate != undefined ) { 
 				clearTimeout( timer_animate );
 				timer_animate = undefined;
@@ -737,6 +806,10 @@ function calculateDistance(lat1, long1, lat2, long2)
 
     function do_stop( ) {
 
+		if ( timer_set_bearing != undefined ) { 
+			clearTimeout( timer_set_bearing );
+			timer_set_bearing = undefined;
+		} 
 		if ( timer_animate != undefined ) {
 			clearTimeout( timer_animate );
 			timer_animate = undefined;
@@ -1568,6 +1641,28 @@ function calculateDistance(lat1, long1, lat2, long2)
 						});
 					}
 				}
+				
+				on( dijit.byId("id_input_route"), "click", function( evt ) {
+
+					require(["dojo/dom-geometry", "dojo/dom", "dojo/dom-style"], function(domGeom, dom, style){
+						var node = dom.byId("id_input_route");
+						var includeScroll = false;
+						var output = domGeom.position(node, includeScroll);
+						var perc = ((evt.x - output.x) / output.w) * 100;
+						var new_curr_dist = (eol * perc) / 100;
+						console.log( perc + " / " + eol + " -> " + new_curr_dist );
+						if ( timer_animate != undefined ) 
+							clearTimeout( timer_animate );
+						if ( timer_set_bearing != undefined ) { 
+							clearTimeout( timer_set_bearing );
+							timer_set_bearing = undefined;
+						} 
+						(function (route_index, curr_dist ) {
+							timer_animate = setTimeout( function() { cb_animate(route_index, curr_dist); }, 50 );
+						})(curr_route, new_curr_dist);
+					});
+
+       			});
 
         		on( window, "resize", function( evt ) {
 	        		if ( is_in_full_screen() )
@@ -1590,17 +1685,23 @@ function calculateDistance(lat1, long1, lat2, long2)
 					if (is_ctrl_down && prev_ctrl_down) {
 						ctrl_down = false;
 						do_hide_commands_message();
+						domStyle.set( "id_show_help", "display", "none" );
+						domStyle.set( "id_control_route", "display", "" );
 						return;
 					}
 					if (is_ctrl_down) {
 						ctrl_down = is_ctrl_down;
 						do_show_commands_message();
+						domStyle.set( "id_show_help", "display", "" );
+						domStyle.set( "id_control_route", "display", "none" );
 					}
 					if (prev_ctrl_down ) {
 						console.log( evt.keyIdentifier + " - " + evt.ctrlKey + " - " + evt.key);
 						if (evt.keyIdentifier != "Control") {
 							ctrl_down = false;
 							do_hide_commands_message();
+							domStyle.set( "id_show_help", "display", "none" );
+							domStyle.set( "id_control_route", "display", "" );
 							if ((evt.key == "S") || (evt.key == "s")) {
 								if (streetViewLayer == undefined)
 									streetViewLayer = new google.maps.StreetViewCoverageLayer();
@@ -1759,6 +1860,10 @@ return;
 		var route_index = curr_route;
 
 		if ( go_timer ) {
+			if ( timer_set_bearing != undefined ) { 
+				clearTimeout( timer_set_bearing );
+				timer_set_bearing = undefined;
+			} 
 			if ( timer_animate != undefined ) 
 				clearTimeout( timer_animate );
 	       	timer_animate = setTimeout( function() { cb_animate(new_pos); }, interval );
@@ -1797,11 +1902,12 @@ return;
     function cb_route_input( ) {
 
 		var slider_disabled = dijit.byId('id_input_route').get( 'disabled' );
-		if ( slider_disabled )
+		if ( slider_disabled ) 
 			return;
 
 		var new_pos = dijit.byId('id_input_route').get( 'value' );
 		new_pos = Math.round( new_pos );
+
 		if ( cb_move_to_dist != undefined ) {
 			clearTimeout( cb_move_to_dist );
 			cb_move_to_dist = undefined;
@@ -2088,6 +2194,10 @@ return;
 
         street_view_check[0] = new google.maps.StreetViewService( );
 
+		if ( timer_set_bearing != undefined ) { 
+			clearTimeout( timer_set_bearing );
+			timer_set_bearing = undefined;
+		} 
         if ( timer_animate ) 
             clearTimeout( timer_animate );
        	timer_animate = setTimeout( function() { cb_animate(-1, 50); }, 250 );
@@ -2162,6 +2272,10 @@ return;
 	
     	require(["dojo/dom-style"], function( domStyle) {
     	
+			if ( timer_set_bearing != undefined ) { 
+				clearTimeout( timer_set_bearing );
+				timer_set_bearing = undefined;
+			} 
 			if ( timer_animate != undefined ) { 
 				clearTimeout( timer_animate );
 				timer_animate = undefined; 
@@ -2534,6 +2648,9 @@ return;
 		
 //		console.log( "*** Add: route_index=" + route_index + " index=" + index );
 
+//		var total_waypoints = find_all_nb_waypoints();
+//		console.log( total_waypoints );
+
         var first_hidden = find_first_hidden( route_index );
 //    	console.log( "first_hidden=" + first_hidden );
 
@@ -2637,6 +2754,9 @@ return;
 	}
 	
 	function update_btns_remove_up_down( route_index, all ) {
+		
+//		var total_nb_waypoints = find_total_nb_waypoints();
+//		console.log("total_nb_waypoints =" + total_nb_waypoints);
 		
         var first_hidden = find_first_hidden( route_index );
 //    	console.log( "first_hidden=" + first_hidden );
