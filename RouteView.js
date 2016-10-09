@@ -1587,7 +1587,7 @@ function calculateDistance(lat1, long1, lat2, long2)
        			for ( var route = 0; route < MAX_NB_ROUTES; route++ ) {
 	       			autocompletes[route] = [];
 	       			places[route] = [];
-	       			for ( var n = 0; n < MAX_NB_WAYPOINTS+2 - 1; n++ ) { 
+	       			for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) { 
 	       				autocompletes[route][n] = new google.maps.places.Autocomplete( dom.byId('id_wp_'+route+'_'+n) );
 	       				if ( autocomplete_restriction != "" )
             	       		autocompletes[route][n].setTypes([ autocomplete_restriction ]);
