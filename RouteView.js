@@ -1854,7 +1854,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 		}
 
 		window.onbeforeunload = function() {
-			if ( is_dirty )
+			if ( (location.hostname != "localhost") && is_dirty )
 				return "Route not saved";
 			return null;
 		}
