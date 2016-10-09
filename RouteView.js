@@ -58,8 +58,6 @@ define( function( m ) {
 
 	var search_places = [];
 
-   	var ctrl_down = false;
-   	var ctrl_down_closing = false;
    	var ctrl_mode = false;
    	var temp_directions_service = undefined;
 	var temp_directions_service_request;
@@ -71,6 +69,7 @@ define( function( m ) {
    	var browse_images_mode = false;
    	
 	var tooltip_dlg = undefined;				// Tooltip dialog used to show the JPEG thumbnail
+	var dlg_commands = undefined;
    	
    	var route_colors = [
    		"#0066cc",
@@ -715,6 +714,8 @@ function calculateDistance(lat1, long1, lat2, long2)
     function do_hide_commands_message( ) {
 		
    		dlg_commands.hide();
+   		dlg_commands.destroyRecursive();
+   		dlg_commands = undefined;
 	}
     
     function do_show_message( is_error, title, message ) {
@@ -1757,68 +1758,49 @@ function calculateDistance(lat1, long1, lat2, long2)
 					if (timer_animate != undefined)
 						return;
 
-					var prev_ctrl_down = ctrl_down;
-					var is_ctrl_down = ( ((evt.keyIdentifier == 'Control') && (evt.ctrlKey == true)) || (evt.key == "Control") )
-//					console.log("is_ctrl_down="+is_ctrl_down+" - ctrl_down="+ ctrl_down);
-					if (is_ctrl_down && prev_ctrl_down) {
-						ctrl_down = false;
-						ctrl_down_closing = false;
+//					console.log( evt.ctrlKey + " , " + evt.altKey );
+					if ( (dlg_commands == undefined) && evt.ctrlKey && evt.altKey ) {
+						do_show_commands_message();
+						domStyle.set( "id_show_help", "display", "" );
+						domStyle.set( "id_control_route", "display", "none" );
+						return;
+					}
+					
+					if ( dlg_commands == undefined )
+						return;
+
+					var force_close = false;
+						
+					if ( (evt.key =='s') || (evt.key =='S') ) {
+						if ( streetViewLayer.getMap() != undefined )
+							streetViewLayer.setMap( null );
+						else
+							streetViewLayer.setMap( map );
+						force_close = true;
+					}
+
+					else if ( (evt.key == "P") || (evt.key == "p") ) {
+						streetViewLayer.setMap( null );
+						if ( !ctrl_mode ) {
+							ctrl_mode = true;
+							begin_ctrl_mode();
+						}
+						else if ( (timer_animate == undefined) && (temp_directions_renderer == undefined) ) {
+							ctrl_mode = false;
+							end_ctrl_mode();
+						}
+						force_close = true;
+					}
+
+					if ( force_close || (evt.key == "Escape") ) {
 						do_hide_commands_message();
 						domStyle.set( "id_show_help", "display", "none" );
 						domStyle.set( "id_control_route", "display", "" );
 						return;
 					}
-					if (is_ctrl_down) {
-						ctrl_down = is_ctrl_down;
-						do_show_commands_message();
-						domStyle.set( "id_show_help", "display", "" );
-						domStyle.set( "id_control_route", "display", "none" );
-					}
-					if (prev_ctrl_down ) {
-//						console.log( evt.keyIdentifier + " - " + evt.ctrlKey + " - " + evt.key);
-						if (evt.keyIdentifier != "Control") {
-							if ((evt.key == "S") || (evt.key == "s") || (evt.key == "P") || (evt.key == "p") || (evt.key == "Escape")) {
-								ctrl_down = false;
-								ctrl_down_closing = (evt.key != "Escape");
-								do_hide_commands_message();
-								domStyle.set( "id_show_help", "display", "none" );
-								domStyle.set( "id_control_route", "display", "" );
-							}
-						}
-					}
 
 				}
 
-				window.onkeyup = function(evt) {
-				
-					if ( map.getCenter() == undefined )
-						return;
-
-//					console.log( evt.keyIdentifier + " == " + evt.ctrlKey + " == " + evt.key + " == " + ctrl_down_closing);
-					if ( ctrl_down_closing ) {
-						if (!evt.ctrlKey && ((evt.key =='s') || (evt.key =='S'))) {
-							if ( streetViewLayer.getMap() != undefined )
-								streetViewLayer.setMap( null );
-							else
-								streetViewLayer.setMap( map );
-							ctrl_down_closing = false;
-						}
-						else if ((evt.key == "P") || (evt.key == "p")) {
-							streetViewLayer.setMap( null );
-							if ( !ctrl_mode ) {
-								ctrl_mode = true;
-								begin_ctrl_mode();
-							}
-							else if ( (timer_animate == undefined) && (temp_directions_renderer == undefined) ) {
-								ctrl_mode = false;
-								end_ctrl_mode();
-							}
-							ctrl_down_closing = false;
-						}
-					}
-				
-				}
-				
 				var is_file_api = (window.File && window.FileReader && window.FileList && window.Blob) ? true : false;
 				console.log( "is_file_api = " + is_file_api );
 				if ( is_file_api ) {
@@ -2520,7 +2502,7 @@ function calculateDistance(lat1, long1, lat2, long2)
     
     function cb_map_click( evt ) {
     	
-    	console.log( "cb_map_click - ctrl_down=" + ctrl_down );
+    	console.log( "cb_map_click" );
     	
     	if ( ctrl_mode ) {
     		if ( temp_directions_service == undefined )
