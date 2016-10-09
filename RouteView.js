@@ -894,7 +894,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 			  			id: "id_tr_"+route_index+"_"+n,
 			  			style: "display:" + ((n < 2) ? "" : "none") 
 			  		}, "id_table_route"+route_index, "last");
-			  		domConstruct.create("td", { innerHTML:String.fromCharCode(n+65)+"&nbsp;", align:"right", valign:"middle"}, id_tr, "first");
+			  		var id_label_wp = "id_label_wp_"+route_index+"_"+n;
+			  		domConstruct.create("td", { innerHTML:String.fromCharCode(n+65)+"&nbsp;", align:"right", valign:"middle", id:id_label_wp}, id_tr, "first");
 	
 			  		var id_td2 = domConstruct.create("td", { align:"left", valign:"middle"}, id_tr, "last");
 			  		var input = new TextBox({
@@ -903,6 +904,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 			  			style: "width:22em", 
 			  			trim: true,
 			  			intermediateChanges: false,
+			  			selectOnClick: true,
 						onKeyPress: function() { domStyle.set( this.id, { color: "red" } ); },
 			  			['route_index']: route_index,
 			  			['waypoint_index']: n 
@@ -1366,6 +1368,19 @@ function calculateDistance(lat1, long1, lat2, long2)
                 };
                 map = new google.maps.Map( document.getElementById('id_map_canvas'), map_options );
 				create_route_dlg();
+
+				require(["dojo/dom", "dojo/on", "dojo/dom-style"], function( dom, on, domStyle ) {
+					for (var route_index = 0; route_index < MAX_NB_ROUTES; route_index++) {
+						for (var n = 0; n < MAX_NB_WAYPOINTS+2; n++) { 
+							(function (route_index, n) {
+								var id_label_wp = "id_label_wp_"+route_index+"_"+n;
+								on( dom.byId(id_label_wp), "click", function( evt ) {
+//									console.log("XX: "+route_index+","+n);
+								});
+							})(route_index, n);
+						}
+					}
+				});
 
 			    require(["RouteViewMapStyles.js"], function( s ) { 
 			    	var map_style = dom.byId('id_map_style').value;
