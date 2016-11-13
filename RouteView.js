@@ -13,7 +13,6 @@ define( function( m ) {
 
 	var MAX_NB_ROUTES = 4;
 	var MAX_NB_WAYPOINTS = 8;
-//	var MAX_NB_WAYPOINTS = 3;
 
 	var total_max_nb_waypoints = (MAX_NB_ROUTES * (MAX_NB_WAYPOINTS+2));
 
@@ -2909,7 +2908,7 @@ return;
 	    	
 	    	var interval = localStorage.getItem("interval");
 	    	if ( !interval )
-	    		interval = 1200;
+	    		interval = 1450;
 	    	console.log( "Restored interval= " + interval );
 	    	if ( interval != null )
 	            dijit.byId('id_input_interval').set( 'value', parse(interval) );
