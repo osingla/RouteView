@@ -27,7 +27,6 @@ define( function( m ) {
     var curr_leg;
 	var timer_show_pano_on_mousemove = undefined;
     var timer_animate = undefined;
-	var timer_set_bearing = undefined;
     var eol;
     var step;               			// meters
     var interval;           			// milliseconds
@@ -124,10 +123,6 @@ define( function( m ) {
 				clearTimeout( timer_animate );
 				timer_animate = undefined;
 			} 
-			if ( timer_set_bearing != undefined ) { 
-				clearTimeout( timer_set_bearing );
-				timer_set_bearing = undefined;
-			} 
 			if (route_index == -1)
 				stop_driving_temporary_route( );
             return;
@@ -152,15 +147,9 @@ define( function( m ) {
 	//			console.log( curr_dist + " / " + eol + " --> " + bearing);
 				if (bearing == undefined)
 					bearing = prev_bearing;
-				if (bearing != undefined) {
-					if ( timer_set_bearing != undefined ) { 
-						clearTimeout( timer_set_bearing );
-						timer_set_bearing = undefined;
-					} 
-        			timer_set_bearing = setTimeout( function() { 
-						panorama.setPov( { heading: bearing, pitch: 1 } ); timer_set_bearing = undefined; }, 5 );
-        		}
         		panorama.setPosition( p );
+				if (bearing != undefined)
+					panorama.setPov( { heading: bearing, pitch: 1 } );
 		    }
 	        if ( step > 0 ) {
             	timer_animate = setTimeout( (function(route_index) { return function() {
@@ -176,10 +165,6 @@ define( function( m ) {
         
 		streetViewLayer.setMap( null );
 
-		if ( timer_set_bearing != undefined ) { 
-			clearTimeout( timer_set_bearing );
-			timer_set_bearing = undefined;
-		} 
         if ( timer_animate ) 
             clearTimeout( timer_animate );
         eol = polylines[route_index][curr_leg].Distance();
@@ -462,7 +447,7 @@ function calculateDistance(lat1, long1, lat2, long2)
         directions_renderer[route_index].addListener('directions_changed', function() {
 			
             var route_index = directions_renderer.indexOf( this );
-            console.log("directions_changed: route_index=" + route_index);
+//            console.log("directions_changed: route_index=" + route_index);
             var new_dir = directions_renderer[route_index].getDirections();
 //          console.log( new_dir );
 
@@ -487,6 +472,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 				index_waypoint = new_dir.request.Uc;
             if (new_dir.request.Vc != undefined)
 				index_waypoint = new_dir.request.Vc;
+            if (new_dir.request.Yb != undefined)
+				index_waypoint = new_dir.request.Yb;
             if ( index_waypoint != undefined ) {
 
                 console.log( directions_renderer[route_index] );
@@ -780,10 +767,6 @@ function calculateDistance(lat1, long1, lat2, long2)
 
         console.log( dijit.byId('id_btn_pause').get( 'label' ) );
         if ( dijit.byId('id_btn_pause').get( 'label' ) == "Pause" ) {
-			if ( timer_set_bearing != undefined ) { 
-				clearTimeout( timer_set_bearing );
-				timer_set_bearing = undefined;
-			} 
 			if ( timer_animate != undefined ) { 
 				clearTimeout( timer_animate );
 				timer_animate = undefined;
@@ -812,10 +795,6 @@ function calculateDistance(lat1, long1, lat2, long2)
 
     function do_stop( ) {
 
-		if ( timer_set_bearing != undefined ) { 
-			clearTimeout( timer_set_bearing );
-			timer_set_bearing = undefined;
-		} 
 		if ( timer_animate != undefined ) {
 			clearTimeout( timer_animate );
 			timer_animate = undefined;
@@ -866,8 +845,8 @@ function calculateDistance(lat1, long1, lat2, long2)
             ready( function() {
    				load_settings( );
 
-				dojoConfig = { gmaps: { v: '3.23', libraries: 'places,geometry' } };
-				var rq = "//maps.google.com/maps/api/js?v=3.24&sensor=false&libraries=places";
+				dojoConfig = { gmaps: { v: '3.26', libraries: 'places,geometry' } };
+				var rq = "//maps.google.com/maps/api/js?v=3.26&sensor=false&libraries=places";
 		    	var google_maps_api_key = localStorage.getItem("id_google_maps_api_key");
 		    	if ( google_maps_api_key && (google_maps_api_key != "") )
 					rq += "&key=" + google_maps_api_key;
@@ -1344,6 +1323,8 @@ function calculateDistance(lat1, long1, lat2, long2)
     		
             ready( function() {
 
+				console.log("Google Maps API version: " + google.maps.version);
+
 				is_ff = false;
 				require(["dojo/sniff"], function( has ){
 					console.log( "has(ie) = " + has("ie") );
@@ -1689,10 +1670,6 @@ function calculateDistance(lat1, long1, lat2, long2)
 						console.log( perc + " / " + eol + " -> " + new_curr_dist );
 						if ( timer_animate != undefined ) 
 							clearTimeout( timer_animate );
-						if ( timer_set_bearing != undefined ) { 
-							clearTimeout( timer_set_bearing );
-							timer_set_bearing = undefined;
-						} 
 						(function (route_index, curr_dist ) {
 							marker_pos_using_slider.setMap( null );
 							marker_pos_using_slider_no_pano.setMap( null );
@@ -1852,10 +1829,6 @@ function calculateDistance(lat1, long1, lat2, long2)
 		var route_index = curr_route;
 
 		if ( go_timer ) {
-			if ( timer_set_bearing != undefined ) { 
-				clearTimeout( timer_set_bearing );
-				timer_set_bearing = undefined;
-			} 
 			if ( timer_animate != undefined ) 
 				clearTimeout( timer_animate );
 	       	timer_animate = setTimeout( function() { cb_animate(new_pos); }, interval );
@@ -2195,10 +2168,6 @@ function calculateDistance(lat1, long1, lat2, long2)
 
         street_view_check[0] = new google.maps.StreetViewService( );
 
-		if ( timer_set_bearing != undefined ) { 
-			clearTimeout( timer_set_bearing );
-			timer_set_bearing = undefined;
-		} 
         if ( timer_animate ) 
             clearTimeout( timer_animate );
        	timer_animate = setTimeout( function() { cb_animate(-1, 50); }, 250 );
@@ -2273,10 +2242,6 @@ function calculateDistance(lat1, long1, lat2, long2)
 	
     	require(["dojo/dom-style"], function( domStyle) {
     	
-			if ( timer_set_bearing != undefined ) { 
-				clearTimeout( timer_set_bearing );
-				timer_set_bearing = undefined;
-			} 
 			if ( timer_animate != undefined ) { 
 				clearTimeout( timer_animate );
 				timer_animate = undefined; 
