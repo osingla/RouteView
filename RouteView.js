@@ -13,6 +13,7 @@ define( function( m ) {
 
 	var MAX_NB_ROUTES = 4;
 	var MAX_NB_WAYPOINTS = 8;
+//	var MAX_NB_WAYPOINTS = 3;
 
 	var total_max_nb_waypoints = (MAX_NB_ROUTES * (MAX_NB_WAYPOINTS+2));
 
@@ -26,10 +27,12 @@ define( function( m ) {
     var curr_leg;
 	var timer_show_pano_on_mousemove = undefined;
     var timer_animate = undefined;
+	var timer_set_bearing = undefined;
     var eol;
     var step;               			// meters
     var interval;           			// milliseconds
     var route_tickness;					// pixels
+    var google_api;						// 3.25 or 3.26
     var prev_bearing;
     var curr_dist;
 	var cb_move_to_dist = undefined;
@@ -122,6 +125,10 @@ define( function( m ) {
 				clearTimeout( timer_animate );
 				timer_animate = undefined;
 			} 
+			if ( (google_api == 3.25) && (timer_set_bearing != undefined) ) { 
+				clearTimeout( timer_set_bearing );
+				timer_set_bearing = undefined;
+			} 
 			if (route_index == -1)
 				stop_driving_temporary_route( );
             return;
@@ -146,9 +153,21 @@ define( function( m ) {
 	//			console.log( curr_dist + " / " + eol + " --> " + bearing);
 				if (bearing == undefined)
 					bearing = prev_bearing;
-        		panorama.setPosition( p );
-				if (bearing != undefined)
-					panorama.setPov( { heading: bearing, pitch: 1 } );
+				if (bearing != undefined) {
+					if ( google_api == 3.25  ) { 
+						if ( timer_set_bearing != undefined ) { 
+							clearTimeout( timer_set_bearing );
+							timer_set_bearing = undefined;
+						} 
+						timer_set_bearing = setTimeout( function() { 
+							panorama.setPov( { heading: bearing, pitch: 1 } ); timer_set_bearing = undefined; }, 5 );
+						panorama.setPosition( p );
+					}
+					else {
+						panorama.setPosition( p );
+						panorama.setPov( { heading: bearing, pitch: 1 } );
+					}
+        		}
 		    }
 	        if ( step > 0 ) {
             	timer_animate = setTimeout( (function(route_index) { return function() {
@@ -164,6 +183,10 @@ define( function( m ) {
         
 		streetViewLayer.setMap( null );
 
+		if ( (google_api == 3.25) && (timer_set_bearing != undefined) ) { 
+			clearTimeout( timer_set_bearing );
+			timer_set_bearing = undefined;
+		} 
         if ( timer_animate ) 
             clearTimeout( timer_animate );
         eol = polylines[route_index][curr_leg].Distance();
@@ -446,7 +469,7 @@ function calculateDistance(lat1, long1, lat2, long2)
         directions_renderer[route_index].addListener('directions_changed', function() {
 			
             var route_index = directions_renderer.indexOf( this );
-//            console.log("directions_changed: route_index=" + route_index);
+//          console.log("directions_changed: route_index=" + route_index);
             var new_dir = directions_renderer[route_index].getDirections();
 //          console.log( new_dir );
 
@@ -766,6 +789,10 @@ function calculateDistance(lat1, long1, lat2, long2)
 
         console.log( dijit.byId('id_btn_pause').get( 'label' ) );
         if ( dijit.byId('id_btn_pause').get( 'label' ) == "Pause" ) {
+			if ( (google_api == 3.25) && (timer_set_bearing != undefined) ) { 
+				clearTimeout( timer_set_bearing );
+				timer_set_bearing = undefined;
+			} 
 			if ( timer_animate != undefined ) { 
 				clearTimeout( timer_animate );
 				timer_animate = undefined;
@@ -794,6 +821,10 @@ function calculateDistance(lat1, long1, lat2, long2)
 
     function do_stop( ) {
 
+		if ( (google_api == 3.25) && (timer_set_bearing != undefined) ) { 
+			clearTimeout( timer_set_bearing );
+			timer_set_bearing = undefined;
+		} 
 		if ( timer_animate != undefined ) {
 			clearTimeout( timer_animate );
 			timer_animate = undefined;
@@ -843,9 +874,11 @@ function calculateDistance(lat1, long1, lat2, long2)
     	require(["dojo/dom", "dojo/on", "dojo/dom-style", "dojo/dom-geometry", "dojo/store/Memory", "dojo/ready"], function( dom, on, domStyle, domGeom, Memory, ready ) {
             ready( function() {
    				load_settings( );
+				google_api = dom.byId('id_google_api').value;
 
-				dojoConfig = { gmaps: { v: '3.26', libraries: 'places,geometry' } };
-				var rq = "//maps.google.com/maps/api/js?v=3.26&sensor=false&libraries=places";
+//				dojoConfig = { gmaps: { v: '3.25', libraries: 'places,geometry' } };
+//				var rq = "//maps.google.com/maps/api/js?v=3.25&sensor=false&libraries=places,geometry";
+				var rq = "//maps.google.com/maps/api/js?v="+google_api+"&sensor=false&libraries=places,geometry";
 		    	var google_maps_api_key = localStorage.getItem("id_google_maps_api_key");
 		    	if ( google_maps_api_key && (google_maps_api_key != "") )
 					rq += "&key=" + google_maps_api_key;
@@ -1669,6 +1702,10 @@ function calculateDistance(lat1, long1, lat2, long2)
 						console.log( perc + " / " + eol + " -> " + new_curr_dist );
 						if ( timer_animate != undefined ) 
 							clearTimeout( timer_animate );
+						if ( (google_api == 3.25) && (timer_set_bearing != undefined) ) { 
+							clearTimeout( timer_set_bearing );
+							timer_set_bearing = undefined;
+						} 
 						(function (route_index, curr_dist ) {
 							marker_pos_using_slider.setMap( null );
 							marker_pos_using_slider_no_pano.setMap( null );
@@ -1828,6 +1865,10 @@ function calculateDistance(lat1, long1, lat2, long2)
 		var route_index = curr_route;
 
 		if ( go_timer ) {
+			if ( (google_api == 3.25) && (timer_set_bearing != undefined) ) { 
+				clearTimeout( timer_set_bearing );
+				timer_set_bearing = undefined;
+			} 
 			if ( timer_animate != undefined ) 
 				clearTimeout( timer_animate );
 	       	timer_animate = setTimeout( function() { cb_animate(new_pos); }, interval );
@@ -2167,6 +2208,10 @@ function calculateDistance(lat1, long1, lat2, long2)
 
         street_view_check[0] = new google.maps.StreetViewService( );
 
+		if ( (google_api == 3.25) && (timer_set_bearing != undefined) ) { 
+			clearTimeout( timer_set_bearing );
+			timer_set_bearing = undefined;
+		} 
         if ( timer_animate ) 
             clearTimeout( timer_animate );
        	timer_animate = setTimeout( function() { cb_animate(-1, 50); }, 250 );
@@ -2241,6 +2286,10 @@ function calculateDistance(lat1, long1, lat2, long2)
 	
     	require(["dojo/dom-style"], function( domStyle) {
     	
+			if ( (google_api == 3.25) && (timer_set_bearing != undefined) ) { 
+				clearTimeout( timer_set_bearing );
+				timer_set_bearing = undefined;
+			} 
 			if ( timer_animate != undefined ) { 
 				clearTimeout( timer_animate );
 				timer_animate = undefined; 
@@ -2834,6 +2883,10 @@ return;
 		    	console.log( "Route " + route_index + " no_toll= " + no_hwy );
 		    }
 	
+	    	var google_api = dom.byId('id_google_api').value;
+	    	localStorage.setItem( "google_api", google_api );
+	    	console.log( "google_api= " + google_api );
+	    		
 	    	var step = dijit.byId('id_input_meters').get( 'value' );
 	    	localStorage.setItem( "step", step );
 	    	console.log( "step= " + step );
@@ -2899,6 +2952,13 @@ return;
 	            	dijit.byId('id_check_no_toll_'+route_index).set( 'checked', parse(no_toll), false );
 			}
 	
+	    	var google_api = localStorage.getItem("google_api");
+	    	if ( !google_api )
+	    		google_api = 3.26;
+	    	console.log( "Restored google_api= " + google_api );
+	    	if ( google_api != null )
+	            dom.byId('id_google_api').value = google_api;
+	    	
 	    	var step = localStorage.getItem("step");
 	    	if ( !step )
 	    		step = 175;
@@ -2908,7 +2968,7 @@ return;
 	    	
 	    	var interval = localStorage.getItem("interval");
 	    	if ( !interval )
-	    		interval = 1450;
+	    		interval = 1200;
 	    	console.log( "Restored interval= " + interval );
 	    	if ( interval != null )
 	            dijit.byId('id_input_interval').set( 'value', parse(interval) );
