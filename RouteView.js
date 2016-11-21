@@ -2356,6 +2356,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 	            for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
 	        		var display = domStyle.get( 'id_tr_'+route_index+'_' + n, "display" );
 	            	if ( display != "none" ) {
+						if ((places[route_index][n] == undefined) || (places[route_index][n].geometry == undefined) || (places[route_index][n].geometry.location == undefined))
+							domStyle.set( 'id_wp_'+route_index+'_'+n, { color: "red" } );
 	            		console.log( n + " ==> " + places[route_index][n].name + " : " + places[route_index][n].geometry.location.lat() + " , " + places[route_index][n].geometry.location.lng() );
 						if (n > 0)
 							url += "&"; 
@@ -2393,7 +2395,6 @@ function calculateDistance(lat1, long1, lat2, long2)
     	
     	// xmllint --noout --schema http://www.topografix.com/GPX/1/0/gpx.xsd testfile.gpx
 
-console.log( "111111" );
 		var nb_routes = 0;
 		var nb_wp = [];
 		console.log( places );
@@ -2439,7 +2440,6 @@ console.log( "111111" );
 		var src = '';
 		var dst = '';
 
-console.log( "2222222222222" );
    		for (var route_index = 0; route_index < nb_routes; route_index++) {
 	        for ( n = 0; n < nb_wp[route_index]; n++ ) {
 	        	if ( src == "" )
@@ -2456,7 +2456,6 @@ console.log( "2222222222222" );
 	        }
    		}
         
-console.log( "333333333333" );
         gpx += '<rte>' + crlf;
 //      gpx += '  <name>' + route.summary + '</name>' + crlf;
         gpx += '  <name>' + src + ' to ' + dst + '</name>' + crlf;
