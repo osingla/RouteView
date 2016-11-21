@@ -1378,7 +1378,15 @@ function calculateDistance(lat1, long1, lat2, long2)
 					disableDoubleClickZoom: true,
 					fullscreenControl: false,
 					draggable: true,
-                   	zoom: 14
+                   	zoom: 14,
+                   	clickableIcons: false,
+                   	keyboardShortcuts: false,
+                   	mapTypeControl: false,
+                   	rotateControl: false,
+                   	scaleControl: true,
+                   	scrollwheel: true,
+                   	streetViewControl: false,
+                   	zoomControl: true
                 };
                 map = new google.maps.Map( document.getElementById('id_map_canvas'), map_options );
 				create_route_dlg();
@@ -2968,7 +2976,7 @@ return;
 	    	
 	    	var interval = localStorage.getItem("interval");
 	    	if ( !interval )
-	    		interval = 1200;
+	    		interval = 1350;
 	    	console.log( "Restored interval= " + interval );
 	    	if ( interval != null )
 	            dijit.byId('id_input_interval').set( 'value', parse(interval) );
