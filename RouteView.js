@@ -1381,12 +1381,12 @@ function calculateDistance(lat1, long1, lat2, long2)
                    	zoom: 14,
                    	clickableIcons: false,
                    	keyboardShortcuts: false,
-                   	mapTypeControl: false,
                    	rotateControl: false,
                    	scaleControl: true,
                    	scrollwheel: true,
-                   	streetViewControl: false,
-                   	zoomControl: true
+                   	zoomControl: true,
+                   	mapTypeControl: false,
+                   	streetViewControl: true,
                 };
                 map = new google.maps.Map( document.getElementById('id_map_canvas'), map_options );
 				create_route_dlg();
