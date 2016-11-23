@@ -471,7 +471,7 @@ function calculateDistance(lat1, long1, lat2, long2)
             var route_index = directions_renderer.indexOf( this );
 //          console.log("directions_changed: route_index=" + route_index);
             var new_dir = directions_renderer[route_index].getDirections();
-//          console.log( new_dir );
+          console.log( new_dir );
 
 			is_dirty = true;
 			var path = new_dir.routes[0].overview_path;
@@ -496,6 +496,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 				index_waypoint = new_dir.request.Vc;
             if (new_dir.request.Yb != undefined)
 				index_waypoint = new_dir.request.Yb;
+            if (new_dir.request.ec != undefined)
+				index_waypoint = new_dir.request.ec;
             if ( index_waypoint != undefined ) {
 
                 console.log( directions_renderer[route_index] );
