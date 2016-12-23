@@ -13,7 +13,6 @@ define( function( m ) {
 
 	var MAX_NB_ROUTES = 4;
 	var MAX_NB_WAYPOINTS = 8;
-//	var MAX_NB_WAYPOINTS = 3;
 
 	var total_max_nb_waypoints = (MAX_NB_ROUTES * (MAX_NB_WAYPOINTS+2));
 
@@ -2969,7 +2968,7 @@ return;
 	
 	    	var google_api = localStorage.getItem("google_api");
 	    	if ( !google_api )
-	    		google_api = 3.26;
+	    		google_api = 3.25;
 	    	console.log( "Restored google_api= " + google_api );
 	    	if ( google_api != null )
 	            dom.byId('id_google_api').value = google_api;
