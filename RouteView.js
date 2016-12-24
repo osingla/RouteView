@@ -3101,7 +3101,7 @@ return;
 	    	
 	    	var map_style = localStorage.getItem("map_style");
 	    	if ( !map_style )
-	    		map_style = "";
+	    		map_style = "1";
 	    	console.log( "Restored map_style= " + map_style );
 	    	dom.byId('id_map_style').value = map_style;
 	            
