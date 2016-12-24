@@ -1232,6 +1232,16 @@ function calculateDistance(lat1, long1, lat2, long2)
 										require(["dojo/dom-style"], function( domStyle) {
 											domStyle.set( 'id_wp_'+route_index+'_'+waypoint_index, { color: "black" } );
 										});
+									require(["dijit/Tooltip"], function(Tooltip) {
+										new Tooltip({
+											id: ["id_tooltip_label_wp_"+route_index+'_'+waypoint_index],
+											connectId: ["id_label_wp_"+route_index+'_'+waypoint_index],
+											position:['below-centered'],
+											label: place.name,
+											showDelay:650,
+											hideDelay:0
+										});
+										});
 										done_nb_waypoints++;
 										if ( (route_index == 0) && (waypoint_index == 0) )
 											map.setCenter(results[0].geometry.location);
@@ -1258,7 +1268,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 								});
 							} 
 							else {
-								console.log("Geocode was not successful for the following reason: " + status);
+								console.log("Geocode was not successful for [" + place_name + "]: " + status);
 							}
 						});
 					}
@@ -1625,13 +1635,13 @@ function calculateDistance(lat1, long1, lat2, long2)
 	                		console.log( "Place changed: route=" + route_index + " waypoint_index=" + waypoint_index );
 	                		console.log( autocompletes[route_index][waypoint_index] );
 	                		var place = autocompletes[route_index][waypoint_index].getPlace();
-//	                		console.log( place );
+	                		console.log( place );
 	                		if ( place.geometry == undefined ) {
 								function look_for_address( place_name, route_index, waypoint_index) {
 									var geocoder = new google.maps.Geocoder();
 									geocoder.geocode( { 'address': place_name}, function(results, status) {
 										if ( status == google.maps.GeocoderStatus.OK ) {
-											console.log( results);
+//											console.log( results);
 											service.getDetails({
 												placeId: results[0].place_id
 											}, function ( place, status ) {
@@ -1654,6 +1664,17 @@ function calculateDistance(lat1, long1, lat2, long2)
 							else {
 								require(["dojo/dom-style"], function( domStyle) {
 									domStyle.set( "id_wp_"+route_index+"_"+waypoint_index, { color: "black" } );
+								});
+								dijit.byId("id_wp_"+route_index+"_"+waypoint_index).set( 'value', place.formatted_address );
+								require(["dijit/Tooltip"], function(Tooltip) {
+									new Tooltip({
+										id: ["id_tooltip_label_wp_"+route_index+'_'+waypoint_index],
+										connectId: ["id_label_wp_"+route_index+'_'+waypoint_index],
+										position:['below-centered'],
+										label: place.name,
+										showDelay:650,
+										hideDelay:0
+									});
 								});
 							}
 	                		if ( cb_route_from_or_to_changed_handle[route_index][waypoint_index] != undefined )
@@ -2738,6 +2759,12 @@ return;
 		dijit.byId('id_wp_'+route_index+'_'+(index)).set( 'value', wp_b );
 		dijit.byId('id_wp_'+route_index+'_'+(index-1)).set( 'value', wp_a );
 		
+		var tooltip_wp_a = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).get( 'label' );
+		var tooltip_wp_b = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index-1)).get( 'label' );
+
+		dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).set( 'label', tooltip_wp_b );
+		dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index-1)).set( 'label', tooltip_wp_a );
+		
 		do_route( route_index );
 	}
 
@@ -2751,7 +2778,13 @@ return;
 		dijit.byId('id_wp_'+route_index+'_'+(index)).set( 'value', wp_b );
 		dijit.byId('id_wp_'+route_index+'_'+(index+1)).set( 'value', wp_a );
 		
-		8( route_index );
+		var tooltip_wp_a = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).get( 'label' );
+		var tooltip_wp_b = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index+1)).get( 'label' );
+
+		dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).set( 'label', tooltip_wp_b );
+		dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index+1)).set( 'label', tooltip_wp_a );
+		
+		do_route( route_index );
 	}
 	
 	function cb_click_btn_drive( route_index, waypoint_index ) {
