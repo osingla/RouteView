@@ -1667,14 +1667,20 @@ function calculateDistance(lat1, long1, lat2, long2)
 								});
 								dijit.byId("id_wp_"+route_index+"_"+waypoint_index).set( 'value', place.formatted_address );
 								require(["dijit/Tooltip"], function(Tooltip) {
-									new Tooltip({
-										id: ["id_tooltip_label_wp_"+route_index+'_'+waypoint_index],
-										connectId: ["id_label_wp_"+route_index+'_'+waypoint_index],
-										position:['below-centered'],
-										label: place.name,
-										showDelay:650,
-										hideDelay:0
-									});
+									var tooltip = dijit.byId("id_tooltip_label_wp_"+route_index+'_'+waypoint_index);
+									if (tooltip == undefined) {
+										new Tooltip({
+											id: ["id_tooltip_label_wp_"+route_index+'_'+waypoint_index],
+											connectId: ["id_label_wp_"+route_index+'_'+waypoint_index],
+											position:['below-centered'],
+											label: place.name,
+											showDelay:650,
+											hideDelay:0
+										});
+									}
+									else {
+										dijit.byId("id_tooltip_label_wp_"+route_index+'_'+waypoint_index).set( 'label', place.name );
+									}
 								});
 							}
 	                		if ( cb_route_from_or_to_changed_handle[route_index][waypoint_index] != undefined )
@@ -2721,6 +2727,26 @@ return;
 			focusUtil.focus(dom.byId('id_wp_'+route_index+'_'+(index)));
 		});
 		
+		var tooltip_wp_a = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).get( 'label' );
+
+		dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).set( 'label', "" );
+		require(["dijit/Tooltip"], function(Tooltip) {
+			var tooltip = dijit.byId("id_tooltip_label_wp_"+route_index+'_'+(index+1));
+			if (tooltip == undefined) {
+				new Tooltip({
+					id: ["id_tooltip_label_wp_"+route_index+'_'+(index+1)],
+					connectId: ["id_label_wp_"+route_index+'_'+(index+1)],
+					position:['below-centered'],
+					label: tooltip_wp_a,
+					showDelay:650,
+					hideDelay:0
+				});
+			}
+			else {
+				dijit.byId("id_tooltip_label_wp_"+route_index+'_'+(index+1)).set( 'label', tooltip_wp_a );
+			}
+		});
+		
 		update_btns_remove_up_down( route_index );		
 	}
 		
@@ -2744,6 +2770,8 @@ return;
     	require(["dojo/dom-style"], function( domStyle) {
     		domStyle.set( 'id_tr_'+route_index+'_'+(first_hidden-1), "display", "none" );
     	});
+		
+		// TODO : move the tooltips on id_tooltip_label_wp_
 		
 		do_route( route_index );
 		update_btns_remove_up_down( route_index );		
