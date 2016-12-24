@@ -149,7 +149,7 @@ define( function( m ) {
 		        var iad = polyline.GetIndexAtDistance( curr_dist );
 		        prev_bearing = bearing;
         		var bearing = polyline.Bearing( iad );
-	//			console.log( curr_dist + " / " + eol + " --> " + bearing);
+//				console.log( curr_dist + " / " + eol + " --> " + bearing);
 				if (bearing == undefined)
 					bearing = prev_bearing;
 				if (bearing != undefined) {
@@ -169,6 +169,8 @@ define( function( m ) {
         		}
 		    }
 	        if ( step > 0 ) {
+				if ( timer_animate ) 
+					clearTimeout( timer_animate );
             	timer_animate = setTimeout( (function(route_index) { return function() {
             		cb_animate( route_index, curr_dist+step );
 				}})(route_index), interval );
@@ -186,8 +188,10 @@ define( function( m ) {
 			clearTimeout( timer_set_bearing );
 			timer_set_bearing = undefined;
 		} 
-        if ( timer_animate ) 
+        if ( timer_animate ) {
             clearTimeout( timer_animate );
+            timer_animate = undefined;
+        }
         eol = polylines[route_index][curr_leg].Distance();
         map.setCenter( polylines[route_index][curr_leg].getPath().getAt(0) );
 
@@ -813,6 +817,10 @@ function calculateDistance(lat1, long1, lat2, long2)
         }
         else if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" ) {
         	dijit.byId('id_btn_pause').set( 'label', "Pause" );
+			if ( timer_animate != undefined ) { 
+				clearTimeout( timer_animate );
+				timer_animate = undefined;
+			}				
 	       	timer_animate = setTimeout( function() { cb_animate(curr_route, curr_dist); }, 250 );
         }
 
@@ -1232,15 +1240,15 @@ function calculateDistance(lat1, long1, lat2, long2)
 										require(["dojo/dom-style"], function( domStyle) {
 											domStyle.set( 'id_wp_'+route_index+'_'+waypoint_index, { color: "black" } );
 										});
-									require(["dijit/Tooltip"], function(Tooltip) {
-										new Tooltip({
-											id: ["id_tooltip_label_wp_"+route_index+'_'+waypoint_index],
-											connectId: ["id_label_wp_"+route_index+'_'+waypoint_index],
-											position:['below-centered'],
-											label: place.name,
-											showDelay:650,
-											hideDelay:0
-										});
+										require(["dijit/Tooltip"], function(Tooltip) {
+											new Tooltip({
+												id: ["id_tooltip_label_wp_"+route_index+'_'+waypoint_index],
+												connectId: ["id_label_wp_"+route_index+'_'+waypoint_index],
+												position:['below-centered'],
+												label: place.name,
+												showDelay:650,
+												hideDelay:0
+											});
 										});
 										done_nb_waypoints++;
 										if ( (route_index == 0) && (waypoint_index == 0) )
@@ -1736,8 +1744,10 @@ function calculateDistance(lat1, long1, lat2, long2)
 						var perc = ((x - output.x) / output.w) * 100;
 						var new_curr_dist = (eol * perc) / 100;
 						console.log( perc + " / " + eol + " -> " + new_curr_dist );
-						if ( timer_animate != undefined ) 
+						if ( timer_animate != undefined ) { 
 							clearTimeout( timer_animate );
+							timer_animate = undefined;
+						}				
 						if ( (google_api == 3.25) && (timer_set_bearing != undefined) ) { 
 							clearTimeout( timer_set_bearing );
 							timer_set_bearing = undefined;
@@ -1745,6 +1755,10 @@ function calculateDistance(lat1, long1, lat2, long2)
 						(function (route_index, curr_dist ) {
 							marker_pos_using_slider.setMap( null );
 							marker_pos_using_slider_no_pano.setMap( null );
+							if ( timer_animate != undefined ) { 
+								clearTimeout( timer_animate );
+								timer_animate = undefined;
+							}				
 							timer_animate = setTimeout( function() { cb_animate(route_index, curr_dist); }, 50 );
 						})(curr_route, new_curr_dist);
 					});
@@ -1905,8 +1919,10 @@ function calculateDistance(lat1, long1, lat2, long2)
 				clearTimeout( timer_set_bearing );
 				timer_set_bearing = undefined;
 			} 
-			if ( timer_animate != undefined ) 
+			if ( timer_animate != undefined ) { 
 				clearTimeout( timer_animate );
+				timer_animate = undefined;
+			}				
 	       	timer_animate = setTimeout( function() { cb_animate(new_pos); }, interval );
 		}
 
@@ -2248,8 +2264,10 @@ function calculateDistance(lat1, long1, lat2, long2)
 			clearTimeout( timer_set_bearing );
 			timer_set_bearing = undefined;
 		} 
-        if ( timer_animate ) 
-            clearTimeout( timer_animate );
+		if ( timer_animate != undefined ) { 
+			clearTimeout( timer_animate );
+			timer_animate = undefined;
+		}				
        	timer_animate = setTimeout( function() { cb_animate(-1, 50); }, 250 );
 
         // Update route slider
@@ -2657,6 +2675,16 @@ function calculateDistance(lat1, long1, lat2, long2)
 	       	    	cb_click_btn_add(selected_route_index, new_nb_waypoints)
     	    		var id = 'id_wp_' + selected_route_index + "_" + first_hidden;
    	        		dijit.byId( id ).set( "value", results[0].formatted_address );
+										require(["dijit/Tooltip"], function(Tooltip) {
+											new Tooltip({
+												id: ["id_tooltip_label_wp_"+selected_route_index+'_'+first_hidden],
+												connectId: ["id_label_wp_"+selected_route_index+'_'+first_hidden],
+												position:['below-centered'],
+												label: results[0].name,
+												showDelay:650,
+												hideDelay:0
+											});
+										});
 			    	update_btns_remove_up_down( selected_route_index );
 	    	        do_route( selected_route_index );
     	        }
@@ -2727,25 +2755,29 @@ return;
 			focusUtil.focus(dom.byId('id_wp_'+route_index+'_'+(index)));
 		});
 		
-		var tooltip_wp_a = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).get( 'label' );
+		var tooltip_wp_a = undefined;
+		var x = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index));
+		if (x) {
+			var tooltip_wp_a = x.get( 'label' );
 
-		dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).set( 'label', "" );
-		require(["dijit/Tooltip"], function(Tooltip) {
-			var tooltip = dijit.byId("id_tooltip_label_wp_"+route_index+'_'+(index+1));
-			if (tooltip == undefined) {
-				new Tooltip({
-					id: ["id_tooltip_label_wp_"+route_index+'_'+(index+1)],
-					connectId: ["id_label_wp_"+route_index+'_'+(index+1)],
-					position:['below-centered'],
-					label: tooltip_wp_a,
-					showDelay:650,
-					hideDelay:0
-				});
-			}
-			else {
-				dijit.byId("id_tooltip_label_wp_"+route_index+'_'+(index+1)).set( 'label', tooltip_wp_a );
-			}
-		});
+			dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).set( 'label', "" );
+			require(["dijit/Tooltip"], function(Tooltip) {
+				var tooltip = dijit.byId("id_tooltip_label_wp_"+route_index+'_'+(index+1));
+				if (tooltip == undefined) {
+					new Tooltip({
+						id: ["id_tooltip_label_wp_"+route_index+'_'+(index+1)],
+						connectId: ["id_label_wp_"+route_index+'_'+(index+1)],
+						position:['below-centered'],
+						label: tooltip_wp_a,
+						showDelay:650,
+						hideDelay:0
+					});
+				}
+				else {
+					dijit.byId("id_tooltip_label_wp_"+route_index+'_'+(index+1)).set( 'label', tooltip_wp_a );
+				}
+			});
+		}
 		
 		update_btns_remove_up_down( route_index );		
 	}
