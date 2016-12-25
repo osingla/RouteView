@@ -2832,18 +2832,15 @@ return;
 		dijit.byId('id_wp_'+route_index+'_'+(index)).set( 'value', wp_b );
 		dijit.byId('id_wp_'+route_index+'_'+(index-1)).set( 'value', wp_a );
 
-		require(["dijit/Tooltip"], function(Tooltip) {
-			if (dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index-1)) == undefined)
-				dijit.byId("id_tooltip_label_wp_"+route_index+'_'+(index-1)).set( 'label', "" );
-			if (dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)) == undefined)
-				dijit.byId("id_tooltip_label_wp_"+route_index+'_'+(index)).set( 'label', "" );
-		});
-		
-		var tooltip_wp_a = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).get( 'label' );
-		var tooltip_wp_b = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index-1)).get( 'label' );
+		if ( (dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index-1)) != undefined) &&
+			 (dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)) != undefined) ) {
 
-		dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).set( 'label', tooltip_wp_b );
-		dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index-1)).set( 'label', tooltip_wp_a );
+			var tooltip_wp_a = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).get( 'label' );
+			var tooltip_wp_b = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index-1)).get( 'label' );
+
+			dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).set( 'label', tooltip_wp_b );
+			dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index-1)).set( 'label', tooltip_wp_a );
+		}
 		
 		do_route( route_index );
 	}
@@ -2858,18 +2855,15 @@ return;
 		dijit.byId('id_wp_'+route_index+'_'+(index)).set( 'value', wp_b );
 		dijit.byId('id_wp_'+route_index+'_'+(index+1)).set( 'value', wp_a );
 		
-		require(["dijit/Tooltip"], function(Tooltip) {
-			if (dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)) == undefined)
-				dijit.byId("id_tooltip_label_wp_"+route_index+'_'+(index)).set( 'label', "" );
-			if (dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index+1)) == undefined)
-				dijit.byId("id_tooltip_label_wp_"+route_index+'_'+(index+1)).set( 'label', "" );
-		});
+		if ( (dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)) != undefined) &&
+			 (dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index+1)) != undefined) ) {
 		
-		var tooltip_wp_a = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).get( 'label' );
-		var tooltip_wp_b = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index+1)).get( 'label' );
+			var tooltip_wp_a = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).get( 'label' );
+			var tooltip_wp_b = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index+1)).get( 'label' );
 
-		dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).set( 'label', tooltip_wp_b );
-		dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index+1)).set( 'label', tooltip_wp_a );
+			dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).set( 'label', tooltip_wp_b );
+			dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index+1)).set( 'label', tooltip_wp_a );
+		}
 		
 		do_route( route_index );
 	}
