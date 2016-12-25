@@ -140,6 +140,7 @@ define( function( m ) {
            	map.panTo( p );
 
 		street_view_check[(route_index == -1) ? 0 : route_index].getPanoramaByLocation(p, 50, (function(route_index) { return function(result, status) {
+console.log(result);
 		    if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
 		        console.log( "No street view available - route=" + route_index );        
         		marker_no_street_view.setPosition( p );
@@ -1462,11 +1463,23 @@ function calculateDistance(lat1, long1, lat2, long2)
                     zoomControl: false,
                     clickToGo: false,
                     disableDoubleClickZoom: true,
-                    fullscreenControl: false
+                    fullscreenControl: false,
+                    showRoadLabels: false,
+                    imageDateControl: true
                 };
 
                 panorama = new google.maps.StreetViewPanorama( document.getElementById('id_panorama'), panorama_options );
                 map.setStreetView( panorama );
+                
+                var StreetViewPanoramaData = {
+					imageDate: "2015-01"
+				};
+//				function getCustomPanorama() {
+//					return StreetViewPanoramaData;
+//				}
+//				panorama.registerPanoProvider( getCustomPanorama );
+//				panorama.registerPanoProvider( 
+//					provider:function(string): StreetViewPanoramaData,  );
 
             	map_or_panorama_full_screen = false;
 
@@ -1780,7 +1793,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 					var x = (is_ff) ? evt.clientX : evt.x;
 					var perc = ((x - output.x) / output.w) * 100;
 					var new_curr_dist = (eol * perc) / 100;
-					console.log( perc + " / " + eol + " -> " + new_curr_dist );
+//					console.log( perc + " / " + eol + " -> " + new_curr_dist );
 					var polyline = (curr_route == -1) ? temp_polylines[0] : polylines[curr_route][curr_leg];
 					
 					var p = polyline.GetPointAtDistance( new_curr_dist );
@@ -2818,6 +2831,13 @@ return;
 
 		dijit.byId('id_wp_'+route_index+'_'+(index)).set( 'value', wp_b );
 		dijit.byId('id_wp_'+route_index+'_'+(index-1)).set( 'value', wp_a );
+
+		require(["dijit/Tooltip"], function(Tooltip) {
+			if (dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)) == undefined)
+				dijit.byId("id_tooltip_label_wp_"+route_index+'_'+(index)).set( 'label', "" );
+			if (dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index+1)) == undefined)
+				dijit.byId("id_tooltip_label_wp_"+route_index+'_'+(index+1)).set( 'label', "" );
+		});
 		
 		var tooltip_wp_a = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).get( 'label' );
 		var tooltip_wp_b = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index-1)).get( 'label' );
@@ -2837,6 +2857,13 @@ return;
 
 		dijit.byId('id_wp_'+route_index+'_'+(index)).set( 'value', wp_b );
 		dijit.byId('id_wp_'+route_index+'_'+(index+1)).set( 'value', wp_a );
+		
+		require(["dijit/Tooltip"], function(Tooltip) {
+			if (dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)) == undefined)
+				dijit.byId("id_tooltip_label_wp_"+route_index+'_'+(index)).set( 'label', "" );
+			if (dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index+1)) == undefined)
+				dijit.byId("id_tooltip_label_wp_"+route_index+'_'+(index+1)).set( 'label', "" );
+		});
 		
 		var tooltip_wp_a = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).get( 'label' );
 		var tooltip_wp_b = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index+1)).get( 'label' );
