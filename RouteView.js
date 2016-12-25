@@ -2833,10 +2833,10 @@ return;
 		dijit.byId('id_wp_'+route_index+'_'+(index-1)).set( 'value', wp_a );
 
 		require(["dijit/Tooltip"], function(Tooltip) {
+			if (dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index-1)) == undefined)
+				dijit.byId("id_tooltip_label_wp_"+route_index+'_'+(index-1)).set( 'label', "" );
 			if (dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)) == undefined)
 				dijit.byId("id_tooltip_label_wp_"+route_index+'_'+(index)).set( 'label', "" );
-			if (dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index+1)) == undefined)
-				dijit.byId("id_tooltip_label_wp_"+route_index+'_'+(index+1)).set( 'label', "" );
 		});
 		
 		var tooltip_wp_a = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).get( 'label' );
