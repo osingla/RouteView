@@ -36,3 +36,14 @@ html, body {
   outline:none;
 }
 
+.icon_btn_drive {
+  background-image: url('../icons/btn-drive.png');
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  border: none; 
+  outline:none;
+}
