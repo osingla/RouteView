@@ -2159,11 +2159,13 @@ function calculateDistance(lat1, long1, lat2, long2)
     	step = dijit.byId('id_input_meters').get( 'value' );
         document.getElementById("id_meters").innerHTML = step;
         document.getElementById("id_feet").innerHTML = Math.floor(step * 3.2808);
+        save_settings();
     }
 
     function cb_interval_changed( ) {
     	interval = dijit.byId('id_input_interval').get( 'value' );
         document.getElementById("id_interval").innerHTML = interval;
+        save_settings();
     }
     
 	function cb_route_tickness_changed( ) {

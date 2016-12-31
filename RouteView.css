@@ -3,8 +3,6 @@
 }
 
 body {
-	margin: 0;
-	padding: 2em;
 	font-family: Lucida Sans,Lucida Grande,Arial !important;
 	font-size: 13px !important;
 	background: white;
@@ -194,6 +192,18 @@ html, body {
   background-repeat: no-repeat;
   width: 18px;
   height: 18px;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  border: none; 
+  outline:none;
+}
+
+.icon_btn_sliders_thing {
+  background-image: url('icons/btn-sliders-thing.png');
+  background-repeat: no-repeat;
+  width: 24px;
+  height: 24px;
   text-align: center;
   margin: 0;
   padding: 0;
