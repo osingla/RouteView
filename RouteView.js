@@ -24,6 +24,7 @@ define( function( m ) {
     var panorama_full_screen;
     var curr_route;
     var curr_leg;
+    var prev_zoom;
 	var timer_show_pano_on_mousemove = undefined;
     var timer_animate = undefined;
 	var timer_set_bearing = undefined;
@@ -41,7 +42,6 @@ define( function( m ) {
 	var polylines = [];
     var route_bounds = [];
     var legs_bounds = [];
-	var xroute;
 	var cb_route_from_or_to_changed_handle = [];
 	var places = [];
 	var got_location;
@@ -116,7 +116,7 @@ define( function( m ) {
     
         if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" )
         	return;
-
+        	
 		curr_dist = d;
         if ( curr_dist > eol ) {
             console.log( "Route " + route_index + " is done" );
@@ -136,11 +136,12 @@ define( function( m ) {
 		var polyline = (route_index == -1) ? temp_polylines[0] : polylines[route_index][curr_leg];
         
         var p = polyline.GetPointAtDistance( curr_dist );
-        if ( !map.getBounds().contains( p ) )
-           	map.panTo( p );
+        if ( prev_zoom == undefined )
+			if ( !map.getBounds().contains( p ) )
+				map.panTo( p );
 
 		street_view_check[(route_index == -1) ? 0 : route_index].getPanoramaByLocation(p, 50, (function(route_index) { return function(result, status) {
-console.log(result);
+//		console.log(result);
 		    if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
 		        console.log( "No street view available - route=" + route_index );        
         		marker_no_street_view.setPosition( p );
@@ -475,7 +476,7 @@ function calculateDistance(lat1, long1, lat2, long2)
             var route_index = directions_renderer.indexOf( this );
 //          console.log("directions_changed: route_index=" + route_index);
             var new_dir = directions_renderer[route_index].getDirections();
-          console.log( new_dir );
+//          console.log( new_dir );
 
 			is_dirty = true;
 			var path = new_dir.routes[0].overview_path;
@@ -595,7 +596,7 @@ function calculateDistance(lat1, long1, lat2, long2)
         	directions_renderer[route_index].setMap( map );
         	directions_renderer[route_index].setDirections( response );
 
-            xroute = response.routes[0];
+            var xroute = response.routes[0];
             var location_from = new Object();
             var location_to = new Object();
 
@@ -806,8 +807,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 	    	require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct ) {
 				if ( map_or_panorama_full_screen ) {
 					domConstruct.place("td_map_canvas", "td_panorama", "before");
-		        	document.getElementById("td_map_canvas").style.width = "50%";
-			        document.getElementById("td_panorama").style.width = "50%";
+		        	document.getElementById("td_map_canvas").style.width = "25%";
+			        document.getElementById("td_panorama").style.width = "75%";
 					map_or_panorama_full_screen = false;
 				}
 	    		dijit.byId('app_layout').resize();
@@ -1471,9 +1472,9 @@ function calculateDistance(lat1, long1, lat2, long2)
                 panorama = new google.maps.StreetViewPanorama( document.getElementById('id_panorama'), panorama_options );
                 map.setStreetView( panorama );
                 
-                var StreetViewPanoramaData = {
-					imageDate: "2015-01"
-				};
+//              var StreetViewPanoramaData = {
+//					imageDate: "2015-01"
+//				};
 //				function getCustomPanorama() {
 //					return StreetViewPanoramaData;
 //				}
@@ -1652,11 +1653,11 @@ function calculateDistance(lat1, long1, lat2, long2)
 	            			var r = get_route_waypoint( autocompletes, this );
 			            	var route_index = r.route_index;
 	            			var waypoint_index = r.waypoint_index;
-							console.log( "route_index=" + route_index + " waypoint_index=" + waypoint_index );
-	                		console.log( "Place changed: route=" + route_index + " waypoint_index=" + waypoint_index );
-	                		console.log( autocompletes[route_index][waypoint_index] );
+//							console.log( "route_index=" + route_index + " waypoint_index=" + waypoint_index );
+//	                		console.log( "Place changed: route=" + route_index + " waypoint_index=" + waypoint_index );
+//	                		console.log( autocompletes[route_index][waypoint_index] );
 	                		var place = autocompletes[route_index][waypoint_index].getPlace();
-	                		console.log( place );
+//	                		console.log( place );
 	                		if ( place.geometry == undefined ) {
 								function look_for_address( place_name, route_index, waypoint_index) {
 									var geocoder = new google.maps.Geocoder();
@@ -1746,6 +1747,36 @@ function calculateDistance(lat1, long1, lat2, long2)
 						});
 					}
 				}
+
+				on( dijit.byId("id_input_route"), "mouseenter", function( evt ) {
+
+					if ( (selected_route_index == undefined) || (polylines[selected_route_index] == undefined) || (timer_animate == undefined) )
+						return;
+					
+					if ( dijit.byId('id_btn_pause').get( 'label' ) != "Pause" )
+						return;
+
+//					console.log("Enter - curr_route=" + curr_route + " - curr_leg=" + curr_leg);
+
+					prev_zoom = map.getZoom();
+					map.setCenter( polylines[curr_route][curr_leg].getPath().getAt(0) );
+					map.fitBounds( legs_bounds[curr_route][curr_leg] );
+				})
+				
+				on( dijit.byId("id_input_route"), "mouseleave", function( evt ) {
+
+					if ( (selected_route_index == undefined) || (polylines[selected_route_index] == undefined) || (timer_animate == undefined) )
+						return;
+					
+					if ( dijit.byId('id_btn_pause').get( 'label' ) != "Pause" )
+						return;
+
+//					console.log("Leave!");
+					map.setCenter( polylines[curr_route][curr_leg].getPath().getAt(0) );
+					map.fitBounds( legs_bounds[curr_route][curr_leg] );
+					map.setZoom( prev_zoom );
+					prev_zoom = undefined;
+				})
 				
 				on( dijit.byId("id_input_route"), "click", function( evt ) {
 
@@ -1756,7 +1787,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 						var x = (is_ff) ? evt.clientX : evt.x;
 						var perc = ((x - output.x) / output.w) * 100;
 						var new_curr_dist = (eol * perc) / 100;
-						console.log( perc + " / " + eol + " -> " + new_curr_dist );
+//						console.log( perc + " / " + eol + " -> " + new_curr_dist );
 						if ( timer_animate != undefined ) { 
 							clearTimeout( timer_animate );
 							timer_animate = undefined;
@@ -1996,24 +2027,6 @@ function calculateDistance(lat1, long1, lat2, long2)
 			return;
 		
 //		console.log( "Enter" );
-	
-	/*
-		browse_images_mode = true;
-
-    	require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct ) {
-			domStyle.set( "id_top_layout", "display", "none" );
-			domStyle.set( "id_left_layout", "display", "none" );
-			dijit.byId('app_layout').resize();
-				if ( map_or_panorama_full_screen ) {
-					domConstruct.place("td_panorama", "td_map_canvas", "after");
-		            document.getElementById("td_map_canvas").style.width = "50%";
-		            document.getElementById("td_panorama").style.width = "50%";
-					map_or_panorama_full_screen = false;
-				}
-			document.getElementById("td_map_canvas").style.width = "50%";
-			document.getElementById("td_panorama").style.width = "50%";
-		});
-*/
 		
 	}
 
@@ -2030,44 +2043,6 @@ function calculateDistance(lat1, long1, lat2, long2)
 		marker_pos_using_slider.setMap( null );
 		marker_pos_using_slider_no_pano.setMap( null );
 
-/*
-		if ( !browse_images_mode )
-			return;
-		browse_images_mode = false;
-
-		if ( timer_show_pano_on_mousemove != undefined ) {
-			clearTimeout( timer_show_pano_on_mousemove );
-			timer_show_pano_on_mousemove = undefined;
-		}
-
-		marker_no_street_view.setPosition( null );
-
-		directions_renderer.forEach( function( e ) {
-		   	e.setOptions( { zIndex:99, draggable:true } ); })
-
-		google.maps.event.clearListeners( map, 'mousemove' );
-		
-		panorama.setVisible( false );
-
-    	require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct ) {
-			domStyle.set( "id_top_layout", "display", "" );
-			domStyle.set( "id_left_layout", "display", (ctrl_mode) ? "none" : "table-cell" );
-    		document.getElementById("td_map_canvas").style.width = "100%";
-            document.getElementById("td_panorama").style.width = "0%";
-			if ( !map_or_panorama_full_screen ) {
-				domConstruct.place("td_panorama", "id_hidden", "after");
-				map_or_panorama_full_screen = true;	
-			}
-			else {
-				domConstruct.place("td_map_canvas", "td_panorama", "before");
-				domConstruct.place("td_panorama", "td_map_canvas", "after");
-				map_or_panorama_full_screen = false;
-			}
-    		dijit.byId('app_layout').resize();
-	        google.maps.event.trigger( map, 'resize' );
-		});
-*/
-    	
 	}
 
 	function browse_images( route_index ) {
@@ -2612,8 +2587,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 			}
 			else {
 				domConstruct.place("td_map_canvas", "td_panorama", "before");
-		        document.getElementById("td_map_canvas").style.width = "50%";
-		        document.getElementById("td_panorama").style.width = "50%";
+		        document.getElementById("td_map_canvas").style.width = "25%";
+		        document.getElementById("td_panorama").style.width = "75%";
 				map_or_panorama_full_screen = false;
 			}
 			google.maps.event.trigger( map, 'resize' );
@@ -2881,12 +2856,14 @@ return;
 			dijit.byId('app_layout').resize();
 				if ( map_or_panorama_full_screen ) {
 					domConstruct.place("td_panorama", "td_map_canvas", "after");
-		            document.getElementById("td_map_canvas").style.width = "50%";
-		            document.getElementById("td_panorama").style.width = "50%";
+		            document.getElementById("td_map_canvas").style.width = "25%";
+		            document.getElementById("td_panorama").style.width = "75%";
 					map_or_panorama_full_screen = false;
 				}
-			document.getElementById("td_map_canvas").style.width = "50%";
-			document.getElementById("td_panorama").style.width = "50%";
+			document.getElementById("td_map_canvas").style.width = "25%";
+			document.getElementById("td_panorama").style.width = "75%";
+			google.maps.event.trigger( map, 'resize' );
+			google.maps.event.trigger( panorama, 'resize' );
 		});
 
    		dijit.byId('id_btn_pause').set( 'disabled', false );
