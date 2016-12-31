@@ -876,6 +876,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 		
         map.setOptions({draggableCursor: 'crosshair'});
 
+		cb_show_all_routes();
+
 		directions_renderer.forEach( function( e ) {
 	       	e.setOptions( { zIndex:99, draggable: true } ); })
     }
