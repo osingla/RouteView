@@ -1,13 +1,8 @@
-<!-- -------------------------------------------------------------------------------------------- -->
-<!-- ---                                                                                      --- -->
-<!-- --- RouteView - Olivier Singla                                                           --- -->
-<!-- ---                                                                                      --- -->
-<!-- --- StreetView Player - Virtual Ride, using Google Maps and Street View                  --- -->
-<!-- ---                                                                                      --- -->
-<!-- --- http://routeview.org                                                                 --- -->
-<!-- --- http://StreetViewPlayer.org                                                          --- -->
-<!-- ---                                                                                      --- -->
-<!-- -------------------------------------------------------------------------------------------- -->
+<!-- --------------------------------------------------------------------------- -->
+<!-- --- RouteView - Olivier Singla                                          --- -->
+<!-- --- StreetView Player - Virtual Ride, using Google Maps and Street View --- -->
+<!-- --- http://StreetViewPlayer.org                                         --- -->
+<!-- --------------------------------------------------------------------------- -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -348,7 +343,7 @@
 									                                            <select id="id_google_api" value="">
 					                                                                <option value="3.25">3.25</option> 
 					                                                                <option value="3.26">3.26</option> 
-					                                                                <option value="3.27">3.26</option> 
+					                                                                <option value="3.27">3.27</option> 
 									                                            </select>
 									                                  		</div>
 													                    </div>
@@ -358,7 +353,8 @@
 												                        <div data-dojo-type="dijit/form/DropDownButton" >
 												                            <span>Map Style</span>
 												                            <div data-dojo-type="dijit/TooltipDialog">
-									                                            <select id="id_map_style" value="">
+									                                            <select id="id_map_style" value=""
+																					onChange='require(["RouteView.js"], function( s ) { s.cb_map_style_changed(); })'>
 					                                                                <option value="">Default</option> 
 					                                                                <option disabled>--------------------------------</option>
 					                                                                <option value="1">Style 1</option> 
@@ -876,8 +872,10 @@
 			                <div id="id_map_canvas" style="width: 100%; height: 100%; float:left"></div>
              	 		</td>
 
-             	 		<td id="td_panorama" style="xwidth:0%; overflow-x:hidden; overflow-y:hidden">
-			                <div id="id_panorama" style="width: 100%; height: 100%; float:left"> </div>
+             	 		<td id="id_td_panorama" style="width:100%; height:100%; overflow-x:hidden; overflow-y:hidden ">
+			                <div id="id_panorama"  style="display:None; width: 0%; height: 0%"> </div>
+							<div id="id_panorama2" style="position:absolute; width: 100%; height: 100%; top: 0; xleft: 0" > </div>
+							<div id="id_panorama3" style="position:absolute; width: 100%; height: 100%; top: 0; xleft: 0" > </div>
              	 		</td>
 
              	 	</tr>
@@ -1008,6 +1006,8 @@
         </div>
 
 		<div id="id_hidden" style="display:none"></div>
+
+		<div id="id_map2_canvas" style="width: 100%; height: 100%; float:left" style="display:none"></div>
 
         <script>
 		    require(["RouteView.js", "dojo/ready"], function( s, ready ) {
