@@ -135,7 +135,7 @@ var  prev_pano_id = '';
 		        var iad = polyline.GetIndexAtDistance( curr_dist );
 		        prev_bearing = bearing;
         		bearing = polyline.Bearing( iad );
-				console.log( curr_dist + " / " + eol + " --> " + bearing);
+//				console.log( curr_dist + " / " + eol + " --> " + bearing);
 				if (bearing == undefined)
 					bearing = prev_bearing;
 				if (bearing != undefined) {
@@ -157,8 +157,10 @@ var  prev_pano_id = '';
 							prev_pano_id = pano_id;
 						}
 					});
+				map.setStreetView( panorama );
 					panorama.setPosition( p );
-//					panorama.setPov( { heading: bearing, pitch: 1 } );
+					panorama.setPov( { heading: bearing, pitch: 1 } );
+					marker_pos_using_slider.setPosition( p );
 				}
 		    }
 	        if ( step > 0 ) {
@@ -468,7 +470,7 @@ function calculateDistance(lat1, long1, lat2, long2)
             var route_index = directions_renderer.indexOf( this );
 //          console.log("directions_changed: route_index=" + route_index);
             var new_dir = directions_renderer[route_index].getDirections();
-//          console.log( new_dir );
+          console.log( new_dir );
 
 			is_dirty = true;
 			var path = new_dir.routes[0].overview_path;
@@ -485,16 +487,18 @@ function calculateDistance(lat1, long1, lat2, long2)
             var index_waypoint = undefined;
             if (new_dir.request.Xc != undefined)
 				index_waypoint = new_dir.request.Xc;
-            if (new_dir.request.Yc != undefined)
+            else if (new_dir.request.Yc != undefined)
 				index_waypoint = new_dir.request.Yc;
-            if (new_dir.request.Uc != undefined)
+            else if (new_dir.request.Uc != undefined)
 				index_waypoint = new_dir.request.Uc;
-            if (new_dir.request.Vc != undefined)
+            else if (new_dir.request.Vc != undefined)
 				index_waypoint = new_dir.request.Vc;
-            if (new_dir.request.Yb != undefined)
+            else if (new_dir.request.Yb != undefined)
 				index_waypoint = new_dir.request.Yb;
-            if (new_dir.request.ec != undefined)
+            else if (new_dir.request.ec != undefined)
 				index_waypoint = new_dir.request.ec;
+            else if (new_dir.request.Ib != undefined)
+				index_waypoint = new_dir.request.Ib;
             if ( index_waypoint != undefined ) {
 
                 console.log( directions_renderer[route_index] );
