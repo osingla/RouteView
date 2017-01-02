@@ -141,12 +141,14 @@ define( function( m ) {
 								document.getElementById("id_panorama2").style.zIndex = "0";
 								panorama2.setPano( pano_id );
 								panorama2.setPov( { heading: bearing, pitch: 1 } );
+					map.setStreetView( panorama2 );
 							}
 							else {
 								document.getElementById("id_panorama2").style.zIndex = "1"
 								document.getElementById("id_panorama3").style.zIndex = "0";
 								panorama3.setPano( pano_id );
 								panorama3.setPov( { heading: bearing, pitch: 1 } );
+					map.setStreetView( panorama3 );
 							}
 							prev_pano_id = pano_id;
 						}
@@ -1164,16 +1166,6 @@ function calculateDistance(lat1, long1, lat2, long2)
 										require(["dojo/dom-style"], function( domStyle) {
 											domStyle.set( 'id_wp_'+route_index+'_'+waypoint_index, { color: "black" } );
 										});
-										require(["dijit/Tooltip"], function(Tooltip) {
-											new Tooltip({
-												id: ["id_tooltip_label_wp_"+route_index+'_'+waypoint_index],
-												connectId: ["id_label_wp_"+route_index+'_'+waypoint_index],
-												position:['below-centered'],
-												label: place.name,
-												showDelay:650,
-												hideDelay:0
-											});
-										});
 										done_nb_waypoints++;
 										if ( (route_index == 0) && (waypoint_index == 0) )
 											map.setCenter(results[0].geometry.location);
@@ -1610,22 +1602,6 @@ function calculateDistance(lat1, long1, lat2, long2)
 									domStyle.set( "id_wp_"+route_index+"_"+waypoint_index, { color: "black" } );
 								});
 								dijit.byId("id_wp_"+route_index+"_"+waypoint_index).set( 'value', place.formatted_address );
-								require(["dijit/Tooltip"], function(Tooltip) {
-									var tooltip = dijit.byId("id_tooltip_label_wp_"+route_index+'_'+waypoint_index);
-									if (tooltip == undefined) {
-										new Tooltip({
-											id: ["id_tooltip_label_wp_"+route_index+'_'+waypoint_index],
-											connectId: ["id_label_wp_"+route_index+'_'+waypoint_index],
-											position:['below-centered'],
-											label: place.name,
-											showDelay:650,
-											hideDelay:0
-										});
-									}
-									else {
-										dijit.byId("id_tooltip_label_wp_"+route_index+'_'+waypoint_index).set( 'label', place.name );
-									}
-								});
 							}
 	                		if ( cb_route_from_or_to_changed_handle[route_index][waypoint_index] != undefined )
 	                			clearTimeout( cb_route_from_or_to_changed_handle[route_index][waypoint_index] );
@@ -2237,16 +2213,6 @@ function calculateDistance(lat1, long1, lat2, long2)
 	       	    	cb_click_btn_add(selected_route_index, new_nb_waypoints)
     	    		var id = 'id_wp_' + selected_route_index + "_" + first_hidden;
    	        		dijit.byId( id ).set( "value", results[0].formatted_address );
-										require(["dijit/Tooltip"], function(Tooltip) {
-											new Tooltip({
-												id: ["id_tooltip_label_wp_"+selected_route_index+'_'+first_hidden],
-												connectId: ["id_label_wp_"+selected_route_index+'_'+first_hidden],
-												position:['below-centered'],
-												label: results[0].name,
-												showDelay:650,
-												hideDelay:0
-											});
-										});
 			    	update_btns_remove_up_down( selected_route_index );
 	    	        do_route( selected_route_index );
     	        }
@@ -2281,9 +2247,11 @@ function calculateDistance(lat1, long1, lat2, long2)
 //    	console.log( "first_hidden=" + first_hidden );
 
     	for ( var n = first_hidden - 1; n >= index; n-- ) {
+
 			var wp = dijit.byId('id_wp_'+route_index+'_'+(n)).get( 'value' );
 			console.log( n + " -> " + wp );
 			dijit.byId('id_wp_'+route_index+'_'+(n+1)).set( 'value', wp );
+
 			places[route_index][n+1] = places[route_index][n];
     	}
     	if (index < MAX_NB_WAYPOINTS+2)
@@ -2297,30 +2265,6 @@ function calculateDistance(lat1, long1, lat2, long2)
 		require([ "dijit/focus", "dojo/dom", "dojo/domReady!" ], function(focusUtil, dom){
 			focusUtil.focus(dom.byId('id_wp_'+route_index+'_'+(index)));
 		});
-		
-		var tooltip_wp_a = undefined;
-		var x = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index));
-		if (x) {
-			var tooltip_wp_a = x.get( 'label' );
-
-			dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).set( 'label', "" );
-			require(["dijit/Tooltip"], function(Tooltip) {
-				var tooltip = dijit.byId("id_tooltip_label_wp_"+route_index+'_'+(index+1));
-				if (tooltip == undefined) {
-					new Tooltip({
-						id: ["id_tooltip_label_wp_"+route_index+'_'+(index+1)],
-						connectId: ["id_label_wp_"+route_index+'_'+(index+1)],
-						position:['below-centered'],
-						label: tooltip_wp_a,
-						showDelay:650,
-						hideDelay:0
-					});
-				}
-				else {
-					dijit.byId("id_tooltip_label_wp_"+route_index+'_'+(index+1)).set( 'label', tooltip_wp_a );
-				}
-			});
-		}
 		
 		update_btns_remove_up_down( route_index );		
 	}
@@ -2346,8 +2290,6 @@ function calculateDistance(lat1, long1, lat2, long2)
     		domStyle.set( 'id_tr_'+route_index+'_'+(first_hidden-1), "display", "none" );
     	});
 		
-		// TODO : move the tooltips on id_tooltip_label_wp_
-		
 		do_route( route_index );
 		update_btns_remove_up_down( route_index );		
 	}
@@ -2362,16 +2304,6 @@ function calculateDistance(lat1, long1, lat2, long2)
 		dijit.byId('id_wp_'+route_index+'_'+(index)).set( 'value', wp_b );
 		dijit.byId('id_wp_'+route_index+'_'+(index-1)).set( 'value', wp_a );
 
-		if ( (dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index-1)) != undefined) &&
-			 (dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)) != undefined) ) {
-
-			var tooltip_wp_a = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).get( 'label' );
-			var tooltip_wp_b = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index-1)).get( 'label' );
-
-			dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).set( 'label', tooltip_wp_b );
-			dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index-1)).set( 'label', tooltip_wp_a );
-		}
-		
 		do_route( route_index );
 	}
 
@@ -2384,16 +2316,6 @@ function calculateDistance(lat1, long1, lat2, long2)
 
 		dijit.byId('id_wp_'+route_index+'_'+(index)).set( 'value', wp_b );
 		dijit.byId('id_wp_'+route_index+'_'+(index+1)).set( 'value', wp_a );
-		
-		if ( (dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)) != undefined) &&
-			 (dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index+1)) != undefined) ) {
-		
-			var tooltip_wp_a = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).get( 'label' );
-			var tooltip_wp_b = dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index+1)).get( 'label' );
-
-			dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index)).set( 'label', tooltip_wp_b );
-			dijit.byId('id_tooltip_label_wp_'+route_index+'_'+(index+1)).set( 'label', tooltip_wp_a );
-		}
 		
 		do_route( route_index );
 	}
