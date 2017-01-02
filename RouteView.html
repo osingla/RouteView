@@ -886,12 +886,12 @@
 				                            <div data-dojo-type="dijit/TooltipDialog">
 							                    <div style="width:100%" align="center">
 
-									                        <span>Step : <span></span><b id="id_meters">175</b> meters</span>&nbsp;-&nbsp;</span><b id="id_feet">575</b> feet</span></span><br>
+									                        <span>Step : <span></span><b id="id_meters">150</b> meters</span>&nbsp;-&nbsp;</span><b id="id_feet">575</b> feet</span></span><br>
 									                        <div id="id_input_meters"
 									                            style="width:400px;"
 									                            name="horizontalSlider"
 									                            data-dojo-type="dijit/form/HorizontalSlider"
-									                            data-dojo-props="value:175,
+									                            data-dojo-props="value:150,
 									                            minimum: 50,
 									                            maximum:1000,
 									                            discreteValues:20,
@@ -900,15 +900,15 @@
 										                        onChange='require(["RouteView.js"], function( s ) { s.cb_step_changed(); })'>
 									                        </div>
 									
-									                        <span>Interval : <b id="id_interval">1200</b> milliseconds</span><br>
+									                        <span>Interval : <b id="id_interval">750</b> milliseconds</span><br>
 									                        <div id="id_input_interval"
 									                            style="width:400px;"
 									                            name="horizontalSlider"
 									                            data-dojo-type="dijit/form/HorizontalSlider"
-									                            data-dojo-props="value:1200,
+									                            data-dojo-props="value:750,
 									                            minimum: 500,
 									                            maximum:5000,
-									                            discreteValues:46,
+									                            discreteValues:91,
 									                            intermediateChanges:true,
 									                            showButtons:true"
 										                        onChange='require(["RouteView.js"], function( s ) { s.cb_interval_changed(); })'>
@@ -916,12 +916,12 @@
 									
 									                		<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_input_meters',position:['after-centered'],showDelay:750,hideDelay:0">
 																This slider lets you define the step in the route.<br><br>
-																Default is 250 meters, meaning that each Street View image are 250 meters apart. 
+																Default is 150 meters, meaning that each Street View image are 250 meters apart. 
 									                		</div>
 									
 									                		<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_input_interval',position:['after-centered'],showDelay:750,hideDelay:0">
 																This slider lets you define the time interval between each Street View image.<br><br>
-																Default is 800 milliseconds, meaning that each Street View image is displayed for 800 milliseconds. 
+																Default is 750 milliseconds, meaning that each Street View image is displayed for 750 milliseconds. 
 									                		</div>
 									
 												</div>

@@ -1953,6 +1953,8 @@ function calculateDistance(lat1, long1, lat2, long2)
         		nb_routes++;
 				nb_wp[route_index] = 0;
 	            for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
+console.log( n );
+console.log( places );
 	        		var display = domStyle.get( 'id_tr_'+route_index+'_' + n, "display" );
 	            	if ( display != "none" ) {
 						if ((places[route_index][n] == undefined) || (places[route_index][n].geometry == undefined) || (places[route_index][n].geometry.location == undefined))
@@ -2202,18 +2204,32 @@ function calculateDistance(lat1, long1, lat2, long2)
     	geocoder.geocode( {'location': evt.latLng}, function( results, status ) {
     	    if (status === google.maps.GeocoderStatus.OK) {
 
-    	    	console.log( results[0].formatted_address );
+    	    	console.log( results[0] );
+    	    	console.log( places[selected_route_index] );
 
     	        var first_hidden = find_first_hidden( selected_route_index );
     	        console.log( "first_hidden=" + first_hidden );
     	        if ( first_hidden != (MAX_NB_WAYPOINTS + 2) ) {
 //    	        	show_waypoint( selected_route_index, first_hidden );
-	    	        var new_nb_waypoints = first_hidden;
-	       	    	cb_click_btn_add(selected_route_index, new_nb_waypoints)
-    	    		var id = 'id_wp_' + selected_route_index + "_" + first_hidden;
-   	        		dijit.byId( id ).set( "value", results[0].formatted_address );
-			    	update_btns_remove_up_down( selected_route_index );
-	    	        do_route( selected_route_index );
+					(function ( route_index, waypoint_index ) {
+						service.getDetails({
+							placeId: results[0].place_id
+						}, function ( place, status ) {
+							console.log( " --> " + route_index + " , " + waypoint_index );
+							if ( status == google.maps.places.PlacesServiceStatus.OK ) {
+								places[route_index][waypoint_index] = place;
+								require(["dojo/dom-style"], function( domStyle) {
+									domStyle.set( "id_wp_"+route_index+"_"+waypoint_index, { color: "black" } );
+								});
+								var new_nb_waypoints = waypoint_index;
+								cb_click_btn_add( route_index, new_nb_waypoints )
+								var id = 'id_wp_' + route_index + "_" + waypoint_index;
+								dijit.byId( id ).set( "value", place.formatted_address );
+								update_btns_remove_up_down( route_index );
+								do_route( route_index );
+							}
+						});
+					})( selected_route_index, first_hidden );
     	        }
     	    	
     	    }
@@ -2536,14 +2552,14 @@ function calculateDistance(lat1, long1, lat2, long2)
 	
 	    	var step = localStorage.getItem("step");
 	    	if ( !step )
-	    		step = 175;
+	    		step = 150;
 	    	console.log( "Restored step= " + step );
 	    	if ( step != null )
 	            dijit.byId('id_input_meters').set( 'value', parse(step) );
 	    	
 	    	var interval = localStorage.getItem("interval");
 	    	if ( !interval )
-	    		interval = 1350;
+	    		interval = 750;
 	    	console.log( "Restored interval= " + interval );
 	    	if ( interval != null )
 	            dijit.byId('id_input_interval').set( 'value', parse(interval) );
