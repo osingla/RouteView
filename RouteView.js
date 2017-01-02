@@ -48,7 +48,7 @@ define( function( m ) {
    	var marker_pos_using_slider;
    	var marker_pos_using_slider_no_pano;
    	var mouse_over_input_route;
-   	var selected_route_index = undefined;
+   	var selected_route_index = 0;
    	var is_dirty = false;
    	var is_ff = false;
 
@@ -141,14 +141,14 @@ define( function( m ) {
 								document.getElementById("id_panorama2").style.zIndex = "0";
 								panorama2.setPano( pano_id );
 								panorama2.setPov( { heading: bearing, pitch: 1 } );
-					map.setStreetView( panorama2 );
+//								map.setStreetView( panorama2 );
 							}
 							else {
 								document.getElementById("id_panorama2").style.zIndex = "1"
 								document.getElementById("id_panorama3").style.zIndex = "0";
 								panorama3.setPano( pano_id );
 								panorama3.setPov( { heading: bearing, pitch: 1 } );
-					map.setStreetView( panorama3 );
+//								map.setStreetView( panorama3 );
 							}
 							prev_pano_id = pano_id;
 						}
@@ -1166,8 +1166,10 @@ function calculateDistance(lat1, long1, lat2, long2)
 											domStyle.set( 'id_wp_'+route_index+'_'+waypoint_index, { color: "black" } );
 										});
 										done_nb_waypoints++;
-										if ( (route_index == 0) && (waypoint_index == 0) )
+										if ( (route_index == 0) && (waypoint_index == 0) ) {
+											console.log("XXX");
 											map.setCenter(results[0].geometry.location);
+										}
 										if ( done_nb_waypoints == total_nb_waypoints ) {
 											for (var r = 0; r < nb_routes; r++)
 												do_route( r );
@@ -1670,6 +1672,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 					if ( dijit.byId('id_btn_pause').get( 'label' ) != "Pause" )
 						return;
 
+//					console.log("Leave - curr_route=" + curr_route + " - curr_leg=" + curr_leg);
 					mouse_over_input_route = false;
 
 					map.setCenter( polylines[curr_route][curr_leg].getPath().getAt(0) );
