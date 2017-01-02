@@ -30,7 +30,6 @@ define( function( m ) {
     var step;               			// meters
     var interval;           			// milliseconds
     var route_tickness;					// pixels
-    var google_api;						// 3.25 or 3.26
     var bearing;
     var prev_bearing;
     var curr_dist;
@@ -823,10 +822,10 @@ console.log("XXXXXXXXX");
     	require(["dojo/dom", "dojo/on", "dojo/dom-style", "dojo/dom-geometry", "dojo/store/Memory", "dojo/ready"], function( dom, on, domStyle, domGeom, Memory, ready ) {
             ready( function() {
    				load_settings( );
-				google_api = dom.byId('id_google_api').value;
-
+				
 //				dojoConfig = { gmaps: { v: '3.25', libraries: 'places,geometry' } };
 //				var rq = "//maps.google.com/maps/api/js?v=3.25&sensor=false&libraries=places,geometry";
+				var google_api = "3.27";
 				var rq = "//maps.google.com/maps/api/js?v="+google_api+"&sensor=false&libraries=places,geometry";
 		    	var google_maps_api_key = localStorage.getItem("id_google_maps_api_key");
 		    	if ( google_maps_api_key && (google_maps_api_key != "") )
@@ -2562,10 +2561,6 @@ console.log("YYY");
 		    	console.log( "Route " + route_index + " no_toll= " + no_hwy );
 		    }
 	
-	    	var google_api = dom.byId('id_google_api').value;
-	    	localStorage.setItem( "google_api", google_api );
-	    	console.log( "google_api= " + google_api );
-	    		
 	    	var step = dijit.byId('id_input_meters').get( 'value' );
 	    	localStorage.setItem( "step", step );
 	    	console.log( "step= " + step );
@@ -2631,13 +2626,6 @@ console.log("YYY");
 	            	dijit.byId('id_check_no_toll_'+route_index).set( 'checked', parse(no_toll), false );
 			}
 	
-	    	var google_api = localStorage.getItem("google_api");
-	    	if ( !google_api )
-	    		google_api = 3.25;
-	    	console.log( "Restored google_api= " + google_api );
-	    	if ( google_api != null )
-	            dom.byId('id_google_api').value = google_api;
-	    	
 	    	var step = localStorage.getItem("step");
 	    	if ( !step )
 	    		step = 175;
