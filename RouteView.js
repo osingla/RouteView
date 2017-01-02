@@ -17,7 +17,7 @@ define( function( m ) {
     var panorama, panorama2, panorama3;
 	var map_or_panorama_full_screen;
     var panorama_full_screen;
-    var curr_route;
+    var curr_route = undefined;
     var curr_leg;
     var prev_zoom;
 	var timer_show_pano_on_mousemove = undefined;
@@ -48,7 +48,7 @@ define( function( m ) {
    	var marker_pos_using_slider;
    	var marker_pos_using_slider_no_pano;
    	var mouse_over_input_route;
-   	var selected_route_index = 0;
+   	var selected_route_index = undefined;
    	var is_dirty = false;
    	var is_ff = false;
 
@@ -160,7 +160,7 @@ define( function( m ) {
 				}
 		    }
 	        if ( step > 0 ) {
-				if ( timer_animate ) 
+				if ( timer_animate != undefined ) 
 					clearTimeout( timer_animate );
             	timer_animate = setTimeout( (function(route_index) { return function() {
             		cb_animate( route_index, curr_dist+step );
@@ -175,10 +175,8 @@ define( function( m ) {
         
 		streetViewLayer.setMap( null );
 
-        if ( timer_animate ) {
+		if ( timer_animate != undefined )
             clearTimeout( timer_animate );
-            timer_animate = undefined;
-        }
         eol = polylines[route_index][curr_leg].Distance();
         map.setCenter( polylines[route_index][curr_leg].getPath().getAt(0) );
 
@@ -1108,6 +1106,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 								play_route    = parseInt( q[0] );
 								play_waypoint = parseInt( q[1] );
 								console.log("play_route=" + play_route + " - play_waypoint=" + play_waypoint);
+								localStorage.setItem( "initial_info_use_icon", "true" );
 							}
 						}
 						else {
