@@ -136,7 +136,7 @@ define( function( m ) {
 					panorama.addListener('pano_changed', function() {
 						var pano_id = panorama.getPano();
 						if (pano_id != prev_pano_id) {
-							if ((pano_cnt++ % 2) == 0) {
+							if ((++pano_cnt % 2) == 0) {
 								document.getElementById("id_panorama3").style.zIndex = "1"
 								document.getElementById("id_panorama2").style.zIndex = "0";
 								panorama2.setPano( pano_id );
@@ -989,7 +989,6 @@ function calculateDistance(lat1, long1, lat2, long2)
 	 			        connectId: ["id_btn_drive_"+route_index+'_'+n],
 	 			        position:['below-centered'],
 	 			        label: "Virtual Ride!<br><br>Play the route using StreetView<br><br>" +
-							"Note: This is different from showing images along the ride using <img src=\"icons/btn-browse.png\" style=\"width:16px; height:16px; vertical-align:middle\" />.<br><br>" +
 							"<table>" +
 							"	<tr>" +
 							"		<td valign=\"middle\" >" +
@@ -1001,14 +1000,6 @@ function calculateDistance(lat1, long1, lat2, long2)
 							"		</td>" +
 							"	</tr>" +
 							"	<tr>" +
-							"	</tr>" +
-							"	<tr>" +
-							"		<td valign=\"middle\" >" +
-							"			<img src=\"icons/btn-browse.png\" style=\"width:16px; height:16px; vertical-align:middle\"/>" +
-							"		</td>" +
-							"		<td>" +
-							"			This allows to <b><i>show</b></i> an image along the route depending where the mouse cursor is." +
-							"		</td>" +
 							"	</tr>" +
 							"</table>",
 	 			        showDelay:9999999,
@@ -1809,6 +1800,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 					document.getElementById( 'id_btn_load_file').addEventListener('change', load_file_select, false );
 				}
 
+				document.getElementById("id_panorama2").style.display = "None";
+				document.getElementById("id_panorama3").style.display = "None";
             });
 
 		});
