@@ -95,6 +95,15 @@ define( function( m ) {
         
     }
     
+    function restart_animate_timer( route_index ) {
+
+		if ( timer_animate != undefined ) 
+			clearTimeout( timer_animate );
+		timer_animate = setTimeout( (function(route_index) { return function() {
+			cb_animate( route_index, curr_dist+step );
+		}})(route_index), interval );
+	}
+    
     function cb_animate( route_index, d ) {
     
         if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" )
@@ -123,11 +132,12 @@ define( function( m ) {
 		        console.log( "No street view available - route=" + route_index );        
 				marker_small_street_view.setPosition( null );
         		marker_no_street_view.setPosition( p );
+				if ( step > 0 ) 
+					restart_animate_timer( route_index );
 		    }
 		    else {
         		marker_no_street_view.setPosition( null );
 		        var iad = polyline.GetIndexAtDistance( curr_dist );
-		        prev_bearing = bearing;
         		bearing = polyline.Bearing( iad );
 //				console.log( curr_dist + " / " + eol + " --> " + bearing);
 				if (bearing == undefined)
@@ -139,33 +149,30 @@ define( function( m ) {
 							if ((++pano_cnt % 2) == 0) {
 								document.getElementById("id_panorama3").style.zIndex = "1"
 								document.getElementById("id_panorama2").style.zIndex = "0";
-								panorama2.setPano( pano_id );
-								panorama2.setPov( { heading: bearing, pitch: 1 } );
-//								map.setStreetView( panorama2 );
+								panorama2.setPano( prev_pano_id );
+								if ( prev_bearing != undefined )
+									panorama2.setPov( { heading: prev_bearing, pitch: 1 } );
 							}
 							else {
 								document.getElementById("id_panorama2").style.zIndex = "1"
 								document.getElementById("id_panorama3").style.zIndex = "0";
-								panorama3.setPano( pano_id );
-								panorama3.setPov( { heading: bearing, pitch: 1 } );
-//								map.setStreetView( panorama3 );
+								panorama3.setPano( prev_pano_id );
+								if ( prev_bearing != undefined )
+									panorama3.setPov( { heading: prev_bearing, pitch: 1 } );
 							}
 							prev_pano_id = pano_id;
+							if ( step > 0 )
+								restart_animate_timer( route_index );
 						}
 					});
 					map.setStreetView( panorama );
 					panorama.setPosition( p );
-					panorama.setPov( { heading: bearing, pitch: 1 } );
+					if ( prev_bearing != undefined )
+						panorama.setPov( { heading: prev_bearing, pitch: 1 } );
 					marker_small_street_view.setPosition( p );
+					prev_bearing = bearing;
 				}
 		    }
-	        if ( step > 0 ) {
-				if ( timer_animate != undefined ) 
-					clearTimeout( timer_animate );
-            	timer_animate = setTimeout( (function(route_index) { return function() {
-            		cb_animate( route_index, curr_dist+step );
-				}})(route_index), interval );
-			}
 			dijit.byId('id_input_route').set( 'value', curr_dist, false );
 		}})(route_index));
 
