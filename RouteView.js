@@ -14,7 +14,8 @@ define( function( m ) {
 	var autocompletes = [];
     var map;
     var service;
-    var panorama, panorama2, panorama3;
+    var panorama, panorama2, panorama3, panorama4;
+    var pano_pos = [];
 	var map_or_panorama_full_screen;
     var panorama_full_screen;
     var curr_route = undefined;
@@ -95,13 +96,13 @@ define( function( m ) {
         
     }
     
-    function restart_animate_timer( route_index ) {
+    function restart_animate_timer( route_index, fast ) {
 
 		if ( timer_animate != undefined ) 
 			clearTimeout( timer_animate );
 		timer_animate = setTimeout( (function(route_index) { return function() {
 			cb_animate( route_index, curr_dist+step );
-		}})(route_index), interval );
+		}})(route_index), (fast) ? 125 : interval );
 	}
     
     function cb_animate( route_index, d ) {
@@ -127,13 +128,13 @@ define( function( m ) {
 				map.panTo( p );
 
 		street_view_check[(route_index == -1) ? 0 : route_index].getPanoramaByLocation(p, 50, (function(route_index) { return function(result, status) {
-//		console.log(result);
+//			console.log(result);
 		    if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
 		        console.log( "No street view available - route=" + route_index );        
 				marker_small_street_view.setPosition( null );
         		marker_no_street_view.setPosition( p );
 				if ( step > 0 ) 
-					restart_animate_timer( route_index );
+					restart_animate_timer( route_index, false );
 		    }
 		    else {
         		marker_no_street_view.setPosition( null );
@@ -146,30 +147,55 @@ define( function( m ) {
 					panorama.addListener('pano_changed', function() {
 						var pano_id = panorama.getPano();
 						if (pano_id != prev_pano_id) {
-							if ((++pano_cnt % 2) == 0) {
-								document.getElementById("id_panorama3").style.zIndex = "1"
-								document.getElementById("id_panorama2").style.zIndex = "0";
-								panorama2.setPano( prev_pano_id );
-								if ( prev_bearing != undefined )
-									panorama2.setPov( { heading: prev_bearing, pitch: 1 } );
-							}
-							else {
-								document.getElementById("id_panorama2").style.zIndex = "1"
-								document.getElementById("id_panorama3").style.zIndex = "0";
-								panorama3.setPano( prev_pano_id );
-								if ( prev_bearing != undefined )
-									panorama3.setPov( { heading: prev_bearing, pitch: 1 } );
+//							marker_small_street_view.setMap( map );
+							var index = 0;
+							switch (pano_cnt++ % 3) {
+								case 0 :
+									pano_pos[4] = panorama.getPosition();
+									document.getElementById("id_panorama2").style.zIndex = "1";
+									document.getElementById("id_panorama3").style.zIndex = "0"
+									document.getElementById("id_panorama4").style.zIndex = "0"
+									panorama4.setPano( prev_pano_id );
+									if ( prev_bearing != undefined )
+										panorama4.setPov( { heading: prev_bearing, pitch: 1 } );
+//									console.log( pano_cnt + " --> 2" );
+									if ( pano_cnt >= 4 )
+										marker_small_street_view.setPosition( pano_pos[2] );
+									break;
+								case 1 :
+									pano_pos[2] = panorama.getPosition();
+									document.getElementById("id_panorama3").style.zIndex = "1";
+									document.getElementById("id_panorama2").style.zIndex = "0"
+									document.getElementById("id_panorama4").style.zIndex = "0";
+									panorama2.setPano( prev_pano_id );
+									if ( prev_bearing != undefined )
+										panorama2.setPov( { heading: prev_bearing, pitch: 1 } );
+//									console.log( pano_cnt + " --> 3" );
+									if ( pano_cnt >= 4 )
+										marker_small_street_view.setPosition( pano_pos[3] );
+									break;
+								case 2 :
+									pano_pos[3] = panorama.getPosition();
+									document.getElementById("id_panorama4").style.zIndex = "1"
+									document.getElementById("id_panorama3").style.zIndex = "0";
+									document.getElementById("id_panorama2").style.zIndex = "0";
+									panorama3.setPano( prev_pano_id );
+									if ( prev_bearing != undefined )
+										panorama3.setPov( { heading: prev_bearing, pitch: 1 } );
+//									console.log( pano_cnt + " --> 4" );
+									if ( pano_cnt >= 4 )
+										marker_small_street_view.setPosition( pano_pos[4] );
+									break;
 							}
 							prev_pano_id = pano_id;
 							if ( step > 0 )
-								restart_animate_timer( route_index );
+								restart_animate_timer( route_index, (pano_cnt <= 3) );
 						}
 					});
-					map.setStreetView( panorama );
+//					map.setStreetView( panorama );
 					panorama.setPosition( p );
-					if ( prev_bearing != undefined )
-						panorama.setPov( { heading: prev_bearing, pitch: 1 } );
-					marker_small_street_view.setPosition( p );
+//					if ( prev_bearing != undefined )
+//						panorama.setPov( { heading: prev_bearing, pitch: 1 } );
 					prev_bearing = bearing;
 				}
 		    }
@@ -204,8 +230,10 @@ define( function( m ) {
 		panorama_resize( );
 		document.getElementById("id_panorama2").style.display = "";
 		document.getElementById("id_panorama3").style.display = "";
+		document.getElementById("id_panorama4").style.display = "";
 		panorama2.setVisible( true );
 		panorama3.setVisible( true );
+		panorama4.setVisible( true );
 
     }
 
@@ -649,6 +677,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 
     		dijit.byId('id_input_route').set( 'disabled', true );
     		
+    		console.log( "1 - DISABLED" );
     		dijit.byId('id_btn_pause').set( 'disabled', true );
     		dijit.byId('id_btn_stop').set( 'disabled', true );
 
@@ -757,6 +786,17 @@ function calculateDistance(lat1, long1, lat2, long2)
         }
         else if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" ) {
         	dijit.byId('id_btn_pause').set( 'label', "Pause" );
+			switch ((pano_cnt-1) % 3) {
+				case 0 : 
+					panorama.setPosition( pano_pos[2] );
+					break;
+				case 1 : 
+					panorama.setPosition( pano_pos[3] );
+					break;
+				case 2 : 
+					panorama.setPosition( pano_pos[4] );
+					break;
+			}
 			if ( timer_animate != undefined )
 				clearTimeout( timer_animate );
 	       	timer_animate = setTimeout( function() { cb_animate(curr_route, curr_dist); }, 250 );
@@ -770,6 +810,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 
 		document.getElementById("id_panorama2").style.display = "none";
 		document.getElementById("id_panorama3").style.display = "none";
+		document.getElementById("id_panorama4").style.display = "none";
 
 		if ( timer_animate != undefined ) {
 			clearTimeout( timer_animate );
@@ -796,9 +837,11 @@ function calculateDistance(lat1, long1, lat2, long2)
     	
 		panorama2.setVisible( false );
 		panorama3.setVisible( false );
+		panorama4.setVisible( false );
 
 		var route_index = curr_route;
 
+console.log( "STOP - DISABLED" );
 		dijit.byId('id_btn_pause').set( 'disabled', true );
     	dijit.byId('id_btn_pause').set( 'label', "Pause" );
 		dijit.byId('id_btn_stop').set( 'disabled', true );
@@ -1249,6 +1292,11 @@ function calculateDistance(lat1, long1, lat2, long2)
 			var computedStyle = domStyle.getComputedStyle(node);
 			domGeom.setContentSize(node, box, computedStyle);
 
+			var box = { w: output.w, h: output.h };
+			var node = dom.byId( "id_panorama4" );
+			var computedStyle = domStyle.getComputedStyle(node);
+			domGeom.setContentSize(node, box, computedStyle);
+
 		});
 	}
     
@@ -1399,6 +1447,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 				map.setStreetView( panorama2 );
 				panorama3 = new google.maps.StreetViewPanorama( document.getElementById('id_panorama3'), panorama_options );
 				map.setStreetView( panorama3 );
+				panorama4 = new google.maps.StreetViewPanorama( document.getElementById('id_panorama4'), panorama_options );
+				map.setStreetView( panorama4 );
 
                 window.onresize = function(event) {
 					panorama_resize( );
@@ -1787,6 +1837,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 
 				document.getElementById("id_panorama2").style.display = "None";
 				document.getElementById("id_panorama3").style.display = "None";
+				document.getElementById("id_panorama4").style.display = "None";
             });
 
 		});
@@ -2371,6 +2422,7 @@ console.log( places );
 			google.maps.event.trigger( panorama, 'resize' );
 		});
 
+console.log( "DRIVE - ENABLED" );
    		dijit.byId('id_btn_pause').set( 'disabled', false );
 		dijit.byId('id_btn_stop').set( 'disabled', false );
 
