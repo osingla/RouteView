@@ -26,7 +26,7 @@ define( function( m ) {
     var eol;
     var step;               			// meters
     var interval;           			// milliseconds
-    var route_tickness;					// pixels
+    var route_thickness;				// pixels
     var bearing;
     var prev_bearing;
 	var prev_pano_id;
@@ -434,8 +434,8 @@ function calculateDistance(lat1, long1, lat2, long2)
     	interval = dijit.byId('id_input_interval').get( 'value' );
 //      console.log( "step=" + step + " interval=" + interval );
 
-    	route_tickness = dijit.byId('id_input_route_tickness').get( 'value' );
-//  	console.log( "route_tickness=" + route_tickness );
+    	route_thickness = dijit.byId('id_input_route_thickness').get( 'value' );
+//  	console.log( "route_thickness=" + route_thickness );
 
         var first_hidden = find_first_hidden( route_index );
 //    	console.log( "first_hidden=" + first_hidden );
@@ -474,7 +474,7 @@ function calculateDistance(lat1, long1, lat2, long2)
             },
             polylineOptions: {
             	strokeColor: route_colors[route_index],
-            	strokeWeight: route_tickness
+            	strokeWeight: route_thickness
             }
         });
 
@@ -1956,12 +1956,12 @@ console.log( "STOP - DISABLED" );
         save_settings();
     }
     
-	function cb_route_tickness_changed( ) {
-    	route_tickness = dijit.byId('id_input_route_tickness').get( 'value' );
-        document.getElementById("id_route_tickness").innerHTML = route_tickness;
+	function cb_route_thickness_changed( ) {
+    	route_thickness = dijit.byId('id_input_route_thickness').get( 'value' );
+        document.getElementById("id_route_thickness").innerHTML = route_thickness;
 		directions_renderer.forEach( function( e ) {
             var route_index = directions_renderer.indexOf( e );
-	       	e.setOptions( { polylineOptions: { strokeColor: route_colors[route_index], strokeWeight: route_tickness } } ); 
+	       	e.setOptions( { polylineOptions: { strokeColor: route_colors[route_index], strokeWeight: route_thickness } } ); 
 	       	e.setMap( map );
 		})
 	}
@@ -2555,9 +2555,9 @@ console.log( "DRIVE - ENABLED" );
 	    	localStorage.setItem( "interval", interval );
 	    	console.log( "interval= " + interval );
 	    	
-	    	var route_tickness = dijit.byId('id_input_route_tickness').get( 'value' );
-	    	localStorage.setItem( "route_tickness", route_tickness );
-	    	console.log( "route_tickness= " + route_tickness );
+	    	var route_thickness = dijit.byId('id_input_route_thickness').get( 'value' );
+	    	localStorage.setItem( "route_thickness", route_thickness );
+	    	console.log( "route_thickness= " + route_thickness );
 	    	
 	        var google_maps_api_key = dijit.byId('id_google_maps_api_key').get( 'value' );
 	    	localStorage.setItem( "id_google_maps_api_key", google_maps_api_key );
@@ -2626,12 +2626,12 @@ console.log( "DRIVE - ENABLED" );
 	    	if ( interval != null )
 	            dijit.byId('id_input_interval').set( 'value', parse(interval) );
 	    	
-	    	var route_tickness = localStorage.getItem("route_tickness");
-	    	if ( !route_tickness )
-	    		route_tickness = 4;
-	    	console.log( "Restored route_tickness= " + route_tickness );
-	    	if ( route_tickness != null )
-	            dijit.byId('id_input_route_tickness').set( 'value', parse(route_tickness) );
+	    	var route_thickness = localStorage.getItem("route_thickness");
+	    	if ( !route_thickness )
+	    		route_thickness = 3;
+	    	console.log( "Restored route_thickness= " + route_thickness );
+	    	if ( route_thickness != null )
+	            dijit.byId('id_input_route_thickness').set( 'value', parse(route_thickness) );
 	    	
 	    	var google_maps_api_key = localStorage.getItem("id_google_maps_api_key");
 	    	if ( !google_maps_api_key )
@@ -2951,7 +2951,7 @@ console.log( "DRIVE - ENABLED" );
 
 		cb_step_changed:     function( ) { cb_step_changed(); },
 		cb_interval_changed: function( ) { cb_interval_changed(); },
-		cb_route_tickness_changed: function( ) { cb_route_tickness_changed(); },
+		cb_route_thickness_changed: function( ) { cb_route_thickness_changed(); },
 
 		cb_map_style_changed:	function( ) { cb_map_style_changed(); },
 		
