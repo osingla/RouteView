@@ -867,7 +867,7 @@
 			                <div id="id_map_canvas" style="width: 100%; height: 100%; float:left"></div>
              	 		</td>
 
-             	 		<td id="id_td_panorama" style="width:100%; height:100%; overflow-x:hidden; overflow-y:hidden ">
+             	 		<td id="td_panoramas_canvas" style="width:100%; height:100%; overflow-x:hidden; overflow-y:hidden ">
 			                <div id="id_panorama"  style="display:None; width: 0%; height: 0%"> </div>
 							<div id="id_panorama2" style="position:absolute; width: 100%; height: 100%; top: 0; xleft: 0" > </div>
 							<div id="id_panorama3" style="position:absolute; width: 100%; height: 100%; top: 0; xleft: 0" > </div>
@@ -887,43 +887,43 @@
 				                            <div data-dojo-type="dijit/TooltipDialog">
 							                    <div style="width:100%" align="center">
 
-									                        <span>Step : <span></span><b id="id_meters">150</b> meters</span>&nbsp;-&nbsp;</span><b id="id_feet">575</b> feet</span></span><br>
-									                        <div id="id_input_meters"
-									                            style="width:400px;"
-									                            name="horizontalSlider"
-									                            data-dojo-type="dijit/form/HorizontalSlider"
-									                            data-dojo-props="value:150,
-									                            minimum: 50,
-									                            maximum:1000,
-									                            discreteValues:20,
-									                            intermediateChanges:true,
-									                            showButtons:true"
-										                        onChange='require(["RouteView.js"], function( s ) { s.cb_step_changed(); })'>
-									                        </div>
+													<span>Step : <span></span><b id="id_meters">150</b> meters</span>&nbsp;-&nbsp;</span><b id="id_feet">575</b> feet</span></span><br>
+													<div id="id_input_meters"
+														style="width:400px;"
+														name="horizontalSlider"
+														data-dojo-type="dijit/form/HorizontalSlider"
+														data-dojo-props="value:150,
+														minimum: 50,
+														maximum:1000,
+														discreteValues:20,
+														intermediateChanges:true,
+														showButtons:true"
+														onChange='require(["RouteView.js"], function( s ) { s.cb_step_changed(); })'>
+													</div>
 									
-									                        <span>Interval : <b id="id_interval">750</b> milliseconds</span><br>
-									                        <div id="id_input_interval"
-									                            style="width:400px;"
-									                            name="horizontalSlider"
-									                            data-dojo-type="dijit/form/HorizontalSlider"
-									                            data-dojo-props="value:750,
-									                            minimum: 500,
-									                            maximum:5000,
-									                            discreteValues:91,
-									                            intermediateChanges:true,
-									                            showButtons:true"
-										                        onChange='require(["RouteView.js"], function( s ) { s.cb_interval_changed(); })'>
-									                        </div>					
-									
-									                		<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_input_meters',position:['after-centered'],showDelay:750,hideDelay:0">
-																This slider lets you define the step in the route.<br><br>
-																Default is 150 meters, meaning that each Street View image are 250 meters apart. 
-									                		</div>
-									
-									                		<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_input_interval',position:['after-centered'],showDelay:750,hideDelay:0">
-																This slider lets you define the time interval between each Street View image.<br><br>
-																Default is 750 milliseconds, meaning that each Street View image is displayed for 750 milliseconds. 
-									                		</div>
+													<span>Interval : <b id="id_interval">750</b> milliseconds</span><br>
+													<div id="id_input_interval"
+														style="width:400px;"
+														name="horizontalSlider"
+														data-dojo-type="dijit/form/HorizontalSlider"
+														data-dojo-props="value:750,
+														minimum: 500,
+														maximum:5000,
+														discreteValues:91,
+														intermediateChanges:true,
+														showButtons:true"
+														onChange='require(["RouteView.js"], function( s ) { s.cb_interval_changed(); })'>
+													</div>					
+							
+													<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_input_meters',position:['after-centered'],showDelay:750,hideDelay:0">
+														This slider lets you define the step in the route.<br><br>
+														Default is 150 meters, meaning that each Street View image are 250 meters apart. 
+													</div>
+							
+													<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_input_interval',position:['after-centered'],showDelay:750,hideDelay:0">
+														This slider lets you define the time interval between each Street View image.<br><br>
+														Default is 750 milliseconds, meaning that each Street View image is displayed for 750 milliseconds. 
+													</div>
 									
 												</div>
 											</div>
@@ -931,6 +931,46 @@
 
                                         <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_sliders_thing',position:['above-centered'],showDelay:750,hideDelay:0">
                                             This allow you to change Steps and Intervall between each image.
+                                        </div>
+
+						            </td>
+
+					                <td style="width:1%; text-align:left; vertical-align:middle; display:xnone" id="td_controls_map_pano_layout">
+		                        		<div data-dojo-type="dijit/form/DropDownButton" data-dojo-props='iconClass:"icon_btn_map_pano_layout", showLabel: false, autoWidth:false' id="id_btn_map_pano_layout" style="font-size: 85%" disabled>
+				                            <div data-dojo-type="dijit/TooltipDialog">
+							                    <div style="width:100%" align="center">
+													
+													<table>
+														<tr>
+															<td>
+																<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_map_pano_layout_1', selected: false"
+																	onClick='require(["RouteView.js"], function( s ) { s.cb_map_pano_layout(1); })' id="btn_map_pano_layout_1" >
+																</button>
+															</td>
+															<td>
+																<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_map_pano_layout_2', selected: false"
+																	onClick='require(["RouteView.js"], function( s ) { s.cb_map_pano_layout(2); })' id="btn_map_pano_layout_2" >
+																</button>
+															</td>
+															<td style="display:none">
+																<button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'icon_btn_map_pano_layout_3', checked: false"
+																	onClick='require(["RouteView.js"], function( s ) { s.cb_map_pano_layout(3); })' id="btn_map_pano_layout_3" >
+																</button>
+															</td>
+															<td style="display:none">
+																<button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'icon_btn_map_pano_layout_4', checked: false"
+																	onClick='require(["RouteView.js"], function( s ) { s.cb_map_pano_layout(4); })' id="btn_map_pano_layout_4" >
+																</button>
+															</td>
+														</tr>
+													</table>
+
+												</div>
+											</div>
+										</div>
+
+                                        <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_map_pano_layout',position:['above-centered'],showDelay:750,hideDelay:0">
+                                            Blah
                                         </div>
 
 						            </td>

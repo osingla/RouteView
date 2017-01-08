@@ -211,6 +211,107 @@ html, body {
   outline:none;
 }
 
+.icon_btn_map_pano_layout {
+  background-image: url('icons/btn-map-pano-layout.png');
+  background-repeat: no-repeat;
+  width: 24px;
+  height: 24px;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  border: none; 
+  outline:none;
+}
+
+.icon_btn_map_pano_layout_1 {
+  background-image: url('icons/icon-map-pano-layout_1.png');
+  background-repeat: no-repeat;
+  width: 64px;
+  height: 40px;
+  text-align: center;
+  margin: 2;
+  padding: 2;
+  border: none; 
+}
+
+.dijitButtonSelected .icon_btn_map_pano_layout_1 {
+  background-image: url('icons/icon-map-pano-layout_1.png');
+  background-repeat: no-repeat;
+  width: 64px;
+  height: 40px;
+  text-align: center;
+  margin: 2;
+  padding: 2;
+  border: 3px solid #000000;
+}
+
+.icon_btn_map_pano_layout_2 {
+  background-image: url('icons/icon-map-pano-layout_2.png');
+  background-repeat: no-repeat;
+  width: 64px;
+  height: 40px;
+  text-align: center;
+  margin: 2;
+  padding: 2;
+  border: none; 
+}
+
+.dijitButtonSelected .icon_btn_map_pano_layout_2 {
+  background-image: url('icons/icon-map-pano-layout_2.png');
+  background-repeat: no-repeat;
+  width: 64px;
+  height: 40px;
+  text-align: center;
+  margin: 2;
+  padding: 2;
+  border: 3px solid #000000;
+
+}
+
+.icon_btn_map_pano_layout_3 {
+  background-image: url('icons/icon-map-pano-layout_3.png');
+  background-repeat: no-repeat;
+  width: 64px;
+  height: 40px;
+  text-align: center;
+  margin: 2;
+  padding: 2;
+  border: none; 
+}
+
+.dijitButtonSelected .icon_btn_map_pano_layout_3 {
+  background-image: url('icons/icon-map-pano-layout_3.png');
+  background-repeat: no-repeat;
+  width: 64px;
+  height: 40px;
+  text-align: center;
+  margin: 2;
+  padding: 2;
+  border: 3px solid #000000;
+}
+
+.icon_btn_map_pano_layout_4 {
+  background-image: url('icons/icon-map-pano-layout_4.png');
+  background-repeat: no-repeat;
+  width: 64px;
+  height: 40px;
+  text-align: center;
+  margin: 2;
+  padding: 2;
+  border: none; 
+}
+
+.dijitButtonSelected .icon_btn_map_pano_layout_4 {
+  background-image: url('icons/icon-map-pano-layout_4.png');
+  background-repeat: no-repeat;
+  width: 64px;
+  height: 40px;
+  text-align: center;
+  margin: 2;
+  padding: 2;
+  border: 3px solid #000000;
+}
+
 #id_input_route {
 	background: grey;
 }

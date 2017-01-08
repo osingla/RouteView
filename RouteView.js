@@ -11,6 +11,8 @@ define( function( m ) {
 
 	var total_max_nb_waypoints = (MAX_NB_ROUTES * (MAX_NB_WAYPOINTS+2));
 
+	var use_broastcast_channel = true;
+	var broastcast_channel;
 	var autocompletes = [];
     var map;
     var service;
@@ -18,6 +20,8 @@ define( function( m ) {
     var pano_pos = [];
 	var map_or_panorama_full_screen;
     var panorama_full_screen;
+    var map_pano_layout = 2;
+	var map_on_left = true;
     var curr_route = undefined;
     var curr_leg;
     var prev_zoom;
@@ -109,14 +113,14 @@ define( function( m ) {
     
         if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" )
         	return;
+		if ( dijit.byId("id_btn_stop").get("disabled") )
+			return;
+
+		timer_animate = undefined;
         	
 		curr_dist = d;
         if ( curr_dist > eol ) {
             console.log( "Route " + route_index + " is done" );
-			if ( timer_animate != undefined ) { 
-				clearTimeout( timer_animate );
-				timer_animate = undefined;
-			} 
             return;
         }
 
@@ -159,8 +163,13 @@ define( function( m ) {
 									if ( prev_bearing != undefined )
 										panorama4.setPov( { heading: prev_bearing, pitch: 1 } );
 //									console.log( pano_cnt + " --> 2" );
-									if ( pano_cnt >= 4 )
+									if ( pano_cnt >= 4 ) {
 										marker_small_street_view.setPosition( pano_pos[2] );
+										if ( use_broastcast_channel ) {
+											var msg = {type:"Pos", lat:pano_pos[2].lat(), lng:pano_pos[2].lng()};
+											broastcast_channel.postMessage( msg );
+										}
+									}
 									break;
 								case 1 :
 									pano_pos[2] = panorama.getPosition();
@@ -171,8 +180,13 @@ define( function( m ) {
 									if ( prev_bearing != undefined )
 										panorama2.setPov( { heading: prev_bearing, pitch: 1 } );
 //									console.log( pano_cnt + " --> 3" );
-									if ( pano_cnt >= 4 )
+									if ( pano_cnt >= 4 ) {
 										marker_small_street_view.setPosition( pano_pos[3] );
+										if ( use_broastcast_channel ) {
+											var msg = {type:"Pos", lat:pano_pos[3].lat(), lng:pano_pos[3].lng()};
+											broastcast_channel.postMessage( msg );
+										}
+									}
 									break;
 								case 2 :
 									pano_pos[3] = panorama.getPosition();
@@ -183,8 +197,13 @@ define( function( m ) {
 									if ( prev_bearing != undefined )
 										panorama3.setPov( { heading: prev_bearing, pitch: 1 } );
 //									console.log( pano_cnt + " --> 4" );
-									if ( pano_cnt >= 4 )
+									if ( pano_cnt >= 4 ) {
 										marker_small_street_view.setPosition( pano_pos[4] );
+										if ( use_broastcast_channel ) {
+											var msg = {type:"Pos", lat:pano_pos[4].lat(), lng:pano_pos[4].lng()};
+											broastcast_channel.postMessage( msg );
+										}
+									}
 									break;
 							}
 							prev_pano_id = pano_id;
@@ -227,13 +246,13 @@ define( function( m ) {
 		directions_renderer.forEach( function( e ) {
 	       	e.setOptions( { zIndex:99, draggable:false } ); })
 
-		panorama_resize( );
 		document.getElementById("id_panorama2").style.display = "";
 		document.getElementById("id_panorama3").style.display = "";
 		document.getElementById("id_panorama4").style.display = "";
 		panorama2.setVisible( true );
 		panorama3.setVisible( true );
 		panorama4.setVisible( true );
+		window.dispatchEvent(new Event('resize'));
 
     }
 
@@ -602,6 +621,12 @@ function calculateDistance(lat1, long1, lat2, long2)
 
       	directions_service[route_index].route( directions_service_request[route_index], 
       		function(response, status) { cb_make_route(response, status); })
+
+		if ( use_broastcast_channel ) {
+			var msg = {type:"Dir", origin:start_location, destination:end_location, waypoints:way_points};
+			broastcast_channel.postMessage( msg );
+		}
+
     }
     
 	function cb_make_route(response, status) {
@@ -677,7 +702,6 @@ function calculateDistance(lat1, long1, lat2, long2)
 
     		dijit.byId('id_input_route').set( 'disabled', true );
     		
-    		console.log( "1 - DISABLED" );
     		dijit.byId('id_btn_pause').set( 'disabled', true );
     		dijit.byId('id_btn_stop').set( 'disabled', true );
 
@@ -760,6 +784,23 @@ function calculateDistance(lat1, long1, lat2, long2)
     		dlg_copy_text.show();
     	});
     }
+
+	function cb_map_pano_layout( layout ) {
+
+		for ( var n = 1; n <= 4; n++ )
+			dijit.byId('btn_map_pano_layout_'+n).set('selected', (n == layout) ? true : false, false);
+
+		map_pano_layout = layout;
+		localStorage.setItem( "map_pano_layout", map_pano_layout );
+
+    	require(["dojo/dom-style"], function( domStyle ) {
+			domStyle.set( "id_top_layout", "display", "none" );
+			domStyle.set( "id_left_layout", "display", "none" );
+			dijit.byId('app_layout').resize();
+			set_map_pano_layout( );
+		});
+
+	}
     
     function do_pause( ) {
 
@@ -773,9 +814,9 @@ function calculateDistance(lat1, long1, lat2, long2)
 			}				
 	    	require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct ) {
 				if ( map_or_panorama_full_screen ) {
-					domConstruct.place("td_map_canvas", "id_td_panorama", "before");
+					domConstruct.place("td_map_canvas", "td_panoramas_canvas", "before");
 		        	document.getElementById("td_map_canvas").style.width = "25%";
-			        document.getElementById("id_td_panorama").style.width = "75%";
+			        document.getElementById("td_panoramas_canvas").style.width = "75%";
 					map_or_panorama_full_screen = false;
 				}
 	    		dijit.byId('app_layout').resize();
@@ -821,14 +862,14 @@ function calculateDistance(lat1, long1, lat2, long2)
 			domStyle.set( "id_top_layout", "display", "" );
 			domStyle.set( "id_left_layout", "display", "table-cell" );
     		document.getElementById("td_map_canvas").style.width = "100%";
-            document.getElementById("id_td_panorama").style.width = "0%";
+            document.getElementById("td_panoramas_canvas").style.width = "0%";
 			if ( !map_or_panorama_full_screen ) {
-				domConstruct.place("id_td_panorama", "id_hidden", "after");
+				domConstruct.place("td_panoramas_canvas", "id_hidden", "after");
 				map_or_panorama_full_screen = true;	
 			}
 			else {
-				domConstruct.place("td_map_canvas", "id_td_panorama", "before");
-				domConstruct.place("id_td_panorama", "td_map_canvas", "after");
+				domConstruct.place("td_map_canvas", "td_panoramas_canvas", "before");
+				domConstruct.place("td_panoramas_canvas", "td_map_canvas", "after");
 				map_or_panorama_full_screen = false;
 			}
     		dijit.byId('app_layout').resize();
@@ -841,11 +882,11 @@ function calculateDistance(lat1, long1, lat2, long2)
 
 		var route_index = curr_route;
 
-console.log( "STOP - DISABLED" );
 		dijit.byId('id_btn_pause').set( 'disabled', true );
     	dijit.byId('id_btn_pause').set( 'label', "Pause" );
 		dijit.byId('id_btn_stop').set( 'disabled', true );
-		
+		dijit.byId('id_btn_map_pano_layout').set( 'disabled', true );
+	
 		dijit.byId('id_input_route').set( 'disabled', true );
 		dijit.byId('id_input_route').set( 'intermediateChanges', false );
 		
@@ -1277,7 +1318,7 @@ console.log( "STOP - DISABLED" );
     function panorama_resize( ) {
 		require(["dojo/dom-geometry", "dojo/dom", "dojo/dom-style"], function( domGeom, dom, domStyle ) {
 			
-			var node = dom.byId("id_td_panorama");
+			var node = dom.byId("td_panoramas_canvas");
 			var computedStyle = domStyle.getComputedStyle(node);
 			var output = domGeom.getContentBox(node, computedStyle);
 //			console.log( output );
@@ -1402,7 +1443,7 @@ console.log( "STOP - DISABLED" );
    				marker_small_street_view = new google.maps.Marker({
 					map: map,
 					title: 'Current position',
-					icon: "icons/small-streetview-icon.png"
+					icon: "icons/marker_pegman.png"
 				});
 
    				marker_no_street_view = new google.maps.Marker({
@@ -1465,10 +1506,19 @@ console.log( "STOP - DISABLED" );
         			cb_map_rightclick( evt );
        			});
         		
-            	var id_panorama = dom.byId('id_panorama');
-        		on( id_panorama, "click", function( evt ) {
-       				if ( evt.handled != true )
-       					cb_panorama_click( );
+            	var id_panorama2 = dom.byId('id_panorama2');
+        		on( id_panorama2, "dblclick", function( evt ) {
+//					console.log( evt );
+//     				if ( evt.handled == true )
+       					cb_panorama_dblclick( );
+       			});
+            	var id_panorama3 = dom.byId('id_panorama3');
+        		on( id_panorama3, "dblclick", function( evt ) {
+   					cb_panorama_dblclick( );
+       			});
+            	var id_panorama4 = dom.byId('id_panorama4');
+        		on( id_panorama4, "dblclick", function( evt ) {
+   					cb_panorama_dblclick( );
        			});
 
         		_list_countries = [
@@ -1840,6 +1890,11 @@ console.log( "STOP - DISABLED" );
 				document.getElementById("id_panorama4").style.display = "None";
             });
 
+			if ( use_broastcast_channel ) {
+				broastcast_channel = new BroadcastChannel("StreeViewPlayer.org");
+				console.log( broastcast_channel );
+			}
+
 		});
             	
 		window.onblur = function() {
@@ -1847,7 +1902,7 @@ console.log( "STOP - DISABLED" );
 		}
 
 		window.onbeforeunload = function() {
-			if ( (location.hostname != "localhost") && is_dirty )
+			if ( (location.hostname != "127.0.0.1") && is_dirty )
 				return "Route not saved";
 			return null;
 		}
@@ -2194,21 +2249,23 @@ console.log( places );
     	
     }
 
-    function cb_panorama_click( ) {
+    function cb_panorama_dblclick( ) {
 
+//		console.log( "cb_panorama_dblclick" );
 		require(["dojo/dom-construct"], function(domConstruct){
 			if ( !map_or_panorama_full_screen ) {
 				domConstruct.place("td_map_canvas", "id_hidden", "after");
 				map_or_panorama_full_screen = true;
 			}
 			else {
-				domConstruct.place("td_map_canvas", "id_td_panorama", "before");
+				domConstruct.place("td_map_canvas", "td_panoramas_canvas", "before");
 		        document.getElementById("td_map_canvas").style.width = "25%";
-		        document.getElementById("id_td_panorama").style.width = "75%";
+		        document.getElementById("td_panoramas_canvas").style.width = "75%";
 				map_or_panorama_full_screen = false;
 			}
 			google.maps.event.trigger( map, 'resize' );
 			google.maps.event.trigger( panorama, 'resize' );
+			window.dispatchEvent(new Event('resize'));
 		});
 
     }
@@ -2395,6 +2452,58 @@ console.log( places );
 		
 		do_route( route_index );
 	}
+
+	function set_map_pano_layout( ) {
+		
+    	require(["dojo/dom-construct"], function( domConstruct ) {
+			
+			var new_map_on_left;
+			var map_width, pano_width;
+			switch ( map_pano_layout ) {
+				case 1 : 
+					new_map_on_left = true;
+					map_width  = "25%"; 
+					pano_width = "75%"; 
+					break;
+				case 2 : 
+					new_map_on_left = true;
+					map_width  = "50%"; 
+					pano_width = "50%"; 
+					break;
+				case 3 : 
+					new_map_on_left = false;
+					map_width  = "50%"; 
+					pano_width = "50%"; 
+					break;
+				case 4 :
+					new_map_on_left = false;
+					map_width  = "25%"; 
+					pano_width = "75%"; 
+					break;
+			}
+			if ( new_map_on_left != map_on_left ) {
+				map_on_left = new_map_on_left;
+				if ( map_on_left ) {
+					var td_canvas = document.getElementById("td_map_canvas");
+					td_canvas.parentNode.insertBefore( td_canvas, td_canvas.parentNode.firstChild );
+				}
+				else {
+					var td_canvas = document.getElementById("td_panoramas_canvas");
+					td_canvas.parentNode.insertBefore( td_canvas, td_canvas.parentNode.firstChild );
+				}
+			}
+			if ( map_or_panorama_full_screen ) {
+				domConstruct.place("td_panoramas_canvas", "td_map_canvas", "after");
+				map_or_panorama_full_screen = false;
+			}
+			document.getElementById("td_map_canvas").style.width  = map_width;
+			document.getElementById("td_panoramas_canvas").style.width = pano_width;
+			google.maps.event.trigger( map, 'resize' );
+			google.maps.event.trigger( panorama, 'resize' );
+			window.dispatchEvent(new Event('resize'));
+			
+		});
+	}
 	
 	function cb_click_btn_drive( route_index, waypoint_index ) {
 		
@@ -2406,25 +2515,16 @@ console.log( places );
 		prev_pano_id = "";
 		pano_cnt = 0;
 
-    	require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct ) {
+    	require(["dojo/dom-style"], function( domStyle ) {
 			domStyle.set( "id_top_layout", "display", "none" );
 			domStyle.set( "id_left_layout", "display", "none" );
 			dijit.byId('app_layout').resize();
-				if ( map_or_panorama_full_screen ) {
-					domConstruct.place("id_td_panorama", "td_map_canvas", "after");
-		            document.getElementById("td_map_canvas").style.width = "25%";
-		            document.getElementById("id_td_panorama").style.width = "75%";
-					map_or_panorama_full_screen = false;
-				}
-			document.getElementById("td_map_canvas").style.width = "25%";
-			document.getElementById("id_td_panorama").style.width = "75%";
-			google.maps.event.trigger( map, 'resize' );
-			google.maps.event.trigger( panorama, 'resize' );
+			set_map_pano_layout( );
 		});
 
-console.log( "DRIVE - ENABLED" );
-   		dijit.byId('id_btn_pause').set( 'disabled', false );
+		dijit.byId('id_btn_pause').set( 'disabled', false );
 		dijit.byId('id_btn_stop').set( 'disabled', false );
+		dijit.byId('id_btn_map_pano_layout').set( 'disabled', false );
 
         start_driving( route_index );  
 
@@ -2625,6 +2725,13 @@ console.log( "DRIVE - ENABLED" );
 	    	console.log( "Restored interval= " + interval );
 	    	if ( interval != null )
 	            dijit.byId('id_input_interval').set( 'value', parse(interval) );
+	    	
+	    	map_pano_layout = localStorage.getItem("map_pano_layout");
+	    	if ( !map_pano_layout )
+	    		map_pano_layout = 1;
+	    	map_pano_layout = parse(map_pano_layout);
+	    	console.log( "Restored map_pano_layout= " + map_pano_layout );
+			dijit.byId('btn_map_pano_layout_'+map_pano_layout).set('selected', true, false);
 	    	
 	    	var route_thickness = localStorage.getItem("route_thickness");
 	    	if ( !route_thickness )
@@ -2930,7 +3037,7 @@ console.log( "DRIVE - ENABLED" );
 		
 		cb_click_fieldset_route: function( route_index ) { cb_click_fieldset_route( route_index ); },
 
-        do_street_view: function( ) { do_street_view(); },
+		cb_map_pano_layout: function( layout ) { cb_map_pano_layout( layout ); },
 		do_pause: function( ) { do_pause(); },
 		do_stop:  function( ) { do_stop(); },
 
