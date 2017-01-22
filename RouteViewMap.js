@@ -5,13 +5,51 @@ var directions_service;
 var directions_service_request;
 var directions_renderer;
 var route_bounds;
+var marker_pos_using_slider;
+var marker_pos_using_slider_no_pano;
+var prev_zoom = undefined;
+var first_pos = false;
 
 function msg_pos( msg ) {
+
+	if ( prev_zoom == undefined ) {
+		if ( first_pos ) {
+			map.setZoom( 12 );
+			first_pos = false;
+		}
+		var p = {lat:msg.lat, lng:msg.lng};
+//		console.log( p );
+		if ( !map.getBounds().contains( p ) ) 
+			map.panTo( p );
+		marker.setPosition( p );
+	}
+}
+
+function msg_slider_pos_pano( msg ) {
+	
 	var p = {lat:msg.lat, lng:msg.lng};
-	console.log( p );
+//	console.log( msg );
+	
 	if ( !map.getBounds().contains( p ) )
 		map.panTo( p );
-	marker.setPosition( p );
+	marker_pos_using_slider.setPosition( p );
+}
+
+function msg_slider_pos_enter( ) {
+
+	console.log("Enter slider");	
+	prev_zoom = map.getZoom();
+	map.fitBounds( route_bounds );
+}
+
+function msg_slider_pos_leave( ) {
+	
+	console.log("Leave slider");	
+	map.setZoom( prev_zoom );
+	prev_zoom = undefined;
+
+	marker_pos_using_slider.setPosition( null );
+	marker_pos_using_slider_no_pano.setPosition( null );
 }
 
 function msg_dir( msg ) {
@@ -33,6 +71,7 @@ function msg_dir( msg ) {
 	directions_service.route( directions_service_request, 
 		function(response, status) { cb_make_route(response, status); })
 
+	first_pos = true;
 }      		
       		
 function cb_make_route(response, status) {
@@ -59,13 +98,21 @@ function cb_make_route(response, status) {
 	}
 	
 }
-			
-
+		
 function dispatch_message( msg ) {
 	
 	switch ( msg.type ) {
 		case "Pos" :
 			msg_pos( msg );
+			break;
+		case "SliderPosPano" :
+			msg_slider_pos_pano( msg );
+			break;
+		case "SliderPosEnter" :
+			msg_slider_pos_enter( );
+			break;
+		case "SliderPosLeave" :
+			msg_slider_pos_leave( msg );
 			break;
 		case "Dir" :
 			msg_dir( msg );
@@ -104,7 +151,18 @@ function initMap() {
 		map: map,
 		icon: "icons/marker_pegman.png"
 	});
-	marker.setMap( map );
+
+	marker_pos_using_slider = new google.maps.Marker({
+		map: map,
+		title: 'Position along the route using the slider',
+		icon: "icons/marker_pos_using_slider.png"
+	});
+
+	marker_pos_using_slider_no_pano = new google.maps.Marker({
+		map: map,
+		title: 'Position along the route using the slider',
+		icon: "icons/marker_pos_using_slider_no_pano.png"
+	});
 
 	broastcast_channel = new BroadcastChannel("StreeViewPlayer.org");
 	console.log( broastcast_channel );

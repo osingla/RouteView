@@ -11,7 +11,7 @@ define( function( m ) {
 
 	var total_max_nb_waypoints = (MAX_NB_ROUTES * (MAX_NB_WAYPOINTS+2));
 
-	var use_broastcast_channel = true;
+	var use_broastcast_channel = false;
 	var broastcast_channel;
 	var autocompletes = [];
     var map;
@@ -233,6 +233,11 @@ define( function( m ) {
         map.setCenter( polylines[route_index][curr_leg].getPath().getAt(0) );
 
 		map.fitBounds( legs_bounds[route_index][curr_leg] );
+		var check_play_route_zoom_level = dijit.byId('id_check_play_route_zoom_level').get( 'checked' );
+		if ( check_play_route_zoom_level ) {
+			var play_route_zoom_level = dijit.byId('id_input_play_route_zoom_level').get( 'value' );
+			map.setZoom( parseInt(play_route_zoom_level) );
+		}
 
        	timer_animate = setTimeout( function(route_index) { cb_animate(route_index, 50); }, 5, route_index );
 
@@ -813,12 +818,14 @@ function calculateDistance(lat1, long1, lat2, long2)
 				timer_animate = undefined;
 			}				
 	    	require(["dojo/dom-style", "dojo/dom-construct"], function( domStyle, domConstruct ) {
+/*				
 				if ( map_or_panorama_full_screen ) {
 					domConstruct.place("td_map_canvas", "td_panoramas_canvas", "before");
 		        	document.getElementById("td_map_canvas").style.width = "25%";
 			        document.getElementById("td_panoramas_canvas").style.width = "75%";
 					map_or_panorama_full_screen = false;
 				}
+*/
 	    		dijit.byId('app_layout').resize();
 		        google.maps.event.trigger( map, 'resize' );
 			});
@@ -848,6 +855,13 @@ function calculateDistance(lat1, long1, lat2, long2)
     }
 
     function do_stop( ) {
+
+		if ( use_broastcast_channel ) {
+			require(["dojo/dom-style"], function( domStyle) {
+				domStyle.set( "td_map_canvas", "display", "" );
+				window.dispatchEvent(new Event('resize'));
+			});
+		}
 
 		document.getElementById("id_panorama2").style.display = "none";
 		document.getElementById("id_panorama3").style.display = "none";
@@ -1769,6 +1783,11 @@ function calculateDistance(lat1, long1, lat2, long2)
 					prev_zoom = map.getZoom();
 					map.setCenter( polylines[curr_route][curr_leg].getPath().getAt(0) );
 					map.fitBounds( legs_bounds[curr_route][curr_leg] );
+
+					if ( use_broastcast_channel ) {
+						var msg = {type:"SliderPosEnter"};
+						broastcast_channel.postMessage( msg );
+					}
 				})
 				
 				on( dijit.byId("id_input_route"), "mouseleave", function( evt ) {
@@ -1789,6 +1808,10 @@ function calculateDistance(lat1, long1, lat2, long2)
 
 					marker_pos_using_slider.setMap( null );
 					marker_pos_using_slider_no_pano.setMap( null );
+					if ( use_broastcast_channel ) {
+						var msg = {type:"SliderPosLeave"};
+						broastcast_channel.postMessage( msg );
+					}
 				})
 				
 				on( dijit.byId("id_input_route"), "click", function( evt ) {
@@ -1865,6 +1888,10 @@ function calculateDistance(lat1, long1, lat2, long2)
 								marker_pos_using_slider.setPosition( p );
 								if ( marker_pos_using_slider.getMap() == undefined )
 									marker_pos_using_slider.setMap( map );
+								if ( use_broastcast_channel ) {
+									var msg = {type:"SliderPosPano", lat:p.lat(), lng:p.lng()};
+									broastcast_channel.postMessage( msg );
+								}
 							}
 						}
 					}})());
@@ -2002,14 +2029,29 @@ function calculateDistance(lat1, long1, lat2, long2)
     	step = dijit.byId('id_input_meters').get( 'value' );
         document.getElementById("id_meters").innerHTML = step;
         document.getElementById("id_feet").innerHTML = Math.floor(step * 3.2808);
-        save_settings();
+        save_settings( true );
     }
 
     function cb_interval_changed( ) {
     	interval = dijit.byId('id_input_interval').get( 'value' );
         document.getElementById("id_interval").innerHTML = interval;
-        save_settings();
+        save_settings( true );
     }
+
+	function cb_play_route_zoom_level( ) {
+        var is_play_route_zoom_level = dijit.byId('id_check_play_route_zoom_level').get('checked');
+    	console.log( "is_play_route_zoom_level = " + is_play_route_zoom_level );
+		dijit.byId('id_input_play_route_zoom_level').set( 'disabled', (is_play_route_zoom_level) ? false : true );
+        document.getElementById("id_val_play_route_zoom_level").style.display = (is_play_route_zoom_level) ? "" : "None";
+        save_settings( false );
+	}
+
+	function cb_play_route_zoom_level_changed( ) {
+    	play_route_zoom_level = dijit.byId('id_input_play_route_zoom_level').get( 'value' );
+    	console.log( "play_route_zoom_level = " + play_route_zoom_level );
+		document.getElementById("id_val_play_route_zoom_level").innerHTML = play_route_zoom_level;
+		save_settings( false );
+	}
     
 	function cb_route_thickness_changed( ) {
     	route_thickness = dijit.byId('id_input_route_thickness').get( 'value' );
@@ -2027,7 +2069,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 			if ( map_style != "" )
 				s.set_map_style( map, parseInt( map_style ) ); 
 		})
-		save_settings();
+		save_settings( false );
 	}
 
     function cb_click_no_hwy( route_index ) {
@@ -2455,10 +2497,16 @@ console.log( places );
 
 	function set_map_pano_layout( ) {
 		
+		if ( use_broastcast_channel ) {
+			require(["dojo/dom-style"], function( domStyle) {
+				domStyle.set( "td_map_canvas", "display", "none" );
+				window.dispatchEvent(new Event('resize'));
+				return;
+			});
+		}
+
     	require(["dojo/dom-construct"], function( domConstruct ) {
 			
-			var new_map_on_left;
-			var map_width, pano_width;
 			switch ( map_pano_layout ) {
 				case 1 : 
 					new_map_on_left = true;
@@ -2626,71 +2674,86 @@ console.log( places );
     	return typeof type == 'string' ? JSON.parse(type) : type;
     }
     
-    function save_settings( ) {
+    function save_settings( close_dlg ) {
 
+		console.log( "Save Settings:" );
         require(["dojo/dom"], function( dom) {
 
 	    	if ( typeof(Storage) == "undefined" ) {
-	    		console.log( "No local storage!" );
+	    		console.log( "  No local storage!" );
 	    		return;
 	    	}
 	
 			for (var route_index = 0; route_index < MAX_NB_ROUTES; route_index++) {
 		        var no_hwy  = dijit.byId('id_check_no_hwy_'+route_index).get( 'checked' );
 		    	localStorage.setItem( "no_highway_"+route_index, no_hwy );
-		    	console.log( "Route " + route_index + " no_hwy= " + no_hwy );
+		    	console.log( "  Route " + route_index + " no_hwy= " + no_hwy );
 			}
 	
 			for (var route_index = 0; route_index < MAX_NB_ROUTES; route_index++) {
 		        var no_toll = dijit.byId('id_check_no_toll_'+route_index).get( 'checked' );
 		    	localStorage.setItem( "no_toll_"+route_index, no_hwy );
-		    	console.log( "Route " + route_index + " no_toll= " + no_hwy );
+		    	console.log( "  Route " + route_index + " no_toll= " + no_hwy );
 		    }
 	
 	    	var step = dijit.byId('id_input_meters').get( 'value' );
 	    	localStorage.setItem( "step", step );
-	    	console.log( "step= " + step );
+	    	console.log( "  step= " + step );
 	    	
 	    	var interval = dijit.byId('id_input_interval').get( 'value' );
 	    	localStorage.setItem( "interval", interval );
-	    	console.log( "interval= " + interval );
+	    	console.log( "  interval= " + interval );
+
+			var is_show_all_routes = dijit.byId('id_check_show_all_routes').get('checked');
+	    	localStorage.setItem( "show_all_routes", is_show_all_routes );
+	    	console.log( "  show_all_routes = " + is_show_all_routes );
+
+			var check_play_route_zoom_level = dijit.byId('id_check_play_route_zoom_level').get( 'checked' );
+			var play_route_zoom_level = -1;
+			if ( check_play_route_zoom_level )
+				play_route_zoom_level = dijit.byId('id_input_play_route_zoom_level').get( 'value' );
+	    	localStorage.setItem( "play_route_zoom_level", play_route_zoom_level );
+	    	console.log( "  play_route_zoom_level= " + play_route_zoom_level );
 	    	
 	    	var route_thickness = dijit.byId('id_input_route_thickness').get( 'value' );
 	    	localStorage.setItem( "route_thickness", route_thickness );
-	    	console.log( "route_thickness= " + route_thickness );
+	    	console.log( "  route_thickness= " + route_thickness );
 	    	
 	        var google_maps_api_key = dijit.byId('id_google_maps_api_key').get( 'value' );
 	    	localStorage.setItem( "id_google_maps_api_key", google_maps_api_key );
-	    	console.log( "google_maps_api_key= " + google_maps_api_key );
+	    	console.log( "  google_maps_api_key= " + google_maps_api_key );
 	    		
 	        var addr_for_orig = dijit.byId('id_addr_for_orig').get( 'value' );
 	    	localStorage.setItem( "id_addr_for_orig", addr_for_orig );
-	    	console.log( "addr_for_orig= " + addr_for_orig );
+	    	console.log( "  addr_for_orig= " + addr_for_orig );
 
 	    	var map_style = dom.byId('id_map_style').value;
 	    	localStorage.setItem( "map_style", map_style );
-	    	console.log( "map_style= " + map_style );
+	    	console.log( "  map_style= " + map_style );
 	    		
 	    	var autocomplete_restriction = dom.byId('id_autocomplete_restriction').value;
 	    	localStorage.setItem( "autocomplete_restriction", autocomplete_restriction );
-	    	console.log( "autocomplete_restriction= " + autocomplete_restriction );
+	    	console.log( "  autocomplete_restriction= " + autocomplete_restriction );
 	    		
 	    	var autocomplete_restrict_country = dom.byId('id_autocomplete_restrict_country').value;
 	    	localStorage.setItem( "autocomplete_restrict_country", autocomplete_restrict_country );
-	    	console.log( "autocomplete_restrict_country= " + autocomplete_restrict_country );
-	    		
-	    	var dlg = dijit.byId('id_configuration_dlg');
-	    	dlg.closeDropDown( false );
+	    	console.log( "  autocomplete_restrict_country= " + autocomplete_restrict_country );
+	
+			if ( close_dlg ) {
+				var dlg = dijit.byId('id_configuration_dlg');
+				dlg.closeDropDown( false );
+			}
 	    	
     	});
     }
     
     function load_settings( ) {
 
+		console.log( "Load settings:" );
         require(["dojo/dom"], function( dom) {
 
 	    	if ( typeof(Storage) == "undefined" ) {
-	    		console.log( "No local storage!" );
+	    		console.log( "  No local storage!" );
 	    		return;
 	    	}
 	    	
@@ -2698,7 +2761,7 @@ console.log( places );
 		    	var no_hwy = localStorage.getItem("no_highway_"+route_index);
 		    	if ( !no_hwy )
 		    		no_hwy = true;
-	    		console.log( "Route " + route_index + " - Restored no_hwy= " + no_hwy );
+	    		console.log( "  Route " + route_index + " - Restored no_hwy= " + no_hwy );
 		    	if ( no_hwy != null )
 	    	        dijit.byId('id_check_no_hwy_'+route_index).set( 'checked', parse(no_hwy), false );
 			}
@@ -2707,7 +2770,7 @@ console.log( places );
 		    	var no_toll = localStorage.getItem("no_toll_"+route_index);
 		    	if ( !no_toll )
 		    		no_toll = true;
-	    		console.log( "Route " + route_index + " - Restored no_toll= " + no_toll );
+	    		console.log( "  Route " + route_index + " - Restored no_toll= " + no_toll );
 	    		if ( no_toll != null )
 	            	dijit.byId('id_check_no_toll_'+route_index).set( 'checked', parse(no_toll), false );
 			}
@@ -2715,59 +2778,91 @@ console.log( places );
 	    	var step = localStorage.getItem("step");
 	    	if ( !step )
 	    		step = 150;
-	    	console.log( "Restored step= " + step );
-	    	if ( step != null )
-	            dijit.byId('id_input_meters').set( 'value', parse(step) );
+	    	console.log( "  Restored step= " + step );
+	    	if ( step != null ) {
+	            dijit.byId('id_input_meters').set( 'intermediateChanges', false );
+	            dijit.byId('id_input_meters').set( 'value', parse(step), false );
+	            dijit.byId('id_input_meters').set( 'intermediateChanges', true );
+	        }
 	    	
 	    	var interval = localStorage.getItem("interval");
 	    	if ( !interval )
 	    		interval = 750;
-	    	console.log( "Restored interval= " + interval );
-	    	if ( interval != null )
-	            dijit.byId('id_input_interval').set( 'value', parse(interval) );
+	    	console.log( "  Restored interval= " + interval );
+	    	if ( interval != null ) {
+	            dijit.byId('id_input_interval').set( 'intermediateChanges', false );
+	            dijit.byId('id_input_interval').set( 'value', parse(interval), false );
+	            dijit.byId('id_input_interval').set( 'intermediateChanges', true );
+	        }
 	    	
 	    	map_pano_layout = localStorage.getItem("map_pano_layout");
 	    	if ( !map_pano_layout )
 	    		map_pano_layout = 1;
 	    	map_pano_layout = parse(map_pano_layout);
-	    	console.log( "Restored map_pano_layout= " + map_pano_layout );
+	    	console.log( "  Restored map_pano_layout= " + map_pano_layout );
 			dijit.byId('btn_map_pano_layout_'+map_pano_layout).set('selected', true, false);
+
+	    	var is_show_all_routes = localStorage.getItem("show_all_routes");
+	    	if ( !is_show_all_routes )
+	    		is_show_all_routes = true;
+	    	console.log( "  Restored is_show_all_routes= " + is_show_all_routes );
+	    	if ( is_show_all_routes != null )
+	            dijit.byId('id_check_show_all_routes').set( 'checked', parse(is_show_all_routes), false );
 	    	
+	    	var play_route_zoom_level = localStorage.getItem("play_route_zoom_level");
+	    	console.log( "  Restored play_route_zoom_level= " + play_route_zoom_level );
+	    	if ( play_route_zoom_level == -1 ) {
+				dijit.byId('id_check_play_route_zoom_level').set( 'checked', false, false );
+				dijit.byId('id_input_play_route_zoom_level').set( 'disabled', true, false );
+				document.getElementById("id_val_play_route_zoom_level").style.display = "None";
+			}
+			else {
+				dijit.byId('id_check_play_route_zoom_level').set( 'checked', true, false );
+				dijit.byId('id_input_play_route_zoom_level').set( 'disabled', false );
+	            dijit.byId('id_input_play_route_zoom_level').set( 'intermediateChanges', false );
+	            dijit.byId('id_input_play_route_zoom_level').set( 'value', parse(play_route_zoom_level), false );
+	            dijit.byId('id_input_play_route_zoom_level').set( 'intermediateChanges', true );
+				document.getElementById("id_val_play_route_zoom_level").innerHTML = play_route_zoom_level;
+				document.getElementById("id_val_play_route_zoom_level").style.display = "";
+			}
 	    	var route_thickness = localStorage.getItem("route_thickness");
 	    	if ( !route_thickness )
 	    		route_thickness = 3;
-	    	console.log( "Restored route_thickness= " + route_thickness );
-	    	if ( route_thickness != null )
-	            dijit.byId('id_input_route_thickness').set( 'value', parse(route_thickness) );
-	    	
+	    	console.log( "  Restored route_thickness= " + route_thickness );
+	    	if ( route_thickness != null ) {
+	            dijit.byId('id_input_route_thickness').set( 'intermediateChanges', false );
+	            dijit.byId('id_input_route_thickness').set( 'value', parse(route_thickness), false );
+	            dijit.byId('id_input_route_thickness').set( 'intermediateChanges', true );
+	        }
+
 	    	var google_maps_api_key = localStorage.getItem("id_google_maps_api_key");
 	    	if ( !google_maps_api_key )
 	    		google_maps_api_key = "";
-	    	console.log( "Restored google_maps_api_key= " + google_maps_api_key );
+	    	console.log( "  Restored google_maps_api_key= " + google_maps_api_key );
 	        dijit.byId('id_google_maps_api_key').set( 'value', google_maps_api_key );
 	    	
 	    	var addr_for_orig = localStorage.getItem("id_addr_for_orig");
 	    	if ( !addr_for_orig )
 	    		addr_for_orig = "";
-	    	console.log( "Restored addr_for_orig= " + addr_for_orig );
+	    	console.log( "  Restored addr_for_orig= " + addr_for_orig );
 	        dijit.byId('id_addr_for_orig').set( 'value', addr_for_orig );
 	    	
 	    	var map_style = localStorage.getItem("map_style");
 	    	if ( !map_style )
 	    		map_style = "1";
-	    	console.log( "Restored map_style= " + map_style );
+	    	console.log( "  Restored map_style= " + map_style );
 	    	dom.byId('id_map_style').value = map_style;
 	            
 	    	var autocomplete_restriction = localStorage.getItem("autocomplete_restriction");
 	    	if ( !autocomplete_restriction )
 	    		autocomplete_restriction = "";
-	    	console.log( "Restored autocomplete_restriction= " + autocomplete_restriction );
+	    	console.log( "  Restored autocomplete_restriction= " + autocomplete_restriction );
 	    	dom.byId('id_autocomplete_restriction').value = autocomplete_restriction;
 	            
 	    	var autocomplete_restrict_country = localStorage.getItem("autocomplete_restrict_country");
 	    	if ( !autocomplete_restrict_country )
 	    		autocomplete_restrict_country = "";
-	    	console.log( "Restored autocomplete_restrict_country= " + autocomplete_restrict_country );
+	    	console.log( "  Restored autocomplete_restrict_country= " + autocomplete_restrict_country );
 	    	dom.byId('id_autocomplete_restrict_country').value = autocomplete_restrict_country;
 	            
         });
@@ -3034,6 +3129,7 @@ console.log( places );
 
 		cb_click_use_route: function( route ) { cb_click_use_route( route ); },
 		cb_show_all_routes: function( ) { cb_show_all_routes( ); },
+		cb_play_route_zoom_level: function( ) { cb_play_route_zoom_level( ); },
 		
 		cb_click_fieldset_route: function( route_index ) { cb_click_fieldset_route( route_index ); },
 
@@ -3058,6 +3154,7 @@ console.log( places );
 
 		cb_step_changed:     function( ) { cb_step_changed(); },
 		cb_interval_changed: function( ) { cb_interval_changed(); },
+		cb_play_route_zoom_level_changed: function( ) { cb_play_route_zoom_level_changed(); },
 		cb_route_thickness_changed: function( ) { cb_route_thickness_changed(); },
 
 		cb_map_style_changed:	function( ) { cb_map_style_changed(); },
@@ -3069,7 +3166,7 @@ console.log( places );
 
 		cb_copy_long_url: function( ) { cb_copy_long_url( ); },
 		
-		save_settings: 		function( ) { save_settings(); },
+		save_settings: 		function( ) { save_settings( true ); },
 		clear_settings: 	function( ) { clear_settings(); },
 		
 		save_ride:	function() { save_ride(); }

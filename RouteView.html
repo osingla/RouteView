@@ -318,6 +318,49 @@
 																When not selected, only the current route will be shown on the map. Other routes or part of them might still be shown.  
 									                		</div>
 							                       		</div>
+							                       		
+									                    <div style="width:100%" align="center">
+															
+															<table cellspacing="0" cellpadding="0" style="width:100%; white-space: nowrap" >
+																<tr>
+																	<td>
+																		<div style="width:100%" align="left">
+																			<button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" style="font-size: 100%;"
+																					onClick='require(["RouteView.js"], function( s ) { s.cb_play_route_zoom_level(); })' id="id_check_play_route_zoom_level" >
+																				Route View Zoom Level
+																			 </button>
+																			<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_play_route_zoom_level',position:['above-centered'],showDelay:750,hideDelay:0">
+																				Apply when starting to play the route.<br><br>
+																				When selected, this zoom will apply.<br>
+																				When not selected, the zoom will be automatically set so the whole route is shown on the map.
+																			</div>
+																		</div>
+																	</td>
+																	<td>
+																		<div style="width:100%" align="center">
+																			<div id="id_input_play_route_zoom_level" disabled
+																				style="width:200px;"
+																				name="horizontalSlider"
+																				data-dojo-type="dijit/form/HorizontalSlider"
+																				data-dojo-props="value:3,
+																				minimum: 9,
+																				maximum:15,
+																				discreteValues:7,
+																				intermediateChanges:true,
+																				showButtons:true"
+																				onChange='require(["RouteView.js"], function( s ) { s.cb_play_route_zoom_level_changed(); })'>
+																			</div>
+																		</div>
+																	</td>
+																	<td>
+																		<b id="id_val_play_route_zoom_level"></b>
+																	</td>
+																</tr>
+															</table>
+															
+							                       		</div>
+							                       		
+							                       		<hr>
 
 									                    <div style="width:100%" align="center">
 									                        <span>Route Thickness : <span></span><b id="id_route_thickness">3</b> pixels</span></span><br>
@@ -893,9 +936,9 @@
 														name="horizontalSlider"
 														data-dojo-type="dijit/form/HorizontalSlider"
 														data-dojo-props="value:150,
-														minimum: 50,
+														minimum: 200,
 														maximum:1000,
-														discreteValues:20,
+														discreteValues:17,
 														intermediateChanges:true,
 														showButtons:true"
 														onChange='require(["RouteView.js"], function( s ) { s.cb_step_changed(); })'>
@@ -907,9 +950,9 @@
 														name="horizontalSlider"
 														data-dojo-type="dijit/form/HorizontalSlider"
 														data-dojo-props="value:750,
-														minimum: 500,
-														maximum:5000,
-														discreteValues:91,
+														minimum: 350,
+														maximum:10000,
+														discreteValues:194,
 														intermediateChanges:true,
 														showButtons:true"
 														onChange='require(["RouteView.js"], function( s ) { s.cb_interval_changed(); })'>
