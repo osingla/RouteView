@@ -21,7 +21,6 @@ define( function( m ) {
 	var map_or_panorama_full_screen;
     var panorama_full_screen;
     var map_pano_layout = 2;
-	var map_on_left = true;
     var curr_route = undefined;
     var curr_leg;
     var prev_zoom;
@@ -236,6 +235,7 @@ define( function( m ) {
 		var check_play_route_zoom_level = dijit.byId('id_check_play_route_zoom_level').get( 'checked' );
 		if ( check_play_route_zoom_level ) {
 			var play_route_zoom_level = dijit.byId('id_input_play_route_zoom_level').get( 'value' );
+			console.log( play_route_zoom_level );
 			map.setZoom( parseInt(play_route_zoom_level) );
 		}
 
@@ -923,8 +923,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 				
 //				dojoConfig = { gmaps: { v: '3.25', libraries: 'places,geometry' } };
 //				var rq = "//maps.google.com/maps/api/js?v=3.25&sensor=false&libraries=places,geometry";
-				var google_api = "3.26";
-//				var google_api = "3.27";
+//				var google_api = "3.26";
+				var google_api = "3.27";
 				var rq = "//maps.google.com/maps/api/js?v="+google_api+"&sensor=false&libraries=places,geometry";
 		    	var google_maps_api_key = localStorage.getItem("id_google_maps_api_key");
 		    	if ( google_maps_api_key && (google_maps_api_key != "") )
@@ -2301,8 +2301,8 @@ console.log( places );
 			}
 			else {
 				domConstruct.place("td_map_canvas", "td_panoramas_canvas", "before");
-		        document.getElementById("td_map_canvas").style.width = "25%";
-		        document.getElementById("td_panoramas_canvas").style.width = "75%";
+		        document.getElementById("td_map_canvas").style.width = "40%";
+		        document.getElementById("td_panoramas_canvas").style.width = "60%";
 				map_or_panorama_full_screen = false;
 			}
 			google.maps.event.trigger( map, 'resize' );
@@ -2509,36 +2509,13 @@ console.log( places );
 			
 			switch ( map_pano_layout ) {
 				case 1 : 
-					new_map_on_left = true;
-					map_width  = "25%"; 
-					pano_width = "75%"; 
+					map_width  = "40%"; 
+					pano_width = "60%"; 
 					break;
 				case 2 : 
-					new_map_on_left = true;
 					map_width  = "50%"; 
 					pano_width = "50%"; 
 					break;
-				case 3 : 
-					new_map_on_left = false;
-					map_width  = "50%"; 
-					pano_width = "50%"; 
-					break;
-				case 4 :
-					new_map_on_left = false;
-					map_width  = "25%"; 
-					pano_width = "75%"; 
-					break;
-			}
-			if ( new_map_on_left != map_on_left ) {
-				map_on_left = new_map_on_left;
-				if ( map_on_left ) {
-					var td_canvas = document.getElementById("td_map_canvas");
-					td_canvas.parentNode.insertBefore( td_canvas, td_canvas.parentNode.firstChild );
-				}
-				else {
-					var td_canvas = document.getElementById("td_panoramas_canvas");
-					td_canvas.parentNode.insertBefore( td_canvas, td_canvas.parentNode.firstChild );
-				}
 			}
 			if ( map_or_panorama_full_screen ) {
 				domConstruct.place("td_panoramas_canvas", "td_map_canvas", "after");
@@ -2810,6 +2787,8 @@ console.log( places );
 	            dijit.byId('id_check_show_all_routes').set( 'checked', parse(is_show_all_routes), false );
 	    	
 	    	var play_route_zoom_level = localStorage.getItem("play_route_zoom_level");
+	    	if ( !play_route_zoom_level )
+	    		play_route_zoom_level = -1;
 	    	console.log( "  Restored play_route_zoom_level= " + play_route_zoom_level );
 	    	if ( play_route_zoom_level == -1 ) {
 				dijit.byId('id_check_play_route_zoom_level').set( 'checked', false, false );
