@@ -109,6 +109,8 @@ define( function( m ) {
 	}
     
     function cb_animate( route_index, d ) {
+
+//		console.log( "route_index=" + route_index + " - d=" + d );
     
         if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" )
         	return;
@@ -130,95 +132,103 @@ define( function( m ) {
 			if ( !map.getBounds().contains( p ) )
 				map.panTo( p );
 
-		street_view_check[(route_index == -1) ? 0 : route_index].getPanoramaByLocation(p, 50, (function(route_index) { return function(result, status) {
-//			console.log(result);
-		    if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
-		        console.log( "No street view available - route=" + route_index );        
-				marker_small_street_view.setPosition( null );
-        		marker_no_street_view.setPosition( p );
-				if ( step > 0 ) 
-					restart_animate_timer( route_index, false );
-		    }
-		    else {
-        		marker_no_street_view.setPosition( null );
-		        var iad = polyline.GetIndexAtDistance( curr_dist );
-        		bearing = polyline.Bearing( iad );
-//				console.log( curr_dist + " / " + eol + " --> " + bearing);
-				if (bearing == undefined)
-					bearing = prev_bearing;
-				if (bearing != undefined) {
-					panorama.addListener('pano_changed', function() {
-						var pano_id = panorama.getPano();
-						if (pano_id != prev_pano_id) {
-//							marker_small_street_view.setMap( map );
-							var index = 0;
-							switch (pano_cnt++ % 3) {
-								case 0 :
-									pano_pos[4] = panorama.getPosition();
-									document.getElementById("id_panorama2").style.zIndex = "1";
-									document.getElementById("id_panorama3").style.zIndex = "0"
-									document.getElementById("id_panorama4").style.zIndex = "0"
-									panorama4.setPano( prev_pano_id );
-									if ( prev_bearing != undefined )
-										panorama4.setPov( { heading: prev_bearing, pitch: 1 } );
-//									console.log( pano_cnt + " --> 2" );
-									if ( pano_cnt >= 4 ) {
-										marker_small_street_view.setPosition( pano_pos[2] );
-										if ( use_broastcast_channel ) {
-											var msg = {type:"Pos", lat:pano_pos[2].lat(), lng:pano_pos[2].lng()};
-											broastcast_channel.postMessage( msg );
-										}
-									}
-									break;
-								case 1 :
-									pano_pos[2] = panorama.getPosition();
-									document.getElementById("id_panorama3").style.zIndex = "1";
-									document.getElementById("id_panorama2").style.zIndex = "0"
-									document.getElementById("id_panorama4").style.zIndex = "0";
-									panorama2.setPano( prev_pano_id );
-									if ( prev_bearing != undefined )
-										panorama2.setPov( { heading: prev_bearing, pitch: 1 } );
-//									console.log( pano_cnt + " --> 3" );
-									if ( pano_cnt >= 4 ) {
-										marker_small_street_view.setPosition( pano_pos[3] );
-										if ( use_broastcast_channel ) {
-											var msg = {type:"Pos", lat:pano_pos[3].lat(), lng:pano_pos[3].lng()};
-											broastcast_channel.postMessage( msg );
-										}
-									}
-									break;
-								case 2 :
-									pano_pos[3] = panorama.getPosition();
-									document.getElementById("id_panorama4").style.zIndex = "1"
-									document.getElementById("id_panorama3").style.zIndex = "0";
-									document.getElementById("id_panorama2").style.zIndex = "0";
-									panorama3.setPano( prev_pano_id );
-									if ( prev_bearing != undefined )
-										panorama3.setPov( { heading: prev_bearing, pitch: 1 } );
-//									console.log( pano_cnt + " --> 4" );
-									if ( pano_cnt >= 4 ) {
-										marker_small_street_view.setPosition( pano_pos[4] );
-										if ( use_broastcast_channel ) {
-											var msg = {type:"Pos", lat:pano_pos[4].lat(), lng:pano_pos[4].lng()};
-											broastcast_channel.postMessage( msg );
-										}
-									}
-									break;
-							}
-							prev_pano_id = pano_id;
-							if ( step > 0 )
-								restart_animate_timer( route_index, (pano_cnt <= 3) );
-						}
-					});
-//					map.setStreetView( panorama );
-					panorama.setPosition( p );
-//					if ( prev_bearing != undefined )
-//						panorama.setPov( { heading: prev_bearing, pitch: 1 } );
-					prev_bearing = bearing;
+		(function ( route_index ) {
+
+			street_view_check[(route_index == -1) ? 0 : route_index].getPanoramaByLocation(p, 50, (function(route_index) { return function(result, status) {
+	//			console.log(result);
+				if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
+					console.log( "No street view available - route=" + route_index );        
+					marker_small_street_view.setPosition( null );
+					marker_no_street_view.setPosition( p );
+					if ( step > 0 ) 
+						restart_animate_timer( route_index, false );
 				}
-		    }
-			dijit.byId('id_input_route').set( 'value', curr_dist, false );
-		}})(route_index));
+				else {
+					marker_no_street_view.setPosition( null );
+					var iad = polyline.GetIndexAtDistance( curr_dist );
+					bearing = polyline.Bearing( iad );
+	//				console.log( curr_dist + " / " + eol + " --> " + bearing);
+					if (bearing == undefined)
+						bearing = prev_bearing;
+					if (bearing != undefined) {
+						curr_route = route_index;
+						(function ( route_index ) {
+							panorama.addListener('pano_changed', function() {
+								route_index = curr_route;
+								var pano_id = panorama.getPano();
+								if (pano_id != prev_pano_id) {
+		//							marker_small_street_view.setMap( map );
+									var index = 0;
+									switch (pano_cnt++ % 3) {
+										case 0 :
+											pano_pos[4] = panorama.getPosition();
+											document.getElementById("id_panorama2").style.zIndex = "1";
+											document.getElementById("id_panorama3").style.zIndex = "0"
+											document.getElementById("id_panorama4").style.zIndex = "0"
+											panorama4.setPano( prev_pano_id );
+											if ( prev_bearing != undefined )
+												panorama4.setPov( { heading: prev_bearing, pitch: 1 } );
+		//									console.log( pano_cnt + " --> 2" );
+											if ( pano_cnt >= 4 ) {
+												marker_small_street_view.setPosition( pano_pos[2] );
+												if ( use_broastcast_channel ) {
+													var msg = {type:"Pos", lat:pano_pos[2].lat(), lng:pano_pos[2].lng()};
+													broastcast_channel.postMessage( msg );
+												}
+											}
+											break;
+										case 1 :
+											pano_pos[2] = panorama.getPosition();
+											document.getElementById("id_panorama3").style.zIndex = "1";
+											document.getElementById("id_panorama2").style.zIndex = "0"
+											document.getElementById("id_panorama4").style.zIndex = "0";
+											panorama2.setPano( prev_pano_id );
+											if ( prev_bearing != undefined )
+												panorama2.setPov( { heading: prev_bearing, pitch: 1 } );
+		//									console.log( pano_cnt + " --> 3" );
+											if ( pano_cnt >= 4 ) {
+												marker_small_street_view.setPosition( pano_pos[3] );
+												if ( use_broastcast_channel ) {
+													var msg = {type:"Pos", lat:pano_pos[3].lat(), lng:pano_pos[3].lng()};
+													broastcast_channel.postMessage( msg );
+												}
+											}
+											break;
+										case 2 :
+											pano_pos[3] = panorama.getPosition();
+											document.getElementById("id_panorama4").style.zIndex = "1"
+											document.getElementById("id_panorama3").style.zIndex = "0";
+											document.getElementById("id_panorama2").style.zIndex = "0";
+											panorama3.setPano( prev_pano_id );
+											if ( prev_bearing != undefined )
+												panorama3.setPov( { heading: prev_bearing, pitch: 1 } );
+		//									console.log( pano_cnt + " --> 4" );
+											if ( pano_cnt >= 4 ) {
+												marker_small_street_view.setPosition( pano_pos[4] );
+												if ( use_broastcast_channel ) {
+													var msg = {type:"Pos", lat:pano_pos[4].lat(), lng:pano_pos[4].lng()};
+													broastcast_channel.postMessage( msg );
+												}
+											}
+											break;
+									}
+									prev_pano_id = pano_id;
+									if ( step > 0 )
+										restart_animate_timer( route_index, (pano_cnt <= 3) );
+								}
+							});
+						})( route_index );
+	//					map.setStreetView( panorama );
+						panorama.setPosition( p );
+	//					if ( prev_bearing != undefined )
+	//						panorama.setPov( { heading: prev_bearing, pitch: 1 } );
+						prev_bearing = bearing;
+					}
+				}
+				dijit.byId('id_input_route').set( 'value', curr_dist, false );
+			}})(route_index));
+
+		})( route_index );
 
     }
 
@@ -233,11 +243,13 @@ define( function( m ) {
 
 		map.fitBounds( legs_bounds[route_index][curr_leg] );
 		var check_play_route_zoom_level = dijit.byId('id_check_play_route_zoom_level').get( 'checked' );
+/*		
 		if ( check_play_route_zoom_level ) {
 			var play_route_zoom_level = dijit.byId('id_input_play_route_zoom_level').get( 'value' );
 			console.log( play_route_zoom_level );
 			map.setZoom( parseInt(play_route_zoom_level) );
 		}
+*/
 
        	timer_animate = setTimeout( function(route_index) { cb_animate(route_index, 50); }, 5, route_index );
 
@@ -551,6 +563,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 				index_waypoint = new_dir.request.ec;
             else if (new_dir.request.Ib != undefined)
 				index_waypoint = new_dir.request.Ib;
+            else if (new_dir.request.Jb != undefined)
+				index_waypoint = new_dir.request.Jb;
             if ( index_waypoint == undefined ) {
 				console.log( "UNDEFINED >>>>>>" );
 				console.log( new_dir.request );
@@ -923,8 +937,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 				
 //				dojoConfig = { gmaps: { v: '3.25', libraries: 'places,geometry' } };
 //				var rq = "//maps.google.com/maps/api/js?v=3.25&sensor=false&libraries=places,geometry";
-//				var google_api = "3.26";
-				var google_api = "3.27";
+				var google_api = "3.26";
+//				var google_api = "3.27";
 				var rq = "//maps.google.com/maps/api/js?v="+google_api+"&sensor=false&libraries=places,geometry";
 		    	var google_maps_api_key = localStorage.getItem("id_google_maps_api_key");
 		    	if ( google_maps_api_key && (google_maps_api_key != "") )
@@ -2787,9 +2801,9 @@ console.log( places );
 	            dijit.byId('id_check_show_all_routes').set( 'checked', parse(is_show_all_routes), false );
 	    	
 	    	var play_route_zoom_level = localStorage.getItem("play_route_zoom_level");
+	    	console.log( "  Restored play_route_zoom_level= " + play_route_zoom_level );
 	    	if ( !play_route_zoom_level )
 	    		play_route_zoom_level = -1;
-	    	console.log( "  Restored play_route_zoom_level= " + play_route_zoom_level );
 	    	if ( play_route_zoom_level == -1 ) {
 				dijit.byId('id_check_play_route_zoom_level').set( 'checked', false, false );
 				dijit.byId('id_input_play_route_zoom_level').set( 'disabled', true, false );
