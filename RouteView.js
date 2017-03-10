@@ -935,6 +935,9 @@ function calculateDistance(lat1, long1, lat2, long2)
 
     	require(["dojo/dom", "dojo/on", "dojo/dom-style", "dojo/dom-geometry", "dojo/store/Memory", "dojo/ready"], function( dom, on, domStyle, domGeom, Memory, ready ) {
             ready( function() {
+
+				console.log("DOJO version: " + dojo.version);
+
    				load_settings( );
 				
 //				dojoConfig = { gmaps: { v: '3.25', libraries: 'places,geometry' } };
