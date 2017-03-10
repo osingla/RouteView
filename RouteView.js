@@ -565,6 +565,8 @@ function calculateDistance(lat1, long1, lat2, long2)
 				index_waypoint = new_dir.request.Ib;
             else if (new_dir.request.Jb != undefined)
 				index_waypoint = new_dir.request.Jb;
+            else if (new_dir.request.Gb != undefined)
+				index_waypoint = new_dir.request.Gb;
             if ( index_waypoint == undefined ) {
 				console.log( "UNDEFINED >>>>>>" );
 				console.log( new_dir.request );
@@ -939,6 +941,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 //				var rq = "//maps.google.com/maps/api/js?v=3.25&sensor=false&libraries=places,geometry";
 				var google_api = "3.26";
 //				var google_api = "3.27";
+//				var google_api = "3.28";
 				var rq = "//maps.google.com/maps/api/js?v="+google_api+"&sensor=false&libraries=places,geometry";
 		    	var google_maps_api_key = localStorage.getItem("id_google_maps_api_key");
 		    	if ( google_maps_api_key && (google_maps_api_key != "") )
