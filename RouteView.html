@@ -522,15 +522,19 @@
 									                        <hr>
 									                        <table>
 									                            <tr align="center">
-									                            	<td colspan="2">
+									                            	<td>
 													                    <button dojoType="dijit.form.Button" type="button" style="Display: " id="id_btn_save_gpx" 
 													                     onclick='require(["RouteView.js"], function( s ) { s.do_save_gpx(); })' disabled>Save GPX file</button>
 									                            	</td>
+									                            	<td>
+													                    <button dojoType="dijit.form.Button" type="button" style="Display: " id="id_btn_create_gmaps_url" 
+													                     onclick='require(["RouteView.js"], function( s ) { s.do_create_gmaps_url(); })' disabled>Create Google Maps URL</button>
+									                            	</td>
 									                            </tr>
 									                            <tr>
-                        											<td valign="middle" align="center">
+                        											<td valign="middle" align="center" colspan="2">
 													                    <button dojoType="dijit.form.Button" type="button" style="Display: " id="id_btn_create_long_url" 
-													                     onclick='require(["RouteView.js"], function( s ) { s.do_create_long_url(); })' disabled>Create Long URL</button>
+													                     onclick='require(["RouteView.js"], function( s ) { s.do_create_long_url(); })' disabled>Create StreetView Player URL</button>
 									                            	</td>
 									                            </tr>
 									                        </table>

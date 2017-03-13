@@ -628,6 +628,7 @@ function calculateDistance(lat1, long1, lat2, long2)
         map.setOptions({draggableCursor: 'crosshair'});
 
 		dijit.byId('id_btn_save_gpx').set( 'disabled', false );
+		dijit.byId('id_btn_create_gmaps_url').set( 'disabled', false );
 		dijit.byId('id_btn_create_long_url').set( 'disabled', false );
         
         directions_service_request[route_index] = {
@@ -944,7 +945,7 @@ function calculateDistance(lat1, long1, lat2, long2)
 //				var rq = "//maps.google.com/maps/api/js?v=3.25&sensor=false&libraries=places,geometry";
 				var google_api = "3.26";
 //				var google_api = "3.27";
-//				var google_api = "3.28";
+				var google_api = "3.28";
 				var rq = "//maps.google.com/maps/api/js?v="+google_api+"&sensor=false&libraries=places,geometry";
 		    	var google_maps_api_key = localStorage.getItem("id_google_maps_api_key");
 		    	if ( google_maps_api_key && (google_maps_api_key != "") )
@@ -2131,8 +2132,8 @@ function calculateDistance(lat1, long1, lat2, long2)
         		nb_routes++;
 				nb_wp[route_index] = 0;
 	            for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
-console.log( n );
-console.log( places );
+//					console.log( n );
+//					console.log( places );
 	        		var display = domStyle.get( 'id_tr_'+route_index+'_' + n, "display" );
 	            	if ( display != "none" ) {
 						if ((places[route_index][n] == undefined) || (places[route_index][n].geometry == undefined) || (places[route_index][n].geometry.location == undefined))
@@ -2262,6 +2263,43 @@ console.log( places );
 
     }
     
+    function do_create_gmaps_url( ) {
+		
+		var url = "";
+
+		var nb_routes = 0;
+		var nb_wp = [];
+    	require(["dojo/dom-style"], function( domStyle) {
+    		for (var route_index = 0; route_index < MAX_NB_ROUTES; route_index++) {
+        		var display = domStyle.get( 'id_fieldset_route_'+route_index, "display" );
+        		if (display == "none")
+        			break;
+				if (route_index > 0)
+					url += "\n\n"; 
+				url += "https://maps.app.goo.gl/?link=https://www.google.com/maps/dir";
+        		nb_routes++;
+				nb_wp[route_index] = 0;
+	            for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
+//					console.log( n );
+//					console.log( places );
+	        		var display = domStyle.get( 'id_tr_'+route_index+'_' + n, "display" );
+	            	if ( display != "none" ) {
+						if ((places[route_index][n] == undefined) || (places[route_index][n].geometry == undefined) || (places[route_index][n].geometry.location == undefined))
+							domStyle.set( 'id_wp_'+route_index+'_'+n, { color: "red" } );
+	            		console.log( n + " ==> " + places[route_index][n].name + " : " + places[route_index][n].geometry.location.lat() + " , " + places[route_index][n].geometry.location.lng() );
+						url += "/"; 
+						var v = dijit.byId('id_wp_'+route_index+'_'+n).get( 'value');
+		    	        url += encodeURIComponent(v);
+	            	}
+	            }
+	            console.log("Route " + route_index + " : " + nb_wp[route_index] + " waypoints");
+    		}
+ 		})
+
+		do_copy_message( "Google Maps URL", "Use this URL in Google Maps (desktop or mobile)", url );
+    
+	}
+    	
     function cb_route_from_or_to_changed( route_index, waypoint_index ) {
 
 		console.log( 'cb_route_from_or_to_changed: ' + route_index + " --- " + waypoint_index );
@@ -3139,8 +3177,9 @@ console.log( places );
 		clear_place:  function( ) { clear_place(); },
 		show_place:   function( ) { show_place(); },
 
-		do_save_gpx: function( ) { do_save_gpx(); },
-		do_create_long_url: function ( ) { do_create_long_url(); },
+		do_save_gpx: 		 function( ) { do_save_gpx(); },
+		do_create_gmaps_url: function( ) { do_create_gmaps_url(); },
+		do_create_long_url:  function ( ) { do_create_long_url(); },
 		do_create_short_url: function ( ) { do_create_short_url(); },
 		
 		move_to_dist: function( new_pos ) { move_to_dist( new_pos ); },
