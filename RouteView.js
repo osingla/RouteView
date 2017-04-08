@@ -220,13 +220,6 @@ define( function( m ) {
 
 		map.fitBounds( legs_bounds[curr_leg] );
 		var check_play_route_zoom_level = dijit.byId('id_check_play_route_zoom_level').get( 'checked' );
-/*		
-		if ( check_play_route_zoom_level ) {
-			var play_route_zoom_level = dijit.byId('id_input_play_route_zoom_level').get( 'value' );
-			console.log( play_route_zoom_level );
-			map.setZoom( parseInt(play_route_zoom_level) );
-		}
-*/
 
        	timer_animate = setTimeout( function() { cb_animate(50); }, 5 );
 
@@ -440,7 +433,7 @@ define( function( m ) {
 				index_waypoint = new_dir.request.Gb;
             if ( index_waypoint == undefined ) {
 				console.log( "UNDEFINED >>>>>>" );
-				console.log( new_dir.request );
+				console.log( new_dir );
 			}
 			else {
 
@@ -797,12 +790,9 @@ define( function( m ) {
 
    				load_settings( );
 				
-//				dojoConfig = { gmaps: { v: '3.25', libraries: 'places,geometry' } };
-//				var rq = "//maps.google.com/maps/api/js?v=3.25&sensor=false&libraries=places,geometry";
 //				var google_api = "3.26";
 //				var google_api = "3.27";
 				var google_api = "3.28";
-//				var google_api = "3.29";
 				var rq = "//maps.google.com/maps/api/js?v="+google_api+"&sensor=false&libraries=places,geometry";
 		    	var google_maps_api_key = localStorage.getItem("id_google_maps_api_key");
 		    	if ( google_maps_api_key && (google_maps_api_key != "") )
@@ -1061,6 +1051,7 @@ define( function( m ) {
 	  	var play_waypoint = undefined;
 
 		var total_nb_waypoints = 0;
+		var nb_routes = 0;
 		query.split("route=").forEach(function(part) {
 			if ( part != "" ) {
 				var item = part;
@@ -1085,8 +1076,11 @@ define( function( m ) {
 						}
 					}
 				});	
+				nb_routes++;
 			}
 	  	});	
+	  	if (nb_routes == 0)
+			return false;
 
 	    dijit.byId("id_pane_standby").show();
 
@@ -1565,6 +1559,7 @@ define( function( m ) {
    				got_location = false;
 
    				var decoded_flags = decode_url_params();
+console.log("decoded_flags= " + decoded_flags );
 
 				if ( !decoded_flags ) {
 					var is_addr_for_orig = (dijit.byId('id_addr_for_orig').get( 'value') == "") ? false : true;
@@ -1899,32 +1894,27 @@ define( function( m ) {
 		var url = location.origin + location.pathname;
 		url += "?";
 
-		var nb_routes = 0;
-		var nb_wp = [];
     	require(["dojo/dom-style"], function( domStyle) {
-    		for (var route_index = 0; route_index < MAX_NB_ROUTES; route_index++) {
-        		var display = domStyle.get( 'id_fieldset_route', "display" );
-        		if (display == "none")
-        			break;
+			var display = domStyle.get( 'id_fieldset_route', "display" );
+			if (display != "none") {
 				url += "route="; 
-        		nb_routes++;
-				nb_wp[route_index] = 0;
-	            for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
+				var nb_wp = 0;
+				for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
 //					console.log( n );
 //					console.log( places );
-	        		var display = domStyle.get( 'id_tr_' + n, "display" );
-	            	if ( display != "none" ) {
+					var display = domStyle.get( 'id_tr_' + n, "display" );
+					if ( display != "none" ) {
 						if ((places[n] == undefined) || (places[n].geometry == undefined) || (places[n].geometry.location == undefined))
 							domStyle.set( 'id_wp_'+n, { color: "red" } );
-	            		console.log( n + " ==> " + places[n].name + " : " + places[n].geometry.location.lat() + " , " + places[n].geometry.location.lng() );
+						console.log( n + " ==> " + places[n].name + " : " + places[n].geometry.location.lat() + " , " + places[n].geometry.location.lng() );
 						if (n > 0)
 							url += "&"; 
 						var v = dijit.byId('id_wp_'+n).get( 'value');
-		    	        url += encodeURIComponent(v);
-	            	}
-	            }
-	            console.log("Route " + nb_wp[route_index] + " waypoints");
-    		}
+						url += encodeURIComponent(v);
+					}
+					console.log("Route has " + nb_wp + " waypoints");
+				}
+			}
  		})
 
 		do_copy_message( "Long URL", "Long URL to create these routes", url );
@@ -1953,38 +1943,33 @@ define( function( m ) {
     	
     	// xmllint --noout --schema http://www.topografix.com/GPX/1/0/gpx.xsd testfile.gpx
 
-		var nb_routes = 0;
-		var nb_wp = [];
 		console.log( places );
     	require(["dojo/dom-style"], function( domStyle) {
-    		for (var route_index = 0; route_index < MAX_NB_ROUTES; route_index++) {
-        		var display = domStyle.get( 'id_fieldset_route', "display" );
-//        		console.log(display);
-        		if (display == "none")
-        			break;
-        		nb_routes++;
-				nb_wp[route_index] = 0;
+			var display = domStyle.get( 'id_fieldset_route', "display" );
+//     		console.log(display);
+			if (display != "none") {
+				var nb_wp = 0;
 				console.log( places );
-	            for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
-	        		var display = domStyle.get( 'id_tr_' + n, "display" );
-	            	if ( display != "none" ) {
+				for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
+					var display = domStyle.get( 'id_tr_' + n, "display" );
+					if ( display != "none" ) {
 						if ( (places[n] == undefined) || (places[n].geometry == undefined) ) {
 //							console.log( route_index + " , " + n + " ==> " + places[n].name + " ? " );
 							domStyle.set( 'id_wp_'+n, { color: "red" } );
 						}
 						else {
 							if ( places[n].geometry.location == undefined ) {
-								console.log( route_index + " , " + n + " ==> " + places[n].name + " ? " + places[n].geometry );
+								console.log( n + " ==> " + places[n].name + " ? " + places[n].geometry );
 							}
 							else {
-								console.log( route_index + " , " + n + " ==> " + places[n].name + " : " + places[n].geometry.location.lat() + " , " + places[n].geometry.location.lng() );
+								console.log(  + " ==> " + places[n].name + " : " + places[n].geometry.location.lat() + " , " + places[n].geometry.location.lng() );
 							}
 						}
-	            		nb_wp[route_index]++;
-	            	}
-	            }
-	            console.log("Route " + route_index + " : " + nb_wp[route_index] + " waypoints");
-    		}
+						nb_wp++;
+					}
+				}
+				console.log("Route has " + nb_wp + " waypoints");
+			}
  		})
     	
     	var crlf = String.fromCharCode(13) + String.fromCharCode(10);
@@ -1998,36 +1983,30 @@ define( function( m ) {
 		var src = '';
 		var dst = '';
 
-   		for (var route_index = 0; route_index < nb_routes; route_index++) {
-	        for ( n = 0; n < nb_wp[route_index]; n++ ) {
-	        	if ( src == "" )
-	        		src = places[n].name;
-	        	if ( places[n] == undefined )
-					break;
-	        	dst = places[n].name;
-	        	if ((route_index > 0) && (n == 0) && (places[nb_wp[route_index-1]-1].name == dst))
-	        		continue;
-	        	gpx += '<wpt ' + crlf;
-	        	gpx += '  lat="' + places[n].geometry.location.lat() + '" lon="' + places[n].geometry.location.lng() + '">' + crlf;
-	        	gpx += '  <name>' + places[n].name + '</name>' + crlf;
-	        	gpx += '</wpt>' + crlf;
-	        }
-   		}
+		for ( n = 0; n < nb_wp; n++ ) {
+			if ( src == "" )
+				src = places[n].name;
+			if ( places[n] == undefined )
+				break;
+			dst = places[n].name;
+			gpx += '<wpt ' + crlf;
+			gpx += '  lat="' + places[n].geometry.location.lat() + '" lon="' + places[n].geometry.location.lng() + '">' + crlf;
+			gpx += '  <name>' + places[n].name + '</name>' + crlf;
+			gpx += '</wpt>' + crlf;
+		}
         
         gpx += '<rte>' + crlf;
 //      gpx += '  <name>' + route.summary + '</name>' + crlf;
         gpx += '  <name>' + src + ' to ' + dst + '</name>' + crlf;
-   		for (var route_index = 0; route_index < nb_routes; route_index++) {
-	        for ( n = 0; n < nb_wp[route_index]; n++ ) {
-//				console.log( "route:" + route_index + " - waypoint:" + n );
-	        	gpx += '  <rtept ' + crlf;
-	        	if ((places[n].geometry == undefined) || (places[n].geometry.location == undefined))
-					domStyle.set( 'id_wp_'+n, { color: "red" } );
-	        	gpx += '    lat="' + places[n].geometry.location.lat() + '" lon="' + places[n].geometry.location.lng() + '">' + crlf;
-	        	gpx += '    <name>' + places[n].name + '</name>' + crlf;
-	        	gpx += '  </rtept>' + crlf;
-	        }
-        }
+		for ( n = 0; n < nb_wp[route_index]; n++ ) {
+//			console.log( "route: " waypoint:" + n );
+			gpx += '  <rtept ' + crlf;
+			if ((places[n].geometry == undefined) || (places[n].geometry.location == undefined))
+				domStyle.set( 'id_wp_'+n, { color: "red" } );
+			gpx += '    lat="' + places[n].geometry.location.lat() + '" lon="' + places[n].geometry.location.lng() + '">' + crlf;
+			gpx += '    <name>' + places[n].name + '</name>' + crlf;
+			gpx += '  </rtept>' + crlf;
+		}
         gpx += '</rte>' + crlf;
         gpx += '</gpx>' + crlf;
         	
@@ -2045,18 +2024,11 @@ define( function( m ) {
 		
 		var url = "";
 
-		var nb_routes = 0;
-		var nb_wp = [];
     	require(["dojo/dom-style"], function( domStyle) {
-    		for (var route_index = 0; route_index < MAX_NB_ROUTES; route_index++) {
-        		var display = domStyle.get( 'id_fieldset_route', "display" );
-        		if (display == "none")
-        			break;
-				if (route_index > 0)
-					url += "\n\n"; 
+       		var display = domStyle.get( 'id_fieldset_route', "display" );
+       		if (display != "none") {
 				url += "https://maps.app.goo.gl/?link=https://www.google.com/maps/dir";
-        		nb_routes++;
-				nb_wp[route_index] = 0;
+				var nb_wp = 0;
 	            for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
 //					console.log( n );
 //					console.log( places );
@@ -2070,7 +2042,7 @@ define( function( m ) {
 		    	        url += encodeURIComponent(v);
 	            	}
 	            }
-	            console.log("Route " + route_index + " : " + nb_wp[route_index] + " waypoints");
+	            console.log("Route has " + nb_wp + " waypoints");
     		}
  		})
 
@@ -2219,11 +2191,6 @@ define( function( m ) {
 		dijit.byId(id_label_wp).set( 'value', place_name );
 
 		do_route( );
-    }
-
-    function reset_panorama( ) {
-    	
-    	
     }
 
 	function cb_click_btn_add( index ) {
