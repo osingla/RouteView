@@ -24,11 +24,11 @@
             ga('send', 'pageview');
         </script>
 
- 		<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.12.1/dijit/themes/claro/claro.css" media="screen" >
+ 		<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.12.2/dijit/themes/claro/claro.css" media="screen" >
 
 		<script src="https://apis.google.com/js/client.js?onload=load"></script>
 
-		<script src="//ajax.googleapis.com/ajax/libs/dojo/1.12.1/dojo/dojo.js"
+		<script src="//ajax.googleapis.com/ajax/libs/dojo/1.12.2/dojo/dojo.js"
             data-dojo-config="isDebug: true, async: true, parseOnLoad: true">
         </script>
         
@@ -128,28 +128,27 @@
 					        <div class="block" style="border:1px solid; overflow:scroll; height:100%; width:auto" >
 				
 								<!-- Route #1 -->
-				                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:false" id="id_fieldset_route_0"
+				                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:false" id="id_fieldset_route"
 				                		  style="background:#b3daff"
-						                  onClick='require(["RouteView.js"], function( s ) { s.cb_click_fieldset_route(0); })'>
+						                  onClick='require(["RouteView.js"], function( s ) { s.cb_click_fieldset_route(); })'>
 				                    <legend>
-				                    	Route 1 
-				                        <span id="id_route0_distance_duration" style="display:none">
+				                        <span id="id_route_distance_duration" style="display:none">
 				                			&nbsp;:&nbsp;
-				                            <span><b id="id_route0_dist_kms"></b>&nbsp;kms</span>
+				                            <span><b id="id_route_dist_kms"></b>&nbsp;kms</span>
 				                            &nbsp;-&nbsp;
-				                            <span><b id="id_route0_dist_miles"></b>&nbsp;miles</span>
+				                            <span><b id="id_route_dist_miles"></b>&nbsp;miles</span>
 				                            &nbsp;-&nbsp;
-				                            <span><b id="id_route0_duration"></b></span>
+				                            <span><b id="id_route_duration"></b></span>
 				                        </span>
 				                    </legend>
 				                    <table cellspacing="0" cellpadding="0" style="white-space: nowrap" >
 				                    	<tr >
 				                    		<td>
-							                    <table cellspacing="0" cellpadding="0" style="white-space: nowrap" id="id_table_route0">
+							                    <table cellspacing="0" cellpadding="0" style="white-space: nowrap" id="id_table_route">
 							                    </table>
 				                    		</td>
 				                    		<td>
-					                    		<table cellspacing="0" cellpadding="0" style="height:100%; white-space: nowrap" id="id_table_drive_0">
+					                    		<table cellspacing="0" cellpadding="0" style="height:100%; white-space: nowrap" id="id_table_drive">
 					                    		</table>
 				                    		</td>
 				                    	</tr>
@@ -161,11 +160,11 @@
 											</td>
 											<td style="display:none">
 												&nbsp;
-												<button dojoType="dijit.form.Button" type="button" id="id_btn_browse_images_0" disabled
+												<button dojoType="dijit.form.Button" type="button" id="id_btn_browse_images" disabled
 														data-dojo-props="iconClass:'icon_btn_browse', showLabel: false"
 														onclick='require(["RouteView.js"], function( s ) { s.browse_images(0); })'>
 												</button>
-												<div id="id_tooltip_btn_browse_images_0" data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_browse_images_0',position:['below-centered'],showDelay:999999,hideDelay:0">
+												<div id="id_tooltip_btn_browse_images" data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_browse_images',position:['below-centered'],showDelay:999999,hideDelay:0">
 													Once a route has been defined,<br>
 													this allows you to show images from the route using Street View.
 													<br><br>
@@ -203,21 +202,21 @@
 							                    <div align="left">
 							                        
 							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" style="font-size: 85%"
-									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_hwy(0); })' id="id_check_no_hwy_0" >
+									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_hwy(); })' id="id_check_no_hwy" >
 							                         No Highway
 							                        </button>
 							
 							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" style="font-size: 85%" 
-									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_toll(0); })' id="id_check_no_toll_0" >
+									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_toll(); })' id="id_check_no_toll" >
 							                         No Toll
 							                         </button>
 							
-								                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_hwy_0',position:['below-centered'],showDelay:750,hideDelay:0">
+								                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_hwy',position:['below-centered'],showDelay:750,hideDelay:0">
 														When selected, this asks Google Maps service to create a route not using Highways.<br>
 														Using this button will recreate the route.
 								                    </div>
 							
-								                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_toll_0',position:['below-centered'],showDelay:750,hideDelay:0">
+								                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_toll',position:['below-centered'],showDelay:750,hideDelay:0">
 														When selected, this asks Google Maps service to create a route not using Toll routes.<br>
 														Using this button will recreate the route.
 								                    </div>
@@ -307,18 +306,6 @@
 				                            		<span>Configuration</span>
 						                            <div data-dojo-type="dijit/TooltipDialog">
 
-									                    <div style="width:100%" align="center">
-									                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" style="font-size: 100%;"
-									                 				onClick='require(["RouteView.js"], function( s ) { s.cb_show_all_routes(); })' id="id_check_show_all_routes" >
-									                         	Show all routes
-							                        		 </button>
-									                		<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_show_all_routes',position:['above-centered'],showDelay:750,hideDelay:0">
-																Only apply when there is more than one route.<br><br>
-																When selected, all routes will be shown on the map.<br>
-																When not selected, only the current route will be shown on the map. Other routes or part of them might still be shown.  
-									                		</div>
-							                       		</div>
-							                       		
 									                    <div style="width:100%" align="center">
 															
 															<table cellspacing="0" cellpadding="0" style="width:100%; white-space: nowrap" >
@@ -549,345 +536,6 @@
 							                    </div>
 				                    		</td>
 				                    		
-				                            <td align="right" valign="middle">
-						                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" style="font-size: 85%"
-  								                        onClick='require(["RouteView.js"], function( s ) { s.cb_click_use_route(1); })' id="id_check_use_route_1" >
-													Route 2
-							                    </button>
-							                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_use_route_1',position:['below-centered'],showDelay:750,hideDelay:0">
-													This allow you to create a new Route, with a starting point, a destination point,<br>
-													and up to 8 waypoints in between.<br><br>
-													Please note that Google Maps allow you to create up to 8 waypoints for a specific route.
-							                    </div>
-				                    		</td>
-				                    	</tr>
-				                    </table>
-				                </fieldset>
-				
-								<!-- Route #2 -->
-				                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:false" id="id_fieldset_route_1" style="display:none"
-				                		  style="background:#b3daff"
-						                  onClick='require(["RouteView.js"], function( s ) { s.cb_click_fieldset_route(1); })'>
-				                    <legend>
-				                    	Route 2
-				                        <span id="id_route1_distance_duration" style="display:none">
-				                			&nbsp;:&nbsp;
-				                            <span><b id="id_route1_dist_kms"></b>&nbsp;kms</span>
-				                            &nbsp;-&nbsp;
-				                            <span><b id="id_route1_dist_miles"></b>&nbsp;miles</span>
-				                            &nbsp;-&nbsp;
-				                            <span><b id="id_route1_duration"></b></span>
-				                        </span>
-				                    </legend>
-				                    <table cellspacing="0" cellpadding="0" style="white-space: nowrap" >
-				                    	<tr >
-				                    		<td>
-							                    <table cellspacing="0" cellpadding="0" style="white-space: nowrap" id="id_table_route1">
-							                    </table>
-				                    		</td>
-				                    		<td>
-					                    		<table cellspacing="0" cellpadding="0" style="height:100%; white-space: nowrap" id="id_table_drive_1">
-					                    		</table>
-				                    		</td>
-				                    	</tr>
-					                </table>
-				                    <table cellspacing="0" cellpadding="0" style="width:100%; white-space: nowrap" >
-				                    	<tr >
-				                    		<td style="width:100%">
-												<hr size="7" color="#00cc00">
-											</td>
-											<td style="display:none">
-												&nbsp;
-												<button dojoType="dijit.form.Button" type="button" id="id_btn_browse_images_1" disabled
-														data-dojo-props="iconClass:'icon_btn_browse', showLabel: false"
-														onclick='require(["RouteView.js"], function( s ) { s.browse_images(1); })'>
-												</button>
-												<div id="id_tooltip_btn_browse_images_1" data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_browse_images_1',position:['below-centered'],showDelay:750,hideDelay:0">
-													Once a route has been defined,<br>
-													this allows you to show images from the route using Street View.
-													<br><br>
-													Note: This is different from playing the ride using <img src="icons/btn-drive.png" style="width:16px; height:16px; vertical-align:middle" />.<br>
-													<br>
-													<table>
-														<tr>
-															<td valign="middle" >
-																<img src="icons/btn-drive.png" style="width:16px; height:16px; vertical-align:middle" />
-															</td>
-															<td>
-																This allows to <b><i>play</b></i> a leg of the route. Each image will stay for a specifc time (default is 1,200 msec), <br>
-																and each new image is separated from the previous one by 175 meters.
-															</td>
-														</tr>
-														<tr>
-														</tr>
-														<tr>
-															<td valign="middle" >
-																<img src="icons/btn-browse.png" style="width:16px; height:16px; vertical-align:middle"/>
-															</td>
-															<td>
-																This allows to <b><i>show</b></i> an image along the route depending where the mouse cursor is.
-															</td>
-														</tr>
-													</table>
-												</div>
-											</td>
-										</tr>
-									</table>
-				                    <table style="width:100%">
-				                    	<tr>
-				                            <td align="left" valign="middle">
-				
-							                    <div align="left">
-							                        
-							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" style="font-size: 100%;"
-									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_hwy(1); })' id="id_check_no_hwy_1" >
-							                         No Highway
-							                        </button>
-							
-							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" style="font-size: 100%;" 
-									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_toll(1); })' id="id_check_no_toll_1" >
-							                         No Toll
-							                         </button>
-							
-								                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_hwy_1',position:['below-centered'],showDelay:750,hideDelay:0">
-														When selected, this asks Google Maps service to create a route not using Highways.<br>
-														Using this button will recreate the route.
-								                    </div>
-							
-								                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_toll_1',position:['below-centered'],showDelay:750,hideDelay:0">
-														When selected, this asks Google Maps service to create a route not using Toll routes.<br>
-														Using this button will recreate the route.
-								                    </div>
-							
-							                    </div>
-				
-				                    		</td>
-				                            <td align="right" valign="middle">
-						                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" style="font-size: 85%;"
-									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_use_route(2); })' id="id_check_use_route_2" >
-							                         Route 3
-						                        </button>
-							                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_use_route_2',position:['below-centered'],showDelay:750,hideDelay:0">
-													This allow you to create a new Route, with a starting point, a destination,<br>
-													and up to 8 waypoints in between.<br><br>
-													Please note that Google Maps allow you to create up to 8 waypoints for a specific route.
-							                    </div>
-				                    		</td>
-				                    	</tr>
-				                    </table>
-				                </fieldset>
-				
-								<!-- Route #3 -->
-				                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:false" id="id_fieldset_route_2" style="display:none"
-				                		  style="background:#b3daff"
-						                  onClick='require(["RouteView.js"], function( s ) { s.cb_click_fieldset_route(2); })'>
-				                    <legend>
-				                    	Route 3
-				                        <span id="id_route2_distance_duration" style="display:none">
-				                			&nbsp;:&nbsp;
-				                            <span><b id="id_route2_dist_kms"></b>&nbsp;kms</span>
-				                            &nbsp;-&nbsp;
-				                            <span><b id="id_route2_dist_miles"></b>&nbsp;miles</span>
-				                            &nbsp;-&nbsp;
-				                            <span><b id="id_route2_duration"></b></span>
-				                        </span>
-				                    </legend>
-				                    <table cellspacing="0" cellpadding="0" style="white-space: nowrap" >
-				                    	<tr >
-				                    		<td>
-							                    <table cellspacing="0" cellpadding="0" style="white-space: nowrap" id="id_table_route2">
-							                    </table>
-				                    		</td>
-				                    		<td>
-					                    		<table cellspacing="0" cellpadding="0" style="height:100%; white-space: nowrap" id="id_table_drive_2">
-					                    		</table>
-				                    		</td>
-				                    	</tr>
-					                </table>
-				                    <table cellspacing="0" cellpadding="0" style="width:100%; white-space: nowrap" >
-				                    	<tr >
-				                    		<td style="width:100%">
-												<hr size="7" color="#ff6600">
-											</td>
-											<td style="display:none">
-												&nbsp;
-												<button dojoType="dijit.form.Button" type="button" id="id_btn_browse_images_2" disabled
-														data-dojo-props="iconClass:'icon_btn_browse', showLabel: false"
-														onclick='require(["RouteView.js"], function( s ) { s.browse_images(2); })'>
-												</button>
-												<div id="id_tooltip_btn_browse_images_2" data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_browse_images_2',position:['below-centered'],showDelay:750,hideDelay:0">
-													Once a route has been defined,<br>
-													this allows you to show images from the route using Street View.
-													<br><br>
-													Note: This is different from playing the ride using <img src="icons/btn-drive.png" style="width:16px; height:16px; vertical-align:middle" />.<br>
-													<br>
-													<table>
-														<tr>
-															<td valign="middle" >
-																<img src="icons/btn-drive.png" style="width:16px; height:16px; vertical-align:middle" />
-															</td>
-															<td>
-																This allows to <b><i>play</b></i> a leg of the route. Each image will stay for a specifc time (default is 1,200 msec), <br>
-																and each new image is separated from the previous one by 175 meters.
-															</td>
-														</tr>
-														<tr>
-														</tr>
-														<tr>
-															<td valign="middle" >
-																<img src="icons/btn-browse.png" style="width:16px; height:16px; vertical-align:middle"/>
-															</td>
-															<td>
-																This allows to <b><i>show</b></i> an image along the route depending where the mouse cursor is.
-															</td>
-														</tr>
-													</table>
-												</div>
-											</td>
-										</tr>
-									</table>
-				                    <table style="width:100%">
-				                    	<tr>
-				                            <td align="left" valign="middle">
-				
-							                    <div align="left">
-							                        
-							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" style="font-size: 100%;"
-									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_hwy(2); })' id="id_check_no_hwy_2" >
-							                         No Highway
-							                        </button>
-							
-							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" style="font-size: 100%;" 
-									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_toll(2); })' id="id_check_no_toll_2" >
-							                         No Toll
-							                         </button>
-							
-								                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_hwy_2',position:['below-centered'],showDelay:750,hideDelay:0">
-														When selected, this asks Google Maps service to create a route not using Highways.<br>
-														Using this button will recreate the route.
-								                    </div>
-							
-								                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_toll_2',position:['below-centered'],showDelay:750,hideDelay:0">
-														When selected, this asks Google Maps service to create a route not using Toll routes.<br>
-														Using this button will recreate the route.
-								                    </div>
-							
-							                    </div>
-				
-				                    		</td>
-				                            <td align="right" valign="middle">
-						                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" style="font-size: 85"
-									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_use_route(3); })' id="id_check_use_route_3" >
-							                         Route 4
-						                        </button>
-							                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_use_route_3',position:['below-centered'],showDelay:750,hideDelay:0">
-													This allow you to create a new Route, with a starting point, a destination,<br>
-													and up to 8 waypoints in between.<br><br>
-													Please note that Google Maps allow you to create up to 8 waypoints for a specific route.
-							                    </div>
-				                    		</td>
-				                    	</tr>
-				                    </table>
-				                </fieldset>
-				
-								<!-- Route #4 -->
-				                <fieldset data-dojo-type="dijit/Fieldset" data-dojo-props="toggleable:false" id="id_fieldset_route_3" style="display:none"
-				                		  style="background:#b3daff"
-						                  onClick='require(["RouteView.js"], function( s ) { s.cb_click_fieldset_route(3); })'>
-				                    <legend>
-				                    	Route 4
-				                        <span id="id_route3_distance_duration" style="display:none">
-				                			&nbsp;:&nbsp;
-				                            <span><b id="id_route3_dist_kms"></b>&nbsp;kms</span>
-				                            &nbsp;-&nbsp;
-				                            <span><b id="id_route3_dist_miles"></b>&nbsp;miles</span>
-				                            &nbsp;-&nbsp;
-				                            <span><b id="id_route3_duration"></b></span>
-				                        </span>
-				                    </legend>
-				                    <table cellspacing="0" cellpadding="0" style="white-space: nowrap" >
-				                    	<tr >
-				                    		<td>
-							                    <table cellspacing="0" cellpadding="0" style="white-space: nowrap" id="id_table_route3">
-							                    </table>
-				                    		</td>
-				                    		<td>
-					                    		<table cellspacing="0" cellpadding="0" style="height:100%; white-space: nowrap" id="id_table_drive_3">
-					                    		</table>
-				                    		</td>
-				                    	</tr>
-					                </table>
-				                    <table cellspacing="0" cellpadding="0" style="width:100%; white-space: nowrap" >
-				                    	<tr >
-				                    		<td style="width:100%">
-												<hr size="7" color="#cc33ff">
-											</td>
-											<td style="display:none">
-												&nbsp;
-												<button dojoType="dijit.form.Button" type="button" id="id_btn_browse_images_3" disabled
-														data-dojo-props="iconClass:'icon_btn_browse', showLabel: false"
-														onclick='require(["RouteView.js"], function( s ) { s.browse_images(3); })'>
-												</button>
-												<div id="id_tooltip_btn_browse_images_3" data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_browse_images_3',position:['below-centered'],showDelay:750,hideDelay:0">
-													Once a route has been defined,<br>
-													this allows you to show images from the route using Street View.
-													<br><br>
-													Note: This is different from playing the ride using <img src="icons/btn-drive.png" style="width:16px; height:16px; vertical-align:middle" />.<br>
-													<br>
-													<table>
-														<tr>
-															<td valign="middle" >
-																<img src="icons/btn-drive.png" style="width:16px; height:16px; vertical-align:middle" />
-															</td>
-															<td>
-																This allows to <b><i>play</b></i> a leg of the route. Each image will stay for a specifc time (default is 1,200 msec), <br>
-																and each new image is separated from the previous one by 175 meters.
-															</td>
-														</tr>
-														<tr>
-														</tr>
-														<tr>
-															<td valign="middle" >
-																<img src="icons/btn-browse.png" style="width:16px; height:16px; vertical-align:middle"/>
-															</td>
-															<td>
-																This allows to <b><i>show</b></i> an image along the route depending where the mouse cursor is.
-															</td>
-														</tr>
-													</table>
-												</div>
-											</td>
-										</tr>
-									</table>
-				                    <table style="width:100%">
-				                    	<tr>
-				                            <td align="left" valign="middle">
-				
-							                    <div align="left">
-							                        
-							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" style="font-size: 100%;"
-									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_hwy(3); })' id="id_check_no_hwy_3" >
-							                         No Highway
-							                        </button>
-							
-							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" style="font-size: 100%;" 
-									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_toll(3); })' id="id_check_no_toll_3" >
-							                         No Toll
-							                         </button>
-							
-								                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_hwy_3',position:['below-centered'],showDelay:750,hideDelay:0">
-														When selected, this asks Google Maps service to create a route not using Highways.<br>
-														Using this button will recreate the route.
-								                    </div>
-							
-								                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_toll_3',position:['below-centered'],showDelay:750,hideDelay:0">
-														When selected, this asks Google Maps service to create a route not using Toll routes.<br>
-														Using this button will recreate the route.
-								                    </div>
-							
-							                    </div>
-				
-				                    		</td>
 				                    	</tr>
 				                    </table>
 				                </fieldset>
