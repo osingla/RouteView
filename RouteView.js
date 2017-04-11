@@ -460,6 +460,8 @@ define( function( m ) {
 				index_waypoint = new_dir.request.Jb;
             else if (new_dir.request.Gb != undefined)
 				index_waypoint = new_dir.request.Gb;
+            else if (new_dir.request.Hb != undefined)
+				index_waypoint = new_dir.request.Hb;
             if ( index_waypoint == undefined ) {
 				console.log( "UNDEFINED >>>>>>" );
 				console.log( new_dir );
