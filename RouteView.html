@@ -133,7 +133,6 @@
 						                  onClick='require(["RouteView.js"], function( s ) { s.cb_click_fieldset_route(); })'>
 				                    <legend>
 				                        <span id="id_route_distance_duration" style="display:none">
-				                			&nbsp;:&nbsp;
 				                            <span><b id="id_route_dist_kms"></b>&nbsp;kms</span>
 				                            &nbsp;-&nbsp;
 				                            <span><b id="id_route_dist_miles"></b>&nbsp;miles</span>
@@ -276,7 +275,7 @@
 													Or, you could also choose to display all Harley Davidson dealerships on the map.
 							                    </div>
 											</td>
-														
+
 				                            <td align="center" valign="middle">
 				                        		<div data-dojo-type="dijit/form/DropDownButton" data-dojo-props='autoWidth:false' id="id_files_dlg" style="font-size: 85%; display:none" disabled>
 				                            		<span>Files</span>
@@ -536,6 +535,15 @@
 							                    </div>
 				                    		</td>
 				                    		
+				                            <td align="center" valign="middle">
+												<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_drive', showLabel: false" style="font-size: 85%" 
+												 onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_drive_whole_route(); })' id="id_btn_drive_whole_route" disabled >
+												 </button>
+											</td>
+											<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_drive_whole_route',position:['below-centered'],showDelay:750,hideDelay:0">
+												Click here to play the whole route
+											</div>
+
 				                    	</tr>
 				                    </table>
 				                </fieldset>

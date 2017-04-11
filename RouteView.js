@@ -19,9 +19,12 @@ define( function( m ) {
     var panorama_full_screen;
     var map_pano_layout = 2;
     var curr_leg;
+    var play_whole_route;
     var prev_zoom;
 	var timer_show_pano_on_mousemove = undefined;
     var timer_animate = undefined;
+    var curr_dist_in_leg;
+    var curr_dist_in_route;
     var eol;
     var step;               			// meters
     var interval;           			// milliseconds
@@ -30,7 +33,6 @@ define( function( m ) {
     var prev_bearing;
 	var prev_pano_id;
 	var pano_cnt;
-    var curr_dist;
 	var cb_move_to_dist = undefined;
 	var directions_service;
 	var directions_service_request;
@@ -38,6 +40,7 @@ define( function( m ) {
 	var polylines;
     var route_bounds;
     var legs_bounds = [];
+	var distances = [];
 	var cb_route_from_or_to_changed_handle;
 	var places;
 	var got_location;
@@ -99,7 +102,7 @@ define( function( m ) {
 		if ( timer_animate != undefined ) 
 			clearTimeout( timer_animate );
 		timer_animate = setTimeout( (function() { return function() {
-			cb_animate( curr_dist+step );
+			cb_animate( curr_dist_in_route + step );
 		}})(), (fast) ? 125 : interval );
 	}
     
@@ -114,15 +117,29 @@ define( function( m ) {
 
 		timer_animate = undefined;
         	
-		curr_dist = d;
-        if ( curr_dist > eol ) {
+		curr_dist_in_route = d;
+        if ( curr_dist_in_route > eol ) {
             console.log( "Route is done" );
+            play_whole_route = false;
             return;
         }
+        
+        if ( play_whole_route ) {
+			curr_leg = 0;
+			while ( d > distances[curr_leg] )
+				curr_leg++;
+//			console.log( "curr_leg=" + curr_leg);
+		}
 
 		var polyline = polylines[curr_leg];
         
-        var p = polyline.GetPointAtDistance( curr_dist );
+        curr_dist_in_leg = curr_dist_in_route;
+        if ( play_whole_route ) {
+			if ( curr_leg > 0 )
+				curr_dist_in_leg -= distances[ curr_leg - 1 ];
+		}
+		var p = polyline.GetPointAtDistance( curr_dist_in_leg );
+
         if ( prev_zoom == undefined )
 			if ( !map.getBounds().contains( p ) )
 				map.panTo( p );
@@ -139,9 +156,9 @@ define( function( m ) {
 				}
 				else {
 					marker_no_street_view.setPosition( null );
-					var iad = polyline.GetIndexAtDistance( curr_dist );
+					var iad = polyline.GetIndexAtDistance( curr_dist_in_leg );
 					bearing = polyline.Bearing( iad );
-	//				console.log( curr_dist + " / " + eol + " --> " + bearing);
+//					console.log( curr_leg + " : " + curr_dist_in_leg + " - " + curr_dist_in_route + " / " + eol + " --> " + bearing);
 					if (bearing == undefined)
 						bearing = prev_bearing;
 					if (bearing != undefined) {
@@ -149,7 +166,7 @@ define( function( m ) {
 							panorama.addListener('pano_changed', function() {
 								var pano_id = panorama.getPano();
 								if (pano_id != prev_pano_id) {
-		//							marker_small_street_view.setMap( map );
+//									marker_small_street_view.setMap( map );
 									var index = 0;
 									switch (pano_cnt++ % 3) {
 										case 0 :
@@ -160,7 +177,7 @@ define( function( m ) {
 											panorama4.setPano( prev_pano_id );
 											if ( prev_bearing != undefined )
 												panorama4.setPov( { heading: prev_bearing, pitch: 1 } );
-		//									console.log( pano_cnt + " --> 2" );
+//											console.log( pano_cnt + " --> 2" );
 											if ( pano_cnt >= 4 )
 												marker_small_street_view.setPosition( pano_pos[2] );
 											break;
@@ -202,7 +219,7 @@ define( function( m ) {
 						prev_bearing = bearing;
 					}
 				}
-				dijit.byId('id_input_route').set( 'value', curr_dist, false );
+				dijit.byId('id_input_route').set( 'value', d, false );
 			}})());
 
 		})(  );
@@ -215,10 +232,22 @@ define( function( m ) {
 
 		if ( timer_animate != undefined )
             clearTimeout( timer_animate );
-        eol = polylines[curr_leg].Distance();
-        map.setCenter( polylines[curr_leg].getPath().getAt(0) );
+            
+		if ( play_whole_route ) {
+			eol = 0;
+			distances = [];
+			polylines.forEach( function(e) { eol += e.Distance(); distances.push( eol); })
+			console.log( distances );
+			console.log("eol = " + eol);
+			map.setCenter( polylines[0].getPath().getAt(0) );
+			show_all_routes();
+		}
+		else {
+			eol = polylines[curr_leg].Distance();
+			map.setCenter( polylines[curr_leg].getPath().getAt(0) );
+			map.fitBounds( legs_bounds[curr_leg] );
+		}
 
-		map.fitBounds( legs_bounds[curr_leg] );
 		var check_play_route_zoom_level = dijit.byId('id_check_play_route_zoom_level').get( 'checked' );
 
        	timer_animate = setTimeout( function() { cb_animate(50); }, 5 );
@@ -260,7 +289,7 @@ define( function( m ) {
     	return first_hidden;
     }
 
-	function cb_show_all_routes( ) {
+	function show_all_routes( ) {
 	
 		if ( dijit.byId("id_btn_drive_1").get("disabled") )
 			return;
@@ -581,7 +610,7 @@ define( function( m ) {
             show_route_distance_duration( dist_meters, duration_secs );
 
 			polylines.forEach( function(e) { e.setMap(map); })
-			cb_show_all_routes(); 
+			show_all_routes(); 
 
     		dijit.byId('id_input_route').set( 'disabled', true );
     		
@@ -706,7 +735,6 @@ define( function( m ) {
 		        google.maps.event.trigger( map, 'resize' );
 			});
         	dijit.byId('id_btn_pause').set( 'label', "Continue" );
-//          console.log( "curr_dist=" + curr_dist );
         }
         else if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" ) {
         	dijit.byId('id_btn_pause').set( 'label', "Pause" );
@@ -723,7 +751,7 @@ define( function( m ) {
 			}
 			if ( timer_animate != undefined )
 				clearTimeout( timer_animate );
-	       	timer_animate = setTimeout( function() { cb_animate(curr_dist); }, 250 );
+	       	timer_animate = setTimeout( function() { cb_animate(curr_dist_in_route); }, 250 );
         }
 
 		dijit.byId('id_input_route').set( 'disabled', false );
@@ -773,7 +801,7 @@ define( function( m ) {
 		
         map.setOptions({draggableCursor: 'crosshair'});
 
-		cb_show_all_routes();
+		show_all_routes();
 
 		directions_renderer.setOptions( { zIndex:99, draggable: true } );
 	       	
@@ -1095,6 +1123,7 @@ define( function( m ) {
 					dijit.byId('id_btn_drive_'+waypoint_index).set( 'disabled', false );
 					domStyle.set( 'id_tr_'+(waypoint_index), "display", "" );
 					domStyle.set( 'id_drive_tr_'+(waypoint_index), "display", "" );
+					dijit.byId('id_btn_drive_whole_route').set( 'disabled', false );
 				}
 			});
 		}
@@ -1600,8 +1629,13 @@ console.log("decoded_flags= " + decoded_flags );
 					mouse_over_input_route = true;
 
 					prev_zoom = map.getZoom();
-					map.setCenter( polylines[curr_leg].getPath().getAt(0) );
-					map.fitBounds( legs_bounds[curr_leg] );
+					if ( play_whole_route ) {
+						map.fitBounds( route_bounds );
+					}
+					else {
+						map.setCenter( polylines[curr_leg].getPath().getAt(0) );
+						map.fitBounds( legs_bounds[curr_leg] );
+					}
 
 				})
 				
@@ -1639,6 +1673,14 @@ console.log("decoded_flags= " + decoded_flags );
 						var x = (is_ff) ? evt.clientX : evt.x;
 						var perc = ((x - output.x) / output.w) * 100;
 						var new_curr_dist = (eol * perc) / 100;
+						
+						if ( play_whole_route ) {
+							curr_leg = 0;
+							while ( new_curr_dist > distances[curr_leg] )
+								curr_leg++;
+//							console.log( "curr_leg=" + curr_leg);
+						}
+
 //						console.log( perc + " / " + eol + " -> " + new_curr_dist );
 						if ( timer_animate != undefined ) { 
 							clearTimeout( timer_animate );
@@ -1674,9 +1716,23 @@ console.log("decoded_flags= " + decoded_flags );
 					var perc = ((x - output.x) / output.w) * 100;
 					var new_curr_dist = (eol * perc) / 100;
 //					console.log( perc + " / " + eol + " -> " + new_curr_dist );
+
+					if ( play_whole_route ) {
+						curr_leg = 0;
+						while ( new_curr_dist > distances[curr_leg] )
+							curr_leg++;
+//						console.log( "curr_leg=" + curr_leg);
+					}
+
 					var polyline = polylines[curr_leg];
 					
-					var p = polyline.GetPointAtDistance( new_curr_dist );
+					curr_dist_in_leg = new_curr_dist;
+					if ( play_whole_route ) {
+						if ( curr_leg > 0 )
+							curr_dist_in_leg -= distances[ curr_leg - 1 ];
+					}
+
+					var p = polyline.GetPointAtDistance( curr_dist_in_leg );
 					if ( p != undefined )
 						if ( !map.getBounds().contains( p ) )
 							map.panTo( p );
@@ -1744,15 +1800,31 @@ console.log("decoded_flags= " + decoded_flags );
 		if ( slider_disabled )
 			return;
 
+		console.log( new_pos );
+
 		if ( go_timer ) {
 			if ( timer_animate != undefined )
 				clearTimeout( timer_animate );
 	       	timer_animate = setTimeout( function() { cb_animate(new_pos); }, interval );
 		}
 
+        if ( play_whole_route ) {
+			curr_leg = 0;
+			while ( new_pos > distances[curr_leg] )
+				curr_leg++;
+			console.log( "curr_leg=" + curr_leg);
+		}
+
 		var polyline = polylines[curr_leg];
 		
-        var p = polyline.GetPointAtDistance( new_pos );
+        curr_dist_in_leg = new_pos;
+        if ( play_whole_route ) {
+			if ( curr_leg > 0 )
+				curr_dist_in_leg -= distances[ curr_leg - 1 ];
+			console.log( curr_dist_in_leg );
+		}
+
+        var p = polyline.GetPointAtDistance( curr_dist_in_leg );
         if ( !map.getBounds().contains( p ) )
             map.panTo( p );
 
@@ -1765,7 +1837,7 @@ console.log("decoded_flags= " + decoded_flags );
         		marker_no_street_view.setPosition( null );
         		panorama.setPosition( p );
         		var prev_bearing = bearing;
-		        var bearing = polyline.Bearing( polyline.GetIndexAtDistance( new_pos ) );
+		        var bearing = polyline.Bearing( polyline.GetIndexAtDistance( curr_dist_in_leg ) );
 				if (bearing == undefined)
 					bearing = prev_bearing;
 		        panorama.setPov({
@@ -1777,7 +1849,7 @@ console.log("decoded_flags= " + decoded_flags );
 
 		cb_move_to_dist = undefined;
 
-		curr_dist = new_pos;
+		curr_dist_in_route = new_pos;
 	}
 
     function cb_route_input( ) {
@@ -2304,6 +2376,14 @@ console.log("decoded_flags= " + decoded_flags );
 	function cb_click_btn_drive( waypoint_index ) {
 		
 		console.log( "Drive: waypoint_index=" + waypoint_index );
+		
+		if ( waypoint_index == -1 ) {
+			waypoint_index = 0;
+			play_whole_route = true;
+		}
+		else {
+			play_whole_route = false;
+		}
 
 		curr_leg = waypoint_index;
 
@@ -2324,6 +2404,12 @@ console.log("decoded_flags= " + decoded_flags );
         start_driving( );  
 
 		mouse_over_input_route = false;
+	}
+	
+	function cb_click_btn_drive_whole_route( ) {
+
+		cb_click_btn_drive( -1 );
+		
 	}
 	
 	function update_btns_remove_up_down( all ) {
@@ -2351,6 +2437,7 @@ console.log("decoded_flags= " + decoded_flags );
 	   		dijit.byId('id_tooltip_btn_down_'+n).set( 'showDelay', (waypoint == '') ? 9999999 : 650 ); 
 		}
 		
+		dijit.byId('id_btn_drive_whole_route').set( 'disabled', true );
 		for ( var n = 1; n < first_hidden; n++ ) {
 			var wp0 = dijit.byId('id_wp_'+(n-1)).get( 'value' );
 			var wp1 = dijit.byId('id_wp_'+n).get( 'value' );
@@ -2370,6 +2457,7 @@ console.log("decoded_flags= " + decoded_flags );
 					dijit.byId('id_btn_browse_images').set( 'disabled', false );
 					dijit.byId('id_tooltip_btn_browse_images').set( 'showDelay', 650 );
 				}
+				dijit.byId('id_btn_drive_whole_route').set( 'disabled', false );
 	   		}
 		}
 		
@@ -2887,6 +2975,8 @@ console.log("decoded_flags= " + decoded_flags );
 		
 		cb_click_no_hwy:  function( ) { cb_click_no_hwy( ); },
 		cb_click_no_toll: function( ) { cb_click_no_toll( ); },
+
+		cb_click_btn_drive_whole_route:	function( ) { cb_click_btn_drive_whole_route( ); },
 
 		cb_open_settings: function( ) { cb_open_settings( ); },
 
