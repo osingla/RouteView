@@ -2021,12 +2021,12 @@ console.log("decoded_flags= " + decoded_flags );
     	
     	// xmllint --noout --schema http://www.topografix.com/GPX/1/0/gpx.xsd testfile.gpx
 
+		var nb_wp = 0;
 		console.log( places );
     	require(["dojo/dom-style"], function( domStyle) {
 			var display = domStyle.get( 'id_fieldset_route', "display" );
 //     		console.log(display);
 			if (display != "none") {
-				var nb_wp = 0;
 				console.log( places );
 				for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
 					var display = domStyle.get( 'id_tr_' + n, "display" );
@@ -2076,7 +2076,7 @@ console.log("decoded_flags= " + decoded_flags );
         gpx += '<rte>' + crlf;
 //      gpx += '  <name>' + route.summary + '</name>' + crlf;
         gpx += '  <name>' + src + ' to ' + dst + '</name>' + crlf;
-		for ( n = 0; n < nb_wp[route_index]; n++ ) {
+		for ( n = 0; n < nb_wp; n++ ) {
 //			console.log( "route: " waypoint:" + n );
 			gpx += '  <rtept ' + crlf;
 			if ((places[n].geometry == undefined) || (places[n].geometry.location == undefined))
