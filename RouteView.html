@@ -79,7 +79,7 @@
 	                        	<a href="http://streetviewplayer.org/VirtualRide/RouteViewMobile.html" target="_blank">Mobile&nbsp;Version</a>
 	                		</td>
 	                        <td valign="middle" align="center" style="width:100%" >
-				                <b>RouteView - Google StreetView Player - Virtual Ride using Google Street View</b>&nbsp;<b id='id_route_info' ></b>
+				                <b>RouteView - Google StreetView Player - Virtual Ride using Google Street View</b>&nbsp;<b id='id_routeview_info' ></b>
 	                		</td>
 	                        <td valign="middle" align="right" id='id_link_to_github_project'>
 	                        	<a href="https://github.com/osingla/RouteView" target="_blank">Github&nbsp;Project</a>
@@ -132,13 +132,15 @@
 				                		  style="background:#b3daff"
 						                  onClick='require(["RouteView.js"], function( s ) { s.cb_click_fieldset_route(); })'>
 				                    <legend>
-				                        <span id="id_route_distance_duration" style="display:none">
-				                            <span><b id="id_route_dist_kms"></b>&nbsp;kms</span>
-				                            &nbsp;-&nbsp;
-				                            <span><b id="id_route_dist_miles"></b>&nbsp;miles</span>
-				                            &nbsp;-&nbsp;
-				                            <span><b id="id_route_duration"></b></span>
-				                        </span>
+										<span id="id_route_info">
+											<span id="id_route_distance_duration" style="display:none">
+												<span><b id="id_route_dist_kms"></b>&nbsp;kms</span>
+												&nbsp;-&nbsp;
+												<span><b id="id_route_dist_miles"></b>&nbsp;miles</span>
+												&nbsp;-&nbsp;
+												<span><b id="id_route_duration"></b></span>
+											</span>
+										</span>
 				                    </legend>
 				                    <table cellspacing="0" cellpadding="0" style="white-space: nowrap" >
 				                    	<tr >
@@ -541,7 +543,9 @@
 												 </button>
 											</td>
 											<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_drive_whole_route',position:['below-centered'],showDelay:750,hideDelay:0">
-												Click here to play the whole route
+												This allows to <b><i>play</b></i> all legs of the route using StreetView.<br><br>
+												Each image will stay for a specific time (default is 1,200 msec), <br>
+												and each new image is separated from the previous one by 175 meters.
 											</div>
 
 				                    	</tr>

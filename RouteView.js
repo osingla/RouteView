@@ -68,33 +68,49 @@ define( function( m ) {
         return '#' + (0x1000000 + rgb).toString(16).slice(1)
 	}
   
-	function show_route_distance_duration( dist_meters, duration_secs ) {
+	function show_route_distance_duration( dist_meters, duration_secs, waypoint ) {
 
-//      console.log( "dist_meters=" + dist_meters + " duration_secs=" + duration_secs );
+		console.log( "waypoint " + waypoint + " : dist_meters=" + dist_meters + " duration_secs=" + duration_secs );
 
-        document.getElementById("id_route_dist_kms").innerHTML = Math.round( dist_meters / 1000 );
-        document.getElementById("id_route_dist_miles").innerHTML = Math.round( dist_meters * 0.000621371 );
-        
+		var id = (waypoint == undefined) ? "id_route_info" : "id_tooltip_btn_drive_"+waypoint;
+
+console.log( id );			
+
         var nb_hours   = Math.floor( duration_secs / 3600 );
         var nb_minutes = Math.floor( (duration_secs - (nb_hours * 3600)) / 60 );
         var nb_seconds = Math.floor( duration_secs - (nb_hours * 3600) - (nb_minutes * 60) );
+        var hms = "";
         if ( nb_hours == 0 ) {
             if ( nb_minutes == 0 ) {
-                document.getElementById("id_route_duration").innerHTML = nb_seconds + '"';
+                hms = nb_seconds + '"';
             }
             else {
                 if ( nb_seconds == 0 )
-                    document.getElementById("id_route_duration").innerHTML = nb_minutes + "'";
+                    hms = nb_minutes + "'";
                 else
-                    document.getElementById("id_route_duration").innerHTML = nb_minutes + "'" + nb_seconds + '"';
+                    hms = nb_minutes + "'" + nb_seconds + '"';
             }
         }
         else {
-            document.getElementById("id_route_duration").innerHTML = nb_hours + "h" + nb_minutes + "'" + nb_seconds + '"';
+            hms = nb_hours + "h" + nb_minutes + "'" + nb_seconds + '"';
         }
         
-        document.getElementById("id_route_distance_duration").style.display = "";
-        
+		var content = 
+			'<span>' +
+			'	<b>' + Math.round( dist_meters / 1000 ) + '</b>&nbsp;kms' +
+			'	&nbsp;-&nbsp;' +
+			'	<b>' + Math.round( dist_meters * 0.000621371 ) + '</b>&nbsp;miles' +
+			'	&nbsp;-&nbsp;' +
+			'	<b>' + hms + '</b>' +
+			'</span>';
+
+        if (waypoint == undefined) {
+            document.getElementById(id).innerHTML = content;
+		}
+		else {
+			dijit.byId(id).set( 'label', content + "<br><br>Play this leg of the route using StreetView" );
+		}
+
     }
     
     function restart_animate_timer( fast ) {
@@ -543,8 +559,8 @@ define( function( m ) {
     
 	function cb_make_route(response, status) {
 
-			console.log( response );
-			console.log( status );
+		console.log( response );
+		console.log( status );
 
         if ( status == google.maps.DirectionsStatus.OK ) {
 
@@ -607,6 +623,7 @@ define( function( m ) {
                     }
                 }
                 
+				show_route_distance_duration( legs[i].distance.value, legs[i].duration.value, i+1 );
             }
             
             show_route_distance_duration( dist_meters, duration_secs );
@@ -982,21 +999,8 @@ define( function( m ) {
 				new Tooltip({
 					id: "id_tooltip_btn_drive_"+n,
 					connectId: ["id_btn_drive_"+n],
-					position:['below-centered'],
-					label: "Virtual Ride!<br><br>Play the route using StreetView<br><br>" +
-						"<table>" +
-						"	<tr>" +
-						"		<td valign=\"middle\" >" +
-						"			<img src=\"icons/btn-drive.png\" style=\"width:16px; height:16px; vertical-align:middle\" />" +
-						"		</td>" +
-						"		<td>" +
-						"			This allows to <b><i>play</b></i> a leg of the route. Each image will stay for a specifc time (default is 1,200 msec), <br>" +
-						"			and each new image is separated from the previous one by 175 meters." +
-						"		</td>" +
-						"	</tr>" +
-						"	<tr>" +
-						"	</tr>" +
-						"</table>",
+					position:['after-centered'],
+					label: "",
 					showDelay:9999999,
 					hideDelay:0
 				});
