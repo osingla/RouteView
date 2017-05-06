@@ -32,7 +32,7 @@ define( function( m ) {
     var bearing;
     var prev_bearing;
 	var prev_pano_id;
-	var pano_cnt;
+	var pano_cnt = 0;
 	var cb_move_to_dist = undefined;
 	var directions_service;
 	var directions_service_request;
@@ -53,6 +53,8 @@ define( function( m ) {
    	var mouse_over_input_route;
    	var is_dirty = false;
    	var is_ff = false;
+   	var browse_images_mode = false;
+   	var marker_browser_images_pos;
 
 	var search_places = [];
 
@@ -73,8 +75,6 @@ define( function( m ) {
 		console.log( "waypoint " + waypoint + " : dist_meters=" + dist_meters + " duration_secs=" + duration_secs );
 
 		var id = (waypoint == undefined) ? "id_route_info" : "id_tooltip_btn_drive_"+waypoint;
-
-console.log( id );			
 
         var nb_hours   = Math.floor( duration_secs / 3600 );
         var nb_minutes = Math.floor( (duration_secs - (nb_hours * 3600)) / 60 );
@@ -228,7 +228,6 @@ console.log( id );
 								}
 							});
 						})(  );
-	//					map.setStreetView( panorama );
 						panorama.setPosition( p );
 	//					if ( prev_bearing != undefined )
 	//						panorama.setPov( { heading: prev_bearing, pitch: 1 } );
@@ -826,6 +825,10 @@ console.log( id );
 	       	
 		marker_pos_using_slider.setMap( null );
 		marker_pos_using_slider_no_pano.setMap( null );
+    
+		browse_images_mode = false;
+		marker_browser_images_pos.setMap( null );
+
     }
 
     function start( ) {
@@ -1353,6 +1356,12 @@ console.log( id );
 					icon: "icons/marker_pos_using_slider.png"
 				});
 
+				marker_browser_images_pos = new google.maps.Marker({
+					map: map,
+					title: 'Position to show panorama view',
+					icon: "icons/marker_browse_images_pos.png"
+				});
+
 				marker_pos_using_slider_no_pano = new google.maps.Marker({
 					map: map,
 					title: 'Position along the route using the slider',
@@ -1392,9 +1401,11 @@ console.log( id );
                 
             	map_or_panorama_full_screen = false;
 
+/*
         		google.maps.event.addListener( map, "click", function( evt ) {
         			cb_map_click( evt );
        			});
+*/
         		
 				google.maps.event.clearListeners( map, 'rightclick' );
         		google.maps.event.addListener( map, "rightclick", function( evt ) {
@@ -1415,6 +1426,20 @@ console.log( id );
         		on( id_panorama4, "dblclick", function( evt ) {
    					cb_panorama_dblclick( );
        			});
+
+				var initial_info_use_icon = localStorage.getItem("initial_info_start");
+				if ( !initial_info_use_icon ) {
+					do_show_message( false, "Information", 
+						"<div align='center'>" +
+						"  The default maximum number of waypoints is 8.<br><br>" +
+						"<br>If you want up to 24 waypoints, request a google maps api key<br>" +
+						"<br>and use this key here (configuration panel).<br>" +
+						"<br>" +
+						"https://developers.google.com/maps/documentation/javascript/get-api-key" +
+						"<br><br>" +
+						"</div>" );
+					localStorage.setItem( "initial_info_start", "true" );
+				}
 
         		_list_countries = [
         		    {id: 0,    list:['Algeria','Burkina Faso','Faeroe Islands','Ghana','Guinea Republic','Iceland','Ireland','Ivory Coast','Liberia','Mali','Morocco','Sao Tome and Principe','Senegal','Sierra Leone','Saint Helena','Gambia','Togo','United Kingdom']},
@@ -1594,7 +1619,7 @@ console.log( id );
    				got_location = false;
 
    				var decoded_flags = decode_url_params();
-console.log("decoded_flags= " + decoded_flags );
+				console.log("decoded_flags= " + decoded_flags );
 
 				if ( !decoded_flags ) {
 					var is_addr_for_orig = (dijit.byId('id_addr_for_orig').get( 'value') == "") ? false : true;
@@ -1903,6 +1928,108 @@ console.log("decoded_flags= " + decoded_flags );
 
 	}
 
+	function browse_images( ) {
+		
+    	require(["dojo/dom-style"], function( domStyle ) {
+			domStyle.set( "id_top_layout", "display", "none" );
+			domStyle.set( "id_left_layout", "display", "none" );
+			dijit.byId('app_layout').resize();
+			set_map_pano_layout( );
+		});
+
+		dijit.byId('id_btn_pause').set( 'disabled', true );
+		dijit.byId('id_btn_stop').set( 'disabled', false );
+		dijit.byId('id_btn_map_pano_layout').set( 'disabled', false );
+
+		browse_images_mode = true;
+		
+		streetViewLayer.setMap( null );
+
+   		map.fitBounds( route_bounds );
+
+		directions_renderer.setOptions( { zIndex:99, draggable: false } );
+
+		document.getElementById("id_panorama2").style.display = "";
+		document.getElementById("id_panorama3").style.display = "";
+		document.getElementById("id_panorama4").style.display = "";
+		document.getElementById("id_panorama4").style.zIndex = "1"
+		document.getElementById("id_panorama3").style.zIndex = "0";
+		document.getElementById("id_panorama2").style.zIndex = "0";
+		panorama2.setVisible( true );
+		panorama3.setVisible( true );
+		panorama4.setVisible( true );
+		window.dispatchEvent(new Event('resize'));
+
+		var service = new google.maps.DirectionsService();
+		var poly = new google.maps.Polyline({ map: map });
+		google.maps.event.addListener(map, "click", function(evt) {
+
+			service.route({
+				origin: evt.latLng,
+				destination: evt.latLng,
+				travelMode: google.maps.DirectionsTravelMode.DRIVING
+			}, function(result, status) {
+//				console.log( status );
+				if (status == google.maps.DirectionsStatus.OK) {
+//					console.log( result.routes[0].overview_path.length );
+					var p = result.routes[0].overview_path[0];
+					street_view_check.getPanoramaByLocation(p, 5000, (function() { return function(result, status) {
+						if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
+							console.log( "No results!" );
+							marker_browser_images_pos.setPosition( null );
+						}
+						else {
+//							console.log( result );
+							marker_browser_images_pos.setPosition( result.location.latLng );
+
+							panorama.addListener('Xpano_changed', function() {
+								var pano_id = panorama.getPano();
+console.log( pano_id );
+								if (pano_cnt < prev_pano_cnt+1) {
+console.log(pano_cnt);
+									switch (pano_cnt++ % 1) {
+										case 0 :
+//											document.getElementById("id_panorama2").style.zIndex = "1";
+//											document.getElementById("id_panorama3").style.zIndex = "0"
+//											document.getElementById("id_panorama4").style.zIndex = "0"
+											panorama4.setPano( pano_id );
+//											if ( prev_bearing != undefined )
+//												panorama4.setPov( { heading: prev_bearing, pitch: 1 } );
+											break;
+										case 1 :
+//											document.getElementById("id_panorama3").style.zIndex = "1";
+//											document.getElementById("id_panorama2").style.zIndex = "0"
+//											document.getElementById("id_panorama4").style.zIndex = "0";
+											panorama2.setPano( pano_id );
+//											if ( prev_bearing != undefined )
+//												panorama2.setPov( { heading: prev_bearing, pitch: 1 } );
+											break;
+										case 2 :
+//											document.getElementById("id_panorama4").style.zIndex = "1"
+//											document.getElementById("id_panorama3").style.zIndex = "0";
+//											document.getElementById("id_panorama2").style.zIndex = "0";
+											panorama3.setPano( pano_id );
+//											if ( prev_bearing != undefined )
+//												panorama3.setPov( { heading: prev_bearing, pitch: 1 } );
+											break;
+									}
+								}
+							});
+							
+							panorama.setPosition( result.location.latLng );
+							prev_pano_cnt = pano_cnt;
+								panorama4.setPosition( result.location.latLng );
+
+						}
+					}})());
+					
+				}
+			});
+
+		});
+
+	}
+
     function cb_step_changed( ) {
     	step = dijit.byId('id_input_meters').get( 'value' );
         document.getElementById("id_meters").innerHTML = step;
@@ -2155,12 +2282,12 @@ console.log("decoded_flags= " + decoded_flags );
            	map.panTo( places[0].geometry.location );
     	}
     }
-    
+
+/*    
     function cb_map_click( evt ) {
-    	
     	console.log( "cb_map_click" );
-    	
     }
+*/
 
     function cb_panorama_dblclick( ) {
 
@@ -2965,6 +3092,8 @@ console.log("decoded_flags= " + decoded_flags );
 		do_create_short_url: function ( ) { do_create_short_url(); },
 		
 		move_to_dist: function( new_pos ) { move_to_dist( new_pos ); },
+
+		browse_images: function( ) { browse_images( ); },
 
 		cb_streetview_icon: function( ) { cb_streetview_icon(); },
 

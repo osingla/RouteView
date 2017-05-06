@@ -25,6 +25,7 @@
         </script>
 
  		<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.12.2/dijit/themes/claro/claro.css" media="screen" >
+ 		<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.12.2/dojox/layout/resources/FloatingPane.css" media="screen" >
 
 		<script src="https://apis.google.com/js/client.js?onload=load"></script>
 
@@ -52,6 +53,7 @@
         		"dijit/form/Select",
         		"dijit/TooltipDialog",
 				"dojox/widget/Standby",
+				"dojox/layout/FloatingPane",
         		"dojo/domReady!"]
         	);
         </script>
@@ -159,11 +161,11 @@
 				                    		<td style="width:100%">
 												<hr size="7" color="#0066cc">
 											</td>
-											<td style="display:none">
+											<td style="display:">
 												&nbsp;
 												<button dojoType="dijit.form.Button" type="button" id="id_btn_browse_images" disabled
 														data-dojo-props="iconClass:'icon_btn_browse', showLabel: false"
-														onclick='require(["RouteView.js"], function( s ) { s.browse_images(0); })'>
+														onclick='require(["RouteView.js"], function( s ) { s.browse_images(); })'>
 												</button>
 												<div id="id_tooltip_btn_browse_images" data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_browse_images',position:['below-centered'],showDelay:999999,hideDelay:0">
 													Once a route has been defined,<br>
@@ -747,6 +749,12 @@
             </div>
             
         </div>
+
+<div data-dojo-type="dojox.layout.FloatingPane" id="idFloatingPane"
+   title="A floating pane" data-dojo-props="closable:false, resizable:false, dockable:false, title:'A floating pane'"
+   style="position:absolute;top:0;left:0;width:320px;height:240px;visibility:hidden;">
+<div id="id_panorama_browse" style="width:100%; height:100%"></div>
+</div>
 
 		<div id="id_hidden" style="display:none"></div>
 
