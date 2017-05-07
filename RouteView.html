@@ -156,48 +156,6 @@
 				                    		</td>
 				                    	</tr>
 					                </table>
-				                    <table cellspacing="0" cellpadding="0" style="width:100%; white-space: nowrap" >
-				                    	<tr >
-				                    		<td style="width:100%">
-												<hr size="7" color="#0066cc">
-											</td>
-											<td style="display:">
-												&nbsp;
-												<button dojoType="dijit.form.Button" type="button" id="id_btn_browse_images" disabled
-														data-dojo-props="iconClass:'icon_btn_browse', showLabel: false"
-														onclick='require(["RouteView.js"], function( s ) { s.browse_images(); })'>
-												</button>
-												<div id="id_tooltip_btn_browse_images" data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_browse_images',position:['below-centered'],showDelay:999999,hideDelay:0">
-													Once a route has been defined,<br>
-													this allows you to show images from the route using Street View.
-													<br><br>
-													Note: This is different from playing the ride using <img src="icons/btn-drive.png" style="width:16px; height:16px; vertical-align:middle" />.<br>
-													<br>
-													<table>
-														<tr>
-															<td valign="middle" >
-																<img src="icons/btn-drive.png" style="width:16px; height:16px; vertical-align:middle" />
-															</td>
-															<td>
-																This allows to <b><i>play</b></i> a leg of the route. Each image will stay for a specifc time (default is 1,200 msec), <br>
-																and each new image is separated from the previous one by 175 meters.
-															</td>
-														</tr>
-														<tr>
-														</tr>
-														<tr>
-															<td valign="middle" >
-																<img src="icons/btn-browse.png" style="width:16px; height:16px; vertical-align:middle"/>
-															</td>
-															<td>
-																This allows to <b><i>show</b></i> an image along the route depending where the mouse cursor is.
-															</td>
-														</tr>
-													</table>
-												</div>
-											</td>
-										</tr>
-									</table>
 				                    <table style="width:100%">
 				                    	<tr>
 				                            <td align="left" valign="middle">
@@ -539,6 +497,18 @@
 							                    </div>
 				                    		</td>
 				                    		
+				                            <td align="center" valign="middle">
+												<button dojoType="dijit.form.Button" type="button" id="id_btn_browse_images" disabled
+														data-dojo-props="iconClass:'icon_btn_browse', showLabel: false"
+														onclick='require(["RouteView.js"], function( s ) { s.browse_images(); })'>
+												</button>
+											</td>
+											<div data-dojo-type="dijit/Tooltip" id="id_tooltip_btn_browse_images" data-dojo-props="connectId:'id_btn_browse_images',position:['below-centered'],showDelay:750,hideDelay:0">
+												This allows to <b><i>play</b></i> show the StreetView image for a given location.<br><br>
+												Each time you click on the map, you should see the StreetView image for this location.<br>
+												Please note that the position is adjusted to be on the nearest location with StreetView data.
+											</div>
+
 				                            <td align="center" valign="middle">
 												<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_drive', showLabel: false" style="font-size: 85%" 
 												 onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_drive_whole_route(); })' id="id_btn_drive_whole_route" disabled >

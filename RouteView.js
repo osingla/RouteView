@@ -124,8 +124,6 @@ define( function( m ) {
     
     function cb_animate( d ) {
 
-//		console.log( "d=" + d );
-    
         if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" )
         	return;
 		if ( dijit.byId("id_btn_stop").get("disabled") )
@@ -163,6 +161,8 @@ define( function( m ) {
 		(function ( ) {
 
 			street_view_check.getPanoramaByLocation(p, 50, (function() { return function(result, status) {
+				if ( browse_images_mode )
+					return;
 				if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
 					console.log( "No street view available" );
 					marker_small_street_view.setPosition( null );
@@ -826,8 +826,11 @@ define( function( m ) {
 		marker_pos_using_slider.setMap( null );
 		marker_pos_using_slider_no_pano.setMap( null );
     
+		google.maps.event.clearListeners(panorama, "pano_changed");
+    
 		browse_images_mode = false;
 		marker_browser_images_pos.setMap( null );
+		google.maps.event.clearListeners(map, "click");
 
     }
 
@@ -1929,7 +1932,7 @@ define( function( m ) {
 	}
 
 	function browse_images( ) {
-		
+
     	require(["dojo/dom-style"], function( domStyle ) {
 			domStyle.set( "id_top_layout", "display", "none" );
 			domStyle.set( "id_left_layout", "display", "none" );
@@ -1955,8 +1958,8 @@ define( function( m ) {
 		document.getElementById("id_panorama4").style.zIndex = "1"
 		document.getElementById("id_panorama3").style.zIndex = "0";
 		document.getElementById("id_panorama2").style.zIndex = "0";
-		panorama2.setVisible( true );
-		panorama3.setVisible( true );
+		panorama2.setVisible( false );
+		panorama3.setVisible( false );
 		panorama4.setVisible( true );
 		window.dispatchEvent(new Event('resize'));
 
@@ -1974,51 +1977,15 @@ define( function( m ) {
 //					console.log( result.routes[0].overview_path.length );
 					var p = result.routes[0].overview_path[0];
 					street_view_check.getPanoramaByLocation(p, 5000, (function() { return function(result, status) {
+						marker_browser_images_pos.setMap( map );
 						if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
 							console.log( "No results!" );
 							marker_browser_images_pos.setPosition( null );
 						}
 						else {
-//							console.log( result );
 							marker_browser_images_pos.setPosition( result.location.latLng );
-
-							panorama.addListener('Xpano_changed', function() {
-								var pano_id = panorama.getPano();
-console.log( pano_id );
-								if (pano_cnt < prev_pano_cnt+1) {
-console.log(pano_cnt);
-									switch (pano_cnt++ % 1) {
-										case 0 :
-//											document.getElementById("id_panorama2").style.zIndex = "1";
-//											document.getElementById("id_panorama3").style.zIndex = "0"
-//											document.getElementById("id_panorama4").style.zIndex = "0"
-											panorama4.setPano( pano_id );
-//											if ( prev_bearing != undefined )
-//												panorama4.setPov( { heading: prev_bearing, pitch: 1 } );
-											break;
-										case 1 :
-//											document.getElementById("id_panorama3").style.zIndex = "1";
-//											document.getElementById("id_panorama2").style.zIndex = "0"
-//											document.getElementById("id_panorama4").style.zIndex = "0";
-											panorama2.setPano( pano_id );
-//											if ( prev_bearing != undefined )
-//												panorama2.setPov( { heading: prev_bearing, pitch: 1 } );
-											break;
-										case 2 :
-//											document.getElementById("id_panorama4").style.zIndex = "1"
-//											document.getElementById("id_panorama3").style.zIndex = "0";
-//											document.getElementById("id_panorama2").style.zIndex = "0";
-											panorama3.setPano( pano_id );
-//											if ( prev_bearing != undefined )
-//												panorama3.setPov( { heading: prev_bearing, pitch: 1 } );
-											break;
-									}
-								}
-							});
-							
 							panorama.setPosition( result.location.latLng );
-							prev_pano_cnt = pano_cnt;
-								panorama4.setPosition( result.location.latLng );
+							panorama4.setPosition( result.location.latLng );
 
 						}
 					}})());
