@@ -174,7 +174,7 @@ define( function( m ) {
 					marker_no_street_view.setPosition( null );
 					var iad = polyline.GetIndexAtDistance( curr_dist_in_leg );
 					bearing = polyline.Bearing( iad );
-//					console.log( curr_leg + " : " + curr_dist_in_leg + " - " + curr_dist_in_route + " / " + eol + " --> " + bearing);
+					console.log( curr_leg + " : " + curr_dist_in_leg + " - " + curr_dist_in_route + " / " + eol + " --> " + bearing);
 					if (bearing == undefined)
 						bearing = prev_bearing;
 					if (bearing != undefined) {
@@ -360,7 +360,7 @@ define( function( m ) {
       return (Math.sqrt( (x*x) + (y*y) + (z*z) )/1000);  
     }
 
-    function do_route( ) {
+    function do_route( load_step_interv ) {
 
 	    dijit.byId("id_pane_standby").show();
 
@@ -375,10 +375,12 @@ define( function( m ) {
         var no_hwy  = dijit.byId('id_check_no_hwy').get( 'checked' );
         var no_toll = dijit.byId('id_check_no_toll').get( 'checked' );
 //      console.log( "no_hwy=" + no_hwy + " no_toll=" + no_toll );
-        
-    	step     = dijit.byId('id_input_meters').get( 'value' );
-    	interval = dijit.byId('id_input_interval').get( 'value' );
-//      console.log( "step=" + step + " interval=" + interval );
+
+		if ( load_step_interv ) {
+			step     = dijit.byId('id_input_meters').get( 'value' );
+			interval = dijit.byId('id_input_interval').get( 'value' );
+			console.log( "step=" + step + " interval=" + interval );
+		}
 
     	route_thickness = dijit.byId('id_input_route_thickness').get( 'value' );
 //  	console.log( "route_thickness=" + route_thickness );
@@ -1115,6 +1117,8 @@ define( function( m ) {
 							if ( q.length = 2 ) {
 								step = parseInt( q[0] );
 								interval = parseInt( q[1] );
+								console.log( "step=" + step );
+								console.log( "interval=" + interval );
 							}
 						}
 						else {
@@ -1174,7 +1178,7 @@ define( function( m ) {
 									if ( waypoint_index == 0 )
 										map.setCenter(results[0].geometry.location);
 									if ( done_nb_waypoints == total_nb_waypoints ) {
-										do_route( );
+										do_route( false );
 										dijit.byId("id_pane_standby").hide();
 										if ( play_waypoint != undefined ) {
 											console.log( "play_waypoint="+play_waypoint);
@@ -2049,13 +2053,13 @@ define( function( m ) {
     function cb_click_no_hwy( ) {
 
     	if ( !dijit.byId("id_btn_drive_1").get("disabled") )
-    		do_route( );
+    		do_route( true );
     }
 
     function cb_click_no_toll( ) {
     	
     	if ( !dijit.byId("id_btn_drive_1").get("disabled") )
-    		do_route( );
+    		do_route( true );
     }
 
     function download_file( text, name, type ) {
@@ -2247,7 +2251,7 @@ define( function( m ) {
     	update_btns_remove_up_down( );
     	
 		if ( !nok_route ) {
-    		do_route( );
+    		do_route( true );
     	}
     	else if ( (origin != "") && (waypoint1 == "") && (destination == "") ) {
     		if ( (places[0].geometry != undefined) && (places[0].geometry.location != undefined) )
@@ -2351,7 +2355,7 @@ define( function( m ) {
 								var id = "id_wp_" + waypoint_index;
 								dijit.byId( id ).set( "value", place.formatted_address );
 								update_btns_remove_up_down( );
-								do_route( );
+								do_route( true );
 							}
 						});
 					})( first_hidden );
@@ -2368,7 +2372,7 @@ define( function( m ) {
     	var id_label_wp = "id_wp_" + index_wp;
 		dijit.byId(id_label_wp).set( 'value', place_name );
 
-		do_route( );
+		do_route( true );
     }
 
 	function cb_click_btn_add( index ) {
@@ -2422,7 +2426,7 @@ define( function( m ) {
     		domStyle.set( 'id_tr_'+(first_hidden-1), "display", "none" );
     	});
 		
-		do_route( );
+		do_route( true );
 		update_btns_remove_up_down( );		
 	}
 
@@ -2436,7 +2440,7 @@ define( function( m ) {
 		dijit.byId('id_wp_'+(index)).set( 'value', wp_b );
 		dijit.byId('id_wp_'+(index-1)).set( 'value', wp_a );
 
-		do_route( );
+		do_route( true );
 	}
 
 	function cb_click_btn_down( index ) {
@@ -2449,7 +2453,7 @@ define( function( m ) {
 		dijit.byId('id_wp_'+(index)).set( 'value', wp_b );
 		dijit.byId('id_wp_'+(index+1)).set( 'value', wp_a );
 		
-		do_route( );
+		do_route( true );
 	}
 
 	function set_map_pano_layout( ) {
