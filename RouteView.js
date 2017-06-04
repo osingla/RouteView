@@ -1102,11 +1102,19 @@ define( function( m ) {
 					if (item != "") {
 						if ( item.slice(0,5) == "play=" ) {
 							var p = item.slice(5);
+							console.log( p );
+							play_waypoint = parseInt( p );
+							console.log("play_waypoint=" + play_waypoint);
+							localStorage.setItem( "initial_info_use_icon", "true" );
+						}
+						else if ( item.slice(0,7) == "interv=" ) {
+							var p = item.slice(7);
+							console.log( p );
 							var q = p.split(",");
-							if ( q.length == 2 ) {
-								play_waypoint = parseInt( q[1] );
-								console.log("play_waypoint=" + play_waypoint);
-								localStorage.setItem( "initial_info_use_icon", "true" );
+							console.log(q);
+							if ( q.length = 2 ) {
+								step = parseInt( q[0] );
+								interval = parseInt( q[1] );
 							}
 						}
 						else {
@@ -1163,10 +1171,8 @@ define( function( m ) {
 										domStyle.set( 'id_wp_'+waypoint_index, { color: "black" } );
 									});
 									done_nb_waypoints++;
-									if ( waypoint_index == 0 ) {
-										console.log("XXX");
+									if ( waypoint_index == 0 )
 										map.setCenter(results[0].geometry.location);
-									}
 									if ( done_nb_waypoints == total_nb_waypoints ) {
 										do_route( );
 										dijit.byId("id_pane_standby").hide();
