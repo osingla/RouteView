@@ -174,7 +174,7 @@ define( function( m ) {
 					marker_no_street_view.setPosition( null );
 					var iad = polyline.GetIndexAtDistance( curr_dist_in_leg );
 					bearing = polyline.Bearing( iad );
-					console.log( curr_leg + " : " + curr_dist_in_leg + " - " + curr_dist_in_route + " / " + eol + " --> " + bearing);
+//					console.log( curr_leg + " : " + curr_dist_in_leg + " - " + curr_dist_in_route + " / " + eol + " --> " + bearing);
 					if (bearing == undefined)
 						bearing = prev_bearing;
 					if (bearing != undefined) {
