@@ -479,6 +479,10 @@ define( function( m ) {
 				index_waypoint = new_dir.request.Gb;
             else if (new_dir.request.Hb != undefined)
 				index_waypoint = new_dir.request.Hb;
+            else if (new_dir.request.Pb != undefined)
+				index_waypoint = new_dir.request.Pb;
+            else if (new_dir.request.Qb != undefined)
+				index_waypoint = new_dir.request.Qb;
             if ( index_waypoint == undefined ) {
 				console.log( "UNDEFINED >>>>>>" );
 				console.log( new_dir );
@@ -845,9 +849,10 @@ define( function( m ) {
 
    				load_settings( );
 				
-//				var google_api = "3.26";
 //				var google_api = "3.27";
-				var google_api = "3.28";
+//				var google_api = "3.28";
+//				var google_api = "3.29";
+				var google_api = "3.30";
 				var rq = "//maps.google.com/maps/api/js?v="+google_api+"&sensor=false&libraries=places,geometry";
 		    	var google_maps_api_key = localStorage.getItem("id_google_maps_api_key");
 		    	if ( google_maps_api_key && (google_maps_api_key != "") )
@@ -1972,6 +1977,27 @@ define( function( m ) {
 		panorama3.setVisible( false );
 		panorama4.setVisible( true );
 		window.dispatchEvent(new Event('resize'));
+
+		google.maps.event.clearListeners( panorama4, 'pov_changed' );
+		google.maps.event.addListener( panorama4, "pov_changed", function( ) {
+			var h = panorama4.getPov().heading;
+			console.log( h );
+			var icon = "";
+/*
+			if 		( h < 22.5 )	icon = "icons/pegman-n.png";
+			else if ( h < 45 )	 	icon = "icons/pegman-ne1.png";
+			else if ( h < 67.5 )	icon = "icons/pegman-ne2.png";
+			else if ( h < 90 ) 		icon = "icons/pegman-ne3.png";
+			else if ( h < 112.5 )	icon = "icons/pegman-e.png";
+			else if ( h < 135 )		icon = "icons/pegman-se1.png";
+			else if ( h < 157.5 )	icon = "icons/pegman-se2.png";
+			else if ( h < 180 ) 	icon = "icons/pegman-se3.png";
+			else if ( h < 202.5 )	icon = "icons/pegman-se3.png";
+			else if ( h < 225 ) 	icon = "icons/pegman-se3.png";
+			else 				 icon = "";
+			marker_browser_images_pos.setIcon( icon );
+*/
+		});
 
 		var service = new google.maps.DirectionsService();
 		var poly = new google.maps.Polyline({ map: map });
