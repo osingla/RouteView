@@ -1305,6 +1305,7 @@ define( function( m ) {
                    	zoomControl: true,
                    	mapTypeControl: false,
                    	streetViewControl: false,
+                   	gestureHandling: 'greedy'
                 };
                 map = new google.maps.Map( document.getElementById('id_map_canvas'), map_options );
 
