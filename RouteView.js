@@ -483,6 +483,12 @@ define( function( m ) {
 				index_waypoint = new_dir.request.Pb;
             else if (new_dir.request.Qb != undefined)
 				index_waypoint = new_dir.request.Qb;
+            else if (new_dir.request.Rb != undefined)
+				index_waypoint = new_dir.request.Rb;
+            else if (new_dir.request.Sb != undefined)
+				index_waypoint = new_dir.request.Sb;
+            else if (new_dir.request.Tb != undefined)
+				index_waypoint = new_dir.request.Tb;
             if ( index_waypoint == undefined ) {
 				console.log( "UNDEFINED >>>>>>" );
 				console.log( new_dir );
