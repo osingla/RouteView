@@ -731,6 +731,7 @@ define( function( m ) {
 
 	function cb_map_pano_layout( layout ) {
 
+console.log("@@@ layout="+layout);
 		for ( var n = 1; n <= 4; n++ )
 			dijit.byId('btn_map_pano_layout_'+n).set('selected', (n == layout) ? true : false, false);
 
@@ -2497,10 +2498,18 @@ define( function( m ) {
 			
 			switch ( map_pano_layout ) {
 				case 1 : 
+					map_width  = "20%"; 
+					pano_width = "80%"; 
+					break;
+				case 2 : 
+					map_width  = "30%"; 
+					pano_width = "70%"; 
+					break;
+				case 3 : 
 					map_width  = "40%"; 
 					pano_width = "60%"; 
 					break;
-				case 2 : 
+				case 4 : 
 					map_width  = "50%"; 
 					pano_width = "50%"; 
 					break;
@@ -2514,7 +2523,14 @@ define( function( m ) {
 			google.maps.event.trigger( map, 'resize' );
 			google.maps.event.trigger( panorama, 'resize' );
 			window.dispatchEvent(new Event('resize'));
-			
+
+			if ( play_whole_route ) {
+				map.fitBounds( route_bounds );
+			}
+			else {
+				map.setCenter( polylines[curr_leg].getPath().getAt(0) );
+				map.fitBounds( legs_bounds[curr_leg] );
+			}
 		});
 	}
 	
