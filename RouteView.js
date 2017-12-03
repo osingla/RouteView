@@ -72,7 +72,10 @@ define( function( m ) {
   
 	function show_route_distance_duration( dist_meters, duration_secs, waypoint ) {
 
-		console.log( "waypoint " + waypoint + " : dist_meters=" + dist_meters + " duration_secs=" + duration_secs );
+		if (waypoint == undefined)
+			console.log( "dist_meters=" + dist_meters + " duration_secs=" + duration_secs );
+		else
+			console.log( "waypoint " + waypoint + " : dist_meters=" + dist_meters + " duration_secs=" + duration_secs );
 
 		var id = (waypoint == undefined) ? "id_route_info" : "id_tooltip_btn_drive_"+waypoint;
 
@@ -242,7 +245,7 @@ define( function( m ) {
     }
 
     function start_driving( ) {
-        
+
 		streetViewLayer.setMap( null );
 
 		if ( timer_animate != undefined )
@@ -2561,6 +2564,12 @@ console.log("@@@ layout="+layout);
 		dijit.byId('id_btn_pause').set( 'disabled', false );
 		dijit.byId('id_btn_stop').set( 'disabled', false );
 		dijit.byId('id_btn_map_pano_layout').set( 'disabled', false );
+
+		if ( step == undefined ) {
+			step     = dijit.byId('id_input_meters').get( 'value' );
+			interval = dijit.byId('id_input_interval').get( 'value' );
+			console.log( "step=" + step + " interval=" + interval );
+		}
 
         start_driving( );  
 
