@@ -15,15 +15,6 @@
         	content="Allows a virtual ride over a Google Maps route using Street View. Step (in meters) and Refresh Rate are configurable. Street View Player. Simulate your Driving Route with this Google Map Web Application. Virtual Ride using Street View.">
         <meta name="revisit-after" content="4 hours">
 
-        <script>
-            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-            ga('create', 'UA-66144602-1', 'auto');
-            ga('send', 'pageview');
-        </script>
-
  		<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.12.2/dijit/themes/claro/claro.css" media="screen" >
  		<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.12.2/dojox/layout/resources/FloatingPane.css" media="screen" >
 
@@ -572,9 +563,9 @@
 														name="horizontalSlider"
 														data-dojo-type="dijit/form/HorizontalSlider"
 														data-dojo-props="value:150,
-														minimum: 200,
+														minimum: 100,
 														maximum:1000,
-														discreteValues:17,
+														discreteValues:19,
 														intermediateChanges:true,
 														showButtons:true"
 														onChange='require(["RouteView.js"], function( s ) { s.cb_step_changed(); })'>

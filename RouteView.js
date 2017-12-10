@@ -26,8 +26,8 @@ define( function( m ) {
     var curr_dist_in_leg;
     var curr_dist_in_route;
     var eol;
-    var step;               			// meters
-    var interval;           			// milliseconds
+    var step = 150;            			// meters
+    var interval = 750;        			// milliseconds
     var route_thickness;				// pixels
     var bearing;
     var prev_bearing;
@@ -141,7 +141,7 @@ define( function( m ) {
             return;
         }
         
-        if ( play_whole_route ) {
+        if ( play_whole_route || (curr_leg == undefined) ) {
 			curr_leg = 0;
 			while ( d > distances[curr_leg] )
 				curr_leg++;
@@ -251,7 +251,7 @@ define( function( m ) {
 		if ( timer_animate != undefined )
             clearTimeout( timer_animate );
             
-		if ( play_whole_route ) {
+        if ( play_whole_route || (curr_leg == undefined) ) {
 			eol = 0;
 			distances = [];
 			polylines.forEach( function(e) { eol += e.Distance(); distances.push( eol); })
@@ -379,6 +379,7 @@ define( function( m ) {
         var no_toll = dijit.byId('id_check_no_toll').get( 'checked' );
 //      console.log( "no_hwy=" + no_hwy + " no_toll=" + no_toll );
 
+console.log("load_step_interv=" + load_step_interv);
 		if ( load_step_interv ) {
 			step     = dijit.byId('id_input_meters').get( 'value' );
 			interval = dijit.byId('id_input_interval').get( 'value' );
@@ -1691,7 +1692,7 @@ console.log("@@@ layout="+layout);
 					mouse_over_input_route = true;
 
 					prev_zoom = map.getZoom();
-					if ( play_whole_route ) {
+					if ( play_whole_route || (curr_leg == undefined) ) {
 						map.fitBounds( route_bounds );
 					}
 					else {
@@ -1736,7 +1737,7 @@ console.log("@@@ layout="+layout);
 						var perc = ((x - output.x) / output.w) * 100;
 						var new_curr_dist = (eol * perc) / 100;
 						
-						if ( play_whole_route ) {
+						if ( play_whole_route || (curr_leg == undefined) ) {
 							curr_leg = 0;
 							while ( new_curr_dist > distances[curr_leg] )
 								curr_leg++;
@@ -1779,7 +1780,7 @@ console.log("@@@ layout="+layout);
 					var new_curr_dist = (eol * perc) / 100;
 //					console.log( perc + " / " + eol + " -> " + new_curr_dist );
 
-					if ( play_whole_route ) {
+					if ( play_whole_route || (curr_leg == undefined) ) {
 						curr_leg = 0;
 						while ( new_curr_dist > distances[curr_leg] )
 							curr_leg++;
@@ -1870,7 +1871,7 @@ console.log("@@@ layout="+layout);
 	       	timer_animate = setTimeout( function() { cb_animate(new_pos); }, interval );
 		}
 
-        if ( play_whole_route ) {
+        if ( play_whole_route || (curr_leg == undefined) ) {
 			curr_leg = 0;
 			while ( new_pos > distances[curr_leg] )
 				curr_leg++;
@@ -2012,6 +2013,48 @@ console.log("@@@ layout="+layout);
 */
 		});
 
+		id_panorama4.addEventListener('mousedown', function(evt) {
+			panorama_mouse_down_offsetX = evt.offsetX;
+			panorama_mouse_down_offsetY = evt.offsetY;
+		});
+
+		id_panorama4.addEventListener('mouseup', function(evt) {
+			if ((evt.offsetX == panorama_mouse_down_offsetX) && (evt.offsetY && panorama_mouse_down_offsetY)) {
+				var curr_latlng = panorama.getPosition();
+				console.log("Panorama clicked - " + curr_latlng + " - " + pano_cnt + " - " + panorama4.getPov().heading);
+				var new_latlng = google.maps.geometry.spherical.computeOffset(curr_latlng, step, panorama4.getPov().heading);
+				console.log(new_latlng);
+
+				service.route({
+					origin: new_latlng,
+					destination: new_latlng,
+					travelMode: google.maps.DirectionsTravelMode.DRIVING
+				}, function(result, status) {
+					console.log( status );
+					if (status == google.maps.DirectionsStatus.OK) {
+						console.log( result.routes[0].overview_path.length );
+						var p = result.routes[0].overview_path[0];
+						street_view_check.getPanoramaByLocation(p, 5000, (function() { return function(result, status) {
+							marker_browser_images_pos.setMap( map );
+							if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
+								console.log( "No results!" );
+								marker_browser_images_pos.setPosition( null );
+							}
+							else {
+								marker_browser_images_pos.setPosition( result.location.latLng );
+								panorama.setPosition( result.location.latLng );
+								panorama4.setPosition( result.location.latLng );
+
+							}
+						}})());
+						
+					}
+				});
+
+
+			}
+		});
+
 		var service = new google.maps.DirectionsService();
 		var poly = new google.maps.Polyline({ map: map });
 		google.maps.event.addListener(map, "click", function(evt) {
@@ -2048,6 +2091,7 @@ console.log("@@@ layout="+layout);
 
     function cb_step_changed( ) {
     	step = dijit.byId('id_input_meters').get( 'value' );
+//    	console.log("step = " + step);
         document.getElementById("id_meters").innerHTML = step;
         document.getElementById("id_feet").innerHTML = Math.floor(step * 3.2808);
         save_settings( true );
@@ -2055,6 +2099,7 @@ console.log("@@@ layout="+layout);
 
     function cb_interval_changed( ) {
     	interval = dijit.byId('id_input_interval').get( 'value' );
+//    	console.log("interval = " + interval);
         document.getElementById("id_interval").innerHTML = interval;
         save_settings( true );
     }
@@ -2527,7 +2572,7 @@ console.log("@@@ layout="+layout);
 			google.maps.event.trigger( panorama, 'resize' );
 			window.dispatchEvent(new Event('resize'));
 
-			if ( play_whole_route ) {
+			if ( play_whole_route || (curr_leg == undefined) ) {
 				map.fitBounds( route_bounds );
 			}
 			else {

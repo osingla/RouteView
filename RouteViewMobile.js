@@ -431,7 +431,6 @@ define( function( m ) {
                    	});
             		
                    	require(["dojo/dom-style", "dojo/ready"], function(domStyle, ready) {
-                   			
                    		domStyle.set( "td_small_map_canvas", "display", "" );
                    		ready( function() {
                            	var home = new google.maps.LatLng( 35.733435, -78.907684 );
@@ -957,11 +956,9 @@ define( function( m ) {
    	    	}
    		}
 
-/*
     	document.getElementById('id_body').style.MozTransform = "scale(1.0, 1.0)";
     	document.getElementById('id_body').style.zoom = "100%";
 		document.getElementById('id_body').style.zoom = "1.0";
-*/
     	
     	clearTimeout( timer_animate );
         timer_animate = undefined;
