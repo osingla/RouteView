@@ -55,6 +55,8 @@ define( function( m ) {
    	var is_ff = false;
    	var browse_images_mode = false;
    	var marker_browser_images_pos;
+	var panorama_mouse_down_offsetX = 0;
+	var panorama_mouse_down_offsetY = 0;
 
 	var search_places = [];
 
@@ -164,6 +166,7 @@ define( function( m ) {
 		(function ( ) {
 
 			street_view_check.getPanoramaByLocation(p, 50, (function() { return function(result, status) {
+console.log( "!!! " + browse_images_mode);
 				if ( browse_images_mode )
 					return;
 				if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
@@ -186,7 +189,6 @@ define( function( m ) {
 								var pano_id = panorama.getPano();
 								if (pano_id != prev_pano_id) {
 //									marker_small_street_view.setMap( map );
-									var index = 0;
 									switch (pano_cnt++ % 3) {
 										case 0 :
 											pano_pos[4] = panorama.getPosition();
@@ -286,7 +288,6 @@ define( function( m ) {
 		panorama3.setVisible( true );
 		panorama4.setVisible( true );
 		window.dispatchEvent(new Event('resize'));
-
     }
 
     function find_first_hidden( ) {
@@ -495,6 +496,8 @@ console.log("load_step_interv=" + load_step_interv);
 				index_waypoint = new_dir.request.Tb;
             else if (new_dir.request.ac != undefined)
 				index_waypoint = new_dir.request.ac;
+            else if (new_dir.request.Zb != undefined)
+				index_waypoint = new_dir.request.Zb;
             if ( index_waypoint == undefined ) {
 				console.log( "UNDEFINED >>>>>>" );
 				console.log( new_dir );
@@ -862,10 +865,9 @@ console.log("@@@ layout="+layout);
 
    				load_settings( );
 				
-//				var google_api = "3.27";
-//				var google_api = "3.28";
-//				var google_api = "3.29";
 				var google_api = "3.30";
+				if ( location.hostname != "127.0.0.1" )
+					google_api = "3.31";
 				var rq = "//maps.google.com/maps/api/js?v="+google_api+"&sensor=false&libraries=places,geometry";
 		    	var google_maps_api_key = localStorage.getItem("id_google_maps_api_key");
 		    	if ( google_maps_api_key && (google_maps_api_key != "") )
@@ -1974,6 +1976,7 @@ console.log("@@@ layout="+layout);
 		dijit.byId('id_btn_map_pano_layout').set( 'disabled', false );
 
 		browse_images_mode = true;
+		prev_pano_id = "";
 		
 		streetViewLayer.setMap( null );
 
@@ -1987,17 +1990,14 @@ console.log("@@@ layout="+layout);
 		document.getElementById("id_panorama4").style.zIndex = "1"
 		document.getElementById("id_panorama3").style.zIndex = "0";
 		document.getElementById("id_panorama2").style.zIndex = "0";
-		panorama2.setVisible( false );
-		panorama3.setVisible( false );
+		panorama2.setVisible( true );
+		panorama3.setVisible( true );
 		panorama4.setVisible( true );
 		window.dispatchEvent(new Event('resize'));
 
-		google.maps.event.clearListeners( panorama4, 'pov_changed' );
-		google.maps.event.addListener( panorama4, "pov_changed", function( ) {
-			var h = panorama4.getPov().heading;
-			console.log( h );
+		function do_pov_changed(panoramax) { 
+			var h = panoramax.getPov().heading;
 			var icon = "";
-/*
 			if 		( h < 22.5 )	icon = "icons/pegman-n.png";
 			else if ( h < 45 )	 	icon = "icons/pegman-ne1.png";
 			else if ( h < 67.5 )	icon = "icons/pegman-ne2.png";
@@ -2006,23 +2006,45 @@ console.log("@@@ layout="+layout);
 			else if ( h < 135 )		icon = "icons/pegman-se1.png";
 			else if ( h < 157.5 )	icon = "icons/pegman-se2.png";
 			else if ( h < 180 ) 	icon = "icons/pegman-se3.png";
-			else if ( h < 202.5 )	icon = "icons/pegman-se3.png";
-			else if ( h < 225 ) 	icon = "icons/pegman-se3.png";
-			else 				 icon = "";
+			else if ( h < 202.5 ) 	icon = "icons/pegman-s.png";
+			else if ( h < 225 ) 	icon = "icons/pegman-sw1.png";
+			else if ( h < 270 ) 	icon = "icons/pegman-sw2.png";
+			else if ( h < 292.5 ) 	icon = "icons/pegman-sw3.png";
+			else if ( h < 315 ) 	icon = "icons/pegman-w.png";
+			else if ( h < 337.5 ) 	icon = "icons/pegman-nw1.png";
+			else if ( h < 360 ) 	icon = "icons/pegman-nw2.png";
+			else 				 	icon = "icons/pegman-nw3.png";
+			console.log( h + " --> " + icon );
 			marker_browser_images_pos.setIcon( icon );
-*/
-		});
+			prev_bearing = panoramax.getPov().heading;
+		}
 
-		id_panorama4.addEventListener('mousedown', function(evt) {
+		google.maps.event.clearListeners( panorama2, 'pov_changed' );
+		google.maps.event.clearListeners( panorama3, 'pov_changed' );
+		google.maps.event.clearListeners( panorama4, 'pov_changed' );
+		google.maps.event.addListener( panorama2, "pov_changed", function() { do_pov_changed(panorama2); });
+		google.maps.event.addListener( panorama3, "pov_changed", function() { do_pov_changed(panorama3); });
+		google.maps.event.addListener( panorama4, "pov_changed", function() { do_pov_changed(panorama4); });
+
+		function do_mousedown(evt) {
+			console.log(evt);
 			panorama_mouse_down_offsetX = evt.offsetX;
 			panorama_mouse_down_offsetY = evt.offsetY;
-		});
+		}
 
-		id_panorama4.addEventListener('mouseup', function(evt) {
+		id_panorama2.addEventListener('mousedown', function(evt) { do_mousedown(evt); });
+		id_panorama3.addEventListener('mousedown', function(evt) { do_mousedown(evt); });
+		id_panorama4.addEventListener('mousedown', function(evt) { do_mousedown(evt); });
+
+		id_panorama2.addEventListener('mouseup', function(evt) { do_mouseup(evt, panorama2); });
+		id_panorama3.addEventListener('mouseup', function(evt) { do_mouseup(evt, panorama3); });
+		id_panorama4.addEventListener('mouseup', function(evt) { do_mouseup(evt, panorama4); });
+
+		function do_mouseup(evt, panoramax) {
 			if ((evt.offsetX == panorama_mouse_down_offsetX) && (evt.offsetY && panorama_mouse_down_offsetY)) {
 				var curr_latlng = panorama.getPosition();
-				console.log("Panorama clicked - " + curr_latlng + " - " + pano_cnt + " - " + panorama4.getPov().heading);
-				var new_latlng = google.maps.geometry.spherical.computeOffset(curr_latlng, step, panorama4.getPov().heading);
+				console.log("Panorama clicked - " + curr_latlng + " - " + pano_cnt + " - " + panoramax.getPov().heading);
+				var new_latlng = google.maps.geometry.spherical.computeOffset(curr_latlng, step, panoramax.getPov().heading);
 				console.log(new_latlng);
 
 				service.route({
@@ -2030,9 +2052,8 @@ console.log("@@@ layout="+layout);
 					destination: new_latlng,
 					travelMode: google.maps.DirectionsTravelMode.DRIVING
 				}, function(result, status) {
-					console.log( status );
 					if (status == google.maps.DirectionsStatus.OK) {
-						console.log( result.routes[0].overview_path.length );
+//						console.log( result.routes[0].overview_path.length );
 						var p = result.routes[0].overview_path[0];
 						street_view_check.getPanoramaByLocation(p, 5000, (function() { return function(result, status) {
 							marker_browser_images_pos.setMap( map );
@@ -2041,9 +2062,55 @@ console.log("@@@ layout="+layout);
 								marker_browser_images_pos.setPosition( null );
 							}
 							else {
-								marker_browser_images_pos.setPosition( result.location.latLng );
+
+								(function ( ) {
+									panorama.addListener('pano_changed', function() {
+										var pano_id = panorama.getPano();
+										if (pano_id != prev_pano_id) {
+											switch (pano_cnt++ % 3) {
+												case 0 :
+													pano_pos[4] = panorama.getPosition();
+													document.getElementById("id_panorama2").style.zIndex = "1";
+													document.getElementById("id_panorama3").style.zIndex = "0"
+													document.getElementById("id_panorama4").style.zIndex = "0"
+													panorama4.setPano( prev_pano_id );
+													if ( prev_bearing != undefined )
+														panorama4.setPov( { heading: prev_bearing, pitch: 1 } );
+//													console.log( pano_cnt + " --> 2" );
+													if ( pano_cnt >= 4 )
+														marker_browser_images_pos.setPosition( pano_pos[2] );
+													break;
+												case 1 :
+													pano_pos[2] = panorama.getPosition();
+													document.getElementById("id_panorama3").style.zIndex = "1";
+													document.getElementById("id_panorama2").style.zIndex = "0"
+													document.getElementById("id_panorama4").style.zIndex = "0";
+													panorama2.setPano( prev_pano_id );
+													if ( prev_bearing != undefined )
+														panorama2.setPov( { heading: prev_bearing, pitch: 1 } );
+//													console.log( pano_cnt + " --> 3" );
+													if ( pano_cnt >= 4 )
+														marker_browser_images_pos.setPosition( pano_pos[3] );
+													break;
+												case 2 :
+													pano_pos[3] = panorama.getPosition();
+													document.getElementById("id_panorama4").style.zIndex = "1"
+													document.getElementById("id_panorama3").style.zIndex = "0";
+													document.getElementById("id_panorama2").style.zIndex = "0";
+													panorama3.setPano( prev_pano_id );
+													if ( prev_bearing != undefined )
+														panorama3.setPov( { heading: prev_bearing, pitch: 1 } );
+//													console.log( pano_cnt + " --> 4" );
+													if ( pano_cnt >= 4 )
+														marker_browser_images_pos.setPosition( pano_pos[4] );
+													break;
+											}
+											prev_pano_id = pano_id;
+										}
+									});
+								})(  );
 								panorama.setPosition( result.location.latLng );
-								panorama4.setPosition( result.location.latLng );
+								//prev_bearing = panorama.getPov().heading;
 
 							}
 						}})());
@@ -2051,9 +2118,8 @@ console.log("@@@ layout="+layout);
 					}
 				});
 
-
 			}
-		});
+		};
 
 		var service = new google.maps.DirectionsService();
 		var poly = new google.maps.Polyline({ map: map });
@@ -2066,7 +2132,7 @@ console.log("@@@ layout="+layout);
 			}, function(result, status) {
 //				console.log( status );
 				if (status == google.maps.DirectionsStatus.OK) {
-//					console.log( result.routes[0].overview_path.length );
+					console.log( result.routes[0].overview_path.length );
 					var p = result.routes[0].overview_path[0];
 					street_view_check.getPanoramaByLocation(p, 5000, (function() { return function(result, status) {
 						marker_browser_images_pos.setMap( map );
@@ -2077,8 +2143,9 @@ console.log("@@@ layout="+layout);
 						else {
 							marker_browser_images_pos.setPosition( result.location.latLng );
 							panorama.setPosition( result.location.latLng );
+							panorama3.setPosition( result.location.latLng );
+							panorama2.setPosition( result.location.latLng );
 							panorama4.setPosition( result.location.latLng );
-
 						}
 					}})());
 					
