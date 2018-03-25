@@ -9,23 +9,57 @@
 /* ***                                                                                       *** */ 
 /* ********************************************************************************************* */
 
-var MAX_NB_ROUTES = 1;
-var MAX_NB_WAYPOINTS = 4;
+var MAX_NB_WAYPOINTS = 23;
 
-var autocompletes = [];
+var autocompletes;
 var map;
-var panorama;
-var directions_service = [];
-var directions_service_request = [];
-var directions_renderer = [];
-var polylines = [];
-var route_bounds = [];
+var service;
+var panorama, panorama2, panorama3, panorama4;
+var pano_pos = [];
+var map_or_panorama_full_screen;
+var panorama_full_screen;
+var map_pano_layout = 2;
+var curr_leg;
+var play_whole_route;
+var prev_zoom;
+var timer_show_pano_on_mousemove = undefined;
+var timer_animate = undefined;
+var curr_dist_in_leg;
+var curr_dist_in_route;
+var eol;
+var step = 150;            			// meters
+var interval = 750;        			// milliseconds
+var route_thickness;				// pixels
+var bearing;
+var prev_bearing;
+var prev_pano_id;
+var pano_cnt = 0;
+var cb_move_to_dist = undefined;
+var directions_service;
+var directions_service_request;
+var directions_renderer;
+var polylines;
+var route_bounds;
 var legs_bounds = [];
+var distances = [];
+var cb_route_from_or_to_changed_handle;
+var places;
+var got_location;
 var streetViewLayer;
-var street_view_check = [];
+var street_view_check;
+var marker_small_street_view;
 var marker_no_street_view;
-var timer_set_bearing = undefined;
-var google_api = 3.25;						// 3.25 or 3.26
+var marker_pos_using_slider;
+var marker_pos_using_slider_no_pano;
+var mouse_over_input_route;
+var is_dirty = false;
+var is_ff = false;
+var browse_images_mode = false;
+var marker_browser_images_pos;
+var panorama_mouse_down_offsetX = 0;
+var panorama_mouse_down_offsetY = 0;
+
+var search_places = [];
 
 var route_colors = [
 	"#0066cc",
@@ -34,23 +68,28 @@ var route_colors = [
 	"#cc33ff",
 ];
 
-function cb_btn_add_waypoint( route_index, waypoint_index ) {
-    console.log( "Add waypoint: route_index=" + route_index + " - waypoint_index=" + waypoint_index );
+function rgb(red, green, blue) {
+	var rgb = blue | (green << 8) | (red << 16);
+	return '#' + (0x1000000 + rgb).toString(16).slice(1)
+}
+  
+function cb_btn_add_waypoint( waypoint_index ) {
+    console.log( "Add waypoint: waypoint_index=" + waypoint_index );
 
 	w2ui['layout'].hide('right');
 }
 
-function cb_btn_remove_waypoint( route_index, waypoint_index ) {
-    console.log( "Remove waypoint: route_index=" + route_index + " - waypoint_index=" + waypoint_index );
+function cb_btn_remove_waypoint( waypoint_index ) {
+    console.log( "Remove waypoint: waypoint_index=" + waypoint_index );
 
-    do_route( route_index );
+    do_route( );
 }
 
-function gmaps_cb_place_changed( route_index, waypoint_index, result ) {
-    console.log( "gmaps_cb_place_changed: route_index=" + route_index + " - waypoint_index=" + waypoint_index );
+function gmaps_cb_place_changed( waypoint_index, result ) {
+    console.log( "gmaps_cb_place_changed: waypoint_index=" + waypoint_index );
 
-	console.log( autocompletes[route_index][waypoint_index] );
-	var place = autocompletes[route_index][waypoint_index].getPlace();
+	console.log( autocompletes[waypoint_index] );
+	var place = autocompletes[waypoint_index].getPlace();
 	console.log( place );
 	if ( map.getCenter() == undefined )
 		map.setCenter(place.geometry.location);
@@ -61,7 +100,7 @@ function cb_show_all_routes( ) {
 	var is_show_all_routes = true;
 //	var is_show_all_routes = dijit.byId('id_check_show_all_routes').get('checked');
 	if ( !is_show_all_routes ) {
-		map.fitBounds( route_bounds[selected_route_index] );
+		map.fitBounds( route_bounds );
 	}
 	else {
 		var b = new google.maps.LatLngBounds;
@@ -74,8 +113,6 @@ function cb_make_route(response, status) {
 
 	if ( status == google.maps.DirectionsStatus.OK ) {
 
-		var route_index = 0;
-
 		console.log( response );
 	
 		var legs = response.routes[0].legs;
@@ -86,8 +123,8 @@ function cb_make_route(response, status) {
         console.log( "distance = " + distance );
         console.log( "duration = " + duration );
 
-		directions_renderer[route_index].setMap( map );
-		directions_renderer[route_index].setDirections( response );
+		directions_renderer.setMap( map );
+		directions_renderer.setDirections( response );
 
         xroute = response.routes[0];
 		var location_from = new Object();
@@ -101,13 +138,13 @@ function cb_make_route(response, status) {
 		var dist_meters = 0;
 		var duration_secs = 0;
 		console.log("legs.length=" + legs.length);
-		route_bounds[route_index] = new google.maps.LatLngBounds();
-		polylines[route_index] = [];
-		legs_bounds[route_index] = [];
+		route_bounds = new google.maps.LatLngBounds();
+		polylines = [];
+		legs_bounds = [];
 		for ( i = 0; i < legs.length; i++) {
 
-			legs_bounds[route_index][i] = new google.maps.LatLngBounds();
-			polylines[route_index][i] = new google.maps.Polyline({
+			legs_bounds[i] = new google.maps.LatLngBounds();
+			polylines[i] = new google.maps.Polyline({
 				path: [],
 				strokeColor: '#FF8000',
 				strokeWeight: 3
@@ -127,15 +164,15 @@ function cb_make_route(response, status) {
 			for ( var j = 0; j < steps.length; j++) {
 				var nextSegment = steps[j].path;
 				for ( var k=0; k < nextSegment.length;k++) {
-					polylines[route_index][i].getPath().push(nextSegment[k]);
-					legs_bounds[route_index][i].extend(nextSegment[k]);
-					route_bounds[route_index].extend(nextSegment[k]);
+					polylines[i].getPath().push(nextSegment[k]);
+					legs_bounds[i].extend(nextSegment[k]);
+					route_bounds.extend(nextSegment[k]);
 				}
 			}
 			
 		}
 		
-		polylines[route_index].forEach( function(e) { e.setMap(map); })
+		polylines.forEach( function(e) { e.setMap(map); })
 		cb_show_all_routes();
 
 	}
@@ -170,9 +207,9 @@ function calculateDistance(lat1, long1, lat2, long2) {
 	return (Math.sqrt( (x*x) + (y*y) + (z*z) )/1000);  
 }
 
-function do_route( route_index ) {
+function do_route( ) {
 	
-    (function ( route_index ) {
+    (function ( ) {
 
 		var route_tickness = 3;
 		
@@ -184,11 +221,11 @@ function do_route( route_index ) {
 		
 		var way_points = [];
 
-		street_view_check[route_index] = new google.maps.StreetViewService( );
+		street_view_check = new google.maps.StreetViewService( );
 
-		directions_service[route_index] = new google.maps.DirectionsService( );
+		directions_service = new google.maps.DirectionsService( );
 
-		directions_renderer[route_index] = new google.maps.DirectionsRenderer({
+		directions_renderer = new google.maps.DirectionsRenderer({
 			draggable: 			true,
 			map: 				map,
 			hideRouteList: 		false,
@@ -198,21 +235,21 @@ function do_route( route_index ) {
 				opacity: 1.0,
 			},
 			polylineOptions: {
-				strokeColor:	route_colors[route_index],
+				strokeColor:	route_colors,
 				strokeWeight:	route_tickness
 			}
 		});
 
-		google.maps.event.clearListeners( directions_renderer[route_index], 'directions_changed' );
-		directions_renderer[route_index].addListener('directions_changed', function() {
+		google.maps.event.clearListeners( directions_renderer, 'directions_changed' );
+		directions_renderer.addListener('directions_changed', function() {
 				
-			var route_index = directions_renderer.indexOf( this );
-			console.log("directions_changed: route_index=" + route_index);
-			var new_dir = directions_renderer[route_index].getDirections();
+//			var route_index = directions_renderer.indexOf( this );
+//			console.log("directions_changed: route_index=" + route_index);
+			var new_dir = directions_renderer.getDirections();
 			console.log( new_dir );
 		});
 		
-		directions_service_request[route_index] = {
+		directions_service_request = {
 			origin: 			start_location,
 			destination: 		end_location,
 			travelMode: 		google.maps.DirectionsTravelMode.DRIVING,
@@ -222,26 +259,23 @@ function do_route( route_index ) {
 			avoidTolls: 		no_toll,
 		};
 
-		directions_service[route_index].route( directions_service_request[route_index], 
+		directions_service.route( directions_service_request, 
 			function(response, status) { cb_make_route(response, status); })
 
-    })( route_index );
+    })( );
 
 }
 
 function cb_click_btn_drive( waypoint_index ) {
 	
-	var route_index = 0;
-	
-	console.log( "Drive: route_index=" + route_index + " waypoint_index=" + waypoint_index );
+	console.log( "Drive: waypoint_index=" + waypoint_index );
 
-	curr_route = route_index;	
 	curr_leg = waypoint_index;
 	
-	start_driving( route_index );  
+	start_driving( );  
 }
 
-function cb_animate( route_index, d ) {
+function cb_animate( d ) {
 
 /*
 	if ( dijit.byId('id_btn_pause').get( 'label' ) == "Continue" )
@@ -250,7 +284,7 @@ function cb_animate( route_index, d ) {
 
 	curr_dist = d;
 	if ( curr_dist > eol ) {
-		console.log( "Route " + route_index + " is done" );
+		console.log( "Route is done" );
 		if ( timer_animate != undefined ) { 
 			clearTimeout( timer_animate );
 			timer_animate = undefined;
@@ -259,21 +293,22 @@ function cb_animate( route_index, d ) {
 			clearTimeout( timer_set_bearing );
 			timer_set_bearing = undefined;
 		} 
-		if (route_index == -1)
-			stop_driving_temporary_route( );
+//		if (route_index == -1)
+//			stop_driving_temporary_route( );
 		return;
 	}
 
-	var polyline = (route_index == -1) ? temp_polylines[0] : polylines[route_index][curr_leg];
+//	var polyline = (route_index == -1) ? temp_polylines[0] : polylines[route_index][curr_leg];
+	var polyline = polylines[curr_leg];
 	
 	var p = polyline.GetPointAtDistance( curr_dist );
 	if ( !map.getBounds().contains( p ) )
 		map.panTo( p );
 
-	street_view_check[(route_index == -1) ? 0 : route_index].getPanoramaByLocation(p, 50, (function(route_index) { return function(result, status) {
+	street_view_check.getPanoramaByLocation(p, 50, (function() { return function(result, status) {
 		console.log(result);
 		if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
-			console.log( "No street view available - route=" + route_index );        
+			console.log( "No street view available" );        
 			marker_no_street_view.setPosition( p );
 		}
 		else {
@@ -304,17 +339,17 @@ function cb_animate( route_index, d ) {
 		if ( step > 0 ) {
 			if ( timer_animate ) 
 				clearTimeout( timer_animate );
-			timer_animate = setTimeout( (function(route_index) { return function() {
-				cb_animate( route_index, curr_dist+step );
-			}})(route_index), interval );
+			timer_animate = setTimeout( (function() { return function() {
+				cb_animate( curr_dist+step );
+			}})(), interval );
 		}
 		dijit.byId('id_input_route').set( 'value', curr_dist, false );
 */
-	}})(route_index));
+	}})());
 
 }
 
-function start_driving( route_index ) {
+function start_driving(  ) {
 	
 	w2ui['layout'].show('right');
 	streetViewLayer.setMap( null );
@@ -329,12 +364,12 @@ function start_driving( route_index ) {
 		timer_animate = undefined;
 	}
 */
-	eol = polylines[route_index][curr_leg].Distance();
-	map.setCenter( polylines[route_index][curr_leg].getPath().getAt(0) );
+	eol = polylines[curr_leg].Distance();
+	map.setCenter( polylines[curr_leg].getPath().getAt(0) );
 
-	map.fitBounds( legs_bounds[route_index][curr_leg] );
+	map.fitBounds( legs_bounds[curr_leg] );
 
-	timer_animate = setTimeout( function(route_index) { cb_animate(route_index, 50); }, 5, route_index );
+	timer_animate = setTimeout( function() { cb_animate(50); }, 5 );
 
 	// Update route slider
 /*
@@ -397,8 +432,6 @@ function start() {
         '<div style="width:100%; height:100%" id="panorama"></div>'
     );
 
-	for ( var route_index = 0; route_index < MAX_NB_ROUTES; route_index++ ) {
-
 		$( "#id_layout_route" ).append( 
 		    '<div class="widget"' +
 			'<table cellspacing="0" cellpadding="0" style="white-space: nowrap" style="width:100%">' +
@@ -416,14 +449,14 @@ function start() {
 		);
 		
 		$( "#id_layout_route" ).append( 
-			'<table id="id_table_routes_'+route_index+'" cellspacing="0" cellpadding="0" style="white-space: nowrap" style="width:100%">' +
+			'<table id="id_table_route_layout" cellspacing="0" cellpadding="0" style="white-space: nowrap" style="width:100%">' +
 			'   <tr style="width:100%">' +
 			'   	<td>' +
-			'   		<table cellspacing="2" cellpadding="2" style="white-space: nowrap" id="id_table_route_'+route_index+'">' +
+			'   		<table cellspacing="2" cellpadding="2" style="white-space: nowrap" id="id_table_route">' +
 			'   		</table>' +
 			'   	</td>' +
 			'   	<td>' +
-			'   		<table cellspacing="0" cellpadding="2" style="height:100%; white-space: nowrap" id="id_table_drive_'+route_index+'">' +
+			'   		<table cellspacing="0" cellpadding="2" style="height:100%; white-space: nowrap" id="id_table_drive">' +
 			'   		</table>' +
 			'   	</td>' +
 			'   </tr>' +
@@ -432,71 +465,69 @@ function start() {
 		
 		for ( var waypoint_index = 0; waypoint_index < MAX_NB_WAYPOINTS+2; waypoint_index++ ) {
 			
-			console.log( "route_index=" + route_index + " - waypoint_index=" + waypoint_index);
+			console.log( "waypoint_index=" + waypoint_index);
 
-			(function ( route_index, waypoint_index ) {
+			(function ( waypoint_index ) {
 
-				$( "#id_table_route_"+route_index ).append( "<tr id='id_route_wp"+route_index+"_"+waypoint_index+"_tr' ></tr>" );
+				$( "#id_table_route" ).append( "<tr id='id_route_wp_"+waypoint_index+"_tr' ></tr>" );
 
-				$( "#id_route_wp"+route_index+"_"+waypoint_index+"_tr" ).append( "<td id='id_route_wp"+route_index+"_"+waypoint_index+"_td1' valign='middle'></td>" );
+				$( "#id_route_wp_"+waypoint_index+"_tr" ).append( "<td id='id_route_wp_"+waypoint_index+"_td1' valign='middle'></td>" );
 
-				$( "#id_route_wp"+route_index+"_"+waypoint_index+"_td1" ).append( String.fromCharCode(waypoint_index+65)+"&nbsp;" );
+				$( "#id_route_wp_"+waypoint_index+"_td1" ).append( String.fromCharCode(waypoint_index+65)+"&nbsp;" );
 
-				$( "#id_route_wp"+route_index+"_"+waypoint_index+"_tr" ).append( "<td id='id_route_wp"+route_index+"_"+waypoint_index+"_td2' valign='middle'></td>" );
+				$( "#id_route_wp_"+waypoint_index+"_tr" ).append( "<td id='id_route_wp_"+waypoint_index+"_td2' valign='middle'></td>" );
 
-				$( "#id_route_wp"+route_index+"_"+waypoint_index+"_td2" ).append( 
-					"<input name='field_text' type='text' maxlength='100' id='id_route_wp"+route_index+"_"+waypoint_index+"_where' style='width: 250px !important;'>" );
+				$( "#id_route_wp_"+waypoint_index+"_td2" ).append( 
+					"<input name='field_text' type='text' maxlength='100' id='id_route_wp_"+waypoint_index+"_where' style='width: 250px !important;'>" );
 
-				$( "#id_route_wp"+route_index+"_"+waypoint_index+"_tr" ).append( "<td id='id_route_wp"+route_index+"_"+waypoint_index+"_td3' valign='middle'></td>" );
+				$( "#id_route_wp_"+waypoint_index+"_tr" ).append( "<td id='id_route_wp_"+waypoint_index+"_td3' valign='middle'></td>" );
 
-				$( "#id_route_wp"+route_index+"_"+waypoint_index+"_td3" ).append( 
-					"<button class='icon_btn_add' id='btn_add_waypoint_"+route_index+"_"+waypoint_index+"' ></button" );
-				$( '#btn_add_waypoint_'+route_index+"_"+waypoint_index ).on('click', function () {
-					cb_btn_add_waypoint( route_index, waypoint_index );
+				$( "#id_route_wp_"+waypoint_index+"_td3" ).append( 
+					"<button class='icon_btn_add' id='btn_add_waypoint_"+waypoint_index+"' ></button" );
+				$( '#btn_add_waypoint_'+waypoint_index ).on('click', function () {
+					cb_btn_add_waypoint( waypoint_index );
 				});            
 
-				$( "#id_route_wp"+route_index+"_"+waypoint_index+"_tr" ).append( "<td id='id_route_wp"+route_index+"_"+waypoint_index+"_td4' valign='middle'></td>" );
+				$( "#id_route_wp_"+waypoint_index+"_tr" ).append( "<td id='id_route_wp_"+waypoint_index+"_td4' valign='middle'></td>" );
 
-				$( "#id_route_wp"+route_index+"_"+waypoint_index+"_td4" ).append( 
-					"<button class='icon_btn_remove' id='btn_remove_waypoint_"+route_index+"_"+waypoint_index+"' ></button" );
-				$( '#btn_remove_waypoint_'+route_index+"_"+waypoint_index ).on('click', function () {
-					cb_btn_remove_waypoint( route_index, waypoint_index );
+				$( "#id_route_wp_"+waypoint_index+"_td4" ).append( 
+					"<button class='icon_btn_remove' id='btn_remove_waypoint_"+waypoint_index+"' ></button" );
+				$( '#btn_remove_waypoint_'+waypoint_index ).on('click', function () {
+					cb_btn_remove_waypoint( waypoint_index );
 				});            
 
 				if ( waypoint_index == 0 )
-					autocompletes[route_index] = [];
-				autocompletes[route_index][waypoint_index] = new google.maps.places.Autocomplete( document.getElementById("id_route_wp"+route_index+"_"+waypoint_index+"_where") );
-				autocompletes[route_index][waypoint_index].addListener('place_changed', function( ) {
-					gmaps_cb_place_changed(route_index, waypoint_index, this);
+					autocompletes = [];
+				autocompletes[waypoint_index] = new google.maps.places.Autocomplete( document.getElementById("id_route_wp_"+waypoint_index+"_where") );
+				autocompletes[waypoint_index].addListener('place_changed', function( ) {
+					gmaps_cb_place_changed( waypoint_index, this );
 				});
 
 
-			})( route_index, waypoint_index );
+			})( waypoint_index );
         
 		}
 	
 		for ( var waypoint_index = 1; waypoint_index < MAX_NB_WAYPOINTS+2; waypoint_index++ ) {
 			
-			console.log( "route_index=" + route_index + " - waypoint_index=" + waypoint_index);
+			console.log( "waypoint_index=" + waypoint_index);
 
-			(function ( route_index, waypoint_index ) {
+			(function ( waypoint_index ) {
 
-				$( "#id_table_drive_"+route_index ).append( "<tr style='height:100%' id='id_drive_wp"+route_index+"_"+waypoint_index+"_tr' ></tr>" );
+				$( "#id_table_drive" ).append( "<tr style='height:100%' id='id_drive_wp_"+waypoint_index+"_tr' ></tr>" );
 
-				$( "#id_drive_wp"+route_index+"_"+waypoint_index+"_tr" ).append( "<td style='height:100%' id='id_drive_wp"+route_index+"_"+waypoint_index+"_td1' valign='middle' align='right'></td>" );
+				$( "#id_drive_wp_"+waypoint_index+"_tr" ).append( "<td style='height:100%' id='id_drive_wp_"+waypoint_index+"_td1' valign='middle' align='right'></td>" );
 
-				$( "#id_drive_wp"+route_index+"_"+waypoint_index+"_td1" ).append( 
-					"<button class='icon_btn_drive' id='btn_drive_waypoint_"+route_index+"_"+waypoint_index+"' ></button" );
-				$( '#btn_drive_waypoint_'+route_index+"_"+waypoint_index ).on('click', function () {
-					cb_click_btn_drive( route_index, waypoint_index );
+				$( "#id_drive_wp_"+waypoint_index+"_td1" ).append( 
+					"<button class='icon_btn_drive' id='btn_drive_waypoint_"+waypoint_index+"' ></button" );
+				$( '#btn_drive_waypoint_'+waypoint_index ).on('click', function () {
+					cb_click_btn_drive( waypoint_index );
 				});            
-			})( route_index, waypoint_index );
+			})( waypoint_index );
         
 		}
 
 		$( "#id_layout_route" ).append( "<hr>" );
-
-    }
 
 	map = new google.maps.Map(document.getElementById('map'), {
 //	  center: {lat: 35.720149, lng: -79.172462},
@@ -540,7 +571,10 @@ $(function () {
 
     console.log( "jquery version " + $.fn.jquery );
 
-	var google_maps_api_key = "AIzaSyB2ejT4uAX7wmMv8mtMHDWAt3BIgcaVjjM";
+	var google_maps_api_key = "AIzaSyCMtnH6wsRtdcvqB9Nqo7u6xibPSjrpnRw";
+	var google_api = "3.30";
+	if ( location.hostname != "127.0.0.1" )
+		google_api = "3.31";
     var rq = "//maps.google.com/maps/api/js?v="+google_api+"&sensor=false&libraries=places,geometry";
 	rq += "&key=" + google_maps_api_key;
 

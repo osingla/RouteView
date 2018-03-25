@@ -346,8 +346,20 @@
 													                        <div data-dojo-type="dijit/form/DropDownButton" >
 													                            <span>My Google Maps API key</span>
 													                            <div data-dojo-type="dijit/TooltipDialog">
-																					<input type="text" name="firstname" value=""
+																					<input type="text" name="google_maps_api_key" value=""
 				 																        dojoType="dijit.form.TextBox" trim="true" id="id_google_maps_api_key" maxlength="64" />
+													                            </div>
+													                        </div>
+												                        </div>
+										                    		</td>
+										                    		
+										                    		<td>
+													                    <div align="center">
+													                        <div data-dojo-type="dijit/form/DropDownButton" >
+													                            <span>My EMAIL</span>
+													                            <div data-dojo-type="dijit/TooltipDialog">
+																					<input type="text" name="my_email" value=""
+				 																        dojoType="dijit.form.TextBox" trim="true" id="id_my_email" maxlength="64" />
 													                            </div>
 													                        </div>
 												                        </div>
@@ -364,7 +376,7 @@
 									                        <div data-dojo-type="dijit/form/DropDownButton" >
 									                            <span>Set Starting Position</span>
 									                            <div data-dojo-type="dijit/TooltipDialog">
-																	<input type="text" name="firstname" value=""
+																	<input type="text" name="addr_for_orig" value=""
 																		   dojoType="dijit.form.TextBox"
 																			trim="true" id="id_addr_for_orig" maxlength="80"
 																			propercase="true" />
@@ -495,7 +507,7 @@
 												</button>
 											</td>
 											<div data-dojo-type="dijit/Tooltip" id="id_tooltip_btn_browse_images" data-dojo-props="connectId:'id_btn_browse_images',position:['below-centered'],showDelay:750,hideDelay:0">
-												This allows to <b><i>play</b></i> show the StreetView image for a given location.<br><br>
+												This allows to <b><i>show</b></i> the StreetView image for a given location.<br><br>
 												Each time you click on the map, you should see the StreetView image for this location.<br>
 												Please note that the position is adjusted to be on the nearest location with StreetView data.
 											</div>
