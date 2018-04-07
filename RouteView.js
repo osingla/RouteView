@@ -2393,8 +2393,6 @@ define( function( m ) {
        		var display = domStyle.get( 'id_fieldset_route', "display" );
        		if (display != "none") {
 				
-				url += "https://www.google.com/maps/dir/?api=1"
-//				url += "https://www.google.com/maps/dir"
 				var nb_wp = -2;
 	            for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
 	        		var display = domStyle.get( 'id_tr_' + n, "display" );
@@ -2405,6 +2403,10 @@ define( function( m ) {
 	            console.log("Route has " + nb_wp + " waypoints");
 	            if ( nb_wp < 0 )
 					return "";
+				if ( nb_wp >= 10 )
+					url += "https://www.google.com/maps/dir"
+				else
+					url += "https://www.google.com/maps/dir/?api=1"
 
 	            for ( var n = 0; n < nb_wp+2; n++ ) {
 //					console.log( n );
