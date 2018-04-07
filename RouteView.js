@@ -375,7 +375,7 @@ define( function( m ) {
 
         var no_hwy  = dijit.byId('id_check_no_hwy').get( 'checked' );
         var no_toll = dijit.byId('id_check_no_toll').get( 'checked' );
-//      console.log( "no_hwy=" + no_hwy + " no_toll=" + no_toll );
+        console.log( "no_hwy=" + no_hwy + " no_toll=" + no_toll );
 
 		if ( load_step_interv ) {
 			step     = dijit.byId('id_input_meters').get( 'value' );
@@ -445,7 +445,6 @@ define( function( m ) {
 		google.maps.event.clearListeners( directions_renderer, 'directions_changed' );
         directions_renderer.addListener('directions_changed', function() {
 
-console.log("XX");			
             var new_dir = directions_renderer.getDirections();
 
 			is_dirty = true;
@@ -507,6 +506,8 @@ console.log("XX");
 				index_waypoint = new_dir.request.lc;
             else if (new_dir.request.ic != undefined)
 				index_waypoint = new_dir.request.ic;
+            else if (new_dir.request.jc != undefined)
+				index_waypoint = new_dir.request.jc;
             if ( index_waypoint == undefined ) {
 				console.log( "UNDEFINED >>>>>>" );
 				console.log( new_dir );
@@ -570,7 +571,7 @@ console.log("XX");
 		dijit.byId('id_btn_save_gpx').set( 'disabled', false );
 		dijit.byId('id_btn_create_gmaps_url').set( 'disabled', false );
 		dijit.byId('id_btn_create_long_url').set( 'disabled', false );
-        
+
         directions_service_request = {
             origin: start_location,
             destination: end_location,
@@ -908,7 +909,7 @@ console.log("XX");
 
 	function create_route_dlg() {
 	
-		require(["dojo/dom-construct", "dijit/form/TextBox", "dijit/form/Button", "dijit/Tooltip", "dojo/dom-style"], function(domConstruct, TextBox, Button, Tooltip, domStyle) {
+		require(["dojo/dom-construct", "dijit/form/TextBox", "dijit/form/Button", "dijit/form/ToggleButton", "dijit/Tooltip", "dojo/dom-style"], function(domConstruct, TextBox, Button, ToggleButton, Tooltip, domStyle) {
 			
 			for (var n = 0; n < MAX_NB_WAYPOINTS+2; n++) { 
 
@@ -941,7 +942,8 @@ console.log("XX");
 					onClick: function() { cb_click_btn_add(this.waypoint_index+1); },
 					id: "id_btn_add_"+n,
 					disabled: true,
-					waypoint_index: n
+					waypoint_index: n,
+					style: "font-size: 75%"
 				}, id_td3); 
 
 				new Tooltip({
@@ -963,7 +965,8 @@ console.log("XX");
 					onClick: function() { cb_click_btn_remove(this.waypoint_index); },
 					id: "id_btn_remove_"+n,
 					disabled: true,
-					waypoint_index: n
+					waypoint_index: n,
+					style: "font-size: 75%"
 				}, id_td4);
 
 				new Tooltip({
@@ -985,7 +988,8 @@ console.log("XX");
 					onClick: function() { cb_click_btn_up(this.waypoint_index); },
 					id: "id_btn_up_"+n,
 					disabled: true,
-					waypoint_index: n
+					waypoint_index: n,
+					style: "font-size: 75%"
 				}, id_td5);
 
 				new Tooltip({
@@ -1007,7 +1011,8 @@ console.log("XX");
 					onClick: function() { cb_click_btn_down(this.waypoint_index); },
 					id: "id_btn_down_"+n,
 					disabled: "true",
-					waypoint_index: n
+					waypoint_index: n,
+					style: "font-size: 75%"
 				}, id_td6);
 
 				new Tooltip({
@@ -1016,7 +1021,7 @@ console.log("XX");
 					position:['below-centered'],
 					label: "Move the Waypoint down",
 					showDelay:999999,
-					hideDelay:0
+					hideDelay:0,
 				});
 
 				var tooltip = new Tooltip({
@@ -1035,7 +1040,7 @@ console.log("XX");
 					style: "display:" + ((n < 2) ? "" : "none") 
 				}, "id_table_drive", "last");
 				
-				var id_td = domConstruct.create("td", { align:"right", valign:"middle"}, id_tr, "first");
+				var id_td = domConstruct.create("td", { align:"right", valign:"middle"}, id_tr, "last");
 				
 				var btn_drive = new Button({
 					iconClass: "icon_btn_drive",
@@ -1043,7 +1048,8 @@ console.log("XX");
 					onClick: function() { cb_click_btn_drive(this.waypoint_index); },
 					id: "id_btn_drive_"+n,
 					disabled: true,
-					waypoint_index: n-1
+					waypoint_index: n-1,
+					style: "font-size: 75%"
 				}, id_td);
 
 				new Tooltip({
@@ -2224,13 +2230,17 @@ console.log("XX");
 	}
 
     function cb_click_no_hwy( ) {
-
+        var no_hwy  = !dijit.byId('id_check_no_hwy').get( 'checked' );
+		console.log("-->" + no_hwy);
+		document.getElementById("id_label_check_no_hwy").innerHTML = (!no_hwy) ? "No Highway" : "Highway";
     	if ( !dijit.byId("id_btn_drive_1").get("disabled") )
     		do_route( true );
     }
 
     function cb_click_no_toll( ) {
-    	
+        var no_toll  = !dijit.byId('id_check_no_toll').get( 'checked' );
+		console.log("-->" + no_toll);
+		document.getElementById("id_label_check_no_toll").innerHTML = (!no_toll) ? "No Toll" : "Toll";
     	if ( !dijit.byId("id_btn_drive_1").get("disabled") )
     		do_route( true );
     }
@@ -2379,8 +2389,10 @@ console.log("XX");
 		var url = "";
 
     	require(["dojo/dom-style"], function( domStyle) {
+			
        		var display = domStyle.get( 'id_fieldset_route', "display" );
        		if (display != "none") {
+				
 				url += "https://www.google.com/maps/dir/?api=1"
 //				url += "https://www.google.com/maps/dir"
 				var nb_wp = -2;
@@ -2393,6 +2405,7 @@ console.log("XX");
 	            console.log("Route has " + nb_wp + " waypoints");
 	            if ( nb_wp < 0 )
 					return "";
+
 	            for ( var n = 0; n < nb_wp+2; n++ ) {
 //					console.log( n );
 //					console.log( places );
@@ -2402,31 +2415,37 @@ console.log("XX");
 							domStyle.set( 'id_wp_'+n, { color: "red" } );
 	            		console.log( n + " ==> " + places[n].name + " : " + places[n].geometry.location.lat() + " , " + places[n].geometry.location.lng() );
 						var v = dijit.byId('id_wp_'+n).get( 'value');
-//						url += "/"; 
-
-						if ( n == 0 )
-							url += "&origin=";
-						else if ( n == nb_wp+1 )
-							url += "&destination=";
-						else if ( n == 1 )
-							url += "&waypoints=";
-						else
-							url += "%7C";
-
+						if ( nb_wp >= 10 ) {
+							url += "/"; 
+						}
+						else {
+							if ( n == 0 )
+								url += "&origin=";
+							else if ( n == nb_wp+1 )
+								url += "&destination=";
+							else if ( n == 1 )
+								url += "&waypoints=";
+							else
+								url += "%7C";
+						}
 		    	        url += encodeURIComponent(v);
 	            	}
 	            }
+
+				console.log("Gmaps url length = " + url.length);
+				if ( url.length >= 2040 ) {
+					show_error( "The URL is too long. Try to remove one or more waypoints." );
+					return "";
+				}
+				if ( nb_wp < 10 ) {
+					if ( url.length < 2048-30 )
+						url += "&dir_action=navigate&travelmode=driving";
+					console.log("Gmaps url length = " + url.length);
+					url += "&dirflg=h,t";
+				}
     		}
+
  		})
- 		console.log("Gmaps url length = " + url.length);
- 		if ( url.length >= 2040 ) {
-			show_error( "The URL is too long. Try to remove one or more waypoints." );
-			return "";
-		}
- 		if ( url.length < 2048-30 )
-			url += "&dir_action=navigate&travelmode=driving";
- 		console.log("Gmaps url length = " + url.length);
-		url += "&dirflg=h,t";
 		return url;
 	}
 
@@ -2732,6 +2751,11 @@ console.log("XX");
 		});
 	}
 	
+	function cb_click_btn_highway( waypoint_index ) {
+		console.log( "Highway: waypoint_index=" + waypoint_index );
+		do_route( true );
+	}
+		
 	function cb_click_btn_drive( waypoint_index ) {
 		
 		console.log( "Drive: waypoint_index=" + waypoint_index );
@@ -2772,9 +2796,7 @@ console.log("XX");
 	}
 	
 	function cb_click_btn_drive_whole_route( ) {
-
 		cb_click_btn_drive( -1 );
-		
 	}
 	
 	function update_btns_remove_up_down( all ) {
@@ -2954,6 +2976,7 @@ console.log("XX");
     		console.log( "  Route - Restored no_hwy= " + no_hwy );
 	    	if ( no_hwy != null )
     	        dijit.byId('id_check_no_hwy').set( 'checked', parse(no_hwy), false );
+			document.getElementById("id_label_check_no_hwy").innerHTML = (no_hwy) ? "No Highway" : "Highway";
 	    	
 	    	var no_toll = localStorage.getItem("no_toll");
 	    	if ( !no_toll )
@@ -2961,6 +2984,7 @@ console.log("XX");
     		console.log( "  Route - Restored no_toll= " + no_toll );
     		if ( no_toll != null )
             	dijit.byId('id_check_no_toll').set( 'checked', parse(no_toll), false );
+			document.getElementById("id_label_check_no_toll").innerHTML = (no_toll) ? "No Toll" : "Toll";
 	
 	    	var step = localStorage.getItem("step");
 	    	if ( !step )

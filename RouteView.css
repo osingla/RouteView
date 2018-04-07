@@ -162,16 +162,16 @@ html, body {
 .dijitButtonDisabled .icon_btn_drive {
   background-image: url('icons/btn-drive-disabled.png');
   background-repeat: no-repeat;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   text-align: center;
 }
 
 .icon_btn_drive {
   background-image: url('icons/btn-drive.png');
   background-repeat: no-repeat;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   text-align: center;
   margin: 0;
   padding: 0;
@@ -182,16 +182,80 @@ html, body {
 .dijitButtonDisabled .icon_btn_browse {
   background-image: url('icons/btn-browse-disabled.png');
   background-repeat: no-repeat;
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   text-align: center;
 }
 
 .icon_btn_browse {
   background-image: url('icons/btn-browse.png');
   background-repeat: no-repeat;
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  border: none; 
+  outline:none;
+}
+
+.dijitToggleButtonDisabled .icon_btn_highway {
+  background-image: url('icons/btn-highway-disabled.png');
+  background-repeat: no-repeat;
+  width: 14px;
+  height: 14px;
+  text-align: center;
+}
+
+.dijitToggleButtonChecked .icon_btn_highway {
+  background-image: url('icons/btn-highway-not-checked.png');
+  background-repeat: no-repeat;
+  width: 14px;
+  height: 14px;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  border: none; 
+  outline:none;
+}
+
+.icon_btn_highway {
+  background-image: url('icons/btn-highway.png');
+  background-repeat: no-repeat;
+  width: 14px;
+  height: 14px;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  border: none; 
+  outline:none;
+}
+
+.dijitToggleButtonDisabled .icon_btn_toll {
+  background-image: url('icons/btn-toll-disabled.png');
+  background-repeat: no-repeat;
+  width: 14px;
+  height: 14px;
+  text-align: center;
+}
+
+.dijitToggleButtonChecked .icon_btn_toll {
+  background-image: url('icons/btn-toll-not-checked.png');
+  background-repeat: no-repeat;
+  width: 14px;
+  height: 14px;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  border: none; 
+  outline:none;
+}
+
+.icon_btn_toll {
+  background-image: url('icons/btn-toll.png');
+  background-repeat: no-repeat;
+  width: 14px;
+  height: 14px;
   text-align: center;
   margin: 0;
   padding: 0;

@@ -153,14 +153,14 @@
 				
 							                    <div align="left">
 							                        
-							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" style="font-size: 85%"
+							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'icon_btn_highway', checked: true" style="font-size: 85%"
 									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_hwy(); })' id="id_check_no_hwy" >
-							                         No Highway
+							                         <span id="id_label_check_no_hwy"></span>
 							                        </button>
 							
-							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: true" style="font-size: 85%" 
+							                        <button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'icon_btn_toll', checked: true" style="font-size: 85%" 
 									                 onClick='require(["RouteView.js"], function( s ) { s.cb_click_no_toll(); })' id="id_check_no_toll" >
-							                         No Toll
+							                         <span id="id_label_check_no_toll"></span>
 							                         </button>
 							
 								                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_no_hwy',position:['below-centered'],showDelay:750,hideDelay:0">
@@ -189,14 +189,20 @@
 																<td>
 																	<select data-dojo-type="dijit/form/ComboBox" id="id_place" name="id_place" maxlength="80">
 																		<option selected>Gas Stations</option>
+																		<option>Fast Food</option>
 																		<option>McDonald's</option>
+																		<option>Chick-fil-A</option>
 																		<option>Wendy's</option>
 																		<option>Subway Restaurant</option>
 																		<option>Bojangles</option>
+																		<option>Five Guys</option>
+																		<option>Panera Bread</option>
 																		<option>Sheetz</option>
 																		<option>Pilot Flying J</option>
 																		<option>TA Petro</option>
 																		<option>Harley Davidson Dealerships</option>
+																		<option>Indian Dealerships</option>
+																		<option>Chevrolet Dealerships</option>
 																	</select>
 																</td>
 															</tr>
@@ -513,7 +519,7 @@
 											</div>
 
 				                            <td align="center" valign="middle">
-												<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_drive', showLabel: false" style="font-size: 85%" 
+												<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_drive', showLabel: false" style="font-size: 75%" 
 												 onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_drive_whole_route(); })' id="id_btn_drive_whole_route" disabled >
 												 </button>
 											</td>
