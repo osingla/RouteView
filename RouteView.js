@@ -1487,18 +1487,34 @@ define( function( m ) {
 // 					cb_panorama_dblclick( );
        			});
 
-				var initial_info_use_icon = localStorage.getItem("initial_info_start");
-				if ( !initial_info_use_icon ) {
-					do_show_message( false, "Information", 
+		    	var google_maps_api_key = localStorage.getItem("id_google_maps_api_key");
+				if ( !google_maps_api_key ) {
+					do_show_message( false, "Warning!", 
 						"<div align='center'>" +
-						"  The default maximum number of waypoints is 8.<br><br>" +
-						"<br>If you want up to 24 waypoints, request a google maps api key<br>" +
-						"<br>and use this key here (configuration panel).<br>" +
+						"  <b>You do not have provided a Google Maps API Key.</b><br>" +
+						"<br>Beginning on June 11, 2018, Google <b>requires</b> to use a valid API key" +
+						"<br>for all Google Maps projects. Since I can not afford to have my personal" +
+						"<br>key to be used here by everbody using this free program, your only option is" +
+						"<br>to request a google maps api key and use it here (see configuration panel)." +
 						"<br>" +
-						"https://developers.google.com/maps/documentation/javascript/get-api-key" +
-						"<br><br>" +
+						"<div align='left'>" +
+						"<br>Notes:<br>" +
+						"<ol>" +
+						"<li>Your key is saved locally and <b>not shared</b> anywhere.</li>" +
+						"<li>Unless you use this program 24/7, it's very unlikely you will generate enough<br>" +
+						"   traffic to be billed by Google. I use this program a lot with my own Google Maps<br>" +
+						"   API key and I am VERY far to be billed.</li>" +
+						"</ol>" +
+						"<div align='center'>" +
+						"<b>Without a Google Maps API this program is not usable.</b>" +
+						"</div>" +
+						"<br>" +
+						"<hr>" +
+						"<a href='https://developers.google.com/maps/faq' target='_blank'>https://developers.google.com/maps/faq</a><br>" +
+						"<a href='https://developers.google.com/maps/documentation/javascript/get-api-key' target='_blank'>https://developers.google.com/maps/documentation/javascript/get-api-key</a>" +
+						"<br>" +
+						"</div>" +
 						"</div>" );
-					localStorage.setItem( "initial_info_start", "true" );
 				}
 
         		_list_countries = [
