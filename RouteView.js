@@ -12,6 +12,7 @@ define( function( m ) {
     var map;
     var service;
     var panorama, panorama2, panorama3, panorama4;
+    var pegman_selected = false;
     var pano_pos = [];
 	var map_or_panorama_full_screen;
     var panorama_full_screen;
@@ -34,7 +35,7 @@ define( function( m ) {
 	var cb_move_to_dist = undefined;
 	var directions_service;
 	var directions_service_request;
-	var directions_renderer;
+	var directions_renderer = undefined;
 	var polylines;
     var route_bounds;
     var legs_bounds = [];
@@ -864,7 +865,8 @@ define( function( m ) {
 
 		show_all_routes();
 
-		directions_renderer.setOptions( { zIndex:99, draggable: true } );
+		if (directions_renderer != undefined)
+			directions_renderer.setOptions( { zIndex:99, draggable: true } );
 	       	
 		marker_pos_using_slider.setMap( null );
 		marker_pos_using_slider_no_pano.setMap( null );
@@ -874,7 +876,13 @@ define( function( m ) {
 		browse_images_mode = false;
 		marker_browser_images_pos.setMap( null );
 		google.maps.event.clearListeners(map, "click");
+		google.maps.event.addListener( map, "click", function( evt ) {
+			cb_map_click( evt );
+		});
 
+		if ( streetViewLayer.getMap() != undefined ) {
+			streetViewLayer.setMap( null );
+		}
     }
 
     function start( ) {
@@ -1303,10 +1311,26 @@ define( function( m ) {
 	}
     
 	function cb_streetview_icon() {
-		if ( streetViewLayer.getMap() != undefined )
+		var btn_drive_whole_route_disabled = dijit.byId('id_btn_drive_whole_route').get( 'disabled' );
+		if ( streetViewLayer.getMap() != undefined ) {
+			console.log("pegman is unselected - " + btn_drive_whole_route_disabled);
 			streetViewLayer.setMap( null );
-		else
+			if (btn_drive_whole_route_disabled)
+				map.setOptions( {draggableCursor:null} );
+			else
+				map.setOptions( {draggableCursor:'crosshair'} );
+			require(["dojo/dom-style"], function( domStyle ) {
+				var display = domStyle.get( "id_top_layout", "display" );
+				console.log(display);
+				if (display != "block")
+					do_stop();
+			});
+		}
+		else {
+			console.log("pegman is selected - " + btn_drive_whole_route_disabled);
 			streetViewLayer.setMap( map );
+			map.setOptions({draggableCursor: 'context-menu'});
+		}
 	}
 
     function initialize( ) {
@@ -1466,7 +1490,7 @@ define( function( m ) {
         		google.maps.event.addListener( map, "click", function( evt ) {
         			cb_map_click( evt );
        			});
-        		
+
 				google.maps.event.clearListeners( map, 'rightclick' );
         		google.maps.event.addListener( map, "rightclick", function( evt ) {
         			cb_map_rightclick( evt );
@@ -2533,6 +2557,33 @@ define( function( m ) {
 
     function cb_map_click( evt ) {
     	console.log( "cb_map_click" );
+		if ( streetViewLayer.getMap() == undefined )
+			return;
+			
+		require(["dojo/dom-style"], function( domStyle ) {
+			var display = domStyle.get( "id_top_layout", "display" );
+			console.log(display);
+			if (display == "block") {
+				domStyle.set( "id_top_layout", "display", "none" );
+				domStyle.set( "id_left_layout", "display", "none" );
+				dijit.byId('app_layout').resize();
+				set_map_pano_layout( );
+				document.getElementById("id_panorama2").style.display = "";
+				document.getElementById("id_panorama3").style.display = "";
+				document.getElementById("id_panorama4").style.display = "";
+				panorama2.setVisible( true );
+				panorama3.setVisible( true );
+				panorama4.setVisible( true );
+				window.dispatchEvent(new Event('resize'));
+				dijit.byId('id_btn_stop').set( 'disabled', false );
+			}
+			panorama.setPosition(evt.latLng);
+			document.getElementById("id_panorama2").style.zIndex = "1";
+			document.getElementById("id_panorama3").style.zIndex = "0"
+			document.getElementById("id_panorama4").style.zIndex = "0"
+			panorama2.setPosition(evt.latLng);
+		});
+
     }
 
 /*
@@ -2760,7 +2811,8 @@ define( function( m ) {
 			window.dispatchEvent(new Event('resize'));
 
 			if ( play_whole_route || (curr_leg == undefined) ) {
-				map.fitBounds( route_bounds );
+				if ( streetViewLayer.getMap() == undefined )
+					map.fitBounds( route_bounds );
 			}
 			else {
 				map.setCenter( polylines[curr_leg].getPath().getAt(0) );
