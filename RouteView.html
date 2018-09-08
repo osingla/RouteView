@@ -75,8 +75,13 @@
 				<div id="id_div_top_layout">
 	            	<table style="width:100%">
 	                	<tr>
+<!--
 	                        <td valign="middle" align="left" id="id_mobile_version">
 	                        	<a href="http://streetviewplayer.org/VirtualRide/RouteViewMobile.html" target="_blank">Mobile&nbsp;Version</a>
+	                		</td>
+-->
+	                        <td valign="middle" align="left" id="id_video">
+	                        	<a href="http://streetviewplayer.org/VirtualRide/about" target="_blank">How&nbsp;To&nbsp;Video</a>
 	                		</td>
 	                        <td valign="middle" align="center" style="width:100%" >
 				                <b>RouteView - Google StreetView Player - Virtual Ride using Google Street View</b>&nbsp;<b id='id_routeview_info' ></b>
@@ -86,12 +91,17 @@
 	                		</td>
 	                	</tr>
 	                </table>
-	                
+
+<!--
 	                <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_mobile_version',position:['below-centered'],showDelay:750,hideDelay:0">
 						This will launch the mobile version (Android, IOS).<br>
 						<br>
 						Please note that the mobile version is a simplified and stripped down version,<br>
 						which only allows to play a route between two points (no waypoints). 
+	                </div>
+-->
+	                <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_video',position:['below-centered'],showDelay:750,hideDelay:0">
+						This will launch a video which demonstrate how to use Street View Player.<br>
 	                </div>
 	
 	                <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_link_to_github_project',position:['below-centered'],showDelay:750,hideDelay:0">
@@ -359,8 +369,29 @@
 													                        <div data-dojo-type="dijit/form/DropDownButton" >
 													                            <span>My Google Maps API key</span>
 													                            <div data-dojo-type="dijit/TooltipDialog">
-																					<input type="text" name="google_maps_api_key" value=""
-				 																        dojoType="dijit.form.TextBox" trim="true" id="id_google_maps_api_key" maxlength="64" />
+																					<table>
+																						<tr>
+																							<td>
+																								Key:&nbsp;
+																							</td>
+																							<td>
+																								<input type="password" name="google_maps_api_key" value="" 
+																								    dojoType="dijit.form.TextBox" trim="true" id="id_google_maps_api_key" maxlength="64" style="width: 30em;" type="hidden" />
+																							</td>
+																						</tr>
+																						<tr>
+																							<td>
+																								Show:&nbsp;
+																							</td>
+																							<td>
+																								<button data-dojo-type="dijit/form/ToggleButton" id="id_show_google_maps_api_key"
+																								    data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false"
+																									onChange='require(["RouteView.js"], function( s ) { s.cb_hide_google_maps_api_key(); })' >
+																									Visible
+																								</button>
+																							</td>
+																						</tr>
+																					</table>				 																        
 													                            </div>
 													                        </div>
 												                        </div>
