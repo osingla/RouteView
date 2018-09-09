@@ -740,6 +740,15 @@
                                             or cleared.
                                         </div>
 						            </td>
+					                <td style="width:1%; text-align:left; vertical-align:middle; display:none" id="td_controls_add_waypoint">
+						                <button dojoType="dijit.form.Button" type="button" id="id_btn_add_waypoint" 
+			    					            onclick='require(["RouteView.js"], function( s ) { s.do_add_waypoint(); })'>
+						    	            Add Waypoint
+							            </button>
+                                        <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_add_waypoint',position:['above-centered'],showDelay:750,hideDelay:0">
+                                            This will add the current location as a waypoint.
+                                        </div>
+						            </td>
 					                <td style="width:1%; text-align:left; vertical-align:middle" id="td_controls_duration"
 	    					            onclick='require(["RouteViewMobile.js"], function( s ) { s.click_duration_distance(); })'>
 					                </td>

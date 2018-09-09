@@ -676,7 +676,12 @@ define( function( m ) {
     		dijit.byId('id_input_route').set( 'disabled', true );
     		
     		dijit.byId('id_btn_pause').set( 'disabled', true );
-    		dijit.byId('id_btn_stop').set( 'disabled', true );
+			require(["dojo/dom-style"], function( domStyle) {
+				var display = domStyle.get( "td_controls_add_waypoint", "display" );
+				console.log(display);
+				if (display == "none")
+					dijit.byId('id_btn_stop').set( 'disabled', true );
+			});
 
         }
         else {
@@ -867,6 +872,9 @@ define( function( m ) {
 		dijit.byId('id_btn_pause').set( 'disabled', true );
     	dijit.byId('id_btn_pause').set( 'label', "Pause" );
 		dijit.byId('id_btn_stop').set( 'disabled', true );
+		require(["dojo/dom-style"], function( domStyle) {
+			domStyle.set( "td_controls_add_waypoint", "display", "None" );
+		});
 		dijit.byId('id_btn_map_pano_layout').set( 'disabled', true );
 	
 		dijit.byId('id_input_route').set( 'disabled', true );
@@ -895,6 +903,41 @@ define( function( m ) {
 			streetViewLayer.setMap( null );
 		}
     }
+
+    function do_add_waypoint( ) {
+		
+		dijit.byId('id_btn_add_waypoint').set( 'disabled', true );
+
+		var p = marker_small_street_view.getPosition( );
+		console.log( p );
+
+		var geocoder = new google.maps.Geocoder();
+    	geocoder.geocode( {'location': p}, function( results, status ) {
+    	    if (status === google.maps.GeocoderStatus.OK) {
+
+    	    	console.log( results[0].formatted_address );
+				var nb_waypoints = places.length;
+    	    	console.log( nb_waypoints );
+    	    	if (nb_waypoints == 2) {
+					var id_label_wp = "id_wp_1";
+					var value = dijit.byId(id_label_wp).get('value');
+					console.log(value);
+					if (value == "")
+						nb_waypoints = 1;
+					console.log( nb_waypoints );
+				}
+				if (nb_waypoints >= 2)
+					show_waypoint( nb_waypoints );
+				places[nb_waypoints] = results[0];
+				change_waypoint( nb_waypoints, results[0].formatted_address );
+				console.log( places );
+    	    	console.log( places.length );
+
+    	    }
+
+    	});
+		
+	}
 
     function start( ) {
 
@@ -2611,12 +2654,16 @@ define( function( m ) {
 				}
 				else {
 //					console.log( result.location.latLng );
+					domStyle.set( "td_controls_add_waypoint", "display", "" );
+					dijit.byId('id_btn_add_waypoint').set( 'disabled', false );
 					marker_no_street_view.setPosition( null );
 					panorama.setPosition(result.location.latLng);
 					panorama2.setPosition(result.location.latLng);
 					if ( prev_bearing != undefined )
 						panorama2.setPov( { heading: prev_bearing, pitch: 1 } );
 					marker_small_street_view.setPosition( result.location.latLng );
+					console.log( result.location.latLng );
+					console.log( result.location );
 				}
 			}})());
 
@@ -3000,7 +3047,6 @@ define( function( m ) {
 		var visible = dijit.byId('id_show_google_maps_api_key').get( 'checked' );
 		console.log( visible );
 		document.getElementById("id_google_maps_api_key").type = (visible) ? "text" : "password";
-		
 	}
 
     function parse( type ) {
@@ -3457,6 +3503,7 @@ define( function( m ) {
 		cb_map_pano_layout: function( layout ) { cb_map_pano_layout( layout ); },
 		do_pause: function( ) { do_pause(); },
 		do_stop:  function( ) { do_stop(); },
+		do_add_waypoint:  function( ) { do_add_waypoint(); },
 
 		clear_place:  function( ) { clear_place(); },
 		show_place:   function( ) { show_place(); },
