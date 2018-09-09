@@ -926,8 +926,12 @@ define( function( m ) {
 						nb_waypoints = 1;
 					console.log( nb_waypoints );
 				}
-				if (nb_waypoints >= 2)
+				if (nb_waypoints >= 2) {
 					show_waypoint( nb_waypoints );
+					require(["dojo/dom-style"], function( domStyle) {
+						domStyle.set( 'id_drive_tr_'+(nb_waypoints), "display", "" );
+					});
+				}
 				places[nb_waypoints] = results[0];
 				change_waypoint( nb_waypoints, results[0].formatted_address );
 				console.log( places );
