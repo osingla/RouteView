@@ -1530,6 +1530,7 @@ define( function( m ) {
 
 		    	var google_maps_api_key = localStorage.getItem("id_google_maps_api_key");
 				if ( !google_maps_api_key ) {
+					domStyle.set( "id_no_google_maps_api", "display", "" );
 					do_show_message( false, "Warning!", 
 						"<div align='center'>" +
 						"  <b>You do not have provided a Google Maps API Key.</b><br>" +
