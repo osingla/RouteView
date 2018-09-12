@@ -12,7 +12,6 @@ define( function( m ) {
     var map;
     var service;
     var panorama, panorama2, panorama3, panorama4;
-    var pegman_selected = false;
     var pano_pos = [];
 	var map_or_panorama_full_screen;
     var panorama_full_screen;
@@ -321,6 +320,8 @@ define( function( m ) {
 	
 		if ( dijit.byId("id_btn_drive_1").get("disabled") )
 			return;
+		if ( streetViewLayer.getMap() != undefined )
+			return;
 		map.fitBounds( route_bounds );
 	}
 
@@ -537,10 +538,6 @@ define( function( m ) {
 	              	placeId: place_id
                 }, function ( place, status ) {
                 	if ( status == google.maps.places.PlacesServiceStatus.OK ) {
-//		                console.log( old_nb_waypoints );
-//                		console.log( new_nb_waypoints );
-//		                console.log( index_waypoint );
-//                	    console.log( place.formatted_address );
                 	    if (new_nb_waypoints == old_nb_waypoints) {
                 	    	change_waypoint( index_waypoint, place.formatted_address );
                 	    }
@@ -901,9 +898,8 @@ define( function( m ) {
 			cb_map_click( evt );
 		});
 
-		if ( streetViewLayer.getMap() != undefined ) {
+		if ( streetViewLayer.getMap() != undefined )
 			streetViewLayer.setMap( null );
-		}
     }
 
     function do_add_waypoint( ) {
