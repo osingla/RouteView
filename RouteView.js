@@ -520,6 +520,8 @@ define( function( m ) {
 				index_waypoint = new_dir.request.ic;
             else if (new_dir.request.jc != undefined)
 				index_waypoint = new_dir.request.jc;
+            else if (new_dir.request.mc != undefined)
+				index_waypoint = new_dir.request.mc;
             if ( index_waypoint == undefined ) {
 				console.log( "UNDEFINED >>>>>>" );
 				console.log( new_dir );
