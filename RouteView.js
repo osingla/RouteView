@@ -320,8 +320,10 @@ define( function( m ) {
 	
 		if ( dijit.byId("id_btn_drive_1").get("disabled") )
 			return;
+		console.log( streetViewLayer.getMap() );
 		if ( streetViewLayer.getMap() != undefined )
 			return;
+console.log("@@@");
 		map.fitBounds( route_bounds );
 	}
 
@@ -1824,11 +1826,13 @@ define( function( m ) {
 
 					prev_zoom = map.getZoom();
 					if ( play_whole_route || (curr_leg == undefined) ) {
+console.log("@@@");
 						map.fitBounds( route_bounds );
 					}
 					else {
 						map.setCenter( polylines[curr_leg].getPath().getAt(0) );
 						map.fitBounds( legs_bounds[curr_leg] );
+console.log("@@@");
 					}
 
 				})
@@ -1846,6 +1850,7 @@ define( function( m ) {
 
 					map.setCenter( polylines[curr_leg].getPath().getAt(0) );
 					map.fitBounds( legs_bounds[curr_leg] );
+console.log("@@@");
 					if ( prev_zoom != undefined )
 						map.setZoom( prev_zoom );
 					prev_zoom = undefined;
@@ -2113,6 +2118,7 @@ define( function( m ) {
 		streetViewLayer.setMap( null );
 
    		map.fitBounds( route_bounds );
+console.log("@@@");
 
 		directions_renderer.setOptions( { zIndex:99, draggable: false } );
 
@@ -2664,8 +2670,8 @@ define( function( m ) {
 					if ( prev_bearing != undefined )
 						panorama2.setPov( { heading: prev_bearing, pitch: 1 } );
 					marker_small_street_view.setPosition( result.location.latLng );
-					console.log( result.location.latLng );
-					console.log( result.location );
+//					console.log( result.location.latLng );
+//					console.log( result.location );
 				}
 			}})());
 
@@ -2898,12 +2904,17 @@ define( function( m ) {
 			window.dispatchEvent(new Event('resize'));
 
 			if ( play_whole_route || (curr_leg == undefined) ) {
-				if ( streetViewLayer.getMap() == undefined )
+				if ( streetViewLayer.getMap() == undefined ) {
 					map.fitBounds( route_bounds );
+console.log("@@@");
+				}
 			}
 			else {
-				map.setCenter( polylines[curr_leg].getPath().getAt(0) );
-				map.fitBounds( legs_bounds[curr_leg] );
+				if ( streetViewLayer.getMap() == undefined ) {
+					map.setCenter( polylines[curr_leg].getPath().getAt(0) );
+					map.fitBounds( legs_bounds[curr_leg] );
+				}
+console.log("@@@");
 			}
 		});
 	}
