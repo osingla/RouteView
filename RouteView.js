@@ -525,6 +525,8 @@ console.log("@@@");
 				index_waypoint = new_dir.request.jc;
             else if (new_dir.request.mc != undefined)
 				index_waypoint = new_dir.request.mc;
+            else if (new_dir.request.dc != undefined)
+				index_waypoint = new_dir.request.dc;
             if ( index_waypoint == undefined ) {
 				console.log( "UNDEFINED >>>>>>" );
 				console.log( new_dir );
