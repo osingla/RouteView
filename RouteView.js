@@ -56,6 +56,7 @@ define( function( m ) {
    	var marker_browser_images_pos;
 	var panorama_mouse_down_offsetX = 0;
 	var panorama_mouse_down_offsetY = 0;
+	var map_type_id = 0;
 
 	var search_places = [];
 
@@ -529,6 +530,8 @@ console.log("@@@");
 				index_waypoint = new_dir.request.dc;
             else if (new_dir.request.cc != undefined)
 				index_waypoint = new_dir.request.cc;
+            else if (new_dir.request.fc != undefined)
+				index_waypoint = new_dir.request.fc;
             if ( index_waypoint == undefined ) {
 				console.log( "UNDEFINED >>>>>>" );
 				console.log( new_dir );
@@ -1438,7 +1441,8 @@ console.log("@@@");
                    	zoomControl: true,
                    	mapTypeControl: false,
                    	streetViewControl: false,
-                   	gestureHandling: 'greedy'
+                   	gestureHandling: 'greedy',
+                   	mapTypeId: 'roadmap'
                 };
                 map = new google.maps.Map( document.getElementById('id_map_canvas'), map_options );
 
@@ -2348,7 +2352,7 @@ console.log("@@@");
     function cb_click_no_hwy( ) {
         var no_hwy  = !dijit.byId('id_check_no_hwy').get( 'checked' );
 		console.log("-->" + no_hwy);
-		document.getElementById("id_label_check_no_hwy").innerHTML = (!no_hwy) ? "No Highway" : "Highway";
+		document.getElementById("id_label_check_no_hwy").innerHTML = (!no_hwy) ? "No Highway" : "Highway   ";
     	if ( !dijit.byId("id_btn_drive_1").get("disabled") )
     		do_route( true );
     }
@@ -2356,10 +2360,19 @@ console.log("@@@");
     function cb_click_no_toll( ) {
         var no_toll  = !dijit.byId('id_check_no_toll').get( 'checked' );
 		console.log("-->" + no_toll);
-		document.getElementById("id_label_check_no_toll").innerHTML = (!no_toll) ? "No Toll" : "Toll";
+		document.getElementById("id_label_check_no_toll").innerHTML = (!no_toll) ? "No Toll" : "Toll   ";
     	if ( !dijit.byId("id_btn_drive_1").get("disabled") )
     		do_route( true );
     }
+
+	function cb_set_map_type_id() {
+		switch (++map_type_id % 4) {
+			case 0 : map.setMapTypeId(google.maps.MapTypeId.ROADMAP); break
+			case 1 : map.setMapTypeId(google.maps.MapTypeId.TERRAIN); break
+			case 2 : map.setMapTypeId(google.maps.MapTypeId.HYBRID);  break
+			case 3 : map.setMapTypeId(google.maps.MapTypeId.SATELLITE); break
+		}
+	}
 
     function download_file( text, name, type ) {
     
@@ -2500,6 +2513,7 @@ console.log("@@@");
 
     }
     
+    // https://developers.google.com/maps/documentation/urls/guide#constructing-valid-urls
     function build_gmaps_url( ) {
 		
 		var url = "";
@@ -3550,6 +3564,7 @@ console.log("@@@");
 		
 		cb_click_no_hwy:  function( ) { cb_click_no_hwy( ); },
 		cb_click_no_toll: function( ) { cb_click_no_toll( ); },
+		cb_set_map_type_id:  function( ) { cb_set_map_type_id( ); },
 
 		cb_click_btn_drive_whole_route:	function( ) { cb_click_btn_drive_whole_route( ); },
 

@@ -160,7 +160,7 @@
 				                		  style="background:#b3daff"
 						                  onClick='require(["RouteView.js"], function( s ) { s.cb_click_fieldset_route(); })'>
 				                    <legend>
-										<span id="id_route_info">
+										<span id="id_route_info" onClick='require(["RouteView.js"], function( s ) { s.cb_set_map_type_id(); })' >
 											<span id="id_route_distance_duration" style="display:none">
 												<span><b id="id_route_dist_kms"></b>&nbsp;kms</span>
 												&nbsp;-&nbsp;
@@ -168,6 +168,9 @@
 												&nbsp;-&nbsp;
 												<span><b id="id_route_duration"></b></span>
 											</span>
+											<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_route_info',position:['above-centered'],showDelay:750,hideDelay:0">
+												Click here to select a different type of map (terrain, hybride, roadmap)
+											</div>
 										</span>
 				                    </legend>
 				                    <table cellspacing="0" cellpadding="0" style="white-space: nowrap" >
