@@ -767,7 +767,8 @@ console.log("@@@");
 					d += " disabled";
 				d += "  >Email itinary to ...</button>";
 			}
-    		d += "  <button dojoType='dijit/form/Button' type='button' onclick='require([\"RouteView.js\"], function( s ) { s.cb_copy_long_url(); dlg_copy_text.hide(); })'>Copy to Clipboard</button>" +
+    		d += "  <button dojoType='dijit/form/Button' type='button' onclick='require([\"RouteView.js\"], function( s ) { s.cb_copy_long_url_and_new_tab(); dlg_copy_text.hide(); })'>New Tab or Window</button>" +
+				 "  <button dojoType='dijit/form/Button' type='button' onclick='require([\"RouteView.js\"], function( s ) { s.cb_copy_long_url(); dlg_copy_text.hide(); })'>Copy to Clipboard</button>" +
     			 "  <button dojoType='dijit/form/Button' type='button' onclick='dlg_copy_text.hide()'>Cancel</button>" +
     			 "</div>";
 
@@ -2009,7 +2010,7 @@ console.log("@@@");
 		if ( slider_disabled )
 			return;
 
-		console.log( new_pos );
+//		console.log( new_pos );
 
 		if ( go_timer ) {
 			if ( timer_animate != undefined )
@@ -2383,7 +2384,7 @@ console.log("@@@");
         a.click();
     }
 
-    function do_create_long_url( ) {
+    function _do_create_long_url( ) {
 
 		var url = location.origin + location.pathname;
 		url += "?";
@@ -2411,6 +2412,11 @@ console.log("@@@");
 			}
  		})
 
+		return url;
+    }
+
+    function do_create_long_url( ) {
+		url = _do_create_long_url();
 		do_copy_message( "Long URL", "Long URL to create these routes", url, false );
     }
 
@@ -3073,6 +3079,25 @@ console.log("@@@");
 		}
 	}
 	
+	function cb_copy_long_url_and_new_tab( ) {
+	
+		var copyTextarea = document.querySelector('.js-copytextarea');
+		copyTextarea.select();
+
+		try {
+			var successful = document.execCommand('copy');
+			var msg = successful ? 'successful' : 'unsuccessful';
+			console.log('Copying text command was ' + msg);
+			is_dirty = false;
+		} catch (err) {
+			console.log('Oops, unable to copy');
+		}
+
+		url = _do_create_long_url();
+		var redirectWindow = window.open(url, '_blank');
+		redirectWindow.location;		
+	}
+	
 	function cb_hide_google_maps_api_key( ) {
 		
 		var visible = dijit.byId('id_show_google_maps_api_key').get( 'checked' );
@@ -3571,6 +3596,7 @@ console.log("@@@");
 		cb_open_settings: function( ) { cb_open_settings( ); },
 
 		cb_copy_long_url: function( ) { cb_copy_long_url( ); },
+		cb_copy_long_url_and_new_tab: function( ) { cb_copy_long_url_and_new_tab( ); },
 		
 		cb_hide_google_maps_api_key: function( ) { cb_hide_google_maps_api_key(); },
 		
