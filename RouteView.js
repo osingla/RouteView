@@ -324,7 +324,6 @@ define( function( m ) {
 		console.log( streetViewLayer.getMap() );
 		if ( streetViewLayer.getMap() != undefined )
 			return;
-console.log("@@@");
 		map.fitBounds( route_bounds );
 	}
 
@@ -534,8 +533,14 @@ console.log("@@@");
 				index_waypoint = new_dir.request.fc;
             else if (new_dir.request.uc != undefined)
 				index_waypoint = new_dir.request.uc;
+            else if (new_dir.request.xc != undefined)
+				index_waypoint = new_dir.request.xc;
+            else if (new_dir.request.Kd != undefined)
+				index_waypoint = new_dir.request.Kd;
+            else if (new_dir.request.Jd != undefined)
+				index_waypoint = new_dir.request.Jd;
             if ( index_waypoint == undefined ) {
-				console.log( "UNDEFINED >>>>>>" );
+				console.log( "!!!!UNDEFINED >>>>>>" );
 				console.log( new_dir );
 			}
 			else {
