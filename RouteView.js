@@ -967,12 +967,16 @@ define( function( m ) {
 
    				load_settings( );
 				
-				var google_api = "3.33";
+				var google_api = "";
 				console.log(location.hostname);
 				if ( location.hostname == "127.0.0.1" )
 					google_api = "3.exp";
 				console.log(google_api);
-				var rq = "//maps.google.com/maps/api/js?v="+google_api+"&libraries=places,geometry";
+				var rq;
+				if (google_api != "")
+					rq = "//maps.google.com/maps/api/js?v="+google_api+"&libraries=places,geometry";
+				else
+					rq = "//maps.google.com/maps/api/js?libraries=places,geometry";
 		    	var google_maps_api_key = localStorage.getItem("id_google_maps_api_key");
 		    	if ( google_maps_api_key && (google_maps_api_key != "") )
 					rq += "&key=" + google_maps_api_key;
