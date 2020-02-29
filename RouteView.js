@@ -1603,6 +1603,9 @@ define( function( m ) {
 							if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
 							}
 							else {
+								//console.log(result)
+								heading = result.links[0].heading;
+								floating_panorama.setPov( { heading: heading, pitch: 1 } );
 								floating_panorama.setPosition(result.location.latLng);
 								marker_browser_images_pos.setPosition(result.location.latLng);
 								dijit.byId("id_floating_panorama_pane").show();
@@ -1610,14 +1613,8 @@ define( function( m ) {
 						}})());
 					}
 					if (streetViewLayer.getMap() != undefined) {
-						if (evt.tb.ctrlKey) {
-							if ( timer_show_pano_on_mousemove != undefined ) 
-								clearTimeout(timer_show_pano_on_mousemove);
-							if ( streetViewLayer.getMap() != undefined )
-								timer_show_pano_on_mousemove = setTimeout(mouse_move, 250, evt);
-						}
-						else if (evt.tb.shiftKey) {
-
+/*
+						if (evt.tb.shiftKey) {
 							require(["dojo/dom-style"], function( domStyle) {
 								var display = domStyle.get( "id_floating_panorama_pane", "display" );
 								if (display != "none") {
@@ -1630,9 +1627,9 @@ define( function( m ) {
 									if (prev_y == -1)
 										prev_y = y;
 									if (x > prev_x)
-										h = h + 1;
+										h = h + 1.25;
 									else if (x < prev_x)
-										h = h - 1;
+										h = h - 1.25;
 									if (y > prev_y)
 										p += 0.05;
 									else if (y < prev_y)
@@ -1640,9 +1637,16 @@ define( function( m ) {
 									prev_x = x;
 									prev_y = y;
 									floating_panorama.setPov( { heading: h, pitch: p } );
+									console.log(h);
 								}
 							});
-
+						} else 
+*/
+						if (!evt.tb.ctrlKey) {
+							if ( timer_show_pano_on_mousemove != undefined ) 
+								clearTimeout(timer_show_pano_on_mousemove);
+							if ( streetViewLayer.getMap() != undefined )
+								timer_show_pano_on_mousemove = setTimeout(mouse_move, 250, evt);
 						}
 					}
 				});
