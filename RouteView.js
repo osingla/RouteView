@@ -20,6 +20,8 @@ define( function( m ) {
     var play_whole_route;
     var prev_zoom = undefined;
 	var timer_show_pano_on_mousemove = undefined;
+	var prev_x = -1;
+	var prev_y = -1;
     var timer_animate = undefined;
     var curr_dist_in_leg;
     var curr_dist_in_route;
@@ -256,6 +258,13 @@ define( function( m ) {
     }
 
     function start_driving( ) {
+
+		dijit.byId("id_floating_panorama_pane").hide();
+		if ( timer_show_pano_on_mousemove != undefined ) {
+			clearTimeout(timer_show_pano_on_mousemove);
+			timer_show_pano_on_mousemove = undefined;
+		}
+		marker_browser_images_pos.setMap( null );
 
 		streetViewLayer.setMap( null );
 
@@ -912,11 +921,19 @@ define( function( m ) {
 		marker_browser_images_pos.setMap( null );
 		google.maps.event.clearListeners(map, "click");
 		google.maps.event.addListener( map, "click", function( evt ) {
-			cb_map_click( evt );
+			cb_map_click(evt);
 		});
 
 		if ( streetViewLayer.getMap() != undefined )
 			streetViewLayer.setMap( null );
+
+		dijit.byId("id_floating_panorama_pane").hide();
+		if ( timer_show_pano_on_mousemove != undefined ) {
+			clearTimeout(timer_show_pano_on_mousemove);
+			timer_show_pano_on_mousemove = undefined;
+		}
+		marker_browser_images_pos.setMap( null );
+    
     }
 
     function do_add_waypoint( ) {
@@ -1395,6 +1412,11 @@ define( function( m ) {
 		var btn_drive_whole_route_disabled = dijit.byId('id_btn_drive_whole_route').get( 'disabled' );
 		if ( streetViewLayer.getMap() != undefined ) {
 			console.log("pegman is unselected - " + btn_drive_whole_route_disabled);
+			dijit.byId("id_floating_panorama_pane").hide();
+			if ( timer_show_pano_on_mousemove != undefined ) {
+				clearTimeout(timer_show_pano_on_mousemove);
+				timer_show_pano_on_mousemove = undefined;
+			}
 			streetViewLayer.setMap( null );
 			if (btn_drive_whole_route_disabled)
 				map.setOptions( {draggableCursor:null} );
@@ -1563,6 +1585,8 @@ define( function( m ) {
 				panorama4 = new google.maps.StreetViewPanorama( document.getElementById('id_panorama4'), panorama_options );
 				map.setStreetView( panorama4 );
 
+				floating_panorama = new google.maps.StreetViewPanorama( document.getElementById('id_floating_panorama'), panorama_options );
+
                 window.onresize = function(event) {
 					panorama_resize( );
 				};
@@ -1570,12 +1594,62 @@ define( function( m ) {
             	map_or_panorama_full_screen = false;
 
         		google.maps.event.addListener( map, "click", function( evt ) {
-        			cb_map_click( evt );
+        			cb_map_click(evt);
        			});
+
+				google.maps.event.addListener(map, "mousemove", function(evt) {
+					function mouse_move(evt) {
+						street_view_check.getPanoramaByLocation(evt.latLng, 1000, (function() { return function(result, status) {
+							if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
+							}
+							else {
+								floating_panorama.setPosition(result.location.latLng);
+								marker_browser_images_pos.setPosition(result.location.latLng);
+								dijit.byId("id_floating_panorama_pane").show();
+							}
+						}})());
+					}
+					if (streetViewLayer.getMap() != undefined) {
+						if (evt.tb.ctrlKey) {
+							if ( timer_show_pano_on_mousemove != undefined ) 
+								clearTimeout(timer_show_pano_on_mousemove);
+							if ( streetViewLayer.getMap() != undefined )
+								timer_show_pano_on_mousemove = setTimeout(mouse_move, 250, evt);
+						}
+						else if (evt.tb.shiftKey) {
+
+							require(["dojo/dom-style"], function( domStyle) {
+								var display = domStyle.get( "id_floating_panorama_pane", "display" );
+								if (display != "none") {
+									var h = floating_panorama.getPov().heading;
+									var p = floating_panorama.getPov().pitch;
+									x = evt.tb.x;
+									y = evt.tb.y;
+									if (prev_x == -1)
+										prev_x = x;
+									if (prev_y == -1)
+										prev_y = y;
+									if (x > prev_x)
+										h = h + 1;
+									else if (x < prev_x)
+										h = h - 1;
+									if (y > prev_y)
+										p += 0.05;
+									else if (y < prev_y)
+										p -= 0.05;
+									prev_x = x;
+									prev_y = y;
+									floating_panorama.setPov( { heading: h, pitch: p } );
+								}
+							});
+
+						}
+					}
+				});
 
 				google.maps.event.clearListeners( map, 'rightclick' );
         		google.maps.event.addListener( map, "rightclick", function( evt ) {
-        			cb_map_rightclick( evt );
+        			cb_map_rightclick(evt);
        			});
         		
             	var id_panorama2 = dom.byId('id_panorama2');
@@ -2663,10 +2737,18 @@ console.log("@@@");
     }
 
     function cb_map_click( evt ) {
+
     	console.log( "cb_map_click" );
 		if ( streetViewLayer.getMap() == undefined )
 			return;
 			
+		dijit.byId("id_floating_panorama_pane").hide();
+		if ( timer_show_pano_on_mousemove != undefined ) {
+			clearTimeout(timer_show_pano_on_mousemove);
+			timer_show_pano_on_mousemove = undefined;
+		}
+		marker_browser_images_pos.setMap( null );
+
 		require(["dojo/dom-style"], function( domStyle ) {
 			
 			var display = domStyle.get( "id_top_layout", "display" );
