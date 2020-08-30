@@ -432,7 +432,7 @@ define( function( m ) {
         var end_location = dijit.byId('id_wp_'+(first_hidden-1)).get( 'value' );
         console.log( "to   = " + end_location );
 
-//        street_view_check = new google.maps.StreetViewService( );
+//      street_view_check = new google.maps.StreetViewService( );
 
         directions_service = new google.maps.DirectionsService( );
 
@@ -548,13 +548,26 @@ define( function( m ) {
 				index_waypoint = new_dir.request.Kd;
             else if (new_dir.request.Jd != undefined)
 				index_waypoint = new_dir.request.Jd;
+            else if (new_dir.request.Gd != undefined)
+				index_waypoint = new_dir.request.Gd;
+            else if (new_dir.request.Hd != undefined)
+				index_waypoint = new_dir.request.Hd;
+            else if (new_dir.request.Ed != undefined)
+				index_waypoint = new_dir.request.Ed;
+            else if (new_dir.request.Ed != undefined)
+				index_waypoint = new_dir.request.Ed;
+            else if (new_dir.request.Dd != undefined)
+				index_waypoint = new_dir.request.Dd;
             if ( index_waypoint == undefined ) {
 				console.log( "!!!!UNDEFINED >>>>>>" );
 				console.log( new_dir );
 			}
 			else {
 
-                console.log( directions_renderer );
+                console.log("---------");
+                console.log(directions_renderer);
+                console.log(new_dir);
+                console.log("---------");
                 var new_nb_waypoints = new_dir.geocoded_waypoints.length;
                 console.log( "old_nb_waypoints=" + old_nb_waypoints + " new_nb_waypoints=" + new_nb_waypoints + " index_waypoint=" + index_waypoint );
                 var place_id = new_dir.geocoded_waypoints[index_waypoint].place_id;
@@ -615,7 +628,7 @@ define( function( m ) {
             waypoints: way_points,
             optimizeWaypoints: false,
             avoidHighways: no_hwy,
-            avoidTolls: no_toll,
+            avoidTolls: no_toll
         };
 
       	directions_service.route( directions_service_request, 
@@ -632,7 +645,7 @@ define( function( m ) {
 
 		    dijit.byId("id_pane_standby").hide();
 
-//			console.log( response );
+			console.log( response );
 
             var legs = response.routes[0].legs;
             var leg = legs[0];
@@ -942,6 +955,10 @@ define( function( m ) {
 
 		var p = marker_small_street_view.getPosition( );
 		console.log( p );
+		if (p == undefined) {
+			p = marker_browser_images_pos.getPosition();
+			console.log( p );
+		}
 
 		var geocoder = new google.maps.Geocoder();
     	geocoder.geocode( {'location': p}, function( results, status ) {
@@ -1593,8 +1610,13 @@ define( function( m ) {
                 
             	map_or_panorama_full_screen = false;
 
-        		google.maps.event.addListener( map, "click", function( evt ) {
+        		google.maps.event.addListener( map, "click", function(evt) {
         			cb_map_click(evt);
+       			});
+
+        		google.maps.event.addListener( map, "dragend", function() {
+        			console.log(this);
+        			console.log(this.position);
        			});
 
 				google.maps.event.addListener(map, "mousemove", function(evt) {
@@ -1603,50 +1625,26 @@ define( function( m ) {
 							if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
 							}
 							else {
-								//console.log(result)
-								heading = result.links[0].heading;
-								floating_panorama.setPov( { heading: heading, pitch: 1 } );
-								floating_panorama.setPosition(result.location.latLng);
-								marker_browser_images_pos.setPosition(result.location.latLng);
-								dijit.byId("id_floating_panorama_pane").show();
+								if (result.links.length >= 1) {
+									heading = result.links[0].heading;
+									floating_panorama.setPov( { heading: heading, pitch: 1 } );
+									floating_panorama.setPosition(result.location.latLng);
+									marker_browser_images_pos.setPosition(result.location.latLng);
+									dijit.byId("id_floating_panorama_pane").show();
+									domStyle.set( "td_controls_add_waypoint", "display", "" );
+									dijit.byId('id_btn_add_waypoint').set( 'disabled', false );
+								}
 							}
 						}})());
 					}
 					if (streetViewLayer.getMap() != undefined) {
-/*
-						if (evt.tb.shiftKey) {
-							require(["dojo/dom-style"], function( domStyle) {
-								var display = domStyle.get( "id_floating_panorama_pane", "display" );
-								if (display != "none") {
-									var h = floating_panorama.getPov().heading;
-									var p = floating_panorama.getPov().pitch;
-									x = evt.tb.x;
-									y = evt.tb.y;
-									if (prev_x == -1)
-										prev_x = x;
-									if (prev_y == -1)
-										prev_y = y;
-									if (x > prev_x)
-										h = h + 1.25;
-									else if (x < prev_x)
-										h = h - 1.25;
-									if (y > prev_y)
-										p += 0.05;
-									else if (y < prev_y)
-										p -= 0.05;
-									prev_x = x;
-									prev_y = y;
-									floating_panorama.setPov( { heading: h, pitch: p } );
-									console.log(h);
-								}
-							});
-						} else 
-*/
-						if (!evt.tb.ctrlKey) {
-							if ( timer_show_pano_on_mousemove != undefined ) 
-								clearTimeout(timer_show_pano_on_mousemove);
-							if ( streetViewLayer.getMap() != undefined )
-								timer_show_pano_on_mousemove = setTimeout(mouse_move, 250, evt);
+						if ( dijit.byId("id_btn_stop").get("disabled") ) {
+							if (!evt.ub.ctrlKey) {
+								if ( timer_show_pano_on_mousemove != undefined ) 
+									clearTimeout(timer_show_pano_on_mousemove);
+								if ( streetViewLayer.getMap() != undefined )
+									timer_show_pano_on_mousemove = setTimeout(mouse_move, 250, evt);
+							}
 						}
 					}
 				});
@@ -2528,7 +2526,11 @@ console.log("@@@");
     }
     
     function do_save_gpx( ) {
-    	
+		
+		console.log(1);
+		window.resizeBy(800, 600);
+		console.log(2);
+		
     	// xmllint --noout --schema http://www.topografix.com/GPX/1/0/gpx.xsd testfile.gpx
 
 		var nb_wp = 0;
@@ -2745,7 +2747,7 @@ console.log("@@@");
     	console.log( "cb_map_click" );
 		if ( streetViewLayer.getMap() == undefined )
 			return;
-			
+	
 		dijit.byId("id_floating_panorama_pane").hide();
 		if ( timer_show_pano_on_mousemove != undefined ) {
 			clearTimeout(timer_show_pano_on_mousemove);
