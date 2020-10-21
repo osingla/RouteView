@@ -1685,6 +1685,13 @@ define( function( m ) {
 						"<div align='left'>" +
 						"<br>Notes:<br>" +
 						"<ol>" +
+                        "<li>Your API keys needs to support these APIs:</li>" +
+                        "  <ul>" +
+                        "    <li>Directions API</li>" +
+                        "    <li>Places API</li>" +
+                        "    <li>Geocoding API</li>" +
+                        "    <li>MAPS Javascrip API</li>" +
+                        "  </ul>" +
 						"<li>Your key is saved locally and <b>not shared</b> anywhere.</li>" +
 						"<li>Unless you use this program 24/7, it's very unlikely you will generate enough<br>" +
 						"   traffic to be billed by Google. I use this program a lot with my own Google Maps<br>" +
