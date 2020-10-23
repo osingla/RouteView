@@ -1639,11 +1639,25 @@ define( function( m ) {
 					}
 					if (streetViewLayer.getMap() != undefined) {
 						if ( dijit.byId("id_btn_stop").get("disabled") ) {
-							if (!evt.ub.ctrlKey) {
-								if ( timer_show_pano_on_mousemove != undefined ) 
-									clearTimeout(timer_show_pano_on_mousemove);
-								if ( streetViewLayer.getMap() != undefined )
-									timer_show_pano_on_mousemove = setTimeout(mouse_move, 250, evt);
+							try {
+								if (!evt.ub.ctrlKey) {
+									if ( timer_show_pano_on_mousemove != undefined ) 
+										clearTimeout(timer_show_pano_on_mousemove);
+									if ( streetViewLayer.getMap() != undefined )
+										timer_show_pano_on_mousemove = setTimeout(mouse_move, 250, evt);
+								}
+							} catch (err) {
+								console.log(evt);
+								try {
+									if (!evt.vb.ctrlKey) {
+										if ( timer_show_pano_on_mousemove != undefined ) 
+											clearTimeout(timer_show_pano_on_mousemove);
+										if ( streetViewLayer.getMap() != undefined )
+											timer_show_pano_on_mousemove = setTimeout(mouse_move, 250, evt);
+									}
+								} catch (err) {
+									console.log(evt);
+								}
 							}
 						}
 					}
