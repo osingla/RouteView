@@ -74,7 +74,7 @@ define( function( m ) {
         return '#' + (0x1000000 + rgb).toString(16).slice(1)
 	}
   
-	function show_route_distance_duration( dist_meters, duration_secs, waypoint ) {
+	function show_route_distance_duration(dist_meters, duration_secs, waypoint, summary) {
 
 		if (waypoint == undefined)
 			console.log( "dist_meters=" + dist_meters + " duration_secs=" + duration_secs );
@@ -108,7 +108,12 @@ define( function( m ) {
 			'	&nbsp;-&nbsp;' +
 			'	<b>' + Math.round( dist_meters * 0.000621371 ) + '</b>&nbsp;miles' +
 			'	&nbsp;-&nbsp;' +
-			'	<b>' + hms + '</b>' +
+			'	<b>' + hms + '</b>';
+        if (waypoint == undefined)
+			content = content + 
+				'	&nbsp;-&nbsp;' +
+				'	<b>' + summary + '</b>';
+        content  = content + 
 			'</span>';
 
         if (waypoint == undefined) {
@@ -181,15 +186,23 @@ define( function( m ) {
 					marker_no_street_view.setPosition( null );
 					var iad = polyline.GetIndexAtDistance( curr_dist_in_leg );
 					bearing = polyline.Bearing( iad );
-//					console.log( curr_leg + " : " + curr_dist_in_leg + " - " + curr_dist_in_route + " / " + eol + " --> " + bearing);
 					if (bearing == undefined)
 						bearing = prev_bearing;
+					delta0 = Math.abs(bearing - result.links[0].heading);
+					delta1 = Math.abs(bearing - result.links[1].heading);
+					if (delta0 < delta1)
+						xbearing = result.links[0].heading;
+					else
+						xbearing = result.links[1].heading;
+//					console.log( pano_cnt + " -> " + Math.round(curr_dist_in_route*100)/1000 + " / " + Math.round(eol*100)/100 + " --> " + Math.round(bearing*100)/100 + " - " + Math.round(xbearing*100)/100 + " (" + Math.round(result.links[0].heading*100)/100 + " , " + Math.round(result.links[1].heading*100)/100 + ")");
 					if (bearing != undefined) {
 						(function ( ) {
 							panorama.addListener('pano_changed', function() {
 								var pano_id = panorama.getPano();
 								if (pano_id != prev_pano_id) {
 //									marker_small_street_view.setMap( map );
+//									console.log("$$$ " + pano_cnt + " - " + (pano_id == prev_pano_id) + " / " + pano_id + " , " + prev_pano_id);
+									google.maps.event.clearInstanceListeners(panorama);									
 									switch (pano_cnt++ % 3) {
 										case 0 :
 											pano_pos[4] = panorama.getPosition();
@@ -243,11 +256,15 @@ define( function( m ) {
 //										restart_animate_timer( (pano_cnt <= 3) );
 								}
 							});
+							panorama.setPosition( p );
+	//						if ( prev_bearing != undefined )
+	//							panorama.setPov( { heading: prev_bearing, pitch: 1 } );
+							prev_bearing = bearing;
 						})(  );
-						panorama.setPosition( p );
-//						if ( prev_bearing != undefined )
-//							panorama.setPov( { heading: prev_bearing, pitch: 1 } );
-						prev_bearing = bearing;
+//						panorama.setPosition( p );
+////						if ( prev_bearing != undefined )
+////							panorama.setPov( { heading: prev_bearing, pitch: 1 } );
+//						prev_bearing = bearing;
 					}
 				}
 				dijit.byId('id_input_route').set( 'value', d, false );
@@ -648,6 +665,7 @@ define( function( m ) {
 			console.log( response );
 
             var legs = response.routes[0].legs;
+            var summary = response.routes[0].summary;
             var leg = legs[0];
             var distance = leg.distance.text;
             var meters = leg.distance.value;
@@ -702,10 +720,10 @@ define( function( m ) {
                     }
                 }
                 
-				show_route_distance_duration( legs[i].distance.value, legs[i].duration.value, i+1 );
+				show_route_distance_duration(legs[i].distance.value, legs[i].duration.value, i+1);
             }
             
-            show_route_distance_duration( dist_meters, duration_secs );
+            show_route_distance_duration(dist_meters, duration_secs, undefined, summary);
 
 			polylines.forEach( function(e) { e.setMap(map); })
 			show_all_routes(); 
@@ -831,6 +849,12 @@ define( function( m ) {
 	}
     
     function do_pause( ) {
+
+console.log(curr_dist_in_route + " - " + step);
+		if (interval == 10000) {
+			cb_animate( curr_dist_in_route + step );
+			return;
+		}
 
         console.log( dijit.byId('id_btn_pause').get( 'label' ) );
         if ( dijit.byId('id_btn_pause').get( 'label' ) == "Pause" ) {
@@ -1503,10 +1527,10 @@ define( function( m ) {
 					controlUI.style.backgroundColor = '#dfdfdf';
 					controlUI.style.borderRadius = '1px';
 					controlUI.style.boxShadow = '0 1px 3px rgba(0,0,0,.3)';
-					controlUI.style.cursor = 'progress';
+					controlUI.style.cursor = 'move';
 					controlUI.style.marginBottom = '1px';
 					controlUI.style.textAlign = 'center';
-					controlUI.title = 'Show the Street View available';
+					controlUI.title = 'Show the Street View available.\n\nWhen moving the cursor over a StreetView enabled road,\ntthis will show you the panorama for this area.';
 					controlDiv.appendChild(controlUI);
 
 					var controlText = document.createElement('div');
@@ -1584,7 +1608,23 @@ define( function( m ) {
                     },
                     enableCloseButton: false,
                     linksControl: false,
-                    panControl: false,
+                    panControl: true,
+                    zoomControl: false,
+                    clickToGo: false,
+                    disableDoubleClickZoom: true,
+                    fullscreenControl: false,
+                    showRoadLabels: false,
+                    imageDateControl: false
+                };
+
+                var floating_panorama_options = {
+                    pov: {
+                        heading: 34,
+                        pitch: 10
+                    },
+                    enableCloseButton: false,
+                    linksControl: false,
+                    panControl: true,
                     zoomControl: false,
                     clickToGo: false,
                     disableDoubleClickZoom: true,
@@ -1602,7 +1642,7 @@ define( function( m ) {
 				panorama4 = new google.maps.StreetViewPanorama( document.getElementById('id_panorama4'), panorama_options );
 				map.setStreetView( panorama4 );
 
-				floating_panorama = new google.maps.StreetViewPanorama( document.getElementById('id_floating_panorama'), panorama_options );
+				floating_panorama = new google.maps.StreetViewPanorama( document.getElementById('id_floating_panorama'), floating_panorama_options );
 
                 window.onresize = function(event) {
 					panorama_resize( );
@@ -1647,7 +1687,6 @@ define( function( m ) {
 										timer_show_pano_on_mousemove = setTimeout(mouse_move, 250, evt);
 								}
 							} catch (err) {
-								console.log(evt);
 								try {
 									if (!evt.vb.ctrlKey) {
 										if ( timer_show_pano_on_mousemove != undefined ) 
@@ -2324,6 +2363,7 @@ console.log("@@@");
 									panorama.addListener('pano_changed', function() {
 										var pano_id = panorama.getPano();
 										if (pano_id != prev_pano_id) {
+google.maps.event.clearInstanceListeners(panorama);									
 											switch (pano_cnt++ % 3) {
 												case 0 :
 													pano_pos[4] = panorama.getPosition();
@@ -3343,6 +3383,8 @@ console.log("@@@");
 	            dijit.byId('id_input_interval').set( 'value', parse(interval), false );
 	            dijit.byId('id_input_interval').set( 'intermediateChanges', true );
 	        }
+			if (interval == 10000)
+				dijit.byId('id_btn_pause').set( 'label', "Next" );
 	    	
 	    	map_pano_layout = localStorage.getItem("map_pano_layout");
 	    	if ( !map_pano_layout )
