@@ -63,11 +63,12 @@ define( function( m ) {
 	var search_places = [];
 
    	var route_colors = [
-   		"#0066cc",
-   		"#00cc00",
-   		"#ff6600",
-   		"#cc33ff",
+		"#0066cc",
+		"#00cc00",
+		"#ff6600",
+		"#cc33ff",
    	];
+   	var route_color = route_colors[0];
 
 	function rgb(red, green, blue) {
 		var rgb = blue | (green << 8) | (red << 16);
@@ -463,7 +464,7 @@ define( function( m ) {
 	          	opacity: 1.0,
             },
             polylineOptions: {
-            	strokeColor: route_colors[0],
+                strokeColor: route_color,
             	strokeWeight: route_thickness
             }
         });
@@ -1027,8 +1028,10 @@ console.log(curr_dist_in_route + " - " + step);
 				
 				var google_api = "";
 				console.log(location.hostname);
-				if ( location.hostname == "127.0.0.1" )
-					google_api = "3.exp";
+				//if ( location.hostname == "127.0.0.1" )
+				//	google_api = "3.exp";
+				//else
+				google_api = "quarterly";
 				console.log(google_api);
 				var rq;
 				if (google_api != "")
@@ -2486,7 +2489,7 @@ google.maps.event.clearInstanceListeners(panorama);
 	function cb_route_thickness_changed( ) {
     	route_thickness = dijit.byId('id_input_route_thickness').get( 'value' );
         document.getElementById("id_route_thickness").innerHTML = route_thickness;
-		directions_renderer.setOptions( { polylineOptions: { strokeColor: route_colors[0], strokeWeight: route_thickness } } ); 
+		directions_renderer.setOptions( { polylineOptions: { strokeColor: route_color, strokeWeight: route_thickness } } ); 
 	}
 
 	function cb_map_style_changed( ) {
