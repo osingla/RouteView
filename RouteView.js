@@ -277,7 +277,9 @@ define( function( m ) {
 
     function start_driving( ) {
 
-		dijit.byId("id_floating_panorama_pane").hide();
+		dijit.byId("id_floating_panorama_pane_1").hide();
+		dijit.byId("id_floating_panorama_pane_2").hide();
+		dijit.byId('id_btn_map_pegman_layout').set( 'disabled', true );
 		if ( timer_show_pano_on_mousemove != undefined ) {
 			clearTimeout(timer_show_pano_on_mousemove);
 			timer_show_pano_on_mousemove = undefined;
@@ -848,6 +850,41 @@ define( function( m ) {
 		});
 
 	}
+
+	function cb_map_pegman_nb_img(nb_img) {
+		console.log("pegman_nb_img="+nb_img);
+		localStorage.setItem("map_pegman_nb_img", nb_img);
+	}
+    
+	function cb_map_pegman_img_size(size, set) {
+		if (set)
+			localStorage.setItem("map_pegman_img_size", size);
+		switch (size) {
+			case 1:
+			default:
+				dijit.byId("id_floating_panorama_pane_1").set("style", "width:640px;height:480x");
+				dijit.byId("id_floating_panorama_pane_2").set("style", "width:640px;height:480x");
+				break;
+			case 2:
+				dijit.byId("id_floating_panorama_pane_1").set("style", "width:800px;height:600px");
+				dijit.byId("id_floating_panorama_pane_2").set("style", "width:800px;height:600px");
+				break;
+			case 3:
+				dijit.byId("id_floating_panorama_pane_1").set("style", "width:1024px;height:768px");
+				dijit.byId("id_floating_panorama_pane_2").set("style", "width:1024px;height:768px");
+				break;
+		}
+		if (set) {
+			var display = domStyle.get( id, "id_floating_panorama_pane_1" );
+			if (display != "none") {
+				dijit.byId("id_floating_panorama_pane_1").show();
+				if (dijit.byId('id_pegman_two_img').get('checked'))
+					dijit.byId("id_floating_panorama_pane_2").show();
+				else
+					dijit.byId("id_floating_panorama_pane_2").hide();
+			}
+		}
+	}
     
     function do_pause( ) {
 
@@ -939,6 +976,7 @@ console.log(curr_dist_in_route + " - " + step);
 			domStyle.set( "td_controls_add_waypoint", "display", "None" );
 		});
 		dijit.byId('id_btn_map_pano_layout').set( 'disabled', true );
+		dijit.byId('id_btn_map_pegman_layout').set( 'disabled', true );
 	
 		dijit.byId('id_input_route').set( 'disabled', true );
 		dijit.byId('id_input_route').set( 'intermediateChanges', false );
@@ -965,7 +1003,9 @@ console.log(curr_dist_in_route + " - " + step);
 		if ( streetViewLayer.getMap() != undefined )
 			streetViewLayer.setMap( null );
 
-		dijit.byId("id_floating_panorama_pane").hide();
+		dijit.byId("id_floating_panorama_pane_1").hide();
+		dijit.byId("id_floating_panorama_pane_2").hide();
+		dijit.byId('id_btn_map_pegman_layout').set( 'disabled', true );
 		if ( timer_show_pano_on_mousemove != undefined ) {
 			clearTimeout(timer_show_pano_on_mousemove);
 			timer_show_pano_on_mousemove = undefined;
@@ -1482,7 +1522,9 @@ console.log(curr_dist_in_route + " - " + step);
 		var btn_drive_whole_route_disabled = dijit.byId('id_btn_drive_whole_route').get( 'disabled' );
 		if ( streetViewLayer.getMap() != undefined ) {
 			console.log("pegman is unselected - " + btn_drive_whole_route_disabled);
-			dijit.byId("id_floating_panorama_pane").hide();
+			dijit.byId("id_floating_panorama_pane_1").hide();
+			dijit.byId("id_floating_panorama_pane_2").hide();
+			dijit.byId('id_btn_map_pegman_layout').set( 'disabled', true );
 			if ( timer_show_pano_on_mousemove != undefined ) {
 				clearTimeout(timer_show_pano_on_mousemove);
 				timer_show_pano_on_mousemove = undefined;
@@ -1559,7 +1601,7 @@ console.log(curr_dist_in_route + " - " + step);
 					controlUI.style.cursor = 'move';
 					controlUI.style.marginBottom = '1px';
 					controlUI.style.textAlign = 'center';
-					controlUI.title = 'Show the Street View available.\n\nWhen moving the cursor over a StreetView enabled road,\ntthis will show you the panorama for this area.';
+					controlUI.title = 'Show the Street View available.\n\nOnce StreetView is enabled, when moving the cursor over a StreetView enabled road,\ntthis will show you the panorama for this area.';
 					controlDiv.appendChild(controlUI);
 
 					var controlText = document.createElement('div');
@@ -1671,7 +1713,8 @@ console.log(curr_dist_in_route + " - " + step);
 				panorama4 = new google.maps.StreetViewPanorama( document.getElementById('id_panorama4'), panorama_options );
 				map.setStreetView( panorama4 );
 
-				floating_panorama = new google.maps.StreetViewPanorama( document.getElementById('id_floating_panorama'), floating_panorama_options );
+				floating_panorama_1 = new google.maps.StreetViewPanorama( document.getElementById('id_floating_panorama_1'), floating_panorama_options );
+				floating_panorama_2 = new google.maps.StreetViewPanorama( document.getElementById('id_floating_panorama_2'), floating_panorama_options );
 
                 window.onresize = function(event) {
 					panorama_resize( );
@@ -1697,11 +1740,21 @@ console.log(curr_dist_in_route + " - " + step);
 							}
 							else {
 								if (result.links.length >= 1) {
+									dijit.byId('id_btn_map_pegman_layout').set( 'disabled', false );
 									heading = result.links[0].heading;
-									floating_panorama.setPov( { heading: heading, pitch: 1 } );
-									floating_panorama.setPosition(result.location.latLng);
+									floating_panorama_1.setPov( { heading: heading, pitch: 1 } );
+									floating_panorama_1.setPosition(result.location.latLng);
 									marker_browser_images_pos.setPosition(result.location.latLng);
-									dijit.byId("id_floating_panorama_pane").show();
+									dijit.byId("id_floating_panorama_pane_1").show();
+									if (dijit.byId('id_pegman_two_img').get('checked') && (result.links.length > 1)) {
+										heading = result.links[1].heading;
+										floating_panorama_2.setPov( { heading: heading, pitch: 1 } );
+										floating_panorama_2.setPosition(result.location.latLng);
+										dijit.byId("id_floating_panorama_pane_2").show();
+									}
+									else {
+										dijit.byId("id_floating_panorama_pane_2").hide();
+									}
 									domStyle.set( "td_controls_add_waypoint", "display", "" );
 									dijit.byId('id_btn_add_waypoint').set( 'disabled', false );
 								}
@@ -2298,6 +2351,7 @@ console.log("@@@");
 		dijit.byId('id_btn_pause').set( 'disabled', true );
 		dijit.byId('id_btn_stop').set( 'disabled', false );
 		dijit.byId('id_btn_map_pano_layout').set( 'disabled', false );
+		dijit.byId('id_btn_map_pegman_layout').set( 'disabled', true );
 
 		browse_images_mode = true;
 		prev_pano_id = "";
@@ -2840,7 +2894,9 @@ google.maps.event.clearInstanceListeners(panorama);
 		if ( streetViewLayer.getMap() == undefined )
 			return;
 	
-		dijit.byId("id_floating_panorama_pane").hide();
+		dijit.byId("id_floating_panorama_pane_1").hide();
+		dijit.byId("id_floating_panorama_pane_2").hide();
+		dijit.byId('id_btn_map_pegman_layout').set( 'disabled', true );
 		if ( timer_show_pano_on_mousemove != undefined ) {
 			clearTimeout(timer_show_pano_on_mousemove);
 			timer_show_pano_on_mousemove = undefined;
@@ -3167,6 +3223,7 @@ console.log("@@@");
 		dijit.byId('id_btn_pause').set( 'disabled', false );
 		dijit.byId('id_btn_stop').set( 'disabled', false );
 		dijit.byId('id_btn_map_pano_layout').set( 'disabled', false );
+		dijit.byId('id_btn_map_pegman_layout').set( 'disabled', true );
 
 		if ( step == undefined ) {
 			step     = dijit.byId('id_input_meters').get( 'value' );
@@ -3398,6 +3455,8 @@ console.log("@@@");
 	    	var step = localStorage.getItem("step");
 	    	if ( !step )
 	    		step = 150;
+	    	else
+	    		step = parseInt(step);
 	    	console.log( "  Restored step= " + step );
 	    	if ( step != null ) {
 	            dijit.byId('id_input_meters').set( 'intermediateChanges', false );
@@ -3408,6 +3467,8 @@ console.log("@@@");
 	    	var interval = localStorage.getItem("interval");
 	    	if ( !interval )
 	    		interval = 750;
+	    	else
+	    		interval = parseInt(interval);
 	    	console.log( "  Restored interval= " + interval );
 	    	if ( interval != null ) {
 	            dijit.byId('id_input_interval').set( 'intermediateChanges', false );
@@ -3420,6 +3481,8 @@ console.log("@@@");
 	    	map_pano_layout = localStorage.getItem("map_pano_layout");
 	    	if ( !map_pano_layout )
 	    		map_pano_layout = 1;
+	    	else
+	    		map_pano_layout = parseInt(map_pano_layout);
 	    	map_pano_layout = parse(map_pano_layout);
 	    	console.log( "  Restored map_pano_layout= " + map_pano_layout );
 			dijit.byId('btn_map_pano_layout_'+map_pano_layout).set('selected', true, false);
@@ -3428,6 +3491,8 @@ console.log("@@@");
 	    	console.log( "  Restored play_route_zoom_level= " + play_route_zoom_level );
 	    	if ( !play_route_zoom_level )
 	    		play_route_zoom_level = -1;
+	    	else
+	    		play_route_zoom_level = parseInt(play_route_zoom_level);
 	    	if ( play_route_zoom_level == -1 ) {
 				dijit.byId('id_check_play_route_zoom_level').set( 'checked', false, false );
 				dijit.byId('id_input_play_route_zoom_level').set( 'disabled', true, false );
@@ -3445,12 +3510,50 @@ console.log("@@@");
 	    	var route_thickness = localStorage.getItem("route_thickness");
 	    	if ( !route_thickness )
 	    		route_thickness = 3;
+	    	else
+	    		route_thickness = parseInt(route_thickness);
 	    	console.log( "  Restored route_thickness= " + route_thickness );
 	    	if ( route_thickness != null ) {
 	            dijit.byId('id_input_route_thickness').set( 'intermediateChanges', false );
 	            dijit.byId('id_input_route_thickness').set( 'value', parse(route_thickness), false );
 	            dijit.byId('id_input_route_thickness').set( 'intermediateChanges', true );
 	        }
+
+	    	var pegman_nb_img = localStorage.getItem("map_pegman_nb_img");
+	    	if ( !pegman_nb_img )
+	    		pegman_nb_img = 1;
+	    	else
+	    		pegman_nb_img = parseInt(pegman_nb_img);
+	    	console.log( "  Restored pegman_nb_img= " + pegman_nb_img );
+	    	switch (pegman_nb_img) {
+				case 1:
+				default:
+					dijit.byId('id_pegman_one_img').set('checked', true, false);
+					break;
+				case 2:
+					dijit.byId('id_pegman_two_img').set('checked', true, false);
+					break;
+			}
+
+	    	var pegman_img_size = localStorage.getItem("map_pegman_img_size");
+	    	if ( !pegman_img_size )
+	    		pegman_img_size = 1;
+	    	else
+	    		pegman_img_size = parseInt(pegman_img_size);
+	    	console.log( "  Restored pegman_img_size= " + pegman_img_size );
+	    	switch (pegman_img_size) {
+				case 1:
+				default:
+					dijit.byId('id_pegman_img_small').set('checked', true, false);
+					break;
+				case 2:
+					dijit.byId('id_pegman_img_medium').set('checked', true, false);
+					break;
+				case 3:
+					dijit.byId('id_pegman_img_large').set('checked', true, false);
+					break;
+			}
+			cb_map_pegman_img_size(pegman_img_size, false);
 
 	    	var google_maps_api_key = localStorage.getItem("id_google_maps_api_key");
 	    	if ( !google_maps_api_key )
@@ -3753,6 +3856,9 @@ console.log("@@@");
 		do_pause: function( ) { do_pause(); },
 		do_stop:  function( ) { do_stop(); },
 		do_add_waypoint:  function( ) { do_add_waypoint(); },
+
+		cb_map_pegman_nb_img:   function(nb_img) { cb_map_pegman_nb_img(nb_img); },
+		cb_map_pegman_img_size: function(size)   { cb_map_pegman_img_size(size); },
 
 		show_clear_place:  function( ) { show_clear_place(); },
 		add_place:    function(name, formatted_address) { add_place(name, formatted_address); },
