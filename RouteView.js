@@ -1029,7 +1029,7 @@ console.log(curr_dist_in_route + " - " + step);
 				var google_api = "";
 				console.log(location.hostname);
 				//if ( location.hostname == "127.0.0.1" )
-				//	google_api = "3.exp";
+				//	google_api = "weekly";
 				//else
 				google_api = "quarterly";
 				console.log(google_api);
@@ -1212,11 +1212,11 @@ console.log(curr_dist_in_route + " - " + step);
 		});
 	}
 	
-	function clear_place( ) {
+	function clear_place() {
 
 		console.log( search_places.length );
 		search_places.forEach( function(e) {
-//			console.log( e );
+			console.log( e );
 			e.setMap( null );
 			delete e;
 		})
@@ -1231,29 +1231,31 @@ console.log(curr_dist_in_route + " - " + step);
 
 		clear_place( );
 
-		var place_val = dijit.byId("id_place").get("value");
+		var place_val = document.getElementById("id_place").value;
 		console.log( place_val );
 		var infowindow = new google.maps.InfoWindow();
 		
-		function createMarker( place ) {
-			var placeLoc = place.geometry.location;
+		function createMarker(place) {
 			var marker = new google.maps.Marker({
 				map: map,
 				position: place.geometry.location,
-				icon: "icons/marker_flag.png"
+				LatLng: place.geometry.location,
+				icon: "icons/marker_flag.png",
+				title: place.name + "\n" + place.vicinity
 			});
 			search_places.push( marker );
 
-			google.maps.event.addListener(marker, 'click', function() {
-				infowindow.setContent( place.name + "<br>" + place.vicinity );
-			console.log( place );
-				infowindow.open(map, this);
+  			google.maps.event.addListener(marker, 'click', function() {
+				infowindow.setContent(place.name + "<BR>" + place.vicinity + "<BR><BR><a href='#' onclick='require([\"RouteView.js\"], function(s) { s.add_place(\"" + escape(place.name) + "\", \"" + escape(place.vicinity)+"\"); })'>Add this place at the end of the route</a>");
+				infowindow.setPosition(place.geometry.location);
+				infowindow.open(map, marker);
 			});
 		}
       
       	function callback(results, status) {
 			if (status === google.maps.places.PlacesServiceStatus.OK) {
 				for (var i = 0; i < results.length; i++) {
+					console.log(results[i]);
 					createMarker(results[i]);
 				}
 			}
@@ -1269,14 +1271,31 @@ console.log(curr_dist_in_route + " - " + step);
 
 		var service = new google.maps.places.PlacesService(map);
         service.nearbySearch({
-          location: map.getCenter(),
-          radius: radius,
-          name: [place_val]
+			location: map.getCenter(),
+			radius: radius,
+			name: [place_val]
         }, callback);
 		
     	var dlg = dijit.byId('id_places_dlg');
     	dlg.closeDropDown( false );
 		
+	}
+
+	function add_place(name, vicinity) {
+		console.log("name="+unescape(name));
+		console.log("vicinity="+unescape(vicinity));
+		var first_hidden = find_first_hidden( );
+		if ( first_hidden != (MAX_NB_WAYPOINTS + 2) ) {
+			(function ( waypoint_index ) {
+				console.log( "waypoint_index=" + waypoint_index );
+				var new_nb_waypoints = waypoint_index;
+				cb_click_btn_add( new_nb_waypoints )
+				var id = "id_wp_" + waypoint_index;
+				dijit.byId( id ).set( "value", unescape(name)+" , " +unescape(vicinity) );
+				update_btns_remove_up_down( );
+				do_route( true );
+			})( first_hidden );
+		}
 	}
 
 	function decode_url_params() {
@@ -3728,6 +3747,7 @@ console.log("@@@");
 
 		clear_place:  function( ) { clear_place(); },
 		show_place:   function( ) { show_place(); },
+		add_place:    function(name, vicinity) { add_place(name, vicinity); },
 
 		do_save_gpx: 		 function( ) { do_save_gpx(); },
 		do_create_gmaps_url: function( ) { do_create_gmaps_url(); },

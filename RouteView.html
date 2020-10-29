@@ -15,19 +15,12 @@
         	content="Allows a virtual ride over a Google Maps route using Street View. Step (in meters) and Refresh Rate are configurable. Street View Player. Simulate your Driving Route with this Google Map Web Application. Virtual Ride using Street View.">
         <meta name="revisit-after" content="4 hours">
 
-<!--
- 		<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.13.0/dijit/themes/claro/claro.css" media="screen" >
- 		<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.13.0/dojox/layout/resources/FloatingPane.css" media="screen" >
--->
- 		<link rel="stylesheet" href="dojo-release-1.14.2/dijit/themes/claro/claro.css" media="screen" >
- 		<link rel="stylesheet" href="dojo-release-1.14.2/dojox/layout/resources/FloatingPane.css" media="screen" >
+ 		<link rel="stylesheet" href="dojo-release-1.16.3/dijit/themes/claro/claro.css" media="screen" >
+ 		<link rel="stylesheet" href="dojo-release-1.16.3/dojox/layout/resources/FloatingPane.css" media="screen" >
 
 		<script src="https://apis.google.com/js/client.js?onload=load"></script>
 
-<!--
-		<script src="//ajax.googleapis.com/ajax/libs/dojo/1.13.0/dojo/dojo.js"
--->
-		<script src="dojo-release-1.14.2/dojo/dojo.js"
+		<script src="dojo-release-1.16.3/dojo/dojo.js"
             data-dojo-config="isDebug: true, async: true, parseOnLoad: true">
         </script>
         
@@ -37,22 +30,22 @@
 				"dijit/layout/TabContainer", 
 				"dijit/layout/ContentPane", 
 				"dijit/Dialog",
-	            "dijit/form/HorizontalSlider", 
-	            "dijit/form/HorizontalRuleLabels", 
-	            "dijit/form/HorizontalRule", 
-	            "dijit/form/Button",
-        		"dijit/form/TextBox", 
-        		"dijit/Tooltip", 
-        		"dijit/Fieldset", 
-        		"dijit/form/DropDownButton",
-        		"dijit/form/CheckBox",
-        		"dijit/form/DataList",
-        		"dijit/form/ComboBox",
-        		"dijit/form/Select",
-        		"dijit/TooltipDialog",
+				"dijit/form/HorizontalSlider", 
+				"dijit/form/HorizontalRuleLabels", 
+				"dijit/form/HorizontalRule", 
+				"dijit/form/Button",
+				"dijit/form/TextBox", 
+				"dijit/Tooltip", 
+				"dijit/Fieldset", 
+				"dijit/form/DropDownButton",
+				"dijit/form/CheckBox",
+				"dijit/form/DataList",
+				"dijit/form/ComboBox",
+				"dijit/form/Select",
+				"dijit/TooltipDialog",
 				"dojox/widget/Standby",
 				"dojox/layout/FloatingPane",
-        		"dojo/domReady!"]
+				"dojo/domReady!"]
         	);
         </script>
             
@@ -227,22 +220,41 @@
 																	Place:&nbsp;
 																</td>
 																<td>
-																	<select data-dojo-type="dijit/form/ComboBox" id="id_place" name="id_place" maxlength="80">
-																		<option selected>Gas Stations</option>
-																		<option>Fast Food</option>
-																		<option>McDonald's</option>
-																		<option>Chick-fil-A</option>
-																		<option>Wendy's</option>
-																		<option>Subway Restaurant</option>
-																		<option>Bojangles</option>
-																		<option>Five Guys</option>
-																		<option>Panera Bread</option>
-																		<option>Sheetz</option>
-																		<option>Pilot Flying J</option>
-																		<option>TA Petro</option>
-																		<option>Harley Davidson Dealerships</option>
-																		<option>Indian Dealerships</option>
-																		<option>Chevrolet Dealerships</option>
+																	<input type="test" value="Harley Davidson Dealerships" 
+																		dojoType="dijit.form.TextBox" trim="true" id="id_place" maxlength="64" style="width: 30em;" />
+																</td>
+															</tr>
+															<tr>
+																<td>
+																</td>
+																<td>
+																	<select style="width:350px;" tabindex="5" id="id_places" maxlength="80"
+																	 onchange="document.getElementById('id_place').value = this.value" >
+																		<optgroup label="Gas Stations">
+																			<option>Gas Stations</option>
+																			<option>Sheetz</option>
+																			<option>Pilot Flying J</option>
+																			<option>TA Petro</option>
+																		</optgroup>
+																		<optgroup label="Food">
+																			<option>Fast Food</option>
+																			<option>McDonald's</option>
+																			<option>Chick-fil-A</option>
+																			<option>Wendy's</option>
+																			<option>Subway Restaurant</option>
+																			<option>Bojangles</option>
+																			<option>Five Guys</option>
+																			<option>Panera Bread</option>
+																		</optgroup>
+																		<optgroup label="Parks">
+																			<option>State Parks</option>
+																			<option>National Parks</option>
+																		</optgroup>
+																		<optgroup label="Dealerships">
+																			<option selected>Harley Davidson Dealerships</option>
+																			<option>Indian Dealerships</option>
+																			<option>Chevrolet Dealerships</option>
+																		</optgroup>
 																	</select>
 																</td>
 															</tr>

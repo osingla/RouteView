@@ -85,6 +85,8 @@ google.maps.LatLng.prototype.lngRadians = function() {
  
 google.maps.LatLng.prototype.equals = function(otherLatLng) {
   var EQUALS_THRESHOLD = 0.001;
+  if (otherLatLng == null)
+    return false;
   return (this.distanceFrom(otherLatLng) < EQUALS_THRESHOLD);
 }
  
