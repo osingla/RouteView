@@ -1246,7 +1246,11 @@ console.log(curr_dist_in_route + " - " + step);
 			search_places.push( marker );
 
   			google.maps.event.addListener(marker, 'click', function() {
-				infowindow.setContent(place.name + "<BR>" + place.vicinity + "<BR><BR><a href='#' onclick='require([\"RouteView.js\"], function(s) { s.add_place(\"" + escape(place.name) + "\", \"" + escape(place.vicinity)+"\"); })'>Add this place at the end of the route</a>");
+				if (place.photos.length == 0)
+					infowindow.setContent(place.name + "<BR>" + place.vicinity + "<BR><BR><a href='#' onclick='require([\"RouteView.js\"], function(s) { s.add_place(\"" + escape(place.name) + "\", \"" + escape(place.vicinity)+"\"); })'>Add this place at the end of the route</a><br>");
+				else
+					//console.log(place.photos[0].getUrl());
+					infowindow.setContent(place.name + "<BR>" + place.vicinity + "<BR><BR><a href='#' onclick='require([\"RouteView.js\"], function(s) { s.add_place(\"" + escape(place.name) + "\", \"" + escape(place.vicinity)+"\"); })'>Add this place at the end of the route</a><br><br><img src='"+place.photos[0].getUrl()+"' style='width:320px;height:240px'><br>");
 				infowindow.setPosition(place.geometry.location);
 				infowindow.open(map, marker);
 			});
