@@ -264,15 +264,9 @@
 																</td>
 															</tr>
 															<tr>
-																<td valign="middle" align="center" >
-																	<button dojoType="dijit.form.Button" type="button" id="id_btn_clear_place" 
-																			onclick='require(["RouteView.js"], function( s ) { s.clear_place(); })'>
-																		Clear
-																	</button>
-																</td>
-																<td valign="middle" align="center" >
-																	<button dojoType="dijit.form.Button" type="button" id="id_btn_show_place" 
-																			onclick='require(["RouteView.js"], function( s ) { s.show_place(); })'>
+																<td colspan="2" valign="middle" align="center" >
+																	<button dojoType="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" id="id_btn_show_place" 
+																			onclick='require(["RouteView.js"], function( s ) { s.show_clear_place(); })'>
 																		Show
 																	</button>
 																</td>

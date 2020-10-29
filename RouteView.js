@@ -1212,11 +1212,20 @@ console.log(curr_dist_in_route + " - " + step);
 		});
 	}
 	
+	function show_clear_place() {
+        var do_show  = dijit.byId('id_btn_show_place').get( 'checked' );
+		if (do_show)
+			show_place();
+		else
+			clear_place();
+
+	}
+
 	function clear_place() {
 
 		console.log( search_places.length );
 		search_places.forEach( function(e) {
-			console.log( e );
+			//console.log( e );
 			e.setMap( null );
 			delete e;
 		})
@@ -1241,16 +1250,16 @@ console.log(curr_dist_in_route + " - " + step);
 				position: place.geometry.location,
 				LatLng: place.geometry.location,
 				icon: "icons/marker_flag.png",
-				title: place.name + "\n" + place.vicinity
+				title: place.name + "\n" + place.formatted_address
 			});
 			search_places.push( marker );
 
   			google.maps.event.addListener(marker, 'click', function() {
 				if (place.photos.length == 0)
-					infowindow.setContent(place.name + "<BR>" + place.vicinity + "<BR><BR><a href='#' onclick='require([\"RouteView.js\"], function(s) { s.add_place(\"" + escape(place.name) + "\", \"" + escape(place.vicinity)+"\"); })'>Add this place at the end of the route</a><br>");
+					infowindow.setContent(place.name + "<BR>" + place.formatted_address + "<BR><BR><a href='#' onclick='require([\"RouteView.js\"], function(s) { s.add_place(\"" + escape(place.name) + "\", \"" + escape(place.formatted_address)+"\"); })'>Add this place at the end of the route</a><br>");
 				else
 					//console.log(place.photos[0].getUrl());
-					infowindow.setContent(place.name + "<BR>" + place.vicinity + "<BR><BR><a href='#' onclick='require([\"RouteView.js\"], function(s) { s.add_place(\"" + escape(place.name) + "\", \"" + escape(place.vicinity)+"\"); })'>Add this place at the end of the route</a><br><br><img src='"+place.photos[0].getUrl()+"' style='width:320px;height:240px'><br>");
+					infowindow.setContent(place.name + "<BR>" + place.formatted_address + "<BR><BR><a href='#' onclick='require([\"RouteView.js\"], function(s) { s.add_place(\"" + escape(place.name) + "\", \"" + escape(place.formatted_address)+"\"); })'>Add this place at the end of the route</a><br><br><img src='"+place.photos[0].getUrl()+"' style='width:320px;height:240px'><br>");
 				infowindow.setPosition(place.geometry.location);
 				infowindow.open(map, marker);
 			});
@@ -1258,26 +1267,20 @@ console.log(curr_dist_in_route + " - " + step);
       
       	function callback(results, status) {
 			if (status === google.maps.places.PlacesServiceStatus.OK) {
+				console.log("found: "+results.length);
 				for (var i = 0; i < results.length; i++) {
-					console.log(results[i]);
+					//console.log(results[i]);
 					createMarker(results[i]);
 				}
 			}
 		}
 
-		var radius = undefined;
 		var bounds = map.getBounds();
-		var center = map.getCenter();
-		if ( bounds && center ) {
-			var ne = bounds.getNorthEast();
-			var radius = google.maps.geometry.spherical.computeDistanceBetween(center, ne);
-		}
 
 		var service = new google.maps.places.PlacesService(map);
-        service.nearbySearch({
-			location: map.getCenter(),
-			radius: radius,
-			name: [place_val]
+        service.textSearch({
+			bounds: bounds,
+			query: place_val
         }, callback);
 		
     	var dlg = dijit.byId('id_places_dlg');
@@ -1285,9 +1288,9 @@ console.log(curr_dist_in_route + " - " + step);
 		
 	}
 
-	function add_place(name, vicinity) {
+	function add_place(name, formatted_address) {
 		console.log("name="+unescape(name));
-		console.log("vicinity="+unescape(vicinity));
+		console.log("formatted_address="+unescape(formatted_address));
 		var first_hidden = find_first_hidden( );
 		if ( first_hidden != (MAX_NB_WAYPOINTS + 2) ) {
 			(function ( waypoint_index ) {
@@ -1295,7 +1298,7 @@ console.log(curr_dist_in_route + " - " + step);
 				var new_nb_waypoints = waypoint_index;
 				cb_click_btn_add( new_nb_waypoints )
 				var id = "id_wp_" + waypoint_index;
-				dijit.byId( id ).set( "value", unescape(name)+" , " +unescape(vicinity) );
+				dijit.byId( id ).set( "value", unescape(name)+" , " +unescape(formatted_address) );
 				update_btns_remove_up_down( );
 				do_route( true );
 			})( first_hidden );
@@ -1682,7 +1685,9 @@ console.log(curr_dist_in_route + " - " + step);
 
         		google.maps.event.addListener( map, "dragend", function() {
         			console.log(this);
-        			console.log(this.position);
+					var do_show  = dijit.byId('id_btn_show_place').get( 'checked' );
+					if (do_show)
+						show_place();
        			});
 
 				google.maps.event.addListener(map, "mousemove", function(evt) {
@@ -3749,9 +3754,8 @@ console.log("@@@");
 		do_stop:  function( ) { do_stop(); },
 		do_add_waypoint:  function( ) { do_add_waypoint(); },
 
-		clear_place:  function( ) { clear_place(); },
-		show_place:   function( ) { show_place(); },
-		add_place:    function(name, vicinity) { add_place(name, vicinity); },
+		show_clear_place:  function( ) { show_clear_place(); },
+		add_place:    function(name, formatted_address) { add_place(name, formatted_address); },
 
 		do_save_gpx: 		 function( ) { do_save_gpx(); },
 		do_create_gmaps_url: function( ) { do_create_gmaps_url(); },
