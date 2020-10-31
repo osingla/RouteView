@@ -16,6 +16,7 @@
         <meta name="revisit-after" content="4 hours">
 
  		<link rel="stylesheet" href="dojo-release-1.16.3/dijit/themes/claro/claro.css" media="screen" >
+ 		<link rel="stylesheet" href="dojo-release-1.16.3/dijit/themes/tundra/tundra.css" media="screen" >
  		<link rel="stylesheet" href="dojo-release-1.16.3/dojox/layout/resources/FloatingPane.css" media="screen" >
 
 		<script src="https://apis.google.com/js/client.js?onload=load"></script>
@@ -137,8 +138,8 @@
 							<br>
 							Once you you have a key, select "Configuration", then put you key in "My Google Maps API key."
 							<br>
-							Once this is done, select "Configuration", then "Save Settings", and then reload the page.
-							<br>
+                            Your API keys needs to support these APIs:<br>
+							Directions API - Places API - Geocoding API - MAPS Javascrip API<br>
 							<br>
 						</td>
 					</tr>
@@ -312,49 +313,6 @@
 						                            <div data-dojo-type="dijit/TooltipDialog">
 
 									                    <div style="width:100%" align="center">
-															
-															<table cellspacing="0" cellpadding="0" style="width:100%; white-space: nowrap" >
-																<tr>
-																	<td>
-																		<div style="width:100%" align="left">
-																			<button data-dojo-type="dijit/form/ToggleButton" data-dojo-props="iconClass:'dijitCheckBoxIcon', checked: false" style="font-size: 100%;"
-																					onClick='require(["RouteView.js"], function( s ) { s.cb_play_route_zoom_level(); })' id="id_check_play_route_zoom_level" >
-																				Route View Zoom Level
-																			 </button>
-																			<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_check_play_route_zoom_level',position:['above-centered'],showDelay:750,hideDelay:0">
-																				Apply when starting to play the route.<br><br>
-																				When selected, this zoom will apply.<br>
-																				When not selected, the zoom will be automatically set so the whole route is shown on the map.
-																			</div>
-																		</div>
-																	</td>
-																	<td>
-																		<div style="width:100%" align="center">
-																			<div id="id_input_play_route_zoom_level" disabled
-																				style="width:200px;"
-																				name="horizontalSlider"
-																				data-dojo-type="dijit/form/HorizontalSlider"
-																				data-dojo-props="value:3,
-																				minimum: 9,
-																				maximum:15,
-																				discreteValues:7,
-																				intermediateChanges:true,
-																				showButtons:true"
-																				onChange='require(["RouteView.js"], function( s ) { s.cb_play_route_zoom_level_changed(); })'>
-																			</div>
-																		</div>
-																	</td>
-																	<td>
-																		<b id="id_val_play_route_zoom_level"></b>
-																	</td>
-																</tr>
-															</table>
-															
-							                       		</div>
-							                       		
-							                       		<hr>
-
-									                    <div style="width:100%" align="center">
 									                        <span>Route Thickness : <span></span><b id="id_route_thickness">3</b> pixels</span></span><br>
 									                        <div id="id_input_route_thickness"
 									                            style="width:400px;"
@@ -369,7 +327,14 @@
 										                        onChange='require(["RouteView.js"], function( s ) { s.cb_route_thickness_changed(); })'>
 									                        </div>
 									                    </div>
+														<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_input_route_thickness',position:['below-centered'],showDelay:750,hideDelay:0" class='tooltip-custom' >
+															<div style="color:darkred">
+																If you change the route tickness, this will be used next time you request a route.
+															</div>
+														</div>
 									
+							                       		<hr>
+
 									                    <div style="width:100%" align="center">
 
 															<table>
@@ -396,7 +361,7 @@
 										                    		
 										                    		<td>
 													                    <div align="center">
-													                        <div data-dojo-type="dijit/form/DropDownButton" >
+													                        <div data-dojo-type="dijit/form/DropDownButton" id='id_btn_google_maps_api_key'>
 													                            <span>My Google Maps API key</span>
 													                            <div data-dojo-type="dijit/TooltipDialog">
 																					<table>
@@ -406,7 +371,10 @@
 																							</td>
 																							<td>
 																								<input type="password" name="google_maps_api_key" value="" 
-																								    dojoType="dijit.form.TextBox" trim="true" id="id_google_maps_api_key" maxlength="64" style="width: 30em;" type="hidden" />
+																								    dojoType="dijit.form.TextBox" trim="true" id="id_google_maps_api_key" maxlength="64" style="width: 30em;" type="hidden" 
+																									onfocus='this.old_value=this.value'
+																									onChange='require(["RouteView.js"], function( s ) { s.cb_change_google_maps_api_key(); });; this.old_value=this.value;' >
+																								    />
 																							</td>
 																						</tr>
 																						<tr>
@@ -425,18 +393,36 @@
 													                            </div>
 													                        </div>
 												                        </div>
+																		<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_google_maps_api_key',position:['below-centered'],showDelay:750,hideDelay:0">
+																			<div style="color:darkred">
+																				Without a valid Google Maps API, this program is not usable!<br><br>
+																				Beginning on June 11, 2018, Google requires to use a valid API key<br>
+																				for all Google Maps projects. Since I can not afford to have my personal<br>
+																				key to be used here by everbody using this free program, your only option is<br>
+																				to request a google maps api key and use it here.
+																			</div>
+																		</div>
 										                    		</td>
 										                    		
 										                    		<td>
 													                    <div align="center">
-													                        <div data-dojo-type="dijit/form/DropDownButton" >
+													                        <div data-dojo-type="dijit/form/DropDownButton" id="id_btn_my_email">
 													                            <span>My EMAIL</span>
 													                            <div data-dojo-type="dijit/TooltipDialog">
 																					<input type="text" name="my_email" value=""
-				 																        dojoType="dijit.form.TextBox" trim="true" id="id_my_email" maxlength="64" />
+				 																        dojoType="dijit.form.TextBox" trim="true" id="id_my_email" maxlength="64" 
+																						onfocus='this.old_value=this.value'
+																						onChange='require(["RouteView.js"], function(s) { s.cb_change_email(); }); this.old_value=this.value;'
+				 																        />
 													                            </div>
 													                        </div>
 												                        </div>
+																		<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_my_email',position:['below-centered'],showDelay:750,hideDelay:0">
+																			<div style="color:darkred">
+																				If an Email is provided here, it is used to send the itinary <br>
+																				using the option 'Create Google Maprs URL'
+																			</div>
+																		</div>
 										                    		</td>
 										                    		
 										                    	</tr>
@@ -447,17 +433,25 @@
 									
 									                    <div style="width:100%" align="center">
 									
-									                        <div data-dojo-type="dijit/form/DropDownButton" >
-									                            <span>Set Starting Position</span>
+									                        <div data-dojo-type="dijit/form/DropDownButton" id="btn_addr_for_orig" >
+									                            <span >Set Starting Position</span>
 									                            <div data-dojo-type="dijit/TooltipDialog">
 																	<input type="text" name="addr_for_orig" value=""
 																		   dojoType="dijit.form.TextBox"
 																			trim="true" id="id_addr_for_orig" maxlength="80"
+																			onfocus='this.old_value=this.value'
+																			onChange='require(["RouteView.js"], function(s) { s.cb_change_starting_position(); }); this.old_value=this.value;'
 																			propercase="true" />
 									                            </div>
 									                        </div>                        
+															<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'btn_addr_for_orig',position:['below-centered'],showDelay:750,hideDelay:0">
+																<div style="color:darkred">
+																	This allows you to setup an address (usually your home address).<br>
+																	When you start then this application, Google Maps will show this address.
+																</div>
+															</div>
 									
-									                        <div data-dojo-type="dijit/form/DropDownButton" data-dojo-props='autoWidth:false'>
+									                        <div data-dojo-type="dijit/form/DropDownButton" data-dojo-props='autoWidth:false' id='btn_id_autocomplete_settings'>
 									                            <span>Autocomplete Settings</span>
 									                            <div data-dojo-type="dijit/TooltipDialog">
 									                            	<table>
@@ -466,7 +460,8 @@
 									                            				Type Restriction:&nbsp;
 									                            			</td>
 															                <td style="text-align:left; vertical-align:middle">
-									                                            <select id="id_autocomplete_restriction" value="">
+									                                            <select id="id_autocomplete_restriction" value=""
+																					onChange='require(["RouteView.js"], function(s) { s.cb_change_autocomplete_type_restriction(); });'>
 					                                                                <option value="">None</option> 
 					                                                                <option disabled>--------------------------------</option>
 					                                                                <option value="geocode">geocode</option> 
@@ -483,7 +478,8 @@
 									                            				Country:&nbsp;
 									                            			</td>
 															                <td style="text-align:left; vertical-align:middle">
-									                                            <select id="id_autocomplete_restrict_country" value="">
+									                                            <select id="id_autocomplete_restrict_country" value=""
+																					onChange='require(["RouteView.js"], function(s) { s.cb_change_autocomplete_restrict_country(); });'>
 					                                                                <option value="">All</option> 
 					                                                                <option disabled>--------------------------------</option>
 					                                                                <optgroup label="North America"> 
@@ -525,16 +521,18 @@
 									                            	<br>
 									                            </div>
 									                        </div>
+															<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'btn_id_autocomplete_settings',position:['below-centered'],showDelay:750,hideDelay:0">
+																<div style="color:darkred">
+																	This allows you to define a Country and Type Restriction<br>
+																	(such as address, city, region, etc.) that will be used<br>
+																	for Autocomplete operation.<br><br>
+																	<b>You will need to reload the page to use the new settings.</b>
+																</div>
+															</div>
 									                        
 									                        <hr>
 									                        <table>
 									                            <tr>
-									                            	<td>
-													                    <button dojoType="dijit.form.Button" type="button" id="id_btn_save_settings" 
-													                    		onclick='require(["RouteView.js"], function( s ) { s.save_settings(); })'>
-													                    	Save Settings
-													                    </button>
-									                            	</td>
 									                            	<td>
 													                    <button dojoType="dijit.form.Button" type="button" id="id_btn_clear_settings" 
 													                    		onclick='require(["RouteView.js"], function( s ) { s.clear_settings(); })'>
@@ -543,6 +541,12 @@
 									                            	</td>
 									                            </tr>
 									                        </table>
+															<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_clear_settings',position:['below-centered'],showDelay:750,hideDelay:0">
+																<div style="color:darkred">
+																	This will clear all your settings!<br>
+																	You will need to reload the page after your clear the settings.
+																</div>
+															</div>
 									                        
 									                        <hr>
 									                        <table>
@@ -564,6 +568,18 @@
 									                            </tr>
 									                        </table>
 									
+															<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_create_gmaps_url',position:['below-centered'],showDelay:750,hideDelay:0">
+																<div style="color:darkred">
+																	This creates a URL which will use Google Maps with the current route.
+																<div>
+															</div>
+															<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_create_long_url',position:['below-centered'],showDelay:750,hideDelay:0">
+																<div style="color:darkred">
+																	This creates a URL which will use StreetViewPlayer with the current route.<br>
+																	You can use this feature to bookmark a specific route.
+																<div>
+															</div>
+
 									                    </div>
 
 						                            </div>
@@ -607,10 +623,13 @@
 				                <div style="width:100%" align="center">
 				
 				                    <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_save_gpx',position:['below-centered'],showDelay:750,hideDelay:0">
-				                        Once a route has been defined, this option allows you to create a GPX file (GPS exchange format).<br>
-				                        This file can then be uploaded to a GPS device (for instance a Garmin).<br><br>
-				                        This feature is highly untested, and provided at your own risk!<br><br>
-				                        Only tested with my Garmin Nuvi 2689LMT 6" that I use on my RoadKing.
+										<div style="color:darkred">
+											Once a route has been defined, this option allows you to create and save a GPX file<br>
+											(GPX stamds for: GPS exchange format).<br><br>
+											This file can then be uploaded to a GPS device (for instance a Garmin).<br><br>
+											<i>This feature is mostly untested, and provided at your own risk!<br>
+											I only tested it with my Garmin Zumo XT that I use on my RoadKing.</i>
+										<div>
 				                    </div>
 				
 				                </div>

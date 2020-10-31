@@ -381,7 +381,7 @@ html, body {
 }
 
 .claro .dijitTooltipContainer {
-    background: Khaki  !important;
+    background: Khaki;
 }
 
 .gm-style-mtc {
@@ -396,3 +396,4 @@ html, body {
   background-color: #ccc;
   margin: 15px;
 }
+

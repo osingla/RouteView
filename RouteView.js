@@ -189,13 +189,17 @@ define( function( m ) {
 					bearing = polyline.Bearing( iad );
 					if (bearing == undefined)
 						bearing = prev_bearing;
-					delta0 = Math.abs(bearing - result.links[0].heading);
-					delta1 = Math.abs(bearing - result.links[1].heading);
-					if (delta0 < delta1)
-						xbearing = result.links[0].heading;
-					else
-						xbearing = result.links[1].heading;
-//					console.log( pano_cnt + " -> " + Math.round(curr_dist_in_route*100)/1000 + " / " + Math.round(eol*100)/100 + " --> " + Math.round(bearing*100)/100 + " - " + Math.round(xbearing*100)/100 + " (" + Math.round(result.links[0].heading*100)/100 + " , " + Math.round(result.links[1].heading*100)/100 + ")");
+/*
+					if (result.links.length > 1) {
+						delta0 = Math.abs(bearing - result.links[0].heading);
+						delta1 = Math.abs(bearing - result.links[1].heading);
+						if (delta0 < delta1)
+							xbearing = result.links[0].heading;
+						else
+							xbearing = result.links[1].heading;
+						console.log( pano_cnt + " -> " + Math.round(curr_dist_in_route*100)/1000 + " / " + Math.round(eol*100)/100 + " --> " + Math.round(bearing*100)/100 + " - " + Math.round(xbearing*100)/100 + " (" + Math.round(result.links[0].heading*100)/100 + " , " + Math.round(result.links[1].heading*100)/100 + ")");
+					}
+*/
 					if (bearing != undefined) {
 						(function ( ) {
 							panorama.addListener('pano_changed', function() {
@@ -305,8 +309,6 @@ define( function( m ) {
 			map.setCenter( polylines[curr_leg].getPath().getAt(0) );
 			map.fitBounds( legs_bounds[curr_leg] );
 		}
-
-		var check_play_route_zoom_level = dijit.byId('id_check_play_route_zoom_level').get( 'checked' );
 
        	timer_animate = setTimeout( function() { cb_animate(50); }, 5 );
 
@@ -802,35 +804,38 @@ define( function( m ) {
 
     	require(["dijit/Dialog", "dojo/domReady!"], function(Dialog){
 
-			var d =  message + "<br>" + 
-				"<br>" +
-				"<p><textarea readonly rows=8 cols=120 class='js-copytextarea' style='width:100%'>" + text + "</textarea></p>" +
-				"<br>" +
-				"<hr>" +
-				"<br>" +
-    			"<div align='right'>";
-    		if (email) {
-				d += "  <button dojoType='dijit/form/Button' type='button' ";
-				if ( my_email != "" )
-					d += " onclick='require([\"RouteView.js\"], function( s ) { s.do_email_gmaps_url(); })'";
-				else
-					d += " disabled";
-				d += "  >Email itinary to ...</button>";
-			}
-    		d += "  <button dojoType='dijit/form/Button' type='button' onclick='require([\"RouteView.js\"], function( s ) { s.cb_copy_long_url_and_new_tab(); dlg_copy_text.hide(); })'>New Tab or Window</button>" +
-				 "  <button dojoType='dijit/form/Button' type='button' onclick='require([\"RouteView.js\"], function( s ) { s.cb_copy_long_url(); dlg_copy_text.hide(); })'>Copy to Clipboard</button>" +
-    			 "  <button dojoType='dijit/form/Button' type='button' onclick='dlg_copy_text.hide()'>Cancel</button>" +
-    			 "</div>";
+			if (typeof(dlg_copy_text) == 'undefined') {
+				var d =  message + "<br>" + 
+					"<br>" +
+					"<p><textarea readonly rows=8 cols=120 class='js-copytextarea' style='width:100%' id='text_route_url'></textarea></p>" +
+					"<br>" +
+					"<hr>" +
+					"<br>" +
+					"<div align='right'>";
+				if (email) {
+					d += "  <button dojoType='dijit/form/Button' type='button' ";
+					if ( my_email != "" )
+						d += " onclick='require([\"RouteView.js\"], function( s ) { s.do_email_gmaps_url(); })'";
+					else
+						d += " disabled";
+					d += "  >Email itinary to ...</button>";
+				}
+				d += "  <button dojoType='dijit/form/Button' type='button' onclick='require([\"RouteView.js\"], function( s ) { s.cb_copy_long_url_and_new_tab(); dlg_copy_text.hide(); })'>New Tab or Window</button>" +
+					 "  <button dojoType='dijit/form/Button' type='button' onclick='require([\"RouteView.js\"], function( s ) { s.cb_copy_long_url(); dlg_copy_text.hide(); })'>Copy to Clipboard</button>" +
+					 "  <button dojoType='dijit/form/Button' type='button' onclick='dlg_copy_text.hide(); '>Cancel</button>" +
+					 "</div>";
 
-    		dlg_copy_text = new Dialog({
-    	        title: title,
-    	        closable: false,
-    	        duration:250,
-    	        content: d,
-    	        style: "min-width:450px; min-heigh:350px"
-    	    });
+				dlg_copy_text = new Dialog({
+					title: title,
+					closable: false,
+					duration:250,
+					content: d,
+					style: "min-width:450px; min-heigh:350px"
+				});
+			}
     		
     		dlg_copy_text.show();
+			document.getElementById('text_route_url').innerHTML = text;
     	});
     }
 
@@ -854,6 +859,8 @@ define( function( m ) {
 	function cb_map_pegman_nb_img(nb_img) {
 		console.log("pegman_nb_img="+nb_img);
 		localStorage.setItem("map_pegman_nb_img", nb_img);
+    	var dlg = dijit.byId('id_btn_map_pegman_layout');
+    	dlg.closeDropDown( false );
 	}
     
 	function cb_map_pegman_img_size(size, set) {
@@ -2548,39 +2555,34 @@ google.maps.event.clearInstanceListeners(panorama);
 
     function cb_interval_changed( ) {
     	interval = dijit.byId('id_input_interval').get( 'value' );
-//    	console.log("interval = " + interval);
-        document.getElementById("id_interval").innerHTML = interval;
+    	console.log("interval = " + interval);
+    	if (interval == 10000) {
+			document.getElementById("id_interval").innerHTML = "XStep by step";
+			document.getElementById("id_interval_msec").innerHTML = "X";
+		} 
+		else {
+			document.getElementById("id_interval").innerHTML = interval;
+			document.getElementById("id_interval_msec").innerHTML = " Ymilliseconds";
+		}
         save_settings( true );
     }
 
-	function cb_play_route_zoom_level( ) {
-        var is_play_route_zoom_level = dijit.byId('id_check_play_route_zoom_level').get('checked');
-    	console.log( "is_play_route_zoom_level = " + is_play_route_zoom_level );
-		dijit.byId('id_input_play_route_zoom_level').set( 'disabled', (is_play_route_zoom_level) ? false : true );
-        document.getElementById("id_val_play_route_zoom_level").style.display = (is_play_route_zoom_level) ? "" : "None";
-        save_settings( false );
-	}
-
-	function cb_play_route_zoom_level_changed( ) {
-    	play_route_zoom_level = dijit.byId('id_input_play_route_zoom_level').get( 'value' );
-    	console.log( "play_route_zoom_level = " + play_route_zoom_level );
-		document.getElementById("id_val_play_route_zoom_level").innerHTML = play_route_zoom_level;
-		save_settings( false );
-	}
-    
 	function cb_route_thickness_changed( ) {
     	route_thickness = dijit.byId('id_input_route_thickness').get( 'value' );
+    	console.log( "  route_thickness= " + route_thickness );
         document.getElementById("id_route_thickness").innerHTML = route_thickness;
-		directions_renderer.setOptions( { polylineOptions: { strokeColor: route_color, strokeWeight: route_thickness } } ); 
+    	localStorage.setItem( "route_thickness", parseInt(route_thickness) );
 	}
 
 	function cb_map_style_changed( ) {
     	require(["dojo/dom", "RouteViewMapStyles.js"], function(dom, s){
 			var map_style = dom.byId('id_map_style').value;
-			if ( map_style != "" )
+			if ( map_style != "" ) {
 				s.set_map_style( map, parseInt( map_style ) ); 
+				localStorage.setItem( "map_style", map_style );
+				console.log( "map_style= " + map_style );
+			}
 		})
-		save_settings( false );
 	}
 
     function cb_click_no_hwy( ) {
@@ -2825,7 +2827,6 @@ google.maps.event.clearInstanceListeners(panorama);
 	}
 
     function do_create_gmaps_url( ) {
-		
 		var url = build_gmaps_url();
 		if ( url != "" )
 			do_copy_message( "Google Maps URL", "Use this URL in Google Maps (desktop or mobile)", url, true );
@@ -3327,8 +3328,11 @@ console.log("@@@");
 		}
 	}
 	
-	function cb_copy_long_url_and_new_tab( ) {
-	
+	function cb_copy_long_url_and_new_tab() {
+
+		var url = document.getElementById('text_route_url').innerHTML;
+		console.log(url);
+
 		var copyTextarea = document.querySelector('.js-copytextarea');
 		copyTextarea.select();
 
@@ -3341,15 +3345,76 @@ console.log("@@@");
 			console.log('Oops, unable to copy');
 		}
 
-		url = _do_create_long_url();
+		// url = _do_create_long_url();
 		var redirectWindow = window.open(url, '_blank');
 		redirectWindow.location;		
 	}
 	
+	function cb_change_google_maps_api_key( ) {
+        var old_google_maps_api_key = dijit.byId('id_google_maps_api_key').get('old_value');
+        var google_maps_api_key = dijit.byId('id_google_maps_api_key').get('value');
+		console.log("old:"+old_google_maps_api_key);
+		console.log("new:"+google_maps_api_key);
+    	localStorage.setItem( "id_google_maps_api_key", google_maps_api_key );
+
+		if (old_google_maps_api_key != google_maps_api_key) {
+			require(["dijit/Dialog", "dojo/domReady!"], function(Dialog){
+				msg = 
+				"<div align='center'>" +
+				"  <b>You have provided a Google Maps API Key.</b><br>" +
+				"<br>This API key has been saved locally on your computer<br>(using HTML5 Web Storage).<br>" +
+				"<br><b>This page will need to be reloaded to use the new Google API Key.</b><br><br>" +
+				"</div>" +
+				"<div style='display: inline-block; text-align: right; width: 100%'>" +
+				"<button dojoType='dijit/form/Button' type='button' onclick='dlg_change_google_maps_api_key.hide();location.reload(true);'>Reload</button>" +
+				"<button dojoType='dijit/form/Button' type='button' onclick='dlg_change_google_maps_api_key.hide();'>Cancel</button>" +
+				"</div>";
+				dlg_change_google_maps_api_key = new Dialog({
+					title: "Google Maps API Key",
+					closable: false,
+					duration:250,
+					content: msg,
+					style: "min-width: 250px"
+				});
+				dlg_change_google_maps_api_key.show();
+			});
+		}
+	}
+
+	function cb_change_email() {
+		var old_my_email = dijit.byId('id_my_email').get('old_value');
+		var my_email = dijit.byId('id_my_email').get('value');
+		console.log("old:"+old_my_email);
+		console.log("new:"+my_email);
+		localStorage.setItem( "id_my_email", my_email );
+	}
+
+	function cb_change_starting_position() {
+		var old_addr_for_orig = dijit.byId('id_addr_for_orig').get('old_value');
+		var addr_for_orig = dijit.byId('id_addr_for_orig').get('value');
+		console.log("old:"+old_addr_for_orig);
+		console.log("new:"+addr_for_orig);
+		localStorage.setItem( "id_addr_for_orig", addr_for_orig );
+	}
+
+	function cb_change_autocomplete_type_restriction() {
+		require(["dojo/dom"], function(dom) {
+	    	var autocomplete_restriction = dom.byId('id_autocomplete_restriction').value;
+	    	localStorage.setItem( "autocomplete_restriction", autocomplete_restriction );
+	    	console.log( "  autocomplete_restriction= " + autocomplete_restriction );
+		});
+	}
+
+	function cb_change_autocomplete_restrict_country() {
+		require(["dojo/dom"], function(dom) {
+	    	var autocomplete_restrict_country = dom.byId('id_autocomplete_restrict_country').value;
+	    	localStorage.setItem( "autocomplete_restrict_country", autocomplete_restrict_country );
+	    	console.log( "  autocomplete_restrict_country= " + autocomplete_restrict_country );
+		});
+	}
+
 	function cb_hide_google_maps_api_key( ) {
-		
 		var visible = dijit.byId('id_show_google_maps_api_key').get( 'checked' );
-		console.log( visible );
 		document.getElementById("id_google_maps_api_key").type = (visible) ? "text" : "password";
 	}
 
@@ -3383,13 +3448,6 @@ console.log("@@@");
 	    	localStorage.setItem( "interval", interval );
 	    	console.log( "  interval= " + interval );
 
-			var check_play_route_zoom_level = dijit.byId('id_check_play_route_zoom_level').get( 'checked' );
-			var play_route_zoom_level = -1;
-			if ( check_play_route_zoom_level )
-				play_route_zoom_level = dijit.byId('id_input_play_route_zoom_level').get( 'value' );
-	    	localStorage.setItem( "play_route_zoom_level", play_route_zoom_level );
-	    	console.log( "  play_route_zoom_level= " + play_route_zoom_level );
-	    	
 	    	var route_thickness = dijit.byId('id_input_route_thickness').get( 'value' );
 	    	localStorage.setItem( "route_thickness", route_thickness );
 	    	console.log( "  route_thickness= " + route_thickness );
@@ -3487,26 +3545,6 @@ console.log("@@@");
 	    	console.log( "  Restored map_pano_layout= " + map_pano_layout );
 			dijit.byId('btn_map_pano_layout_'+map_pano_layout).set('selected', true, false);
 
-	    	var play_route_zoom_level = localStorage.getItem("play_route_zoom_level");
-	    	console.log( "  Restored play_route_zoom_level= " + play_route_zoom_level );
-	    	if ( !play_route_zoom_level )
-	    		play_route_zoom_level = -1;
-	    	else
-	    		play_route_zoom_level = parseInt(play_route_zoom_level);
-	    	if ( play_route_zoom_level == -1 ) {
-				dijit.byId('id_check_play_route_zoom_level').set( 'checked', false, false );
-				dijit.byId('id_input_play_route_zoom_level').set( 'disabled', true, false );
-				document.getElementById("id_val_play_route_zoom_level").style.display = "None";
-			}
-			else {
-				dijit.byId('id_check_play_route_zoom_level').set( 'checked', true, false );
-				dijit.byId('id_input_play_route_zoom_level').set( 'disabled', false );
-	            dijit.byId('id_input_play_route_zoom_level').set( 'intermediateChanges', false );
-	            dijit.byId('id_input_play_route_zoom_level').set( 'value', parse(play_route_zoom_level), false );
-	            dijit.byId('id_input_play_route_zoom_level').set( 'intermediateChanges', true );
-				document.getElementById("id_val_play_route_zoom_level").innerHTML = play_route_zoom_level;
-				document.getElementById("id_val_play_route_zoom_level").style.display = "";
-			}
 	    	var route_thickness = localStorage.getItem("route_thickness");
 	    	if ( !route_thickness )
 	    		route_thickness = 3;
@@ -3559,7 +3597,7 @@ console.log("@@@");
 	    	if ( !google_maps_api_key )
 	    		google_maps_api_key = "";
 	    	console.log( "  Restored google_maps_api_key= " + google_maps_api_key );
-	        dijit.byId('id_google_maps_api_key').set( 'value', google_maps_api_key );
+	        dijit.byId('id_google_maps_api_key').set( 'value', google_maps_api_key, false );
 	    	
 	    	var my_email = localStorage.getItem("id_my_email");
 	    	if ( !my_email )
@@ -3571,7 +3609,7 @@ console.log("@@@");
 	    	if ( !addr_for_orig )
 	    		addr_for_orig = "";
 	    	console.log( "  Restored addr_for_orig= " + addr_for_orig );
-	        dijit.byId('id_addr_for_orig').set( 'value', addr_for_orig );
+	        dijit.byId('id_addr_for_orig').set( 'value', addr_for_orig, false );
 	    	
 	    	var map_style = localStorage.getItem("map_style");
 	    	if ( !map_style )
@@ -3602,7 +3640,16 @@ console.log("@@@");
     		return;
     	}
 
-    	localStorage.clear( );
+		require(["dijit/ConfirmDialog", "dojo/domReady!"], function(ConfirmDialog){
+			var dlg = new ConfirmDialog({
+				title: "Clear Settings",
+				content: "All your current settings will be deleted.",
+				style: "width: 300px"
+			});
+			dlg.on('execute', function() { localStorage.clear(); console.log("Clear Settings: Done"); });
+			dlg.on('cancel',  function() { console.log("Clear Settings: cancelled"); });
+			dlg.show();
+		});
 
     	var dlg = dijit.byId('id_configuration_dlg');
     	dlg.closeDropDown( false );
@@ -3895,9 +3942,15 @@ console.log("@@@");
 		cb_open_settings: function( ) { cb_open_settings( ); },
 
 		cb_copy_long_url: function( ) { cb_copy_long_url( ); },
-		cb_copy_long_url_and_new_tab: function( ) { cb_copy_long_url_and_new_tab( ); },
+		cb_copy_long_url_and_new_tab: function(  ) { cb_copy_long_url_and_new_tab(); },
 		
-		cb_hide_google_maps_api_key: function( ) { cb_hide_google_maps_api_key(); },
+		cb_change_google_maps_api_key: function( ) { cb_change_google_maps_api_key(); },
+		cb_hide_google_maps_api_key: function( )   { cb_hide_google_maps_api_key(); },
+
+		cb_change_email: 			 			 function() { cb_change_email(); },
+		cb_change_starting_position: 			 function() { cb_change_starting_position(); },
+		cb_change_autocomplete_type_restriction: function() { cb_change_autocomplete_type_restriction(); },
+		cb_change_autocomplete_restrict_country: function() { cb_change_autocomplete_restrict_country(); },
 		
 		save_settings: 		function( ) { save_settings( true ); },
 		clear_settings: 	function( ) { clear_settings(); },
