@@ -886,6 +886,8 @@ define( function( m ) {
 					dijit.byId("id_floating_panorama_pane_2").hide();
 			}
 		}
+    	var dlg = dijit.byId('id_btn_map_pegman_layout');
+    	dlg.closeDropDown( false );
 	}
     
     function do_pause( ) {
@@ -1522,7 +1524,7 @@ console.log(curr_dist_in_route + " - " + step);
 		
 		if (timer_animate != undefined)
 			return;
-		
+
 		var btn_drive_whole_route_disabled = dijit.byId('id_btn_drive_whole_route').get( 'disabled' );
 		if ( streetViewLayer.getMap() != undefined ) {
 			console.log("pegman is unselected - " + btn_drive_whole_route_disabled);
@@ -1549,6 +1551,19 @@ console.log(curr_dist_in_route + " - " + step);
 			console.log("pegman is selected - " + btn_drive_whole_route_disabled);
 			streetViewLayer.setMap( map );
 			map.setOptions({draggableCursor: 'context-menu'});
+			var initial_info_use_pegman = localStorage.getItem("initial_info_use_pegman");
+			if ( !initial_info_use_pegman ) {
+				do_show_message( false, "StreetView Images Browser", 
+					"<div align='center'>" +
+					"When the pegman is selected, you will see a StreetView image<br>" +
+					"when you move the cursor over any road which has StreetView coverage<br>" +
+					"(roads displayed in blue).<br><br>" +
+					"<b>Use the CTRL key if you want to reach an area of the map or the screen<br>" +
+					"without showing a StreetVide image.</b></br><br>" +
+					"Click again on the <b>pegman icon</b> or the <b>Stop button</b> to leave this mode.<br>" +
+					"</div>" );
+				localStorage.setItem( "initial_info_use_pegman", "true" );
+			}
 		}
 	}
 
@@ -1630,7 +1645,7 @@ console.log(curr_dist_in_route + " - " + step);
 						(function (n) {
 							var id_label_wp = "id_label_wp_"+n;
 							on( dom.byId(id_label_wp), "click", function( evt ) {
-//								console.log("XX: "+n);
+//							console.log("XX: "+n);
 							});
 						})(n);
 					}
@@ -3493,13 +3508,13 @@ google.maps.event.clearInstanceListeners(panorama);
 	            dijit.byId('id_input_interval').set( 'intermediateChanges', true );
 	        }
 			if (interval == 10000) {
-				document.getElementById("id_interval").innerHTML = "XStep by step";
-				document.getElementById("id_interval_msec").innerHTML = "X";
+				document.getElementById("id_interval").innerHTML = "Step by step";
+				document.getElementById("id_interval_msec").innerHTML = "";
 				dijit.byId('id_btn_pause').set( 'label', "Next" );
 			} 
 			else {
 				document.getElementById("id_interval").innerHTML = interval;
-				document.getElementById("id_interval_msec").innerHTML = " Ymilliseconds";
+				document.getElementById("id_interval_msec").innerHTML = " milliseconds";
 				dijit.byId('id_btn_pause').set( 'label', "Pause" );
 			}
 	    	
