@@ -404,27 +404,6 @@
 																		</div>
 										                    		</td>
 										                    		
-										                    		<td>
-													                    <div align="center">
-													                        <div data-dojo-type="dijit/form/DropDownButton" id="id_btn_my_email">
-													                            <span>My EMAIL</span>
-													                            <div data-dojo-type="dijit/TooltipDialog">
-																					<input type="text" name="my_email" value=""
-				 																        dojoType="dijit.form.TextBox" trim="true" id="id_my_email" maxlength="64" 
-																						onfocus='this.old_value=this.value'
-																						onChange='require(["RouteView.js"], function(s) { s.cb_change_email(); }); this.old_value=this.value;'
-				 																        />
-													                            </div>
-													                        </div>
-												                        </div>
-																		<div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_my_email',position:['below-centered'],showDelay:750,hideDelay:0">
-																			<div style="color:darkred">
-																				If an Email is provided here, it is used to send the itinary <br>
-																				using the option 'Create Google Maprs URL'
-																			</div>
-																		</div>
-										                    		</td>
-										                    		
 										                    	</tr>
 
 										                    </table>
@@ -676,7 +655,7 @@
 														onChange='require(["RouteView.js"], function( s ) { s.cb_step_changed(); })'>
 													</div>
 									
-													<span>Interval : <b id="id_interval">750</b> milliseconds</span><br>
+													<span>Interval : <b id="id_interval">750</b> <span id="id_interval_msec">milliseconds</span></span><br>
 													<div id="id_input_interval"
 														style="width:400px;"
 														name="horizontalSlider"

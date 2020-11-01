@@ -130,6 +130,10 @@ define( function( m ) {
 
 		if ( timer_animate != undefined ) 
 			clearTimeout( timer_animate );
+		if (interval == 10000) {
+			console.log(interval);
+			return;
+		}
 		timer_animate = setTimeout( (function() { return function() {
 			cb_animate( curr_dist_in_route + step );
 		}})(), (fast) ? 125 : interval );
@@ -796,30 +800,19 @@ define( function( m ) {
     	do_show_message( false, title, message );
     }
     
-    function do_copy_message( title, message, text, email ) {
-
-		var my_email = localStorage.getItem("id_my_email");
-	    if ( !my_email )
-	    	my_email = "";
+    function do_copy_message( title, message, text, is_gmaps_url ) {
 
     	require(["dijit/Dialog", "dojo/domReady!"], function(Dialog){
 
 			if (typeof(dlg_copy_text) == 'undefined') {
-				var d =  message + "<br>" + 
+				var d =  "<span id='id_create_url_msg'></span>" + 
 					"<br>" +
+					"<div id='id_is_gmaps_url' style='display:none'></div>" +
 					"<p><textarea readonly rows=8 cols=120 class='js-copytextarea' style='width:100%' id='text_route_url'></textarea></p>" +
 					"<br>" +
 					"<hr>" +
 					"<br>" +
 					"<div align='right'>";
-				if (email) {
-					d += "  <button dojoType='dijit/form/Button' type='button' ";
-					if ( my_email != "" )
-						d += " onclick='require([\"RouteView.js\"], function( s ) { s.do_email_gmaps_url(); })'";
-					else
-						d += " disabled";
-					d += "  >Email itinary to ...</button>";
-				}
 				d += "  <button dojoType='dijit/form/Button' type='button' onclick='require([\"RouteView.js\"], function( s ) { s.cb_copy_long_url_and_new_tab(); dlg_copy_text.hide(); })'>New Tab or Window</button>" +
 					 "  <button dojoType='dijit/form/Button' type='button' onclick='require([\"RouteView.js\"], function( s ) { s.cb_copy_long_url(); dlg_copy_text.hide(); })'>Copy to Clipboard</button>" +
 					 "  <button dojoType='dijit/form/Button' type='button' onclick='dlg_copy_text.hide(); '>Cancel</button>" +
@@ -834,7 +827,9 @@ define( function( m ) {
 				});
 			}
     		
+			document.getElementById('id_create_url_msg').innerHTML = message;
     		dlg_copy_text.show();
+			document.getElementById('id_is_gmaps_url').innerHTML = (is_gmaps_url) ? "yes" : "no";
 			document.getElementById('text_route_url').innerHTML = text;
     	});
     }
@@ -1476,6 +1471,8 @@ console.log(curr_dist_in_route + " - " + step);
 			}
 		})( total_nb_waypoints );
 
+		console.log("step="+step);
+		console.log("interval="+interval);
 	  	return true;
 	}
 	
@@ -2253,7 +2250,8 @@ console.log("@@@");
 		if ( go_timer ) {
 			if ( timer_animate != undefined )
 				clearTimeout( timer_animate );
-	       	timer_animate = setTimeout( function() { cb_animate(new_pos); }, interval );
+			if (interval != 10000)
+				timer_animate = setTimeout( function() { cb_animate(new_pos); }, interval );
 		}
 
         if ( play_whole_route || (curr_leg == undefined) ) {
@@ -2547,10 +2545,10 @@ google.maps.event.clearInstanceListeners(panorama);
 
     function cb_step_changed( ) {
     	step = dijit.byId('id_input_meters').get( 'value' );
-//    	console.log("step = " + step);
+    	console.log("step = " + step);
         document.getElementById("id_meters").innerHTML = step;
         document.getElementById("id_feet").innerHTML = Math.floor(step * 3.2808);
-        save_settings( true );
+    	localStorage.setItem( "step", step );
     }
 
     function cb_interval_changed( ) {
@@ -2559,12 +2557,14 @@ google.maps.event.clearInstanceListeners(panorama);
     	if (interval == 10000) {
 			document.getElementById("id_interval").innerHTML = "XStep by step";
 			document.getElementById("id_interval_msec").innerHTML = "X";
+			dijit.byId('id_btn_pause').set( 'label', "Next" );
 		} 
 		else {
 			document.getElementById("id_interval").innerHTML = interval;
 			document.getElementById("id_interval_msec").innerHTML = " Ymilliseconds";
+			dijit.byId('id_btn_pause').set( 'label', "Pase" );
 		}
-        save_settings( true );
+		localStorage.setItem( "interval", interval );
     }
 
 	function cb_route_thickness_changed( ) {
@@ -2832,35 +2832,6 @@ google.maps.event.clearInstanceListeners(panorama);
 			do_copy_message( "Google Maps URL", "Use this URL in Google Maps (desktop or mobile)", url, true );
 	}
 
-    function do_email_gmaps_url( ) {
-
-		// See here: https://productforums.google.com/forum/#!topic/gmail/CQMCGRvyhCM
-		// and: chrome://settings/handlers
-
-		var my_email = localStorage.getItem("id_my_email");
-	    if ( !my_email )
-	    	return;
-
-		var d = new Date();
-		var year = d.getFullYear();
-		var mon  = d.getMonth() + 1;
-		var day  = d.getDate();
-		var when = year + '-' + ((mon < 10) ? '0' : '') + mon + '-' + ((day < 10) ? '0' : '') + day;
-		console.log( when );
-
-		// See: https://developers.google.com/maps/documentation/urls/guide#directions-action
-		var subject= "Itinary | " + when;
-		var body = build_gmaps_url();
-		body += "\r\n\r\nItinary made with StreetViewPlayer.org";
-		var uri = "mailto:olivier.singla@gmail.com?subject=";
-		var uri = "mailto:" + my_email + "?subject=";
-		uri += encodeURIComponent(subject);
-		uri += "&body=";
-		uri += encodeURIComponent(body);
-		window.open(uri);
-                
-	}
-    	
     function cb_route_from_or_to_changed( waypoint_index ) {
 
 		console.log( "cb_route_from_or_to_changed: " + waypoint_index );
@@ -3178,7 +3149,6 @@ google.maps.event.clearInstanceListeners(panorama);
 			if ( play_whole_route || (curr_leg == undefined) ) {
 				if ( streetViewLayer.getMap() == undefined ) {
 					map.fitBounds( route_bounds );
-console.log("@@@");
 				}
 			}
 			else {
@@ -3186,7 +3156,6 @@ console.log("@@@");
 					map.setCenter( polylines[curr_leg].getPath().getAt(0) );
 					map.fitBounds( legs_bounds[curr_leg] );
 				}
-console.log("@@@");
 			}
 		});
 	}
@@ -3330,9 +3299,6 @@ console.log("@@@");
 	
 	function cb_copy_long_url_and_new_tab() {
 
-		var url = document.getElementById('text_route_url').innerHTML;
-		console.log(url);
-
 		var copyTextarea = document.querySelector('.js-copytextarea');
 		copyTextarea.select();
 
@@ -3345,7 +3311,10 @@ console.log("@@@");
 			console.log('Oops, unable to copy');
 		}
 
-		// url = _do_create_long_url();
+		if (document.getElementById('id_is_gmaps_url').innerHTML == "yes")
+			url = build_gmaps_url();
+		else
+			url = _do_create_long_url();
 		var redirectWindow = window.open(url, '_blank');
 		redirectWindow.location;		
 	}
@@ -3379,14 +3348,6 @@ console.log("@@@");
 				dlg_change_google_maps_api_key.show();
 			});
 		}
-	}
-
-	function cb_change_email() {
-		var old_my_email = dijit.byId('id_my_email').get('old_value');
-		var my_email = dijit.byId('id_my_email').get('value');
-		console.log("old:"+old_my_email);
-		console.log("new:"+my_email);
-		localStorage.setItem( "id_my_email", my_email );
 	}
 
 	function cb_change_starting_position() {
@@ -3456,10 +3417,6 @@ console.log("@@@");
 	    	localStorage.setItem( "id_google_maps_api_key", google_maps_api_key );
 	    	console.log( "  google_maps_api_key= " + google_maps_api_key );
 	    		
-	        var my_email = dijit.byId('id_my_email').get( 'value' );
-	    	localStorage.setItem( "id_my_email", my_email );
-	    	console.log( "  my_email= " + my_email );
-	    		
 	        var addr_for_orig = dijit.byId('id_addr_for_orig').get( 'value' );
 	    	localStorage.setItem( "id_addr_for_orig", addr_for_orig );
 	    	console.log( "  addr_for_orig= " + addr_for_orig );
@@ -3510,7 +3467,7 @@ console.log("@@@");
             	dijit.byId('id_check_no_toll').set( 'checked', parse(no_toll), false );
 			document.getElementById("id_label_check_no_toll").innerHTML = (no_toll) ? "No Toll" : "Toll";
 	
-	    	var step = localStorage.getItem("step");
+	    	step = localStorage.getItem("step");
 	    	if ( !step )
 	    		step = 150;
 	    	else
@@ -3518,11 +3475,13 @@ console.log("@@@");
 	    	console.log( "  Restored step= " + step );
 	    	if ( step != null ) {
 	            dijit.byId('id_input_meters').set( 'intermediateChanges', false );
-	            dijit.byId('id_input_meters').set( 'value', parse(step), false );
+	            dijit.byId('id_input_meters').set( 'value', step, false );
 	            dijit.byId('id_input_meters').set( 'intermediateChanges', true );
+				document.getElementById("id_meters").innerHTML = step;
+				document.getElementById("id_feet").innerHTML = Math.floor(step * 3.2808);
 	        }
 	    	
-	    	var interval = localStorage.getItem("interval");
+	    	interval = localStorage.getItem("interval");
 	    	if ( !interval )
 	    		interval = 750;
 	    	else
@@ -3530,11 +3489,19 @@ console.log("@@@");
 	    	console.log( "  Restored interval= " + interval );
 	    	if ( interval != null ) {
 	            dijit.byId('id_input_interval').set( 'intermediateChanges', false );
-	            dijit.byId('id_input_interval').set( 'value', parse(interval), false );
+	            dijit.byId('id_input_interval').set( 'value', interval, false );
 	            dijit.byId('id_input_interval').set( 'intermediateChanges', true );
 	        }
-			if (interval == 10000)
+			if (interval == 10000) {
+				document.getElementById("id_interval").innerHTML = "XStep by step";
+				document.getElementById("id_interval_msec").innerHTML = "X";
 				dijit.byId('id_btn_pause').set( 'label', "Next" );
+			} 
+			else {
+				document.getElementById("id_interval").innerHTML = interval;
+				document.getElementById("id_interval_msec").innerHTML = " Ymilliseconds";
+				dijit.byId('id_btn_pause').set( 'label', "Pause" );
+			}
 	    	
 	    	map_pano_layout = localStorage.getItem("map_pano_layout");
 	    	if ( !map_pano_layout )
@@ -3598,12 +3565,6 @@ console.log("@@@");
 	    		google_maps_api_key = "";
 	    	console.log( "  Restored google_maps_api_key= " + google_maps_api_key );
 	        dijit.byId('id_google_maps_api_key').set( 'value', google_maps_api_key, false );
-	    	
-	    	var my_email = localStorage.getItem("id_my_email");
-	    	if ( !my_email )
-	    		my_email = "";
-	    	console.log( "  Restored my_email= " + my_email );
-	        dijit.byId('id_my_email').set( 'value', my_email );
 	    	
 	    	var addr_for_orig = localStorage.getItem("id_addr_for_orig");
 	    	if ( !addr_for_orig )
@@ -3912,7 +3873,6 @@ console.log("@@@");
 
 		do_save_gpx: 		 function( ) { do_save_gpx(); },
 		do_create_gmaps_url: function( ) { do_create_gmaps_url(); },
-		do_email_gmaps_url:  function( ) { do_email_gmaps_url(); },
 		do_create_long_url:  function ( ) { do_create_long_url(); },
 		do_create_short_url: function ( ) { do_create_short_url(); },
 		
@@ -3947,7 +3907,6 @@ console.log("@@@");
 		cb_change_google_maps_api_key: function( ) { cb_change_google_maps_api_key(); },
 		cb_hide_google_maps_api_key: function( )   { cb_hide_google_maps_api_key(); },
 
-		cb_change_email: 			 			 function() { cb_change_email(); },
 		cb_change_starting_position: 			 function() { cb_change_starting_position(); },
 		cb_change_autocomplete_type_restriction: function() { cb_change_autocomplete_type_restriction(); },
 		cb_change_autocomplete_restrict_country: function() { cb_change_autocomplete_restrict_country(); },
