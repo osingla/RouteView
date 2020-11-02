@@ -54,7 +54,6 @@ define( function( m ) {
    	var mouse_over_input_route;
    	var is_dirty = false;
    	var is_ff = false;
-   	var browse_images_mode = false;
    	var marker_browser_images_pos;
 	var panorama_mouse_down_offsetX = 0;
 	var panorama_mouse_down_offsetY = 0;
@@ -178,8 +177,6 @@ define( function( m ) {
 		(function ( ) {
 
 			street_view_check.getPanoramaByLocation(p, 50, (function() { return function(result, status) {
-				if ( browse_images_mode )
-					return;
 				if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
 					console.log( "No street view available" );
 					marker_small_street_view.setPosition( null );
@@ -740,12 +737,6 @@ define( function( m ) {
     		dijit.byId('id_input_route').set( 'disabled', true );
     		
     		dijit.byId('id_btn_pause').set( 'disabled', true );
-			require(["dojo/dom-style"], function( domStyle) {
-				var display = domStyle.get( "td_controls_add_waypoint", "display" );
-				console.log(display);
-				if (display == "none")
-					dijit.byId('id_btn_stop').set( 'disabled', true );
-			});
 
         }
         else {
@@ -985,9 +976,6 @@ console.log(curr_dist_in_route + " - " + step);
 		dijit.byId('id_btn_pause').set( 'disabled', true );
     	dijit.byId('id_btn_pause').set( 'label', "Pause" );
 		dijit.byId('id_btn_stop').set( 'disabled', true );
-		require(["dojo/dom-style"], function( domStyle) {
-			domStyle.set( "td_controls_add_waypoint", "display", "None" );
-		});
 		dijit.byId('id_btn_map_pano_layout').set( 'disabled', true );
 	
 		dijit.byId('id_input_route').set( 'disabled', true );
@@ -1005,7 +993,6 @@ console.log(curr_dist_in_route + " - " + step);
     
 		google.maps.event.clearListeners(panorama, "pano_changed");
     
-		browse_images_mode = false;
 		marker_browser_images_pos.setMap( null );
 		google.maps.event.clearListeners(map, "click");
 		google.maps.event.addListener( map, "click", function( evt ) {
@@ -1025,49 +1012,6 @@ console.log(curr_dist_in_route + " - " + step);
 		marker_browser_images_pos.setMap( null );
     
     }
-
-    function do_add_waypoint( ) {
-		
-		dijit.byId('id_btn_add_waypoint').set( 'disabled', true );
-
-		var p = marker_small_street_view.getPosition( );
-		console.log( p );
-		if (p == undefined) {
-			p = marker_browser_images_pos.getPosition();
-			console.log( p );
-		}
-
-		var geocoder = new google.maps.Geocoder();
-    	geocoder.geocode( {'location': p}, function( results, status ) {
-    	    if (status === google.maps.GeocoderStatus.OK) {
-
-    	    	console.log( results[0].formatted_address );
-				var nb_waypoints = places.length;
-    	    	console.log( nb_waypoints );
-    	    	if (nb_waypoints == 2) {
-					var id_label_wp = "id_wp_1";
-					var value = dijit.byId(id_label_wp).get('value');
-					console.log(value);
-					if (value == "")
-						nb_waypoints = 1;
-					console.log( nb_waypoints );
-				}
-				if (nb_waypoints >= 2) {
-					show_waypoint( nb_waypoints );
-					require(["dojo/dom-style"], function( domStyle) {
-						domStyle.set( 'id_drive_tr_'+(nb_waypoints), "display", "" );
-					});
-				}
-				places[nb_waypoints] = results[0];
-				change_waypoint( nb_waypoints, results[0].formatted_address );
-				console.log( places );
-    	    	console.log( places.length );
-
-    	    }
-
-    	});
-		
-	}
 
     function start( ) {
 
@@ -1561,6 +1505,8 @@ console.log(curr_dist_in_route + " - " + step);
 				domStyle.set( "td_streetview_panel", "display", "" );
 			});
 			streetViewLayer.setMap( map );
+			google.maps.event.trigger( floating_panorama_1, 'resize' );
+			google.maps.event.trigger( floating_panorama_2, 'resize' );
 			map.setOptions({draggableCursor: 'context-menu'});
 			var initial_info_use_pegman = localStorage.getItem("initial_info_use_pegman");
 			if ( !initial_info_use_pegman ) {
@@ -1779,8 +1725,6 @@ console.log(curr_dist_in_route + " - " + step);
 										floating_panorama_2.setPov( { heading: heading, pitch: 1 } );
 										floating_panorama_2.setPosition(result.location.latLng);
 									}
-									domStyle.set( "td_controls_add_waypoint", "display", "" );
-									dijit.byId('id_btn_add_waypoint').set( 'disabled', false );
 								}
 							}
 						}})());
@@ -2445,88 +2389,6 @@ console.log("@@@");
 		id_panorama3.addEventListener('mouseup', function(evt) { do_mouseup(evt, panorama3); });
 		id_panorama4.addEventListener('mouseup', function(evt) { do_mouseup(evt, panorama4); });
 
-		function do_mouseup(evt, panoramax) {
-			if ((evt.offsetX == panorama_mouse_down_offsetX) && (evt.offsetY && panorama_mouse_down_offsetY)) {
-				var curr_latlng = panorama.getPosition();
-				console.log("Panorama clicked - " + curr_latlng + " - " + pano_cnt + " - " + panoramax.getPov().heading);
-				var new_latlng = google.maps.geometry.spherical.computeOffset(curr_latlng, step, panoramax.getPov().heading);
-				console.log(new_latlng);
-
-				service.route({
-					origin: new_latlng,
-					destination: new_latlng,
-					travelMode: google.maps.DirectionsTravelMode.DRIVING
-				}, function(result, status) {
-					if (status == google.maps.DirectionsStatus.OK) {
-//						console.log( result.routes[0].overview_path.length );
-						var p = result.routes[0].overview_path[0];
-						street_view_check.getPanoramaByLocation(p, 5000, (function() { return function(result, status) {
-							marker_browser_images_pos.setMap( map );
-							if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
-								console.log( "No results!" );
-								marker_browser_images_pos.setPosition( null );
-							}
-							else {
-
-								(function ( ) {
-									panorama.addListener('pano_changed', function() {
-										var pano_id = panorama.getPano();
-										if (pano_id != prev_pano_id) {
-google.maps.event.clearInstanceListeners(panorama);									
-											switch (pano_cnt++ % 3) {
-												case 0 :
-													pano_pos[4] = panorama.getPosition();
-													document.getElementById("id_panorama2").style.zIndex = "1";
-													document.getElementById("id_panorama3").style.zIndex = "0"
-													document.getElementById("id_panorama4").style.zIndex = "0"
-													panorama4.setPano( prev_pano_id );
-													if ( prev_bearing != undefined )
-														panorama4.setPov( { heading: prev_bearing, pitch: 1 } );
-//													console.log( pano_cnt + " --> 2" );
-													if ( pano_cnt >= 4 )
-														marker_browser_images_pos.setPosition( pano_pos[2] );
-													break;
-												case 1 :
-													pano_pos[2] = panorama.getPosition();
-													document.getElementById("id_panorama3").style.zIndex = "1";
-													document.getElementById("id_panorama2").style.zIndex = "0"
-													document.getElementById("id_panorama4").style.zIndex = "0";
-													panorama2.setPano( prev_pano_id );
-													if ( prev_bearing != undefined )
-														panorama2.setPov( { heading: prev_bearing, pitch: 1 } );
-//													console.log( pano_cnt + " --> 3" );
-													if ( pano_cnt >= 4 )
-														marker_browser_images_pos.setPosition( pano_pos[3] );
-													break;
-												case 2 :
-													pano_pos[3] = panorama.getPosition();
-													document.getElementById("id_panorama4").style.zIndex = "1"
-													document.getElementById("id_panorama3").style.zIndex = "0";
-													document.getElementById("id_panorama2").style.zIndex = "0";
-													panorama3.setPano( prev_pano_id );
-													if ( prev_bearing != undefined )
-														panorama3.setPov( { heading: prev_bearing, pitch: 1 } );
-//													console.log( pano_cnt + " --> 4" );
-													if ( pano_cnt >= 4 )
-														marker_browser_images_pos.setPosition( pano_pos[4] );
-													break;
-											}
-											prev_pano_id = pano_id;
-										}
-									});
-								})(  );
-								panorama.setPosition( result.location.latLng );
-								//prev_bearing = panorama.getPov().heading;
-
-							}
-						}})());
-						
-					}
-				});
-
-			}
-		};
-
 		var service = new google.maps.DirectionsService();
 		var poly = new google.maps.Polyline({ map: map });
 		google.maps.event.addListener(map, "click", function(evt) {
@@ -2924,8 +2786,6 @@ google.maps.event.clearInstanceListeners(panorama);
 				}
 				else {
 //					console.log( result.location.latLng );
-					domStyle.set( "td_controls_add_waypoint", "display", "" );
-					dijit.byId('id_btn_add_waypoint').set( 'disabled', false );
 					marker_no_street_view.setPosition( null );
 					panorama.setPosition(result.location.latLng);
 					panorama2.setPosition(result.location.latLng);
@@ -3261,18 +3121,10 @@ google.maps.event.clearInstanceListeners(panorama);
 	   		if ( (wp0 == '') || (wp1 == '') ) {
 		   		dijit.byId('id_btn_drive_'+n).set( 'disabled', true );
 				dijit.byId('id_tooltip_btn_drive_'+n).set( 'showDelay', 999999 );
-				if ( n == 1 ) {
-					dijit.byId('id_btn_browse_images').set( 'disabled', true );
-					dijit.byId('id_btn_browse_images').set( 'showDelay', 999999 );
-				}
 	   		}
 	   		else {
 		   		dijit.byId('id_btn_drive_'+n).set( 'disabled', false );
 				dijit.byId('id_tooltip_btn_drive_'+n).set( 'showDelay', 650 );
-				if ( n == 1 ) {
-					dijit.byId('id_btn_browse_images').set( 'disabled', false );
-					dijit.byId('id_tooltip_btn_browse_images').set( 'showDelay', 650 );
-				}
 				dijit.byId('id_btn_drive_whole_route').set( 'disabled', false );
 	   		}
 		}
@@ -3400,7 +3252,8 @@ google.maps.event.clearInstanceListeners(panorama);
     function parse( type ) {
     	return typeof type == 'string' ? JSON.parse(type) : type;
     }
-    
+
+/*    
     function save_settings( close_dlg ) {
 
 		console.log( "Save Settings:" );
@@ -3458,6 +3311,7 @@ google.maps.event.clearInstanceListeners(panorama);
 	    	
     	});
     }
+*/    
     
     function load_settings( ) {
 
@@ -3847,7 +3701,6 @@ google.maps.event.clearInstanceListeners(panorama);
 		cb_map_pano_layout: function( layout ) { cb_map_pano_layout( layout ); },
 		do_pause: function( ) { do_pause(); },
 		do_stop:  function( ) { do_stop(); },
-		do_add_waypoint:  function( ) { do_add_waypoint(); },
 
 		cb_map_pegman_nb_img:   function(nb_img) { cb_map_pegman_nb_img(nb_img); },
 		cb_map_pegman_img_size: function(size)   { cb_map_pegman_img_size(size); },
@@ -3863,8 +3716,6 @@ google.maps.event.clearInstanceListeners(panorama);
 		do_create_short_url: function ( ) { do_create_short_url(); },
 		
 		move_to_dist: function( new_pos ) { move_to_dist( new_pos ); },
-
-		browse_images: function( ) { browse_images( ); },
 
 		cb_streetview_icon: function( ) { cb_streetview_icon(); },
 
@@ -3897,7 +3748,6 @@ google.maps.event.clearInstanceListeners(panorama);
 		cb_change_autocomplete_type_restriction: function() { cb_change_autocomplete_type_restriction(); },
 		cb_change_autocomplete_restrict_country: function() { cb_change_autocomplete_restrict_country(); },
 		
-		save_settings: 		function( ) { save_settings( true ); },
 		clear_settings: 	function( ) { clear_settings(); },
 		
     };

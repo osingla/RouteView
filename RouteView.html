@@ -373,7 +373,7 @@
 																								<input type="password" name="google_maps_api_key" value="" 
 																								    dojoType="dijit.form.TextBox" trim="true" id="id_google_maps_api_key" maxlength="64" style="width: 30em;" type="hidden" 
 																									onfocus='this.old_value=this.value'
-																									onChange='require(["RouteView.js"], function( s ) { s.cb_change_google_maps_api_key(); });; this.old_value=this.value;' >
+																									onChange='require(["RouteView.js"], function( s ) { s.cb_change_google_maps_api_key(); });; this.old_value=this.value;'
 																								    />
 																							</td>
 																						</tr>
@@ -569,18 +569,6 @@
 							                    </div>
 				                    		</td>
 				                    		
-				                            <td align="center" valign="middle">
-												<button dojoType="dijit.form.Button" type="button" id="id_btn_browse_images" disabled
-														data-dojo-props="iconClass:'icon_btn_browse', showLabel: false"
-														onclick='require(["RouteView.js"], function( s ) { s.browse_images(); })'>
-												</button>
-											</td>
-											<div data-dojo-type="dijit/Tooltip" id="id_tooltip_btn_browse_images" data-dojo-props="connectId:'id_btn_browse_images',position:['below-centered'],showDelay:750,hideDelay:0">
-												This allows to <b><i>show</b></i> the StreetView image for a given location.<br><br>
-												Each time you click on the map, you should see the StreetView image for this location.<br>
-												Please note that the position is adjusted to be on the nearest location with StreetView data.
-											</div>
-
 				                            <td align="center" valign="middle">
 												<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_drive', showLabel: false" style="font-size: 75%" 
 												 onClick='require(["RouteView.js"], function( s ) { s.cb_click_btn_drive_whole_route(); })' id="id_btn_drive_whole_route" disabled >
@@ -787,15 +775,6 @@
                                             Once a route has been defined and you are playing this route through Google Street View,<br>
                                             this allows you to stop the playing of the route. Once stopped, a route can be restart (from the beginning)>br>
                                             or cleared.
-                                        </div>
-						            </td>
-					                <td style="width:1%; text-align:left; vertical-align:middle; display:none" id="td_controls_add_waypoint">
-						                <button dojoType="dijit.form.Button" type="button" id="id_btn_add_waypoint" 
-			    					            onclick='require(["RouteView.js"], function( s ) { s.do_add_waypoint(); })'>
-						    	            Add Waypoint
-							            </button>
-                                        <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_add_waypoint',position:['above-centered'],showDelay:750,hideDelay:0">
-                                            This will add the current location as a waypoint.
                                         </div>
 						            </td>
 					                <td style="width:1%; text-align:left; vertical-align:middle" id="td_controls_duration"
