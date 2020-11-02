@@ -285,9 +285,9 @@ define( function( m ) {
 
     function start_driving( ) {
 
-		dijit.byId("id_floating_panorama_pane_1").hide();
-		dijit.byId("id_floating_panorama_pane_2").hide();
-		dijit.byId('id_btn_map_pegman_layout').set( 'disabled', true );
+		require(["dojo/dom", "dojo/on", "dojo/dom-style"], function( dom, on, domStyle ) {
+			domStyle.set( "td_streetview_panel", "display", "none" );
+		});
 		if ( timer_show_pano_on_mousemove != undefined ) {
 			clearTimeout(timer_show_pano_on_mousemove);
 			timer_show_pano_on_mousemove = undefined;
@@ -851,43 +851,52 @@ define( function( m ) {
 
 	}
 
-	function cb_map_pegman_nb_img(nb_img) {
-		console.log("pegman_nb_img="+nb_img);
-		localStorage.setItem("map_pegman_nb_img", nb_img);
-    	var dlg = dijit.byId('id_btn_map_pegman_layout');
-    	dlg.closeDropDown( false );
-	}
-    
-	function cb_map_pegman_img_size(size, set) {
+    function cb_click_inc_dec_floating_pane(action, set) {
+		console.log(action);
+		var pegman_img_size = localStorage.getItem("map_pegman_img_size");
+		if (!set)
+	    	console.log( "  Restored pegman_img_size= " + pegman_img_size );
+		if ( !pegman_img_size )
+			pegman_img_size = 1;
+		else
+			pegman_img_size = parseInt(pegman_img_size);
+		console.log( "pegman_img_size=" + pegman_img_size );
+		pegman_img_size += action;
+		console.log( "pegman_img_size=" + pegman_img_size );
+		console.log(set);
 		if (set)
-			localStorage.setItem("map_pegman_img_size", size);
-		switch (size) {
-			case 1:
-			default:
-				dijit.byId("id_floating_panorama_pane_1").set("style", "width:640px;height:480x");
-				dijit.byId("id_floating_panorama_pane_2").set("style", "width:640px;height:480x");
-				break;
-			case 2:
-				dijit.byId("id_floating_panorama_pane_1").set("style", "width:800px;height:600px");
-				dijit.byId("id_floating_panorama_pane_2").set("style", "width:800px;height:600px");
-				break;
-			case 3:
-				dijit.byId("id_floating_panorama_pane_1").set("style", "width:1024px;height:768px");
-				dijit.byId("id_floating_panorama_pane_2").set("style", "width:1024px;height:768px");
-				break;
-		}
-		if (set) {
-			var display = domStyle.get( id, "id_floating_panorama_pane_1" );
-			if (display != "none") {
-				dijit.byId("id_floating_panorama_pane_1").show();
-				if (dijit.byId('id_pegman_two_img').get('checked'))
-					dijit.byId("id_floating_panorama_pane_2").show();
-				else
-					dijit.byId("id_floating_panorama_pane_2").hide();
+			localStorage.setItem("map_pegman_img_size", pegman_img_size);
+		require(["dojo/dom-style", "dojo/dom"], function( domStyle, dom) {
+			switch (pegman_img_size) {
+				case 1:
+				default:
+					domStyle.set( "id_floating_panorama_1", { width: "320px", height: "240px" } );
+					domStyle.set( "id_floating_panorama_2", { width: "320px", height: "240px" } );
+					break;
+				case 2:
+					domStyle.set( "id_floating_panorama_1", { width: "480px", height: "360px" } );
+					domStyle.set( "id_floating_panorama_2", { width: "480px", height: "360px" } );
+					break;
+				case 3:
+					domStyle.set( "id_floating_panorama_1", { width: "800px", height: "480px" } );
+					domStyle.set( "id_floating_panorama_2", { width: "800px", height: "480px" } );
+					break;
+				case 4:
+					domStyle.set( "id_floating_panorama_1", { width: "720px", height: "540px" } );
+					domStyle.set( "id_floating_panorama_2", { width: "720px", height: "540px" } );
+					break;
+				case 5:
+					domStyle.set( "id_floating_panorama_1", { width: "800px", height: "600px" } );
+					domStyle.set( "id_floating_panorama_2", { width: "800px", height: "600px" } );
+					break;
 			}
+		});
+		if (action != 0) {
+			google.maps.event.trigger( floating_panorama_1, 'resize' );
+			google.maps.event.trigger( floating_panorama_2, 'resize' );
 		}
-    	var dlg = dijit.byId('id_btn_map_pegman_layout');
-    	dlg.closeDropDown( false );
+		dijit.byId('btn_dec_floating_pano').set( 'disabled', (pegman_img_size == 1));
+		dijit.byId('btn_inc_floating_pano').set( 'disabled', (pegman_img_size == 5));
 	}
     
     function do_pause( ) {
@@ -980,7 +989,6 @@ console.log(curr_dist_in_route + " - " + step);
 			domStyle.set( "td_controls_add_waypoint", "display", "None" );
 		});
 		dijit.byId('id_btn_map_pano_layout').set( 'disabled', true );
-		dijit.byId('id_btn_map_pegman_layout').set( 'disabled', true );
 	
 		dijit.byId('id_input_route').set( 'disabled', true );
 		dijit.byId('id_input_route').set( 'intermediateChanges', false );
@@ -1007,9 +1015,9 @@ console.log(curr_dist_in_route + " - " + step);
 		if ( streetViewLayer.getMap() != undefined )
 			streetViewLayer.setMap( null );
 
-		dijit.byId("id_floating_panorama_pane_1").hide();
-		dijit.byId("id_floating_panorama_pane_2").hide();
-		dijit.byId('id_btn_map_pegman_layout').set( 'disabled', true );
+		require(["dojo/dom", "dojo/on", "dojo/dom-style"], function( dom, on, domStyle ) {
+			domStyle.set( "td_streetview_panel", "display", "none" );
+		});
 		if ( timer_show_pano_on_mousemove != undefined ) {
 			clearTimeout(timer_show_pano_on_mousemove);
 			timer_show_pano_on_mousemove = undefined;
@@ -1528,9 +1536,9 @@ console.log(curr_dist_in_route + " - " + step);
 		var btn_drive_whole_route_disabled = dijit.byId('id_btn_drive_whole_route').get( 'disabled' );
 		if ( streetViewLayer.getMap() != undefined ) {
 			console.log("pegman is unselected - " + btn_drive_whole_route_disabled);
-			dijit.byId("id_floating_panorama_pane_1").hide();
-			dijit.byId("id_floating_panorama_pane_2").hide();
-			dijit.byId('id_btn_map_pegman_layout').set( 'disabled', true );
+			require(["dojo/dom", "dojo/on", "dojo/dom-style"], function( dom, on, domStyle ) {
+				domStyle.set( "td_streetview_panel", "display", "none" );
+			});
 			if ( timer_show_pano_on_mousemove != undefined ) {
 				clearTimeout(timer_show_pano_on_mousemove);
 				timer_show_pano_on_mousemove = undefined;
@@ -1549,6 +1557,9 @@ console.log(curr_dist_in_route + " - " + step);
 		}
 		else {
 			console.log("pegman is selected - " + btn_drive_whole_route_disabled);
+			require(["dojo/dom", "dojo/on", "dojo/dom-style"], function( dom, on, domStyle ) {
+				domStyle.set( "td_streetview_panel", "display", "" );
+			});
 			streetViewLayer.setMap( map );
 			map.setOptions({draggableCursor: 'context-menu'});
 			var initial_info_use_pegman = localStorage.getItem("initial_info_use_pegman");
@@ -1759,20 +1770,14 @@ console.log(curr_dist_in_route + " - " + step);
 							}
 							else {
 								if (result.links.length >= 1) {
-									dijit.byId('id_btn_map_pegman_layout').set( 'disabled', false );
 									heading = result.links[0].heading;
 									floating_panorama_1.setPov( { heading: heading, pitch: 1 } );
 									floating_panorama_1.setPosition(result.location.latLng);
 									marker_browser_images_pos.setPosition(result.location.latLng);
-									dijit.byId("id_floating_panorama_pane_1").show();
-									if (dijit.byId('id_pegman_two_img').get('checked') && (result.links.length > 1)) {
+									if (result.links.length > 1) {
 										heading = result.links[1].heading;
 										floating_panorama_2.setPov( { heading: heading, pitch: 1 } );
 										floating_panorama_2.setPosition(result.location.latLng);
-										dijit.byId("id_floating_panorama_pane_2").show();
-									}
-									else {
-										dijit.byId("id_floating_panorama_pane_2").hide();
 									}
 									domStyle.set( "td_controls_add_waypoint", "display", "" );
 									dijit.byId('id_btn_add_waypoint').set( 'disabled', false );
@@ -2371,7 +2376,6 @@ console.log("@@@");
 		dijit.byId('id_btn_pause').set( 'disabled', true );
 		dijit.byId('id_btn_stop').set( 'disabled', false );
 		dijit.byId('id_btn_map_pano_layout').set( 'disabled', false );
-		dijit.byId('id_btn_map_pegman_layout').set( 'disabled', true );
 
 		browse_images_mode = true;
 		prev_pano_id = "";
@@ -2881,9 +2885,9 @@ google.maps.event.clearInstanceListeners(panorama);
 		if ( streetViewLayer.getMap() == undefined )
 			return;
 	
-		dijit.byId("id_floating_panorama_pane_1").hide();
-		dijit.byId("id_floating_panorama_pane_2").hide();
-		dijit.byId('id_btn_map_pegman_layout').set( 'disabled', true );
+		require(["dojo/dom", "dojo/on", "dojo/dom-style"], function( dom, on, domStyle ) {
+			domStyle.set( "td_streetview_panel", "display", "none" );
+		});
 		if ( timer_show_pano_on_mousemove != undefined ) {
 			clearTimeout(timer_show_pano_on_mousemove);
 			timer_show_pano_on_mousemove = undefined;
@@ -3208,7 +3212,6 @@ google.maps.event.clearInstanceListeners(panorama);
 		dijit.byId('id_btn_pause').set( 'disabled', false );
 		dijit.byId('id_btn_stop').set( 'disabled', false );
 		dijit.byId('id_btn_map_pano_layout').set( 'disabled', false );
-		dijit.byId('id_btn_map_pegman_layout').set( 'disabled', true );
 
 		if ( step == undefined ) {
 			step     = dijit.byId('id_input_meters').get( 'value' );
@@ -3539,41 +3542,7 @@ google.maps.event.clearInstanceListeners(panorama);
 	            dijit.byId('id_input_route_thickness').set( 'intermediateChanges', true );
 	        }
 
-	    	var pegman_nb_img = localStorage.getItem("map_pegman_nb_img");
-	    	if ( !pegman_nb_img )
-	    		pegman_nb_img = 1;
-	    	else
-	    		pegman_nb_img = parseInt(pegman_nb_img);
-	    	console.log( "  Restored pegman_nb_img= " + pegman_nb_img );
-	    	switch (pegman_nb_img) {
-				case 1:
-				default:
-					dijit.byId('id_pegman_one_img').set('checked', true, false);
-					break;
-				case 2:
-					dijit.byId('id_pegman_two_img').set('checked', true, false);
-					break;
-			}
-
-	    	var pegman_img_size = localStorage.getItem("map_pegman_img_size");
-	    	if ( !pegman_img_size )
-	    		pegman_img_size = 1;
-	    	else
-	    		pegman_img_size = parseInt(pegman_img_size);
-	    	console.log( "  Restored pegman_img_size= " + pegman_img_size );
-	    	switch (pegman_img_size) {
-				case 1:
-				default:
-					dijit.byId('id_pegman_img_small').set('checked', true, false);
-					break;
-				case 2:
-					dijit.byId('id_pegman_img_medium').set('checked', true, false);
-					break;
-				case 3:
-					dijit.byId('id_pegman_img_large').set('checked', true, false);
-					break;
-			}
-			cb_map_pegman_img_size(pegman_img_size, false);
+			cb_click_inc_dec_floating_pane(0, false);
 
 	    	var google_maps_api_key = localStorage.getItem("id_google_maps_api_key");
 	    	if ( !google_maps_api_key )
@@ -3882,6 +3851,8 @@ google.maps.event.clearInstanceListeners(panorama);
 
 		cb_map_pegman_nb_img:   function(nb_img) { cb_map_pegman_nb_img(nb_img); },
 		cb_map_pegman_img_size: function(size)   { cb_map_pegman_img_size(size); },
+
+		cb_click_inc_dec_floating_pane: function(action, set)   { cb_click_inc_dec_floating_pane(action, set); },
 
 		show_clear_place:  function( ) { show_clear_place(); },
 		add_place:    function(name, formatted_address) { add_place(name, formatted_address); },

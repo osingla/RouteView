@@ -628,7 +628,38 @@
 							<div id="id_panorama4" style="position:absolute; width: 100%; height: 100%; top: 0; xleft: 0" > 4</div>
              	 		</td>
 
+             	 		<td id="td_streetview_panel" style="height:100%; width:100%; overflow-x:hidden; overflow-y:hidden; display: None">
+							<table style="height:100%; margin:auto">
+								<tr style="margin:auto; height:1%">
+									<td>
+										<div id="id_floating_panorama_1" style="width:320px ; height: 240px; background:#DDDDDD"></div>
+									</td>
+								</tr>
+								<tr style="margin:auto; height:1%">
+									<td>
+										<div id="id_floating_panorama_2" style="width:320px ; height: 240px; background:#D0D0D0"></div>
+									</td>
+								</tr>
+								<tr style="margin:auto; height:98%">
+									<td align="center" valign="bottom" >
+										<br>
+										<div style="margin:auto; height:100%"id="xxxx>">
+											<button id='btn_dec_floating_pano' data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_decrease', showLabel: false" 
+													onClick='require(["RouteView.js"], function( s ) { s.cb_click_inc_dec_floating_pane(-1, true); })' 
+											        type="button">
+											</button>
+											<button id='btn_inc_floating_pano' data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'icon_btn_increase', showLabel: false" 
+													onClick='require(["RouteView.js"], function( s ) { s.cb_click_inc_dec_floating_pane(1, true); })' 
+											        type="button">
+											</button>
+										</div>
+									</td>
+								</tr>
+			                </table>
+             	 		</td>
+
              	 	</tr>
+
              	 	<tr>
 		                <td colspan="2" style="width:100%; height:0%; text-align:center; vertical-align:middle">
 		                
@@ -729,38 +760,6 @@
 
 						            </td>
 
-					                <td style="width:1%; text-align:left; vertical-align:middle" id="td_controls_map_pegman_layout">
-		                        		<div data-dojo-type="dijit/form/DropDownButton" data-dojo-props='iconClass:"icon_btn_map_pano_layout", showLabel: false, autoWidth:false' id="id_btn_map_pegman_layout" style="font-size: 100%" disabled>
-				                            <div data-dojo-type="dijit/TooltipDialog">
-							                    <div style="width:100%" align="center">
-													
-													<b>Street View images settings</b><br><br>
-													<table>
-														<tr>
-															<td>
-																Number of images:
-															</td>
-															<td>
-																<input type="radio" data-dojo-type="dijit/form/RadioButton" name="pegman_nb_img" id="id_pegman_one_img" value="1" onClick='require(["RouteView.js"], function(s) { s.cb_map_pegman_nb_img(1); })' /> <label for="id_pegman_one_img">1</label>
-																<input type="radio" data-dojo-type="dijit/form/RadioButton" name="pegman_nb_img" id="id_pegman_two_img" value="2" onClick='require(["RouteView.js"], function(s) { s.cb_map_pegman_nb_img(2); })' /> <label for="id_pegman_two_img">2</label>
-															</td>
-														</tr>
-														<tr>
-															<td>
-																Image size:
-															</td>
-															<td>
-																<input type="radio" data-dojo-type="dijit/form/RadioButton" name="pegman_img_size" id="id_pegman_img_small"  value="small"  onClick='require(["RouteView.js"], function(s) { s.cb_map_pegman_img_size(1, true); })' /> <label for="id_pegman_img_size_small">small</label>
-																<input type="radio" data-dojo-type="dijit/form/RadioButton" name="pegman_img_size" id="id_pegman_img_medium" value="medium" onClick='require(["RouteView.js"], function(s) { s.cb_map_pegman_img_size(2, true); })' /> <label for="id_pegman_img_size_medium">medium</label>
-																<input type="radio" data-dojo-type="dijit/form/RadioButton" name="pegman_img_size" id="id_pegman_img_large"  value="large"  onClick='require(["RouteView.js"], function(s) { s.cb_map_pegman_img_size(3, true); })' /> <label for="id_pegman_img_size_large">large</label>
-															</td>
-														</tr>
-													</table>
-												</div>
-											</div>
-										</div>
-										<br>
-
                                         <div data-dojo-type="dijit/Tooltip" data-dojo-props="connectId:'id_btn_map_pegman_layout',position:['above-centered'],showDelay:750,hideDelay:0">
                                             Street View images settings
                                         </div>
@@ -841,18 +840,6 @@
             </div>
             
         </div>
-
-		<div data-dojo-type="dojox.layout.FloatingPane" id="id_floating_panorama_pane_1"
-		   title="Panorama 1" data-dojo-props="closable:false, resizable:true, dockable:false, title:'Panorama 1'"
-		   style="position:absolute;top:0;left:0;width:640px;height:480px;visibility:hidden;">
-           <div id="id_floating_panorama_1"  style="width: 100%; height: 100%; background-color: #AFD9FF"> </div>
-		</div>
-
-		<div data-dojo-type="dojox.layout.FloatingPane" id="id_floating_panorama_pane_2"
-		   title="Panorama 2" data-dojo-props="closable:false, resizable:true, dockable:false, title:'Panorama 2'"
-		   style="position:absolute;top:510px;left:0;width:640px;height:480px;visibility:hidden;">
-           <div id="id_floating_panorama_2"  style="width: 100%; height: 100%; background-color: #AFD9FF"> </div>
-		</div>
 
 		<div id="id_hidden" style="display:none"></div>
 

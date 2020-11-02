@@ -397,3 +397,43 @@ html, body {
   margin: 15px;
 }
 
+.icon_btn_decrease {
+  background-image: url('icons/btn-decrease.png');
+  background-repeat: no-repeat;
+  width: 32px;
+  height: 32px;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  border: none; 
+  outline:none;
+}
+
+.dijitButtonDisabled .icon_btn_decrease {
+  background-image: url('icons/btn-decrease-disabled.png');
+  background-repeat: no-repeat;
+  width: 32px;
+  height: 32px;
+  text-align: center;
+}
+
+.icon_btn_increase {
+  background-image: url('icons/btn-increase.png');
+  background-repeat: no-repeat;
+  width: 32px;
+  height: 32px;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  border: none; 
+  outline:none;
+}
+
+.dijitButtonDisabled .icon_btn_increase {
+  background-image: url('icons/btn-increase-disabled.png');
+  background-repeat: no-repeat;
+  width: 32px;
+  height: 32px;
+  text-align: center;
+}
+
