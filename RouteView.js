@@ -434,7 +434,7 @@ define( function( m ) {
 //  	console.log( "route_thickness=" + route_thickness );
 
         var first_hidden = find_first_hidden( );
-//    	console.log( "first_hidden=" + first_hidden );
+    	console.log( "first_hidden=" + first_hidden );
         
         var start_location = dijit.byId('id_wp_0').get( 'value' );
         console.log( "from = " + start_location );
@@ -581,6 +581,7 @@ define( function( m ) {
 				index_waypoint = new_dir.request.Ed;
             else if (new_dir.request.Dd != undefined)
 				index_waypoint = new_dir.request.Dd;
+			console.log("index_waypoint="+index_waypoint);
             if ( index_waypoint == undefined ) {
 				console.log( "!!!!UNDEFINED >>>>>>" );
 				console.log( new_dir );
@@ -599,6 +600,7 @@ define( function( m ) {
 	              	placeId: place_id
                 }, function ( place, status ) {
                 	if ( status == google.maps.places.PlacesServiceStatus.OK ) {
+						console.log("==> " + old_nb_waypoints + "," + new_nb_waypoints + "(" + index_waypoint + ") >> " + place.formatted_address);
                 	    if (new_nb_waypoints == old_nb_waypoints) {
                 	    	change_waypoint( index_waypoint, place.formatted_address );
                 	    }
@@ -1284,21 +1286,48 @@ console.log(curr_dist_in_route + " - " + step);
 		
 	}
 
+	function update_place(where) {
+		var geocoder = new google.maps.Geocoder();
+    	geocoder.geocode( where, function( results, status ) {
+    	    if (status === google.maps.GeocoderStatus.OK) {
+
+    	    	console.log( results[0] );
+    	    	console.log( places );
+
+    	        var first_hidden = find_first_hidden( );
+    	        console.log( "first_hidden=" + first_hidden );
+    	        if ( first_hidden != (MAX_NB_WAYPOINTS + 2) ) {
+					(function ( waypoint_index ) {
+						service.getDetails({
+							placeId: results[0].place_id
+						}, function ( place, status ) {
+							console.log( " --> " + waypoint_index );
+							if ( status == google.maps.places.PlacesServiceStatus.OK ) {
+								places[waypoint_index] = place;
+								require(["dojo/dom-style"], function( domStyle) {
+									domStyle.set( "id_wp_"+waypoint_index, { color: "black" } );
+								});
+								var new_nb_waypoints = waypoint_index;
+								cb_click_btn_add( new_nb_waypoints )
+								var id = "id_wp_" + waypoint_index;
+								dijit.byId( id ).set( "value", place.formatted_address );
+								update_btns_remove_up_down( );
+								do_route( true );
+							}
+						});
+					})( first_hidden );
+    	        }
+    	    	
+    	    }
+    	});
+	}
+
 	function add_place(name, formatted_address) {
 		console.log("name="+unescape(name));
 		console.log("formatted_address="+unescape(formatted_address));
 		var first_hidden = find_first_hidden( );
-		if ( first_hidden != (MAX_NB_WAYPOINTS + 2) ) {
-			(function ( waypoint_index ) {
-				console.log( "waypoint_index=" + waypoint_index );
-				var new_nb_waypoints = waypoint_index;
-				cb_click_btn_add( new_nb_waypoints )
-				var id = "id_wp_" + waypoint_index;
-				dijit.byId( id ).set( "value", unescape(name)+" , " +unescape(formatted_address) );
-				update_btns_remove_up_down( );
-				do_route( true );
-			})( first_hidden );
-		}
+		update_place({'address': unescape(name)+" , " +unescape(formatted_address)});
+		do_route( true );
 	}
 
 	function decode_url_params() {
@@ -2509,7 +2538,6 @@ console.log("@@@");
 			var display = domStyle.get( 'id_fieldset_route', "display" );
 			if (display != "none") {
 				url += "route="; 
-				var nb_wp = 0;
 				for ( var n = 0; n < MAX_NB_WAYPOINTS+2; n++ ) {
 //					console.log( n );
 //					console.log( places );
@@ -2517,13 +2545,13 @@ console.log("@@@");
 					if ( display != "none" ) {
 						if ((places[n] == undefined) || (places[n].geometry == undefined) || (places[n].geometry.location == undefined))
 							domStyle.set( 'id_wp_'+n, { color: "red" } );
+						console.log(places[n]);
 						console.log( n + " ==> " + places[n].name + " : " + places[n].geometry.location.lat() + " , " + places[n].geometry.location.lng() );
 						if (n > 0)
 							url += "&"; 
 						var v = dijit.byId('id_wp_'+n).get( 'value');
 						url += encodeURIComponent(v);
 					}
-					console.log("Route has " + nb_wp + " waypoints");
 				}
 			}
  		})
@@ -2671,6 +2699,7 @@ console.log("@@@");
 	            	if ( display != "none" ) {
 						if ((places[n] == undefined) || (places[n].geometry == undefined) || (places[n].geometry.location == undefined))
 							domStyle.set( 'id_wp_'+n, { color: "red" } );
+						console.log(places[n]);
 	            		console.log( n + " ==> " + places[n].name + " : " + places[n].geometry.location.lat() + " , " + places[n].geometry.location.lng() );
 						var v = dijit.byId('id_wp_'+n).get( 'value');
 						if ( nb_wp >= 10 ) {
@@ -2866,41 +2895,7 @@ console.log("@@@");
     	if ( dijit.byId("id_btn_drive_1").get("disabled") )
     		return;
     	
-    	var latlng = {lat: evt.latLng.lat, lng: evt.latLng.lng};
-		var geocoder = new google.maps.Geocoder();
-    	geocoder.geocode( {'location': evt.latLng}, function( results, status ) {
-    	    if (status === google.maps.GeocoderStatus.OK) {
-
-    	    	console.log( results[0] );
-    	    	console.log( places );
-
-    	        var first_hidden = find_first_hidden( );
-    	        console.log( "first_hidden=" + first_hidden );
-    	        if ( first_hidden != (MAX_NB_WAYPOINTS + 2) ) {
-					(function ( waypoint_index ) {
-						service.getDetails({
-							placeId: results[0].place_id
-						}, function ( place, status ) {
-							console.log( " --> " + waypoint_index );
-							if ( status == google.maps.places.PlacesServiceStatus.OK ) {
-								places[waypoint_index] = place;
-								require(["dojo/dom-style"], function( domStyle) {
-									domStyle.set( "id_wp_"+waypoint_index, { color: "black" } );
-								});
-								var new_nb_waypoints = waypoint_index;
-								cb_click_btn_add( new_nb_waypoints )
-								var id = "id_wp_" + waypoint_index;
-								dijit.byId( id ).set( "value", place.formatted_address );
-								update_btns_remove_up_down( );
-								do_route( true );
-							}
-						});
-					})( first_hidden );
-    	        }
-    	    	
-    	    }
-    	});
-    	
+    	update_place({'location': evt.latLng});
     }
     
     function change_waypoint( index_wp, place_name ) {
