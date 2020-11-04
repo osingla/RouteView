@@ -1012,7 +1012,6 @@ console.log(curr_dist_in_route + " - " + step);
 			timer_show_pano_on_mousemove = undefined;
 		}
 		marker_browser_images_pos.setMap( null );
-    
     }
 
     function start( ) {
@@ -1503,6 +1502,22 @@ console.log(curr_dist_in_route + " - " + step);
 		});
 	}
     
+    function show_hide_route_panel(do_hide) {
+		require(["dojo/dom-style"], function( domStyle ) {
+			if (do_hide) {
+				domStyle.set( "id_top_layout", "display", "none" );
+				domStyle.set( "id_control_route", "display", "none" );
+				domStyle.set( "id_left_layout", "display", "none" );
+}
+			else {
+				domStyle.set( "id_top_layout", "display", "" );
+				domStyle.set( "id_control_route", "display", "" );
+				domStyle.set( "id_left_layout", "display", "" );
+			}
+		});
+		dijit.byId('app_layout').resize();
+	}
+    
 	function cb_streetview_icon() {
 		
 		if (timer_animate != undefined)
@@ -1511,6 +1526,7 @@ console.log(curr_dist_in_route + " - " + step);
 		var btn_drive_whole_route_disabled = dijit.byId('id_btn_drive_whole_route').get( 'disabled' );
 		if ( streetViewLayer.getMap() != undefined ) {
 			console.log("pegman is unselected - " + btn_drive_whole_route_disabled);
+			show_hide_route_panel(false);
 			require(["dojo/dom", "dojo/on", "dojo/dom-style"], function( dom, on, domStyle ) {
 				domStyle.set( "td_streetview_panel", "display", "none" );
 			});
@@ -1532,6 +1548,7 @@ console.log(curr_dist_in_route + " - " + step);
 		}
 		else {
 			console.log("pegman is selected - " + btn_drive_whole_route_disabled);
+			show_hide_route_panel(true);
 			require(["dojo/dom", "dojo/on", "dojo/dom-style"], function( dom, on, domStyle ) {
 				domStyle.set( "td_streetview_panel", "display", "" );
 			});
