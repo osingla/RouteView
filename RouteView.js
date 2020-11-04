@@ -1286,14 +1286,14 @@ console.log(curr_dist_in_route + " - " + step);
 		
 	}
 
-	function update_place(where) {
+	function update_place(where, gps) {
+		console.log(where);
+		console.log(gps);
 		var geocoder = new google.maps.Geocoder();
     	geocoder.geocode( where, function( results, status ) {
     	    if (status === google.maps.GeocoderStatus.OK) {
-
     	    	console.log( results[0] );
     	    	console.log( places );
-
     	        var first_hidden = find_first_hidden( );
     	        console.log( "first_hidden=" + first_hidden );
     	        if ( first_hidden != (MAX_NB_WAYPOINTS + 2) ) {
@@ -1304,20 +1304,22 @@ console.log(curr_dist_in_route + " - " + step);
 							console.log( " --> " + waypoint_index );
 							if ( status == google.maps.places.PlacesServiceStatus.OK ) {
 								places[waypoint_index] = place;
-								require(["dojo/dom-style"], function( domStyle) {
-									domStyle.set( "id_wp_"+waypoint_index, { color: "black" } );
-								});
 								var new_nb_waypoints = waypoint_index;
 								cb_click_btn_add( new_nb_waypoints )
 								var id = "id_wp_" + waypoint_index;
-								dijit.byId( id ).set( "value", place.formatted_address );
+								if (gps == undefined)
+									dijit.byId( id ).set( "value", place.formatted_address );
+								else
+									dijit.byId( id ).set( "value", gps.slice(1, -1) );
+								require(["dojo/dom-style"], function( domStyle) {
+									domStyle.set( "id_wp_"+waypoint_index, { color: "black" } );
+								});
 								update_btns_remove_up_down( );
 								do_route( true );
 							}
 						});
 					})( first_hidden );
     	        }
-    	    	
     	    }
     	});
 	}
@@ -2883,8 +2885,7 @@ console.log("@@@");
     
     function cb_map_rightclick( evt ) {
 
-//		console.log( evt );    	
-//    	console.log( "Right click: " + evt.latLng );
+		console.log( "Right click: " + evt );    	
 
 		if ( !dijit.byId("id_btn_stop").get("disabled") )
 			return;
@@ -2895,6 +2896,17 @@ console.log("@@@");
     	if ( dijit.byId("id_btn_drive_1").get("disabled") )
     		return;
     	
+		try {
+			if (evt.vb.ctrlKey)
+				return update_place({'location': evt.latLng}, evt.latLng.toString());
+		} catch (err) {
+			try {
+				if (evt.ub.ctrlKey)
+					return update_place({'location': evt.latLng}, evt.latLng.toString());
+			} catch (err) {
+			}
+		}
+								
     	update_place({'location': evt.latLng});
     }
     
