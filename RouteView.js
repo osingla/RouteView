@@ -2774,9 +2774,12 @@ console.log("@@@");
 
     function cb_map_click( evt ) {
 
-    	console.log( "cb_map_click" );
-		if ( streetViewLayer.getMap() == undefined )
+		if ( streetViewLayer.getMap() == undefined ) {
+			console.log( "cb_map_clicked" );
 			return;
+		}
+    	console.log( "cb_map_click" );
+    	return;
 	
 		require(["dojo/dom", "dojo/on", "dojo/dom-style"], function( dom, on, domStyle ) {
 			domStyle.set( "td_streetview_panel", "display", "none" );
