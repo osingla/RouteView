@@ -20,8 +20,6 @@ define( function( m ) {
     var play_whole_route;
     var prev_zoom = undefined;
 	var timer_show_pano_on_mousemove = undefined;
-	var prev_x = -1;
-	var prev_y = -1;
     var timer_animate = undefined;
     var curr_dist_in_leg;
     var curr_dist_in_route;
@@ -58,6 +56,14 @@ define( function( m ) {
 	var panorama_mouse_down_offsetX = 0;
 	var panorama_mouse_down_offsetY = 0;
 	var map_type_id = 0;
+	
+	const api_count = {
+		PLACES: 0,
+		MAPS_JAVASCRIPT: 1,
+		GEOCODING: 2,
+		DIRECTIONS: 3
+	}
+	var api_counts = [4];
 
 	var search_places = [];
 
@@ -441,7 +447,6 @@ define( function( m ) {
 
         var way_points = [];
         for ( var n = 1; n < first_hidden-1; n++ ) {
-        	
             waypt = dijit.byId('id_wp_'+n).get( 'value' );
             console.log( "n=" + n + " => [" + waypt + "]" );
             if ( waypt != "" ) {
@@ -492,6 +497,7 @@ define( function( m ) {
 		google.maps.event.clearListeners( directions_renderer, 'directions_changed' );
         directions_renderer.addListener('directions_changed', function() {
 
+			api_counts[api_count.MAPS_JAVASCRIPT]++;
             var new_dir = directions_renderer.getDirections();
 
 			is_dirty = true;
@@ -581,6 +587,12 @@ define( function( m ) {
 				index_waypoint = new_dir.request.Ed;
             else if (new_dir.request.Dd != undefined)
 				index_waypoint = new_dir.request.Dd;
+            else if (new_dir.request.Pd != undefined)
+				index_waypoint = new_dir.request.Pd;
+            else if (new_dir.request.ae != undefined)
+				index_waypoint = new_dir.request.ae;
+            else if (new_dir.request.ri != undefined)
+				index_waypoint = new_dir.request.ri;
 			console.log("index_waypoint="+index_waypoint);
             if ( index_waypoint == undefined ) {
 				console.log( "!!!!UNDEFINED >>>>>>" );
@@ -596,6 +608,7 @@ define( function( m ) {
                 console.log( "old_nb_waypoints=" + old_nb_waypoints + " new_nb_waypoints=" + new_nb_waypoints + " index_waypoint=" + index_waypoint );
                 var place_id = new_dir.geocoded_waypoints[index_waypoint].place_id;
 
+				api_counts[api_count.PLACES]++;
                 service.getDetails({
 	              	placeId: place_id
                 }, function ( place, status ) {
@@ -657,7 +670,10 @@ define( function( m ) {
         };
 
       	directions_service.route( directions_service_request, 
-      		function(response, status) { cb_make_route(response, status); })
+      		function(response, status) { 
+				api_counts[api_count.DIRECTIONS]++;
+				cb_make_route(response, status); 
+			})
 
     }
     
@@ -1071,7 +1087,8 @@ console.log(curr_dist_in_route + " - " + step);
 					trim: true,
 					intermediateChanges: false,
 					selectOnClick: true,
-					onKeyPress: function() { domStyle.set( this.id, { color: "red" } ); },
+					onKeyPress: function(evt) { cb_waypoint_changed(this.id, evt); },
+//					onKeyPress: function(evt) { console.log(evt); domStyle.set( this.id, { color: "red" } ); },
 					['waypoint_index']: n 
 				}, id_td2, "last");
 
@@ -1274,6 +1291,7 @@ console.log(curr_dist_in_route + " - " + step);
 
 		var bounds = map.getBounds();
 
+		api_counts[api_count.PLACES]++;
 		var service = new google.maps.places.PlacesService(map);
         service.textSearch({
 			bounds: bounds,
@@ -1290,6 +1308,7 @@ console.log(curr_dist_in_route + " - " + step);
 		console.log(gps);
 		var geocoder = new google.maps.Geocoder();
     	geocoder.geocode( where, function( results, status ) {
+			api_counts[api_count.GEOCODING]++;
     	    if (status === google.maps.GeocoderStatus.OK) {
     	    	console.log( results[0] );
     	    	console.log( places );
@@ -1297,6 +1316,7 @@ console.log(curr_dist_in_route + " - " + step);
     	        console.log( "first_hidden=" + first_hidden );
     	        if ( first_hidden != (MAX_NB_WAYPOINTS + 2) ) {
 					(function ( waypoint_index ) {
+						api_counts[api_count.PLACES]++;
 						service.getDetails({
 							placeId: results[0].place_id
 						}, function ( place, status ) {
@@ -1408,8 +1428,10 @@ console.log(curr_dist_in_route + " - " + step);
 				function look_for_address( place_name, waypoint_index) {
 					var geocoder = new google.maps.Geocoder();
 					geocoder.geocode( { 'address': place_name}, function(results, status) {
+						api_counts[api_count.GEOCODING]++;
 						if ( status == google.maps.GeocoderStatus.OK ) {
 //							console.log( results);
+							api_counts[api_count.PLACES]++;
 							service.getDetails({
 								placeId: results[0].place_id
 							}, function ( place, status ) {
@@ -1795,7 +1817,16 @@ console.log(curr_dist_in_route + " - " + step);
 											timer_show_pano_on_mousemove = setTimeout(mouse_move, 250, evt);
 									}
 								} catch (err) {
-									console.log(evt);
+								    try {
+									    if (!evt.domEvent.ctrlKey) {
+										    if ( timer_show_pano_on_mousemove != undefined ) 
+											    clearTimeout(timer_show_pano_on_mousemove);
+										    if ( streetViewLayer.getMap() != undefined )
+											    timer_show_pano_on_mousemove = setTimeout(mouse_move, 250, evt);
+									    }
+								    } catch (err) {
+									    console.log(evt);
+								    }
 								}
 							}
 						}
@@ -1986,20 +2017,23 @@ console.log(curr_dist_in_route + " - " + step);
 						autocompletes[n].setComponentRestrictions( {country: code_country} );
 					google.maps.event.clearListeners( autocompletes[n], 'place_changed' );
 					autocompletes[n].addListener('place_changed', function( ) {
-//						console.log( this );
+						api_counts[api_count.PLACES]++;
+						console.log( this );
 						var r = get_route_waypoint( autocompletes, this );
 						var waypoint_index = r.waypoint_index;
 //						console.log( "waypoint_index=" + waypoint_index );
 //	               		console.log( "Place changed: " + waypoint_index=" + waypoint_index );
 //	               		console.log( autocompletes[waypoint_index] );
 						var place = autocompletes[waypoint_index].getPlace();
-//	                		console.log( place );
+//	               		console.log( place );
 						if ( place.geometry == undefined ) {
 							function look_for_address( place_name, waypoint_index) {
 								var geocoder = new google.maps.Geocoder();
 								geocoder.geocode( { 'address': place_name}, function(results, status) {
+									api_counts[api_count.GEOCODING]++;
 									if ( status == google.maps.GeocoderStatus.OK ) {
 //										console.log( results);
+										api_counts[api_count.PLACES]++;
 										service.getDetails({
 											placeId: results[0].place_id
 										}, function ( place, status ) {
@@ -2049,8 +2083,10 @@ console.log(curr_dist_in_route + " - " + step);
 
 						var geocoder = new google.maps.Geocoder();
 						geocoder.geocode( { 'address': dijit.byId('id_addr_for_orig').get( 'value')}, function(results, status) {
+							api_counts[api_count.GEOCODING]++;
 							if ( status == google.maps.GeocoderStatus.OK ) {
 //								console.log( results);
+								api_counts[api_count.PLACES]++;
 								service.getDetails({
 									placeId: results[0].place_id
 								}, function ( place, status ) {
@@ -2353,124 +2389,18 @@ console.log("@@@");
 
 		marker_pos_using_slider.setMap( null );
 		marker_pos_using_slider_no_pano.setMap( null );
-
 	}
 
-	function browse_images( ) {
-
-    	require(["dojo/dom-style"], function( domStyle ) {
-			domStyle.set( "id_top_layout", "display", "none" );
-			domStyle.set( "id_left_layout", "display", "none" );
-			dijit.byId('app_layout').resize();
-			set_map_pano_layout( );
+    function cb_waypoint_changed( id, evt ) {
+		console.log(evt);
+		require(["dojo/dom-style"], function( domStyle ) {
+			domStyle.set( id, { color: "red" } );
 		});
-
-		dijit.byId('id_btn_pause').set( 'disabled', true );
-		dijit.byId('id_btn_stop').set( 'disabled', false );
-		dijit.byId('id_btn_map_pano_layout').set( 'disabled', false );
-
-		browse_images_mode = true;
-		prev_pano_id = "";
-
-		streetViewLayer.setMap( null );
-
-   		map.fitBounds( route_bounds );
-console.log("@@@");
-
-		directions_renderer.setOptions( { zIndex:99, draggable: false } );
-
-		document.getElementById("id_panorama2").style.display = "";
-		document.getElementById("id_panorama3").style.display = "";
-		document.getElementById("id_panorama4").style.display = "";
-		document.getElementById("id_panorama4").style.zIndex = "1"
-		document.getElementById("id_panorama3").style.zIndex = "0";
-		document.getElementById("id_panorama2").style.zIndex = "0";
-		pano_cnt = 0;
-		skip_cnt = 0;
-		panorama2.setVisible( true );
-		panorama3.setVisible( true );
-		panorama4.setVisible( true );
-		window.dispatchEvent(new Event('resize'));
-
-		function do_pov_changed(panoramax) { 
-			var h = panoramax.getPov().heading;
-			var icon = "";
-			if 		( h < 22.5 )	icon = "icons/pegman-n.png";
-			else if ( h < 45 )	 	icon = "icons/pegman-ne1.png";
-			else if ( h < 67.5 )	icon = "icons/pegman-ne2.png";
-			else if ( h < 90 ) 		icon = "icons/pegman-ne3.png";
-			else if ( h < 112.5 )	icon = "icons/pegman-e.png";
-			else if ( h < 135 )		icon = "icons/pegman-se1.png";
-			else if ( h < 157.5 )	icon = "icons/pegman-se2.png";
-			else if ( h < 180 ) 	icon = "icons/pegman-se3.png";
-			else if ( h < 202.5 ) 	icon = "icons/pegman-s.png";
-			else if ( h < 225 ) 	icon = "icons/pegman-sw1.png";
-			else if ( h < 270 ) 	icon = "icons/pegman-sw2.png";
-			else if ( h < 292.5 ) 	icon = "icons/pegman-sw3.png";
-			else if ( h < 315 ) 	icon = "icons/pegman-w.png";
-			else if ( h < 337.5 ) 	icon = "icons/pegman-nw1.png";
-			else if ( h < 360 ) 	icon = "icons/pegman-nw2.png";
-			else 				 	icon = "icons/pegman-nw3.png";
-			console.log( h + " --> " + icon );
-			marker_browser_images_pos.setIcon( icon );
-			prev_bearing = panoramax.getPov().heading;
-		}
-
-		google.maps.event.clearListeners( panorama2, 'pov_changed' );
-		google.maps.event.clearListeners( panorama3, 'pov_changed' );
-		google.maps.event.clearListeners( panorama4, 'pov_changed' );
-		google.maps.event.addListener( panorama2, "pov_changed", function() { do_pov_changed(panorama2); });
-		google.maps.event.addListener( panorama3, "pov_changed", function() { do_pov_changed(panorama3); });
-		google.maps.event.addListener( panorama4, "pov_changed", function() { do_pov_changed(panorama4); });
-
-		function do_mousedown(evt) {
+		if (evt.key.length == 1) {
 			console.log(evt);
-			panorama_mouse_down_offsetX = evt.offsetX;
-			panorama_mouse_down_offsetY = evt.offsetY;
+			api_counts[api_count.PLACES]++;
 		}
-
-		id_panorama2.addEventListener('mousedown', function(evt) { do_mousedown(evt); });
-		id_panorama3.addEventListener('mousedown', function(evt) { do_mousedown(evt); });
-		id_panorama4.addEventListener('mousedown', function(evt) { do_mousedown(evt); });
-
-		id_panorama2.addEventListener('mouseup', function(evt) { do_mouseup(evt, panorama2); });
-		id_panorama3.addEventListener('mouseup', function(evt) { do_mouseup(evt, panorama3); });
-		id_panorama4.addEventListener('mouseup', function(evt) { do_mouseup(evt, panorama4); });
-
-		var service = new google.maps.DirectionsService();
-		var poly = new google.maps.Polyline({ map: map });
-		google.maps.event.addListener(map, "click", function(evt) {
-
-			service.route({
-				origin: evt.latLng,
-				destination: evt.latLng,
-				travelMode: google.maps.DirectionsTravelMode.DRIVING
-			}, function(result, status) {
-//				console.log( status );
-				if (status == google.maps.DirectionsStatus.OK) {
-					console.log( result.routes[0].overview_path.length );
-					var p = result.routes[0].overview_path[0];
-					street_view_check.getPanoramaByLocation(p, 5000, (function() { return function(result, status) {
-						marker_browser_images_pos.setMap( map );
-						if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
-							console.log( "No results!" );
-							marker_browser_images_pos.setPosition( null );
-						}
-						else {
-							marker_browser_images_pos.setPosition( result.location.latLng );
-							panorama.setPosition( result.location.latLng );
-							panorama3.setPosition( result.location.latLng );
-							panorama2.setPosition( result.location.latLng );
-							panorama4.setPosition( result.location.latLng );
-						}
-					}})());
-					
-				}
-			});
-
-		});
-
-	}
+    }
 
     function cb_step_changed( ) {
     	step = dijit.byId('id_input_meters').get( 'value' );
@@ -2514,6 +2444,57 @@ console.log("@@@");
 		})
 	}
 
+	function cb_show_tooltip_dollar( ) {
+		console.log(1);
+		content = 
+		"<b>This is only an ESTIMATION of the Google Maps API usage!!</b><br>" +
+		"<br>" +
+		"<table cellspacing='4' cellpadding='4' border='1' width='100%'>" +
+		"  <tr>" +
+		"    <td align='center' valign='top'>" +
+		"	   <b>API</b>" +
+		"    </td>" +
+		"    <td align='center' valign='top'>" +
+		"      <b>Calls</b>" +
+		"    </td>" +
+		"    </tr>" +
+		"  <tr>" +
+		"    <td align='right' valign='top'>" +
+		"      Places API" +
+		"    </td>" +
+		"    <td>" +
+		"      <b>"+api_counts[api_count.PLACES]+"</b>" +
+		"    </td>" +
+		"  </tr>" +
+		"  <tr>" +
+		"    <td align='right' valign='top'>" +
+		"      MAPS Javascript API" +
+		"    </td>" +
+		"    <td>" +
+		"      <b>"+api_counts[api_count.MAPS_JAVASCRIPT]+"</b>" +
+		"    </td>" +
+		"  </tr>" +
+		"  <tr>" +
+		"    <td align='right' valign='top'>" +
+		"      Geocoding API" +
+		"    </td>" +
+		"    <td>" +
+		"      <b>"+api_counts[api_count.GEOCODING]+"</b>" +
+		"    </td>" +
+		"  </tr>" +
+		"  <tr>" +
+		"    <td align='right' valign='top'>" +
+		"      Directions API" +
+		"    </td>" +
+		"    <td>" +
+		"      <b>"+api_counts[api_count.DIRECTIONS]+"</b>" +
+		"    </td>" +
+		"  </tr>" +
+		"</table>" +
+		"<br>";
+        document.getElementById("tooltip_btn_dollar").innerHTML = content;
+	}
+
     function cb_click_no_hwy( ) {
         var no_hwy  = !dijit.byId('id_check_no_hwy').get( 'checked' );
 		console.log("-->" + no_hwy);
@@ -2540,7 +2521,6 @@ console.log("@@@");
 	}
 
     function download_file( text, name, type ) {
-    
         var a = document.createElement("a");
         var file = new Blob([text], {type: type});
         a.href = URL.createObjectURL(file);
@@ -2791,90 +2771,43 @@ console.log("@@@");
 
     function cb_map_click( evt ) {
 
+/*
 		if ( streetViewLayer.getMap() == undefined ) {
 			console.log( "cb_map_clicked" );
 			return;
 		}
-    	console.log( "cb_map_click" );
-    	return;
-	
-		require(["dojo/dom", "dojo/on", "dojo/dom-style"], function( dom, on, domStyle ) {
-			domStyle.set( "td_streetview_panel", "display", "none" );
-		});
-		if ( timer_show_pano_on_mousemove != undefined ) {
-			clearTimeout(timer_show_pano_on_mousemove);
-			timer_show_pano_on_mousemove = undefined;
-		}
-		marker_browser_images_pos.setMap( null );
-
-		require(["dojo/dom-style"], function( domStyle ) {
-			
-			var display = domStyle.get( "id_top_layout", "display" );
-			console.log(display);
-			if ((display == "block") || (display == "none")) {
-				domStyle.set( "id_top_layout", "display", "none" );
-				domStyle.set( "id_left_layout", "display", "none" );
-				dijit.byId('app_layout').resize();
-				set_map_pano_layout( );
-				document.getElementById("id_panorama2").style.display = "";
-				document.getElementById("id_panorama3").style.display = "";
-				document.getElementById("id_panorama4").style.display = "";
-				panorama2.setVisible( true );
-				panorama3.setVisible( false );
-				panorama4.setVisible( false );
-				document.getElementById("id_panorama2").style.zIndex = "1";
-				document.getElementById("id_panorama3").style.zIndex = "0"
-				document.getElementById("id_panorama4").style.zIndex = "0"
-				window.dispatchEvent(new Event('resize'));
-				dijit.byId('id_btn_stop').set( 'disabled', false );
-			}
-			
-			street_view_check.getPanoramaByLocation(evt.latLng, 1000, (function() { return function(result, status) {
-				if (status == google.maps.StreetViewStatus.ZERO_RESULTS) {
-					console.log( "No street view available" );
-					marker_small_street_view.setPosition( null );
-					marker_no_street_view.setPosition( evt.latLng );
-				}
-				else {
-//					console.log( result.location.latLng );
-					marker_no_street_view.setPosition( null );
-					panorama.setPosition(result.location.latLng);
-					panorama2.setPosition(result.location.latLng);
-					if ( prev_bearing != undefined )
-						panorama2.setPov( { heading: prev_bearing, pitch: 1 } );
-					marker_small_street_view.setPosition( result.location.latLng );
-//					console.log( result.location.latLng );
-//					console.log( result.location );
-				}
-			}})());
-
-		});
-
-    }
-
-/*
-    function cb_panorama_dblclick( ) {
-
-//		console.log( "cb_panorama_dblclick" );
-		require(["dojo/dom-construct"], function(domConstruct){
-			if ( !map_or_panorama_full_screen ) {
-				domConstruct.place("td_map_canvas", "id_hidden", "after");
-				map_or_panorama_full_screen = true;
-			}
-			else {
-				domConstruct.place("td_map_canvas", "td_panoramas_canvas", "before");
-		        document.getElementById("td_map_canvas").style.width = "40%";
-		        document.getElementById("td_panoramas_canvas").style.width = "60%";
-				map_or_panorama_full_screen = false;
-			}
-			google.maps.event.trigger( map, 'resize' );
-			google.maps.event.trigger( panorama, 'resize' );
-			window.dispatchEvent(new Event('resize'));
-		});
-
-    }
 */
-    
+    	console.log(evt);
+    	where = {'location': evt.latLng};
+    	return;
+    	
+		var geocoder = new google.maps.Geocoder();
+    	geocoder.geocode( where, function( results, status ) {
+			api_counts[api_count.GEOCODING]++;
+    	    if (status === google.maps.GeocoderStatus.OK) {
+    	    	console.log(results[0].formatted_address);
+				require(["dijit/Tooltip"], function(Tooltip){
+					//var around = {x:evt.ub.clientX, y:evt.ub.clientY, h:undefined, w:undefined};
+					var around = {x:500, y:0, h:undefined, w:undefined};
+					//Tooltip.show(results[0].formatted_address, around);
+/*					
+					dlg = new Tooltip({
+						id: ["id_xxx"],
+						connectId: ["id_map_canvas"],
+						position:['below-centered'],
+						label: "XXXXXXXXXXXXXXXXX",
+						showDelay:999999,
+						hideDelay:0
+					});
+					//dlg.placeAt("id_map_canvas", evt.pixel);
+					//dlg.show();
+*/
+				});
+			}
+    	});
+
+    }
+
     function show_waypoint( index ) {
 
     	require(["dojo/dom-style"], function( domStyle) {
@@ -3280,67 +3213,12 @@ console.log("@@@");
     	return typeof type == 'string' ? JSON.parse(type) : type;
     }
 
-/*    
-    function save_settings( close_dlg ) {
-
-		console.log( "Save Settings:" );
-        require(["dojo/dom"], function( dom) {
-
-	    	if ( typeof(Storage) == "undefined" ) {
-	    		console.log( "  No local storage!" );
-	    		return;
-	    	}
-	
-	        var no_hwy  = dijit.byId('id_check_no_hwy').get( 'checked' );
-	    	localStorage.setItem( "no_highway", no_hwy );
-	    	console.log( "  Route no_hwy= " + no_hwy );
-	
-	        var no_toll = dijit.byId('id_check_no_toll').get( 'checked' );
-	    	localStorage.setItem( "no_toll", no_hwy );
-	    	console.log( "  Route no_toll= " + no_hwy );
-	
-	    	var step = dijit.byId('id_input_meters').get( 'value' );
-	    	localStorage.setItem( "step", step );
-	    	console.log( "  step= " + step );
-	    	
-	    	var interval = dijit.byId('id_input_interval').get( 'value' );
-	    	localStorage.setItem( "interval", interval );
-	    	console.log( "  interval= " + interval );
-
-	    	var route_thickness = dijit.byId('id_input_route_thickness').get( 'value' );
-	    	localStorage.setItem( "route_thickness", route_thickness );
-	    	console.log( "  route_thickness= " + route_thickness );
-	    	
-	        var google_maps_api_key = dijit.byId('id_google_maps_api_key').get( 'value' );
-	    	localStorage.setItem( "id_google_maps_api_key", google_maps_api_key );
-	    	console.log( "  google_maps_api_key= " + google_maps_api_key );
-	    		
-	        var addr_for_orig = dijit.byId('id_addr_for_orig').get( 'value' );
-	    	localStorage.setItem( "id_addr_for_orig", addr_for_orig );
-	    	console.log( "  addr_for_orig= " + addr_for_orig );
-
-	    	var map_style = dom.byId('id_map_style').value;
-	    	localStorage.setItem( "map_style", map_style );
-	    	console.log( "  map_style= " + map_style );
-	    		
-	    	var autocomplete_restriction = dom.byId('id_autocomplete_restriction').value;
-	    	localStorage.setItem( "autocomplete_restriction", autocomplete_restriction );
-	    	console.log( "  autocomplete_restriction= " + autocomplete_restriction );
-	    		
-	    	var autocomplete_restrict_country = dom.byId('id_autocomplete_restrict_country').value;
-	    	localStorage.setItem( "autocomplete_restrict_country", autocomplete_restrict_country );
-	    	console.log( "  autocomplete_restrict_country= " + autocomplete_restrict_country );
-	
-			if ( close_dlg ) {
-				var dlg = dijit.byId('id_configuration_dlg');
-				dlg.closeDropDown( false );
-			}
-	    	
-    	});
-    }
-*/    
-    
     function load_settings( ) {
+
+		api_counts[api_count.PLACES] = 0;
+		api_counts[api_count.MAPS_JAVASCRIPT] = 0;
+		api_counts[api_count.GEOCODING] = 0;
+		api_counts[api_count.DIRECTIONS] = 0;
 
 		console.log( "Load settings:" );
         require(["dojo/dom"], function( dom) {
@@ -3750,6 +3628,8 @@ console.log("@@@");
 		cb_route_input_mouse_enter: function( ) { cb_route_input_mouse_enter( ); },
 		cb_route_input_mouse_leave: function( ) { cb_route_input_mouse_leave( ); },
 
+		cb_waypoint_changed:     function( evt ) { cb_waypoint_changed( evt ); },
+
 		cb_step_changed:     function( ) { cb_step_changed(); },
 		cb_interval_changed: function( ) { cb_interval_changed(); },
 		cb_play_route_zoom_level_changed: function( ) { cb_play_route_zoom_level_changed(); },
@@ -3757,6 +3637,7 @@ console.log("@@@");
 
 		cb_map_style_changed:	function( ) { cb_map_style_changed(); },
 		
+		cb_show_tooltip_dollar:  function( ) { cb_show_tooltip_dollar( ); },
 		cb_click_no_hwy:  function( ) { cb_click_no_hwy( ); },
 		cb_click_no_toll: function( ) { cb_click_no_toll( ); },
 		cb_set_map_type_id:  function( ) { cb_set_map_type_id( ); },
