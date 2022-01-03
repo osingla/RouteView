@@ -593,6 +593,8 @@ define( function( m ) {
 				index_waypoint = new_dir.request.ae;
             else if (new_dir.request.ri != undefined)
 				index_waypoint = new_dir.request.ri;
+            else if (new_dir.request.fh != undefined)
+				index_waypoint = new_dir.request.fh;
 			console.log("index_waypoint="+index_waypoint);
             if ( index_waypoint == undefined ) {
 				console.log( "!!!!UNDEFINED >>>>>>" );
