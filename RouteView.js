@@ -605,6 +605,8 @@ define( function( m ) {
 				index_waypoint = new_dir.request.Fh;
             else if (new_dir.request.Th != undefined)
 				index_waypoint = new_dir.request.Th;
+            else if (new_dir.request.Xh != undefined)
+				index_waypoint = new_dir.request.Xh;
 			console.log("index_waypoint="+index_waypoint);
             if ( index_waypoint == undefined ) {
 				console.log( "!!!!UNDEFINED >>>>>>" );
