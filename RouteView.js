@@ -607,8 +607,14 @@ define( function( m ) {
 				index_waypoint = new_dir.request.Th;
             else if (new_dir.request.Xh != undefined)
 				index_waypoint = new_dir.request.Xh;
+            else if (new_dir.request.Qp != undefined)
+				index_waypoint = new_dir.request.Qp;
             else if (new_dir.request.bk != undefined)
 				index_waypoint = new_dir.request.bk;
+            else if (new_dir.request.Zp != undefined)
+				index_waypoint = new_dir.request.Zp;
+            else if (new_dir.request.sq != undefined)
+				index_waypoint = new_dir.request.sq;
 			console.log("index_waypoint="+index_waypoint);
             if ( index_waypoint == undefined ) {
 				console.log( "!!!!UNDEFINED >>>>>>" );

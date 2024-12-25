@@ -1,0 +1,39 @@
+
+<!doctype html>
+
+<html>
+
+  <head>
+    <title>Load GPS from Ride Video</title>
+    <link rel="stylesheet" href="leaflet/leaflet.css" />
+    <script src="leaflet/leaflet.js" ></script>
+    <style type="text/css">
+       body { width: 100%; height: 100%; margin: 0 auto; font-family: 'Hiragino Sans', sans-serif; }
+      .gpx header { padding: 0.5em; }
+      h1 a { text-decoration: none; color: black; border-bottom: 1px #444 dotted; }
+      .gpx h3 { margin: 0; padding: 0; font-weight: bold; }
+      .gpx .map { border: 1px #888 solid; margin: 0; }
+      .gpx footer { padding: 0.5em; }
+      .gpx ul.info { list-style: none; margin: 1em 0 0 0; padding: 0; font-size: smaller; }
+      .gpx ul.info li { color: #666; display: inline; }
+      .gpx ul.info li span { color: black; }
+      #ride_map1 { position: fixed; top: 10px;  left:0px;    width: 550px;  height: 400px; margin: 0px; border: #C00000 solid }
+      #ride_map2 { position: fixed; top: 10px;  left:560px;  width: 550px;  height: 400px; margin: 0px; border: #C00000 solid }
+      #ride_map3 { position: fixed; top: 10px;  left:1360px; width: 350px;  height: 600px; margin: 0px; border: #C00000 solid }
+      #ride_map4 { position: fixed; top: 420px; left:0px;    width: 1350px; height: 600px; margin: 0px; border: #C00000 solid }
+      #ride_map5 { position: fixed; top: 10px;  left:1720px; width: 450px;  height: 600px; margin: 0px; border: #C00000 solid }
+    </style>
+      <script type="module" src="load_gps.js?onload=load"></script>
+  </head>
+
+  <body>
+        <Xdiv style="position: relative; overflow: hidden;">
+            <div class=gpx" id="ride_map1"></div>
+            <div class=gpx" id="ride_map2"></div>
+            <div class=gpx" id="ride_map3"></div>
+            <div class=gpx" id="ride_map4"></div>
+            <div class=gpx" id="ride_map5"></div>
+        </Xdiv>
+  </body>
+  
+</html>
